@@ -1,0 +1,18 @@
+This is the final 1.0 release of the Exscalibar suite.
+
+Requirements:
+* A Linux distribution.
+* Qt version 3.2 or greater. Not Qt version 4 or above.
+
+Recommended:
+* libsndfile (for reading .wav files)
+* libmad (for reading .mp3 files)
+* libvorbisfile (for reading .ogg files)
+* FFTW (for /fast/ Fast Fourier Transforms)
+
+Optional:
+* Jack
+* ALSA
+* GAT
+
+

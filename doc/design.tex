@@ -1,0 +1,807 @@
+\section{Introduction}
+
+This chapter discusses the architecture of our digital signal processing environment named \textit{Exscalibar}. This is an acronym for \textbf{Ex}tendable \textbf{Sc}alable \textbf{A}rchitecture for \textbf{L}ive, \textbf{I}nteractive and \textbf{B}atch \textbf{A}udio-signal Information-\textbf{R}etrieval. The Exscalibar project is an umbrella project to design and implement software to facilitate experiments into audio feature extraction techniques specifically for the purpose of music information retrieval. The software components are discussed in detail later in this chapter, in section \ref{sec:components}.
+
+There are several properties of the desired environment that are not delivered by any systems to date. We investigate these properties and determine several basic tenets to consider when making the design. We propose an overall design of such a system that delivers true to each of the tenets, then go on to discuss more detailed aspects of the design and associated implementation. We then evaluate the design though the implementation, and finally report our conclusions.
+
+Such investigations must be made possible on a wide scale of hardware from embedding into traditional applications scaling to working on distributed systems and supercomputers. The main software component, Geddei, must therefore be designed with scalability and flexibility in mind. Having considered our domain, audio signal processing for music information retrieval, we devised the most simple design that would allow optimal modelling of most experiments: Geddei is the implementation of that design.
+
+\section{Design Concerns}
+
+We start by cataloging our main concerns over the final design. These are devived from the initial pilot study, documented in chapter \ref{ch:initialpilot}.
+
+\subsubsection{Extendible}
+
+We need to be able to code more analysis methods easily and rapidly (RAD) and simply (error free). We would like others to \textit{want} to implement analysis methods too. Resolution:
+
+\begin{itemize}
+\item The development API must be simple, usable, elegant and attractive.
+\item The software as a whole must be modular, making a clear distinction between core and peripheral functionality.
+\item Technologies such as dynamic code location and loading should be utilised to allow third parties to easily contribute code.
+\end{itemize}
+
+\subsubsection{Upwardly Scalable}
+
+In the case of distributed usage, we wish to be able to use multiple CPUs at once, both in terms of multi-processors (e.g. SMP), multi-computers and (network-based) cluster computing. Resolution:
+
+\begin{itemize}
+\item Data-transfer mechanisms must be supported in order to allow communication between different CPUs/nodes.
+\item The communication mechanisms should be optimised for high-throughput transfer.
+\item Some form of intrinsic ability for accept multiple ``portions'' of seperated data, in the situation when multiple files are to be analysed.
+\end{itemize}
+
+\subsubsection{Application-Embeddable}
+
+We wish to be able to embed (some portion of) Geddei in order to provide useful functionality to other applications. These tasks may be real-time (e.g. visualisation tools). Resolution:
+
+\begin{itemize}
+\item Any technologies used must have a small enough CPU and memory footprint to make embedding realistic, and have usable and reliable bindings for multiple languages.
+\item The basic mechanisms used must themselves allow for an efficient implementation.
+\item In the case of realtime tasks (such as visualisation), we would wish Geddei to be able to work with a minimal amount of latency.
+\end{itemize}
+
+\subsubsection{Portable}
+
+We wish Geddei to work on multiple architectures. We would also wish for Geddei to be, where possible, compatible with other signal processing technologies. Resolution:
+
+\begin{itemize}
+\item Any technologies used must themselves be cross-platform.
+\item Current signal processing software should be consulted for potential design considerations.
+\end{itemize}
+
+\subsubsection{Stable}
+
+It must be robust and resistant to errors. Resolution:
+
+\begin{itemize}
+\item Design should be minimalist and simple to allow an implemention whose core components are basic enough to be tested thoroughly.
+\item The basic distribution should provide a solid set of well tested tools from which solution may be made in part of whole with black-box functionality.
+\item Insist on a full typing mechanism for the signal data.
+\end{itemize}
+
+\section{Design Overview}
+
+The general model of computation on which Geddei is based is the very much tried and tested Processflow Network (section \ref{sec:processflow}). For typical audio analysis applications, various other systems such as \textit{Marsyas} (section \ref{sec:marsyas}) and \textit{CLAM} (section \ref{sec:clam}) have shown the basic flow network to be adequate. As has been discussed, the design is conceptually simple and thereby encourages robust implementations. The basic process flow design also naturally provides a clear mechanism for extending and otherwise customising the features it can offer, by allowing modularity of the types of nodes.
+
+%For the unaware reader, a process flow network may be thought of as a series of connected points, where at each point some input signal data is transformed into some output signal data. Each connection between points has a direction and the signal data flows in that direction from one point to another. The signal data is created at some points with no inputs (typically called a source). It them flows from point to point, until it arrives are the end of the network (typically called a sink), where it stops. Examples of this kind of architecture are found all around the subject of computing, for example the popular \textit{GStreamer} open source multimedia system uses such an architecture. See chapter \ref{ch:litrevdsp} for more details.
+
+According to the theory, Processflow Networks communicate in small discrete \textit{tokens}, exemplified by \textit{D2K} (section \ref{sec:d2k}). As a design decision, we modify this premise slightly in Geddei; though tokens (known in Geddei as \textit{samples}) may be passed one-by-one, we encourage the conceptual idea of continuous stream rather than discrete tokens. Concordantly, we write of `buffers' instead of `queues' and of `chunks' of `samples' rather than sequences of tokens. Fundamentally, this is just a shift of emphasis rather than a real change, but because of the continuity guarantee, it allows problematic aspects of large ranges of token size to be handled effectively in the basic design. \textit{D2K} doesn't make this shift and in order to stay reasonably efficient has to make inflexible and explicit code changes\footnote{i.e. hacks}: While samples which are large and sparse are handled `natively' as a singleton token, samples which are small and numerous are explicitly grouped into a array and handled as one token.
+
+\subsection{Processflow Network Architecture}
+
+The network should be a directed acyclic graph (DAG); this precludes the possibility of loops. A DAG provides a high degree of flexibility, unlike other architectures that allow essentially only a linear path of the signal data (see section \ref{sec:marsyas}). Loops are unimportant in audio analysis, not typically found in feature extraction algorithms, and have a significant drawback: They prevent general determination of type through deduction. The process of type-determination is detailed further in section \ref{sec:signaldatatyping}.
+
+In the Geddei Processflow Network, each node represents a single processing component, and the signal data is transferred, duplicated and collated where necessary by Geddei. The software using Geddei to set up and conduct the processing creates the network from individual components and connects them together explicitly in order to define the graph.
+
+All points on the network (i.e. processing components)---including the start and end points---will be treated as the same basic type of object. This allows a greater degree of freedom, gives a richer and more powerful interface to extension developers and frees Geddei-based program creators from having multiple types of component. This contributs to the simplicity (and robustness), and is different to other systems such as \textit{D2K} and \textit{Marsyas}.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=2in]{figures/basicdataflownetwork.eps}
+\caption{An illustration of a simple process flow network. The concept of ports are used here to allow nodes to have multiple distinguishable inputs and outputs, allowing for more complex and flexible networks.}
+\label{fig:basicdataflownetwork}
+\end{figure}
+
+Each processing component may therefore have zero, one or many inputs and likewise zero, one or many outputs. Since processing components are connected by way of the ports, we have a far wider range of flexibility, than if, for example, each processing component was explicitly allowed only one input and output. In Geddei, we call the processing components \textit{Processor}s. We call each input and output of a Geddei \textit{processor} a \textit{port}. A \textit{processor} with zero input ports is by definition a \textit{source}, while a processor with zero output ports would be considered a \textit{sink}. In Geddei terminology, we use the term \textit{source} in a limited sense when describing a processor or port that supplies signal data to some other subject processor. Likewise we use sink in a situation as a processor or port that consumes data from a subject.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5in]{figures/dataflownetwork.eps}
+\caption{An example process flow diagram showing multiple types of processor and connection.}
+\label{fig:dataflownetwork}
+\end{figure}
+
+Network models in Geddei are completely static. That is, the topology of the network cannot change once data is flowing. Though it may be an interesting experiment to attempt to add the possibility for topology change mid-analysis, it is a non-trivial problem and is not a priority for this project.
+
+%would serve only to convolute the design at this stage. interesting to extend the Geddei core to be able to handle more dynamically changing networks. Such a facility could potentially allow Geddei to dynamically take advantage of extra CPUs when and if they became available. Such dynamically reconfigurable networks are currently a popular research area. However it is not a priority in the design of Geddei, and thus will be relegated to the section of `Further work'.
+
+Processflow Networks, because of their partially-defined schedulability, provide one implicit attribute; \textit{pipeline parallelisation} (see section \ref{sec:processflow}). Though this is good, distribution concerns force us to push for more parallelisation capacity. The less powerful Synchronous Dataflow Networks implicitly give the potential for \textit{data parallelisation}. Synchronous Dataflow Networks' components, known in the theory as \textit{actors}, have simpler semantics and are thus deliver a simpler API and are easier to develop.
+
+Therefore, out of concerns for both simplicity and distributability, we designed Geddei to be able to utilise Synchronous Dataflow Network actors (known as SubProcessors) in the basic Processflow Network model. A class which converts the actors to typical processing components (and delivers the parallelisation/distribution capability) is used (known as a DomProcessor). A similar scheme is utilised is \textit{D2K}, with its `re-entrant compute' components. This portion of the design is detailed properly in \ref{sec:statelessprocessors}.
+
+Further concerns for efficiency---specifically in communication throughput and latency---prompted a novel (in the field of audio signal processing) design introduction. We allow linear combination of the previously mentioned SubProcessors to form a single processing component. Such a hybrid design has been examined in prior work such as \cite{silc97asynchrony} and discussed here in section \ref{sec:hybrids}. This particular aspect of the design is detailed at length in section \ref{sec:combination}.
+
+\subsection{Communication}
+
+In keeping with simplicity we provide a 1-1 mapping between the ports of each component. Efficiency concerns forced the provision of specialised (i.e. optimised) mechanisms for duplication of data, so that one output port may be connected to multiple input ports. From the developer's point of view, all data from the output port is duplicated into a given number of input ports. In fact, depending upon the communication medium, the data may not be duplicated at all. These mechanisms are described in section \ref{sec:onetomany}.
+
+Due to the unclear semantics the somewhat confusing notion of connecting multiple output ports to a single input port was not developed as part of the design; if the semantics are clear then the necessary functionality could easily be implemented as a custom processor.
+
+The individual processing components are thoroughly unaware of how any of the data transfer is happening, being given only an abstract interface with which to interact. This relieves the extension programmer of any duty to learn about the underlying nature of the system on which her extension may be eventually executed.
+
+Usage of Geddei may vary between a simple indefinite stream of signal (e.g. audio visualisation software) or a series of distinct portions of audio (e.g. a large scale batch experiment on thousands of excerpts of musical tracks). In keeping with simplicity and flexibility we decided to keep the general usage and core functionality of Geddei the same regardless of the exact task to be done. Thus we took the decision to allow experiments with multiple individual sections of audio to be done by simply concatenating them, one after another and piping them through the network. This allows both efficient operation (since the stream is continuous, no extra reinitialisation of the network needs to be carried out) and increases simplicity, minimising the API and Geddei's core code size. The mechanism of providing seperation of the data throughout the network is known in Geddei as the plunger mechanism, so-called due to the effect of disguarding all extra data after finding a seperator. This novel aspect is detailed in section \ref{sec:plungers}.
+
+\subsection{Signal Data Typing}\label{sec:signaldatatyping}
+
+In the context of Geddei's signal processing mechanism, when we talk about signal data we do not simply mean a series of values corresponding to wave offsets which constitutes the audio: This only one possible representation of the music, and thus only one possible type of data corresponding to the signal that we wish to process. While this is generally the initial and arguably the simplest form the data will take, the signal data could be represented through various transformations in a myriad of other forms. We call each of these forms signal {\it types}. Examples of a signal type might be a basic PCM wave, a set of frequency magnitudes and offsets, or a matrix of self similarity indices.
+
+We took an early decision that all data flowing between processing components of the network should be intrinsically constructed from floating point numbers, rather than bits or bytes. This decision was based upon two of our resolutions. It aids simplicity since it both adds a form of consistency to all data transactions, and since potential endian-correction decisions can be made in advance. It also provides some form of portability with the float-based Marsyas software.
+
+Some software goes as far as to allow only that types may be built up from multiple floating point values. For Geddei we wanted a less abstract and more robust data typing mechanism. Essentially we wanted to be able to describe what the given set of values should represent. For example, we may know that each instance of a type is composed of exactly 16 floating point values, but other than that technical fact, it would be up to the individual processing component to decide on how to use those 16 values. The 16 values may represent a 4x4 matrix, but could just as easily represent a 2x2x2x2 (hyper-) matrix, or even perhaps a spectrum of length 16.
+
+We therefore come to define four key terms: \textit{elements}, \textit{samples}, \textit{scope} and \textit{frequency}. Elements are the individual floating point values; the core of Geddei deals in arrays of these exclusively. The user rarely needs to be aware of the concept of elements at all, and they can regard them as being generally synonymous with values of type float.
+
+Samples are, at the most basic, a fixed size array of elements. A single sample can be thought of as some sort of discrete measurement of a given signal at some given point in time. So far as the user is concerned, they are a discrete item in transmission, and thus can be thought of as analogous to a \textit{token} in Dataflow Network theory (see section \ref{sec:dataflow}). The meaning of elements contained in a sample is described by the signal type associated with the sample. Taking the previous examples, a sample would comprise 16 elements, which together may form a single matrix, hypermatrix or spetrum.
+
+The scope of the signal type determines how many elements are contained in a single sample. In the above example, the scope would be 16. The frequency is simply put as the reciprocal of the amount of time that occurs between two sequential samples in the signal. More explicitly, if we choose any two sequential samples, we may describe the times at which they represent the input signal as $t$ and $t'$ (in seconds). The frequency $f$ is therefore given as:
+
+\begin{equation}
+f \equiv (t' - t)^{-1}
+\end{equation}
+
+In keeping with the full typing resolution, we find that the process flow network architecture facilitates data typing. Geddei's signal data typing can be thought of as being similar to standard programming language typing, with the exception being that it works on the level of real numbers (elements) rather than bits and bytes. As a whole, the system should attempt to determine a type for each connection. If the attempt fails because of some intrinsic inconsistency from the network's configuration we may assert that the network is invalid and therefore generate a fatal error, as figure \ref{fig:inconsistency} shows. If the attempt succeeds we can consistently address a type to each connection in the network.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.8in]{figures/inconsistency.eps}
+\caption{An example process flow network demonstrating a signal type inconsistency.}
+\label{fig:inconsistency}
+\end{figure}
+
+For simplicity, each connection has one and only one type while data may be flowing across it. This stands to reason since data may be travelling through a connection at any time, and that data had its type defined on entry to the connection. Changing the type of some arbitrary amount of data would amount to stream-corruption.
+
+To stay extensible, we allow each processing component to first inspect and validate each of its input connections before requiring it to determine each of its output connection types. This has several very beneficial consequences: Processing components can be very adaptive to input types, allowing them to change their output types to depend upon their inputs. All connections in the process flow network are given a type. If any of them fail, then we are able to easily track down where the type mismatch problem lies and report it to the developer (or user).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=2.8in]{figures/datatypes.eps}
+\caption{Geddei's basic signal type heirarchy.}
+\label{fig:datatypes}
+\end{figure}
+
+Signal types themselves are described through a hierarchical series of classes which take advantage of OO paradigms to provide abstract levels of specialisation of the description, as shown in figure \ref{fig:datatypes}. The type determines at the least the sampling frequency of the data and how large each such sample is (in terms of single floating point values, or elements). But types can be further specialised in order to better describe their respective types of data, for example the dimensions of the matrix or the Nyquist frequency of the spectrum.
+
+\subsection{Data Transfer Interface}
+
+The data transfer interface is probably the most common interface that processing component authors will use and thus it must be attractive to use and flexible. Its design will also have an absolute effect on the efficiency of data transfer. Before final design, several key aspects about the usage were laid down:
+
+\begin{enumerate}
+\item It must be efficient. Where possible (i.e. between components that share the same memory space), signal data must not be copied. As small an amount of space as possible should be used to store the data to be transferred.
+\item It must be flexible. We wish to allow components to be able to read and write arbitrary amounts of data. We wish to allow components to vary the amount of data read and written with each iteration (if, indeed, they are iteration-based).
+\item It must be usable. We want to provide the developer with as small and succinct API as possible. Multiple elements of data should look and act like C-style arrays or C++ vectors. No problematic and annoying polling, checking, or other such flow-arbitration should have to be done explicitly by the developer.
+\end{enumerate}
+
+Several potential mechanisms were considered, but accommodating all three aspects proved difficult. Providing a usable array-like access system that is shared between two communicating components runs quite contrary to allowing them to endlessly read and write differing amounts of data.
+
+The most efficient possible solution would be to have a statically allocated buffer written to by the outputting component and read from by the input component. The static memory would be necessary to avoid costly heap allocations and sharing the read/write buffer would provide a zero-copy transfer mechanism. This has several problems though, as simultaneous reading and writing is necessary for the processing to be asynchronous. This could not be done with a single static buffer. Some extra mechanism would be necessary to resolve any differences in the amount of signal data a reader wanted to read at once and the amount a writer wanted to write at once.
+
+Probably the most programmatically usable solution would be to allow the output component to simply ``push'' signal data, likely to be allocated on the stack, onto the connection and to the output. However this makes the efficient zero-copy ideal all but impossible, since Geddei is not in control of the source data. Also reading the data could be troublesome, since more or less than the amount given could be required. In this case some extra mechanism (i.e. a buffer) would be needed for the reader.
+
+Probably the most flexible would be to allow dynamic allocation of signal data buffers and to allow Geddei to adopt management of them on the write operation. This would allow Geddei to handle the zero-copy problems, and since each write/read uses a freshly allocated portion of memory, asynchronous processing would not be a problem. However the dynamic allocation of buffer memory is costly, and without proper (and complicated) mechanisms in place to limit the amount of buffer space allocated, the system would soon crumble due to greedy memory allocation.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.8in]{figures/buffer.eps}
+\caption{An example of a cyclic buffer with a single read pointer and a write pointer in action. We start with the buffer in state (1). After a read has taken place, the buffer is in state (2). A further write forces the pointer to cycle back to the beginning as in (3). Another read causes the buffer to finish in state (4).}
+\label{fig:buffer}
+\end{figure}
+
+In Geddei, in order to coordinate all three aspects into one solution, a buffered connection system has been devised. Elements of each of the three flawed solutions were taken and combined to provide a usable compromise. The buffer used is cyclic (as in figure \ref{fig:buffer}), and its size is fixed to a power of two, in order to provide an efficient modulo calculation for the wraparound. Being cyclic allows unlimited and continuous reading and writing and utilising C++'s operator overloading facilities can provide the usable C-style array interface. Using a mutex protected wait condition, it allows safe simultaneous reading and writing, supporting unlimited readers and a single writer. This provides (in the typical case) a zero-copy transferral between a writer and any number of readers.
+
+A further use of having mutex/wait condition-controlled reading and writing of the buffer is to build in a powerful ``stack trapdoor'' mechanism. This mechanism allows an otherwise blocked read or write operation on the buffer to ``drop out'' and execute some other code. This is achieved by putting some other basic ``trapdoor'' guard on the wait condition loop. The pseudocode is displayed in program listing \ref{pro:trapdoor}.
+
+\begin{program}
+\begin{verbatim}
+01 LOCK Mutex
+02 DO
+03   WaitCondition->Wait( USING Mutex )
+04 UNTIL Can_Operate_On_Buffer OR Our_Trapdoor == Open
+05 IF Our_Trapdoor == Open THEN
+06   Quit_From_This_Runtime( )
+07 ELSE
+08   Operate_On_Buffer( )
+09 END IF
+10 UNLOCK Mutex
+\end{verbatim}
+\caption{Pseudocode for trapdoor-guarded buffer operation.}
+\label{pro:trapdoor}
+\end{program}
+
+The trapdoor variable is thread and object specific meaning that different threads operating on the same object will not be adversely affected. The reason why being able to drop out at will without cooperation from either the buffer (being ready to be operated on) or the user (to poll or otherwise consider some exceptional circumstance) is useful is to ease and simplify Processor coding. With the use of C++ exceptions to unwind the stack, deallocating stack-based objects we can set up a system whereby a developer-definable routine (i.e. an overriden virtual method) can be silently and safely exited without \textit{any} code or design overhead form said developer. Indeed the processing loop could easily be an unguarded ``while(true)''-style construction without fear of indefinate execution or unsafe termination.
+
+Because we are able to control the execution of the developers' code \textit{from within their execution} we can therefore prevent the need for a non-positive return. If an error occurs that means the operation must fail, then the called API function can simply unwind the stack, bypassing the peripheral signal processing code and take care of the error without coordination from the developer. Likewise if an unrelated thread or process calls for pause or termination of a particular processor then this can also be handled safely out of the developer's control by opening the trapdoor.
+
+The modeless exit therefore guarantees the developer that if the read operation returns, it will have succeeded, significantly simplifying their code. In the input/output portion of the API when coding new processing components, return types never have to be verified, exiting and such like is handled without the developer's coordination.
+
+\section{Subsystem Design}
+
+\subsection{Implementation Overview}\label{sec:components}
+
+Exscalibar comprises several software modules. Briefly, these are:
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=3in]{figures/modules.eps}
+\caption{The Exscalibar software; its constituent modules and their dependencies.}
+\label{fig:modules}
+\end{figure}
+
+{\bf QtExtra} A utility class library that provides a simple and usable interface to functionality such as network session management (including addressing the problem of big/little endian communication), dynamic code loading (plug-in management) and memory management issues that arise with class-based threading.
+
+{\bf Geddei} The core software library that provides the infrastructure to allow the processing to happen. This looks after such aspects as defining the ``front-end'' abstract interfaces for processing modules and implementing all necessary communication between the different threads and processes. Geddei addresses such aspects of communication as type-correctness and type-derivation, aspects of parallelism such as synchronisation and process-control, and abstracts where necessary to provide different levels of parallelism (such as multithreading and network-based distribution).
+
+{\bf Common Processor Libraries} The CPL provide a collection of ``building blocks'' with which desired computations may be expressed. Several libraries exist, each addressing some application of computation; currently we have libraries featuring modules in mathematics and music IR. We also have a toolkit library for analysing and probing a network from a program. We also have a library (in the experimental phase) that allows usage of components of another audio-signal processing software library.
+
+{\bf Remote Geddei (rGeddei)} This extra software library that sits atop Geddei provides the necessary functionality to control a Geddei ``session'' on a different memory area or host. This is important (and generally necessary) when Geddei is to be scaled up to use multiple hosts (or nodes) in order to carry out some computation. rGeddei abstracts away from the concrete instantiations of Geddei objects to provide a create-and-control interface that is location transparent from the programmer's point of view.
+
+{\bf NodeServer} This software works with rGeddei to allow it use of a particular host (or node). It is able to listen to and act on requests directing it to create or otherwise control a Geddei ``session''. It provides a basic authentication mechanism in order to address security issues.
+
+{\bf NodeController} This software is able to control a single Geddei-based distributed experiment, unaided, potentially in a batch configuration. It is able to submit Grid jobs to establish a number of hosts running the NodeServer software and then to utilise them to complete a given job. It is conceivable that this particular piece of software could be adapted to become a Web Service.
+
+{\bf Network Investigation Toolkit Environment} NITE is a graphical application for designing Geddei-based dataflows and expressing a particular computation. It is designed to be a Rapid Application Development environment employing all modern aspects of a GUI including drag-and-drop and physical modelling of components.
+
+\subsection{Typical Exscalibar-based Program}
+
+We, like \cite{amatriain04object}, assert that for a modern software framework to be sucessful, the usability of the development API is an important consideration. We liken a framework to any other computer artefact that humans use; they should be designed with human aspects in mind. In the field of music information retrieval, where researchers may not be programmers by profession, the design of the API is ever more important. Paraphrasing the author of Perl `Common tasks should be easy to do; uncomon tasks should be possible'.
+
+In using Exscalibar as a black-box framework, we adhere to this as closely as possible. We keep the total amount of required interaction with the core absolutely minimal and clear. We break down the program construction into three main parts; creation of the network, usage of the network, and finally destruction of the network. There are safeguards in place to clean up the network should the developer neglect to do so, though we consider it good design to put in explicit code to destroy that which is created. We have made such destruction code very convenient.
+
+A typical Exscalibar-based application follows these basic steps:
+
+\begin{enumerate}
+\item Declare group.
+\item Create and initialise each processor in turn.
+\item Connect each processor individually.
+\item Attempt to start group.
+\item If group started properly:
+\begin{enumerate}
+	\item Wait until finished.
+	\item Stop (and reset) group.
+\end{enumerate}
+\item Optionally go back to (4).
+\item Disconnect all processors.
+\item Optionally go back to (3).
+\item Destroy all processors.
+\end{enumerate}
+
+Steps 1-3 correspond to creation of the network, 4-6 to usage and 7-9 to destruction. As can be seen, there is plenty of possibility to utilise the same network or processor constituents over multiple times. Furthermore, there is minimal mandatory verification code (unlike typical C programs). Exceptions are not used (unlike traditional Java), instead all operations can be assumed to succeed until the point of starting the network. If the network is invalid, an error code is given along with information as to where in the network the error occured.
+
+\subsection{Processors}\label{sec:processors}
+
+A developer's usage of a processor can be seen in two perspectives; black box and white box. In the black box situation, they are actually using it as an object as part of a network. In the white box scenario, they are creating a new type of processor, to be used later in a black box situation. It is informative to consider the temporal order of API methods in either situation. We begin with the order as is viewed from the black box perspective.
+
+\begin{enumerate}
+\item Construct
+\item Determine properties (with properties())
+\item Initialise (with init())
+\item Connect (with connect())
+\item Start (with go())
+\item Optionally and indefinately:
+\begin{enumerate}
+\item pause (with pause())
+\item continue (with unpause())
+\end{enumerate}
+\item Stop (with stop())
+\item Reset (with reset())
+\item Optionally go back to (5)
+\item Disconnect
+\item Optionally go back to (4)
+\item Destruct
+\end{enumerate}
+
+The actions correspond well with the typical Exscalibar-based program discussed previously. The initial network-setup phase corresponds to items 1-4, the usage of the network corresponds to items 5-8 and the destruction items 10 and 12. One interesting point is the splitting of initialisation form construction. This is because the properties available for configuration may have to be examined prior to initialisation. Clearly they cannot be returned by the object at run time if it is not constructed.
+
+The white box lifecycle can be taken as one from `inside' the object:
+
+\begin{enumerate}
+\item \textit{Constructor} (by utilising Processor())
+\item Supply properties (by overriding specifyProperties())
+\item Perform Geddei-based initialisation (by overriding initFromProperties() and calling setupIO(), setupVisual())
+\item Draw processor on canvas (by overriding paintProcessor())
+\item Verify input types and determine/specify output types (by overriding verifyAndSpecifyTypes())
+\item Specify input buffer minima (by overriding specifyInputSpace())
+\item Specify output buffer minima (by overriding specifyOutputSpace())
+\item Perform any custom initialisation and validate state (by overriding processorStarted())
+\item Perform processor work (by overriding processor(), receivedPlunger() and calling input(), output(), multiplicity(), thereIsInputForProcessing(), plunge())
+\item Perform any custom deinitialisation (by overriding processorStopped())
+\item \textit{Destructor}
+\end{enumerate}
+
+The API methods here all fit into two categories; those to be called actively (such as setupIO, setupVisual and plunge), and those that are overridden from the standard processor implementation (such as specifyProperties and processor). Since the developer is creating a standalone class, all methods that are called explcitly are done so from the methods that are overridden. Items 2 and 3 are all called in the network-setup phase, and correspond roughly to the first three items of the black box view.
+
+Item 4, the draw method may be executed at any time after initialisation and does not necessary have to be called before later items. Items 5-7 correspond to the network verification, corresponding to item 4 of the first list (the typical Exscalibar-based program) and item 5 of the previous list. The further items 8-10 correspond to the running of the network. The constructor and destructor are not considered part of the API (already being standard OO C++ concepts).
+
+%WANT MAXIMUM DEVELOPER SIMPLICITY; simple, minimal api; typing; fewer ways to trip up; no outputbuffer==input buffer. too unexpected.
+
+\subsection{Buffers}\label{sec:buffers}
+
+The signal data buffer in Geddei is encompassed in a single class, the \texttt{Buffer}. These objects are used by the \texttt{Connection} class and its derivatives, which connect the processing component objects, \texttt{Processor}s together.
+
+The \texttt{Buffer} is essentially a large array, with a single  write pointer to determine where the last write ended, and the next write should begin. It plays host to a number of \texttt{BufferReader} objects who have access to the array, and themselves host a read pointer into it. The array is considered cyclic, i.e. element 0 is defined to be the element directly following {n - 1}, where {n} is the size of the array. The contents of the \texttt{Buffer} may only ever be accessed, i.e. read or written to, by the \texttt{BufferData} class.
+
+The \texttt{Buffer} also holds a read pointer, which simply holds the value of the read pointer that is the most behind (relative to the write pointer). Any data following the read pointer and before the write pointer can be considered in use and thus read-only, whereas data following the write pointer and before the read pointer can be considered old, invalid and ready to be written to.
+
+If the buffer is $s$ elements large, $w$ is the position of the write pointer and $R$ is the set of positions of the read pointers, then formally, we can say that the buffer's most behind read pointer is at position $r$:
+
+\begin{equation}
+r \equiv (s + w - max_n ( ( s + w - R_n ) \divideontimes s ) ) \divideontimes s
+\end{equation}
+
+where
+
+\begin{equation}
+n \equiv \vert R \vert
+\end{equation}
+
+and
+
+\begin{equation}\label{eqn:modulo}
+\exists n \in \aleph, a \in \aleph, b \in \aleph, c \in \aleph | a \divideontimes b \equiv c \text{ where } a=bn+c
+\end{equation}
+
+The \texttt{Buffer} maintains a single mutex, \texttt{theDataFlux}, which must be held in order to access either of the read/write pointers (or any of their derivative values). This is the first stage to guaranteeing that portions being read can never also be written to, since it guarantees that any simultaneous calls to read from or write to the array (and thus change or otherwise depend upon its state) will be acted upon sequentially. Two wait conditions are also provided (which are protected by the mutex), to act upon changes to either the read or write pointer. These provide the basics to the blocking architecture.
+
+The \texttt{Buffer} also has a list of \textit{trapdoor}s, which are the \texttt{Processor} objects that are currently attempting a controlled exit, and thus require all blocking operations to exit immediately. This is also protected by \texttt{theDataFlux}, and changes to it will wake all blocking instructions in the object. As the exit will almost certainly be non-successful and thus as far as the API is concerned, invalid, the bad return value is handled before control is returned outside of Geddei's core. An internal exception is thrown in order to wind the stack down past any new, non-core code so control is returned completely to Geddei and the any remaining tasks for controlled exit may commence.
+
+\subsubsection{BufferData Objects}
+
+\texttt{BufferData} objects allow reading and writing to the \texttt{Buffer}'s array to take place. Each Buffer may have only one write operation pending at once so only one unique BufferData object may access it at once, likewise with BufferReader. BufferData objects are reference counted, and thus passing by value is allowed and efficient. The BufferData class is very flexible and while it may be used to access a Buffer object's data, it could also be given an external array to operate on or keep an internal private databank. In the case of maintaining its own chunk of data, the payload is reference counted as in the case of the external Buffer. If the data payload is external (i.e. not owned by the BuffeData object) then no reference counting is necessary.
+
+Reference counting the BufferData instance's payload can be most useful. We can specify to the BufferData object an action to be carried out when the last such object that has access to the data is destroyed. In a typical reference counting situation, we would expect that the last instance should destroy the data, which is exactly what happens here for the self-maintained private payload. However if the data instead belongs to a Buffer object then we can customise that action to be, for example, to declare the data free to be overwritten.
+
+In Geddei we have the \texttt{Auxilliary} class to override in order to define such actions. This class has both a ``positive'' and a ``negative'' action defined. We have two implementations of it; one for the owner of a screen (an ``array'' meant to be read), the other for the owner of a scratch (an ``array'' meant to be written). The BufferData object can be given a default action to be carried out on the final destruction (\texttt{theEndType}) together with an Auxilliary (\texttt{theAux}). We allow either a positive or negative outcome to be given by the API user in order to determine whether the read or write operation should be committed to the Buffer or just forgotten. The type of operation (determined by the Auxilliary) is fixed.
+
+\begin{tabular}{|cc|cc|}
+\hline
+	&		& \multicolumn{2}{c|}{Auxilliary (fixed)} \\
+	&		& ScratchOwner		& ScreenOwner \\
+\hline
+EndType	& positive	& move write pointer	& move read pointer \\
+(mutable)	& negative	& do nothing		& do nothing \\
+\hline
+\end{tabular}
+
+A typical example of a read operation that will default to a negative (do not commit) outcome is if the read was what is commonly termed as a ``peek'' (i.e. so a further read will return the same data).
+
+At the core of the \texttt{BufferData} object is just a pointer to an array and an offset from which it may read or write. There also needs to be a size, which determines exactly how much data the BufferData may use out of the array (in order to provide safe bounding) and a mask, which powers the binary modulo calculation necessary to make the array cyclic.
+
+\subsection{Plungers}\label{sec:plungers}
+
+The plunger subsystem was designed primarily for stream separation. Like data, plungers ``flow'' through the pipeline, getting duplicated where a Processor has multiple outputs and collected together when a Processor has multiple inputs. Regardless of transformation, plungers flow through at the same rate as the data and thus can be used to annotate particular points (such as the end of a music track) in the signal data. The data before a plunger is considered irreconcilably different to that after a plunger, and data from both will never be returned from a single read: If necessary data is discarded from before that plunger to start anew after it. Figure \ref{fig:plungers} demonstrates this in action.
+
+Plungers play an important role in allowing a Processor to determine when no more data can possibly arrive. Each time a plunger is inserted into the output data stream from a Processor (be it either from explicit insertion by a source Processor or implicit relaying), a separate signal is sent notifying any receiving Processor objects to expect such a plunger. To prevent both an early dropout, all Processor objects initially start expecting a single plunger. When a source Processor has finished delivering all signal (if there is a finite amount to deliver) a corresponding plunger is artificially added without an accompanying notification signal. This ``end-of-stream'' plunger is hidden outside the Geddei core, since it was never introduced by the user.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.8in]{figures/plungers.eps}
+\caption{A buffer with two read pointers and a set of plungers. Read pointer (a) reads in steps of 2 samples, whereas (b) reads in steps of 8. Since one of the plungers is not on an 8 sample boundary away from (b) some data has to be discarded before the plunger can be past, as in step 7.}
+\label{fig:plungers}
+\end{figure}
+
+A guard can then be placed at a sink Processor to check if all plungers are accounted for. Once the number of notifications equals the number of plungers arrived, we are guaranteed that all data ever dispatched from the sources has flowed through the network and finally been received at this sink. The sink may exit and perhaps the control thread may conduct a join operation and become unblocked.
+
+Plungers are homogeneous; i.e. no specific way of identifying one plunger from another is given. However since plungers are strictly ordered, simply assigning a cardinality to them will result in a canonical index. This may allow one Processor (e.g. a sink) to query the meaning of a given plunger with another (most probably a source, since it must have introduced it initially).
+
+\subsection{Stateless Processors}\label{sec:statelessprocessors}
+
+%modification to actor from in->out to in/step->out. spec for dsp, similar to computation graphs (A, U, W, T) => (0, o_src, s_dest, i_dest)
+
+A \texttt{Processor} object is a highly flexible and abstract programming model. At its most fundamental it is a class that has its own thread of execution and can read from some given input streams and write to some given output streams. Some types of Processor, notably sources and sinks, require the flexibility to determine how much they should read or write and under what conditions they should interact. However, for simple fixed transformation-based processing, (e.g. the Fast Fourier Transform), the amount of flexibility given is overkill.
+
+Furthermore, simple fixed transformations can be easily parallelised by a technique known as data parallelisation or \textit{timeslicing}. The signal may be split up into multiple slices, and these slices may be processed independently, and potentially in parallel. Such independence is only possible if the processing is stateless. By this we mean that no permenant aspect of the Processor survives from one processing iteration to the next. This implies that the processing may be done out of order, on separate hosts and so forth.
+
+To take advantage of the large subset of processing that is stateless, Geddei includes a class, similar to the \texttt{Processor} class but considerably simpler: \texttt{SubProcessor}. Like \texttt{Processor}, this class is for specialisation, however unlike \texttt{Processor}, it has no threading capability of its own---it provides the developer only with the capability to specify the stateless transformation from a set of inputs to a set of outputs. In this sense it is more similar to an \textit{actor} of a Synchronous Dataflow Network than a process of a Process Network.
+
+\subsubsection{Behaviour}
+
+No explicit data transfer operations are provided in the API and because the method by which the transformations are specified is \texttt{const}, it is developer is forced into making it stateless.\footnote{There, in fact, ways to get around this, such as global variables or forcing mutability through typecasting. A developer set on breaking their program will achieve it; we just try to make it harder for them.}
+
+A SubProcessor has three main parameters specified as an adjunct to the number of input and output ports it requires. These amounts are known as the \textit{input}, \textit{step} and \textit{output} amounts, and are specified in samples (which we will use analogously to tokens). They are defined in terms of all input ports, rather than fo each one individually. In SDF theory, we may view the step and output amounts as analogous to the number of tokens consumed and produced. The input amount embodies the concept of how many tokens are viewed in a single firing. This allows overlap in sequences without the necessity of state (which we have already debarred).
+
+In some complete sequence of firings $(f_1,f_2,...,f_n)$, we define that the first firing, $f_n$ will consume $i$ tokens, but that $i-s$ tokens will remain `in memory'. Subsequent firings will consume only $s$ tokens, to be appended to what is `in memory' and to be used for the operation. Having fired, the oldest $s$ tokens are discarded from what is `in memory', to make the memory only of capacity $i-s$ again.
+
+In some sequence of $n$ firings of a SubProcessor with input $i$, step $s$ we may therefore define the total tokens required $t$ to be:
+
+\begin{equation}\label{eqn:totaltokens}
+t \equiv \begin{cases}
+i + s(n - 1) & \text{ if } n > 0 \\
+0 & \text{ otherwise }
+\end{cases}
+\end{equation}
+
+We may compare the SubProcessor's (white box) lifecycle to that of the Processor (already described in section \ref{sec:processors}).
+
+\begin{enumerate}
+\item \textit{Constructor} (by utilising SubProcessor())
+\item Supply properties (by overriding specifyProperties())
+\item Perform Geddei-based initialisation (by overriding initFromProperties() and calling setupIO(), setupVisual())
+\item Draw processor on canvas (by overriding paintProcessor())
+\item Verify input types and determine/specify output types (by overriding verifyAndSpecifyTypes())
+\item Perform processor work (by overriding processChunk()/processChunks())
+\item \textit{Destructor}
+\end{enumerate}
+
+It is clearly far simpler, having only five steps aside from the mandatory constructor/destructor. Steps 2-4, the initialisation and painting, remain unchanged. Type verification also takes place, but there is no need for specifying the input and output space required since this can be done automatically. Due to the departure of explicit flow control, there is no callable API in the actual processing stage. This clearly demonstrates the supreme simplicity of the stateless processing design.
+
+\subsubsection{Encapsulation}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.8in]{figures/subdom.eps}
+\caption{An overview of the DomProcessor/SubProcessor architecture. Note that the zeroth SubProcessor is necessarily local (for house-keeping functions). The others may be joined any way for which a Coupling can be written (initially either locally, sharing memory or remotely over sockets).}
+\label{fig:subdom}
+\end{figure}
+
+Because \texttt{SubProcessor} is basically just a shell to encapsulate a transformation together with the signal type/properties specification and verification, another class is required to make it usable; naturally this is called the \texttt{DomProcessor}. The duality of a SubProcessor to a DomProcessor is roughly analogous to the distinction between an actor and a process in Dataflow and Process Network theory. The \texttt{DomProcessor} wraps a particular subclass of \texttt{SubProcessor}, and is \textit{coupled} to at least one instance. Figure \ref{fig:subdom} gives an overview of the basic DomProcessor subsystem in terms of encapsulation.
+
+A coupling between a \texttt{SubProcessor} and \texttt{DomProcessor} is essentially an umbilical cord allowing the \texttt{DomProcessor} to present data for transformation and retrieve the result at a later time. Figure \ref{fig:couplings} shows couplings portion in more depth. The \texttt{SubProcessor} transformation method temporarily executes in its own thread when presented with data. Couplings, like connections, may be between objects in the same memory space (in which case shared memory will be used) or in different memory spaces (or even different machines) in which case sockets will be used.
+
+\begin{figure}[htb!]
+\centering
+\includegraphics[width=5.8in]{figures/couplings.eps}
+\caption{A close up of a local coupling showing the data path. Notice that the SubProcessor is able to directly access the buffer, through the Coupling class using a BufferData object to pass the data.}
+\label{fig:couplings}
+\end{figure}
+
+Stateless processing through the \texttt{SubProcessor}/\texttt{DomProcessor} architecture presents the processor developer with a simple and rapid development path with no extra complexity. Furthermore because of the guarantee of statelessness, data may be processed output of order, remotely, or otherwise, giving Geddei processing freedom generally resulting in more effective computation.
+
+We are now in a position to better define the specific algorithm a DomProcessor must go through to accomplish its job of serving data from a buffer to multiple SubProcessors (\textit{actors}), respecting the \textit{input}/\textit{step} parameters accurately. Put more directly, it is not acceptable to consider a \textit{complete} sequence of samples (\textit{tokens}) anything less than the data between two plungers (defaulting to the beginning and end of transmission, of course). That said we cannot nor would not wish to resize the buffer large enough to encompass an arbitrary amount of data such that all data between two plungers could be stored accordingly as a complete sequence. We must therefore approach the problem of synthesising multiple subsequences from an real sequence.
+
+The act of synthesising multiple discrete subsequences is actually quite simple, when a buffer with more freedoms than the basic produce/consume behaviour of a queue is used. We may break down the action of \textit{consuming} into two independant actions of \textit{viewing} and of \textit{skipping}. Typically in a queue both would happen at once, tokens would be read, copied or used and discarded in one operation of consuming. Thus we may \textit{view} (and operate on) some $i+s(n-1)$ tokens yet only skip $sn$ tokens, having the effect of viewing a complete sequence but only actually removing one portion of a subsequence from a buffer.
+
+\begin{program}
+\begin{verbatim}
+01 REM Samples is predefined, Worker is the first item in Workers
+02 WAIT UNTIL NOT Worker.Is_Busy
+03 Would_Read := Input + ( Samples - 1 ) * Step
+04 Worker.Queue_Reader.Wait_For_Samples( Would_Read )
+05 Available := MIN( Would_Read,
+                     Worker.Queue_Reader.Samples_Ready(  ) )
+06 WasPlunger := FALSE
+07 IF Available < Input THEN
+08   Disguard := Available
+09   Worker.Queue_Reader.Skip( Disguard )
+10   Worker.Queue_Reader.DestroyPlunger( )
+11   WasPlunger := TRUE
+12 ELSE
+13   Firings := ( Available - Input ) / Step + 1
+14   Discard := Firings * Step
+15   Data := Worker.Queue_Reader.Peek( Input
+                                       + ( Firings - 1 ) * Step )
+16   Worker.Process( Data )
+17   Worker.Queue_Reader.Skip( Discard )
+18 END IF
+19 FOR X IN Workers
+20   IF W != X THEN
+21     X.Queue_Reader.Skip( Disguard )
+22   END IF
+23 END FOR
+24 IF NOT WasPlunger THEN
+25   Worker := Workers.Next
+26 END IF
+\end{verbatim}
+\caption{The code for the outer loop of DomProcessor. This is executed for each read iteration.}
+\label{pro:domproc}
+\end{program}
+
+This is better explained in the pseudo code used for the DomProcessor itself, as shown in program \ref{pro:domproc}. Plungers are removed immediatly upon detection at line 10; any later would risk that some other worker, further ahead in the queue might attempt to read past the plunger and become locked. Lines 24-26 show that a new worker is iterated onto only in the case that the current worker \verb|W| was actually served with data, main for scheduling purposes.
+
+The disassociation between viewing and skipping is exemplified specifically on a normal read in lines 15 and 17, where the skipping amount is different to the viewing (\verb|peek|ing) amount. With one full read taken place, all other workers are skipped ahead as though their sequence was artificially shortened by some amount of samples, using the basic $Step \times Firings$ formula (lines 19-23).
+
+\subsubsection{Buffer Sizing through Weights}\label{sec:buffersizing}
+
+Reading, scheduling, transferring, returning and inserting data, as has to be done for each ``chunk'' of the input stream is costly, as the graphs in the evaluation section show. Minimising the number of times this has to happen, given a fixed amount of data is important. It follows that if more data that can be read at once and given wholly to a SubProcessor instance then fewer such cycles will have to happen hence higher throughput. The drawback being that it requires a larger buffer (to store up large chunks before processing) and will neccessarily result in higher latency since data will not necessarily be processed immediately.
+
+In some situations (such as real-time interactive applications), latency is an issue and thus we suffer suboptimal throughput for an increase in responsiveness. In batch-style situations (as is the case in chapter XXX) we require the highest efficiency, not caring about the resultant lapse in latency. A DomProcessor takes the simple approach of utilising as much of the buffer as possible. If $min(I)$ is the size of the smallest input buffer, and $min(O)$ the smallest of the output buffers, then we can define $c_{max}$, the maximum number of chunks that would be possible to process at once given all of the input buffers being full and outputs being empty:
+
+$$
+c_{max} = min(\frac{min(I) - s_{in}}{(s_{step} + 1) * w}, \frac{min(O)}{s_{out} * w})
+$$
+
+The number of chunks to safely take at once is that number which would necessitate only half the smallest input/output buffer to be full/empty. This is due to the problem of buffers typically being filled in chunks themselves. Generally we can assume some constant chunk size $z$. If $z > \frac{min(I)}{2}$, then only one such output chunk will come through and most of it will have to be processed before another can come, hence we process chunks that require only half the buffer size to be read. We cannot simply divide the chunks by two due to their potenially overlapping nature.
+
+We already know, given that $b_{min}$ if some minimum buffer size:
+
+$$
+s_{in} + (c_{max}-1)s_{step} <= b_{min}
+$$
+
+We then wish to find $c_{nom}$ where it requires only half $b_{min}$:
+
+$$
+s_{in} + (c_{nom}-1)s_{step} <= \frac{b_{min}}{2}
+$$
+
+Therefore:
+
+$$
+2(s_{in} + (c_{nom}-1)s_{step}) = s_{in} + (c_{max}-1)s_{step}
+$$
+
+Which simplifies to:
+
+$$
+c_{nom} = \frac{1}{2}(c_{max} + 1 - \frac{s_{in}}{s_{step}})
+$$
+
+Being our formula to calculate nominal chunk size.
+
+This allows the DomProcessor object to optimise throughput according to the buffer size, but if this is not changed explicitly (which is a tedious task) then the buffer sizes will generally be at their minimum, resulting in low-latency, low-throughput charecteristics. In addition to this then we provide a method to allow the size of the buffer to be automatically balanced according to the job necessary.
+
+The following weighting algorithm, essentially a bounded gamma formula is used given a weight $\gamma$ which defaults to 0.5 and an optimal buffer size, $\lambda$ (defaulting to 131072 words). It returns a number of samples $\varsigma$ which is at least equal to that necessary for one chunk to be processed at once by each of the $w$ workers.
+
+We first calculate the minimum size of buffer (in samples), $\varsigma_{min}$:
+
+$$
+	\varsigma_{min} \equiv s_{in} + s_{step}(w - 1)
+$$
+
+Then, we define the optimal size according to $\lambda$, which is given as the minimum number of samples from each input required to use up the space given by $\lambda$. This must not be less than the minimum $\varsigma_{min}$:
+
+$$
+	\varsigma_{optimal} \equiv max(\varsigma_{min}, min_{i=1}^n(\frac{\lambda}{scope_i}))
+$$
+
+Finally we do an exponential weighting with $\gamma$ between these two values:
+
+$$
+	\varsigma \equiv e^{log(\varsigma_{min}) + \gamma(log(\varsigma_{optimal}) - log(\varsigma_{min}))}
+$$
+
+\subsubsection{Load Balancing}\label{sec:loadbalancing}
+
+When utilising the data parallelism that the DSP system provides on a single symmetric multiprocessor host or multiple symmetric hosts with no other tasks running on them, then load balancing is of little importance. However, as is often the case in distribution, several of the worker hosts may have other tasks running on them utilising the CPU. These tasks may be other Geddei processor objects or perhaps other applications ono a multi-user system. In any case, an uneven computational performance for each worker causes inefficiency in the distribution. Time must be spent waiting for a slower worker to complete a batch of work while speedier workers are idling.
+
+We can analyse the situation present by naming a set of $n$ workers. Each worker has a particular speed on which it may perform a given operation required by a given SubProcessor. We will not concern ourselves with the determination of this speed, other than it is out of our control; it may be the nature of the CPU or perhaps other programs running in the background. We name these speeds accordingly $S = (s_1, s_2,...,s_n)$, and we will define they are the average number of firings (chunks) to be completed in a second. Now given some arbitrary number of chunks $c$ to be fed to each worker in a complete iteration, we arrive at the time taken for a complete iteration ($t$) as:
+
+\begin{equation}
+t \equiv max^{x=1}_n(\frac{c}{s_x}) + T + Kn + L
+\end{equation}
+
+Which we may interpret as the maximum time taken to complete a single job plus some transfer time $T$, some per-worker overhead $Kn$, and some further basic overheads $L$. We will allow ourselves the conveniece of predicting that the time taken for the job to complete is the most significant factor in this formula for the simple reasson that if it were not then load balancing as a method of bettering speed would be pointless. We will also introduce differing loads to each worker, through a new array of variables, $C = (c_1, c_2,...,c_n)$ the number of chunks to be given a worker, reducing our equation to:
+
+\begin{equation}
+t \equiv max^{x=1}_n(\frac{c_x}{s_x})
+\end{equation}
+
+We must now define a constraint on the new array of variables, $c_x$, in order to keep the amount of work done constant, which we will recognise as necessary to the system:
+
+\begin{equation}\label{eqn:workdoneconst}
+\sum^{x=1}_n c_x \equiv cn
+\end{equation} 
+
+It seems quite clear that to minimise $t$, we must minimise the maximum time taken. Since the total amount of work done must be kept constant it seems quite expected that we will reduce the maximum at the cost of increasing the other workers. It follows that there is some inevitable point, whereby the maximum is shared by all workers and as such can no longer be reduced further. This happens if and only if the distribution is even; all times taken are equal. Formally we require the sequence $C$ such that:
+
+\begin{equation}
+\forall a | a > 0 \wedge a \leq n, \frac{c_a}{s_a} = \frac{c_0}{s_0}
+\end{equation} 
+
+Neglecting the constraint imposed upon us by equation \ref{eqn:workdoneconst}, we simple assign chunks equal to the speed, in order to keep the time taken constant:
+
+\begin{equation}
+\forall a | a > 0 \wedge a \leq n, c_a = s_a \Rightarrow \frac{c_a}{s_a} = 1 = \frac{c_0}{s_0}
+\end{equation}
+
+But this leads to the total work done being the total speed (which is some arbitrary amount), not the original amount of work done which we require:
+
+\begin{equation}
+\sum^{x=1}_n c_x \equiv \sum^{x=1}_n(s_x) \ne cn
+\end{equation}
+
+Thus we need to apply the appropriate factor to each to fulful the final constraint:
+
+\begin{eqnarray}
+\sum^{x=1}_n(K.s_x) \equiv cn \\
+\therefore K \sum^{x=1}_n(s_x) \equiv cn \\
+\therefore K \equiv \frac{cn}{\sum^{x=1}_n(s_x)}
+\end{eqnarray}
+
+Applied to the original we get the final formula:
+
+\begin{equation}
+\forall a | a > 0 \wedge a \leq n, c_a \equiv K.s_a \equiv \frac{s_a.cn}{\sum^{x=1}_n(s_x)}
+\end{equation}
+
+In the implementation, calcuation of the processing time can be done on the remote host and sent back along with the job's results for simple calculation of speed. There are several flaws in this method that mean it doesn't (necessarily) give the exact optimum. This doesn't take into account any transmission overheads meaning that a local worker that with no transmission overheads will not be favoured over a remote worker needing to have the data sent over a slower sockets link. Also, being as independant speeds are fundamental to the model, this cannot take into account inter process dependancies that may arise. This includes the scenario of multiple workers that share the time of a single CPU. Nonetheless, we postulate that this is a worthy optimum to be found.
+
+\subsection{Synchronous Dataflow Subsequences}\label{sec:combination}
+
+\subsubsection{Design}
+
+Synchronous Dataflow Subsequences (SDS) is the dataflow-subsystem adjunct to the Geddei system. Stateless processing via the SubProcessor/DomProcessor (SDP) system is useful for both data-based parallelisation of workload and the reduced programming complexity a dataflow based API and design brings. However synchronous dataflow based processing has another useful feature that can be exploited; namely static scheduling.
+
+The basic SDP system works around as well as a basic Processor object based system. Buffers are used between connected Processor objects, introducing either latency or high degrees of context switching adding to the workload. Scheduling has to be performed by the operating system which may be suboptimal, and mutexes have to be continuously switched to power the data sharing mechanisms. When all processors are based on the same host then communication is not too costly in terms of time and latency. However for large pipelines of relatively simple calculations this can still be problem. When on spread onto different hosts through either data or pipeline parallelism, a roundtrip communication cost must be paid for each processor in the pipeline. The amount of data involved makes these costs extremely high. In the field of musical audio DSP such pipelines are relatively common and appear on almost every paper. Classic examples the appear often in the literature include Overlap $\rightarrow$ Hanning $\rightarrow$ FFT $\rightarrow$ Bark $\rightarrow$ Sone $\rightarrow$ Phon and FFT $\rightarrow$ SelfSimilarityMatrix $\rightarrow$ DiagonalSummation
+
+The method used in Geddei to alleviate this problem is the introduction of SDS into the system. Under dataflow theory, a SubProcessor is equivalent to an \textit{actor}. SDSs are a subset of possible dataflow networks, specifically a linear sequence of SubProcessor objects. The limitation of only allowing sequences was chosen for three main reasons:
+
+\begin{itemize}
+\item In musical audio signal processing large sequences of basic operations are more common than complex networks.
+\item Its simplicity means a simpler, more robust and optimal implementation in the time given.
+\item More complex networks can be made by mixing SDS together with the basic SDP system.
+\end{itemize}
+
+Therefore each object must be a simple class with exactly one input and one output. Due to the simplicity and data bounding a sequence can be scheduled in advance and all necessary memory estimated. Context-switching and data sharing overheads can immediately be dropped. SDSs, being composed wholly from stateless SubProcessor classes are also stateless and in fact possess all attributes of SubProcessors. As such the sequence of processing may be distributed accordingly with none of the intermediate result's round trip costs to be paid.
+
+SDS has a number of drawbacks however; since it has no internal buffering and threading it has no implicit parallelism due to pipelining. Since it is part of the SubProcessor system this drawback is reduced somewhat since multiple SubProcessor worker threads can be created. SDS also only works under the condition where the first SubProcessor produces data in a number of samples that is a common divisor of both the destination SubProcessor's input and step amounts. If this is not the case they cannot be amalgamated into one since a the number of samples to take in one chunk (input) and the step between subsequent chunks (step) cannot be accurately described as a whole number. Again this is not generally a problem since almost every SubProcessor outputs in terms of a unit sample.
+
+\subsubsection{Implementation}
+
+The implementation of SDS in Geddei is based around a recursive system. A special SubProcessor-derivative class, \textit{Combination} is a class that composes its behaviour from two other SubProcessor objects. By using multiple instances of this class in a heirarchical fashion, arbitrary sequences SubProcessor objects can be made. By utilising recursion, deriving a description of a given Combination class is made trivial so distributed copying is also trivial. Matching two SubProcessor's signal types is also trivial.
+
+The main problem is in determining if two SubProcessors, $X$ and $Y$ can be combined to form a composite SubProcessor $Z$. Furthermore we must determine the relevant input, step and output ($Z_i$, $Z_s$, $Z_o$) amounts for the composite processor, and given some number of chunks of data, how much should be processed by either.
+
+For our ease of understanding, we will first define ourselves two trivial amounts: $X_r$, as the number of times SubProcessor $X$ must be fired to produce $Y_t$, some number tokens required by $Y$. Also, we define $Y_r$, the number of times $Y$ must be fired to produce $Z_t$ tokens for $Z$'s output:
+
+\begin{eqnarray}
+X_r \equiv \frac{Y_t}{X_o} \\
+Y_r \equiv \frac{Z_t}{Y_o}
+\end{eqnarray}
+
+We will define, for simplicity of implementation, that a single firing of processor $Z$ shall be defined as a single firing of processor $Y$. Therefore we define the output tokens $Z_o$ as the number of tokens produced by $Y$ in a single firing of $Z$:
+
+\begin{equation}\label{eqn:zoequivyo}
+Z_o \equiv Y_r \text{ where } Z_t = 1 \equiv Y_o
+\end{equation}
+
+To determine the other two $Z$ parameters, we need to utilise $X_r$ together with the parameters of $Y$. We will begin with $Z_s$, the step size of $Z$. We can define $Z_s$ as the number of input tokens to be consumed for a single step of processor $Z$ to take place. We firstly define $X_f$, the number of firings $X$ must make to produce enough tokens for a single step of $Y$:
+
+\begin{equation}\label{eqn:xfequivxoys}
+X_f \equiv X_r \text{ where } X_t = Y_s \equiv \frac{Y_s}{X_o}
+\end{equation}
+
+This must now be multiplied by the ratio of $Z$'s output to that of $Y$, to give us $X_f$:
+
+\begin{equation}
+X_f' \equiv X_f.(Y_r \text{ where } Z_t = Z_o)
+\end{equation}
+
+But we have already defined $Z$'s output to be the same as $Y$'s in equation \ref{eqn:zoequivyo}, so:
+
+\begin{equation}\label{eqn:xfpequivxoys}
+X_f' \equiv X_f.(Y_r \text{ where } Z_t = Z_o \equiv Y_o) \equiv X_f \frac{Y_o}{Y_o} \equiv X_f \equiv \frac{X_o}{Y_s}
+\end{equation}
+
+As we are calculating the steps amount, we can be guaranteed that none of te firings will be the first in sequence, so we need not worry that we have to take in some initial input tokens ($X_i$). We can therefore define the number of step tokens of $Z$ as the produce of the number of times $X$ must fire and the number of tokens $X$ requires when firing (and not the first in the sequence):
+
+\begin{equation}
+Z_s \equiv X_s.X_f' \equiv X_s\frac{Y_s}{X_o}
+\end{equation}
+
+Finally we must define the input size of $Z$. All steps follow similarly from equation \ref{eqn:xfequivxoys} through to \ref{eqn:xfpequivxoys} substituting $Y_s$ for $Y_i$, so we can determine the number of firings $X$ must have to satisfy the consumption of a single input of $Y$:
+
+\begin{equation}
+X_f' \equiv \frac{Y_i}{X_o}
+\end{equation}
+
+Since we are dealing with an input operation rather than a step operation, we can guarantee that this read heads a sequence. From equation \ref{eqn:totaltokens} we know that in a sequence, the formula to convert from number of firings ($f$) to number of tokens required ($t$), given some input size of $i$ tokens and some step size of $s$ tokens is:
+
+\begin{equation}
+t \equiv \begin{cases}
+i + s(f - 1) & \text{ if } f > 0 \\
+0 & \text{ otherwise }
+\end{cases}
+\end{equation}
+
+We may reasonably assume that our second SubProcessor's input size ($Y_i$) and step size ($Y_s$) is greater than zero so we can discard the default case. Combining the two gives the final:
+
+\begin{equation}
+Z_i \equiv (i + s(f - 1) \text{ where } f = \frac{Y_i}{X_o}, i = X_i, s = X_s) \equiv X_i + X_s(\frac{Y_i}{X_o} - 1)
+\end{equation}
+
+We end with our three equations for the parameters of $Z$ as:
+
+\begin{eqnarray}
+Z_i \equiv X_i + X_s(\frac{Y_i}{X_o} - 1) \\
+Z_s \equiv X_s\frac{Y_s}{X_o} \\
+Z_o \equiv Y_o
+\end{eqnarray}
+
+Now we must define when combination of the two SubProcessors $X$ and $Y$ is feasible. The formulae themselves are quite flawless, however since they involve integers only we must be careful not to allow any rounding to happen. This could only happen in the division operations, of which there are two:
+
+\begin{eqnarray}
+\frac{Y_i}{X_o}\\
+\frac{Y_s}{X_o}
+\end{eqnarray}
+
+We recall the binary operator $\divideontimes$ as the modulo remainder from a division, mathematically defined in equation \ref{eqn:modulo}. We can define that a divide operation is allowable iff there is no remainder to the division, meaning that no rounding error has occured in the integer division. We can then define $A_{XY}$ that two processors $X$ and $Y$ are suitable for combination:
+
+\begin{equation}
+A_{XY} \Leftrightarrow (Y_i \divideontimes X_o = 0) \wedge (Y_s \divideontimes X_o = 0)
+\end{equation}
+
+
+% It reduces the overall complexity of the system. It also has the side effect of allowing extended regions of a network to timesliced and distributed thereby reducing complexity, memory footprint and bandwidth.
+
+
+\subsection{One to Many Connections}\label{sec:onetomany}
+
+Early on in the implementation it was decided that there should be an internal mechanism for allowing one output port to drive multiple input ports. This is because using a Processor-based object would not be a particularly efficient implementation. For what is essentially a no-op, the processor framework is overkill. Hence two mechanisms, \textit{splitting} and \textit{sharing} were designed.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.5in]{figures/splitting.eps}
+\caption{Diagramatic representation for splitting an output.}
+\label{fig:splitting}
+\end{figure}
+
+\textit{Splitting} is the simplest and most flexible method of having the same data from and output port get to multiple input ports. It is detailed in figure \ref{fig:splitting}. An output port that has been split is in fact connected to an instance of a \texttt{Splitter}. This object acts as a \texttt{Source}, with the exception that it has multiple outputs. If the processor in question demands a \texttt{BufferData} object into which it may write for eventual tranfer (also known as a \textit{scratch}), the \texttt{BufferData} object given by the first connection is relayed. When the data is to be sent, it is first written out to each of the other connections before finally being sent on the first connection. This therefore requires only $n - 1$ copies of the data to be made, where n is the number of outputs, since it is written direcly into one copy.
+
+The copying is done using the fast system memcpy and as such gives very good performance. On copy-on-write operating systems like Linux, the data may never, in fact actually be copied, instead only redirected to the original. Because the splitting operation happens independent of any further connections, it provides a robust architecture and will work on all types of Connection-derived objects, both those implemented now and in the future.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5in]{figures/sharing.eps}
+\caption{Diagramatic representation for sharing an output.}
+\label{fig:sharing}
+\end{figure}
+
+Another method of solving the same problem was also devised, named \textit{sharing}, illustrated in figure \ref{fig:sharing}. Splitting requires duplicating all of the transferred data to each connection (or the OS feining it, at least); if there are perhaps five local connections, then data is copied needlessly into four separate buffers. Sharing is a mechanism that works only with local connections, where the transport buffer can be shared between all of them. The actual \texttt{Connection} class is broken down into two parts \texttt{LMConnection} and \texttt{MLConnection}, allowing multiple instances of the latter. The \texttt{Buffer} object is stored on the source side of the connection (\texttt{LMConnection}), and thus all destination ports read from a single \texttt{Buffer} object.
+
+This has the advantage of saving needless duplication at the cost of losing the flexibility to power multiple connection types. It is important to note that splitting merely provides a duplicating relay service and is not in itself a new Connection class, whereas the sharing mechanism is actually two new Connection-derived classes and thus mutually-exclusive with any other Connection-derived system.
+
+\subsection{Multiplicity}\label{sec:multiplicity}
+
+Multiplicity is a (currently experimental) subsystem for building networks locally that contain numerous duplications of objects. It allows multiple instantiations of identical objects to be created and connected automatically. Together with this it allows [Sub]Processor-derived classes to declare themselves as \textit{Multiplicative} meaning that they are able to take or provide a varying number of source/destination ports.
+
+A typical example of a multiplicative-input processor would be one for addition that is able to sum together values from any number of inputs. An example for multiplicative-output might be a splitting processor that is able to take a sample of values and split them into a number of portions. While the basic properties system allows processors to determine how many ports they will provide depending on a given parameter, the multiplicity subsystem provides a framework to have this determined automatically; if we initialise our multiplicative source processor with a multiplicity of three, and then connect the processor to our multiplicative sink processor, the multiplicity of three will be passed along to the sink automatically; if it has already been initialised with a different multiplicity, an error can be flagged. Figure \ref{fig:multisituation} illustrates this situation as part of a larger network.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.5in]{figures/multisituation.eps}
+\caption{General example of a situation that the multiplicity subsystem could represent. Here we require multiple identical instances of Spectral Transform, with each to be fed one of Split Spectrum's outputs. We then require the output of each Spectral Transform instance to be connected to an input of Addition. Multiplicity can address the tedious and repetative nature of creating this network.}
+\label{fig:multisituation}
+\end{figure}
+
+Processors inherit from the class \texttt{Multiplicative}, which defines the interface by which multiplicity can be determined and provides the necessary connection methods. A further class \texttt{MultiProcessor} was designed to fulfil the remaining feature of providing an automatic-sized array of multiple duplicate processors under one object. It too derives from \texttt{Multiplicative} and thus has an intrinsic multiplicity that can be determined either from the given properties or (potentially) from any connections made. However in this case the multiplicity is used to determine how many instances of the represented class are to be created and connected. Each such instance is unaware of its situation, and the array of connections are made automatically by the \texttt{MultiProcessor} parent object. Properties etc. are duplicated between siblings.
+
+In order to provide flexibility for creating both Processors and SubProcessors, as well as using the plugin factory for creation together with locally defined classes, four helper classes derived from the interface class \texttt{MultiProcessorCreator} are defined, each fulfilling a combination of the given modes. An instance of this can be passed to a \texttt{MultiProcessor} to allow it to create its children once multiplicity is determined.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=5.5in]{figures/multisolution.eps}
+\caption{The situation in figure \ref{fig:multisituation} using the Multiplicative subsystem. Notice only 4 connections and 5 objects need to be created explicitly now.}
+\label{fig:multisolution}
+\end{figure}
+
+Perhaps the most important design decision taken was to allow delayed initialisation. This was necessary in order to allow connection-wise propagation of multiplicity. Since the inputs and outputs must be determined at the initialisation stage, and for this to happen the multiplicity has to be defined, the initialisation stage may be deferred until the network is connected enough such that it can be determined properly. If the developer leaves no way to determine the multiplicity, then an error is flagged. Connections are not deferred and thus there are obscure situations where propagation problem can occur. This has not yet been addressed.
+
+\section{Is Exscalibar Different?}
+
+We review the concrete differences between the architecture of Exscalibar and that of the other similar software environments; \textit{CLAM}, \textit{Marsyas}, \textit{D2K}, \textit{Triana}, \textit{SAI}.
+
+\subsubsection{CLAM}
+
+\textit{CLAM} is probably the most similar environment in basic design to Exscalibar; their metamodel is almost identical, both are heavily modular and implemented in the same language. Both are designed to be utilised by other programs rather than used seperately, and the supplied graphical application for building networks is similar. These similarities are hardly surprising; both were designed at around the same time, in a similarly academic environment for processing data of a similar focus (i.e. music and audio).
+
+The two are far from identical however; their dissimilarities range from fundamental design deviations to basic implementation issues. \textit{CLAM} makes extensive use of C++ templates for its data types; Exscalibar concentrates less on templating, using inheritance and virtual methods to accomplish the same ends. With respect to processor implementation, \textit{CLAM} opts for an all-in-one approach, having a stateful, one-iteration at a time, manual communication, pull-based network. Exscalibar instead goes for a stateful, independent blocking approach to its processing components together with a seperate, simpler interface for stateless one-iteration at a time, implicit transfer based interface.
+
+Perhaps the biggest difference between the two is that \textit{CLAM} is not focussed on parallelism or distribution at all; this is one of Exscalibar's main tenets. Because of this, Exscalibar has thread-safe buffering, safe memory sharing and the plunger subsystem (necessary for synchronisation). It is not constrained to a pull-based system, the design allowing either pull or push, dependent upon usage scenario.
+
+Whereas Exscalibar is designed to process only signals, \textit{CLAM}'s model is less focused, covering symbolic forms of music such as MIDI; \textit{CLAM} also addresses synthesis, rather than just analysis, of audio. There is no obvious reason Geddei couldn't be used for synthesis, but this was not addressed in the design or implementation of Exscalibar.
+
+\subsubsection{Marsyas}
+
+The \textit{Marsyas} software perhaps shares the most design direction with Exscalibar. Both are focused mainly on the analysis of musical audio (though \textit{Marsyas} was originally supposed to be for the synthesis of audio too, this side of the sofwtare has since been ailing). The implementation of Geddei's data transfer system as a series of floating point values was inspired directly by \textit{Marsyas} (and designed so that the two would be able to interact easily). Both are frameworks (though \textit{Marsyas} is maturing slowly into a black-box framework it was originally more of a toolkit). Both are designed to be embedded into other applications to be used by them, and are programmed in the same language.
+
+In some manner they address partly the same problem; that of analysis and feature extraction of musical audio. The similarities in this case arise from both concern for compatibility and because of their similar ends.
+
+To call \textit{Marsyas} modular would be rather flattering. At the time of writing, the modularity was arguable; there was little seperation between processing components and core code; externally designed processing components were difficult to integrate with \textit{Marsyas} applications. Exscalibar is designed with modularity, and specifically, plugins to be a convenient form of extension.
+
+The initial scope of problem that \textit{Marayas} was deisgned for was rather lacking; linear dataflows where each component has precisely one input and output were implemented easiest; more complex network types were difficult to create, addressed by later modifications.
+
+\textit{Marsyas} has no support for implicit data parallelism, no standard buffering, and if there are to be used then extra complexity must be afforded in using them. No core executor makes programming networks inconvenient. The design of \textit{Marayas}'s processing components are more restrictive than those of Geddei; Geddei's SubProcessors are more similar to \textit{Marsyas}'s, though in Geddei's case they are stateless.
+
+\textit{Marsyas} was not originally designed with parallelisation as a major concern. Some changes were made to \textit{Marsyas} in order to allow distribution of a task accross multiple machines but the performance is seriously lacking, and the granularity of the parallelism is excessive. 
+
+The supplied graphical interface is very dissimilar; Marsyas's is essentially a basic taperecorder-style program, unlike Exscalibar's network designer. \textit{Marsyas} also addresses the aspect of machine learning, which was considered far out of scope in the design of Exscalibar.
+
+\subsubsection{D2K}
+
+\textit{D2K} which we use as an umbrella term to include the derivative \textit{M2K} project shares some mainly superficial aspects of its design with Exscalibar. Both have a similar graphical interface with the component/connection metaphor, though whereas Geddei Nite allows a built-in visualisation that taylors itself automatically to the data type of the connection to be tapped, \textit{D2K} requires a specific visualisation object type. Both have full support for parallelisation and distribution of the workload. Both are very modular, rather necessary in \textit{D2K}'s case since the core is closed source. Both have a similar component properties system, and both have a stateless component design allow for data-based parallelism.
+
+\textit{D2K} is implemented in \textit{Java}, making various implementation aspects rather different. Moreover, unlike Geddei, \textit{D2K} cannot be used for convenient embedding into a C or C++ based application.
+
+Both constitute a modular framework, though the API of each are rather different. \textit{D2K}'s processing components must be programmed to supply only a single token at once (any more and the scheduler is unreliable); Geddei utilises buffers as standard to get around this limitation. As such it is designed to be similar to a Dynamic Dataflow Network, rather than the Process Network/Synchronous Dataflow Network of Geddei. \textit{D2K}'s scheduler is heavily centralised unlike Geddei which (because of the blocking API and asynchronous data transfer) leaves the scheduling to the operating system(s).
+
+Both have a similar (static) properties system, though whereas \textit{D2K} uses Java-oriented introspection, Geddei utilises a Qt-oriented `variant' data type.
+
+In general, \textit{D2K} is design for complex, large scale machine learning problems. As such, fundamental design decisions taken such as the centralised scheduler and insistence on singleton data tokens make it unsuitable for realtime or interactive audio analysis.
+
+\subsubsection{Triana}
+
+\textit{Triana}, a system written in \textit{Java} is a Grid-based application to for generic data processing. It shares the basic process flow network design, though in Triana's case the network is more similar to a dataflow network. The graphical user interface is a network builder reminiscient of Geddei's network editor, Nite. Both are modular and plugin based and are able to distribute.
+
+The two frameworks differ quite widely in their proposed domain; \textit{Triana} is designed broadly for data processing, which we are to take includes not only audio signal processing but also graphics, text and numeric processing. As such there is no focus on realtime processing, or for embedding \textit{Triana} into other (possibly C or C++) applications for realtime analysis and interaction.
+
+Due to the focus onto batch style processing and distribution, \textit{Triana}'s parallelisation framework is `wholesale'. This involes the serialisation of the whole network and further duplication onto other machines in a similar style to that of \textit{Marsyas}. The data is then split for processing on each machine. This necessarily forces the processing components to be stateless (since otherwise the networks on each machine would not be independent). Comparatively, Geddei's parallelisation is more fine-grained, supporting data and pipeline parallelism, far more flexible, useful for smaller amounts of data and more suited to shared memory architectures where multi-threading is a more lightweight method of utilising hardware parallelism. Geddei can do a limited form of large scale distribution similar to \textit{Triana} (by combination of SubProcessors).
+

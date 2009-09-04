@@ -1,0 +1,101 @@
+1.0.5:
+Visibility aware.
+Configure script improved.
+
+1.0.4:
+More 64-bit awareness.
+C++-friendly headers.
+
+1.0.3:
+amd64 platform fixes.
+
+1.0.2:
+Sndfile was, until now, necessary for a good build.
+
+1.0.1:
+Some slight changes to make non-init error non-fatal.
+Minor API introduction: isInitFailed().
+Qt 3.3.5 workaround.
+GCC 4 Warning fixes.
+
+1.0.0:
+Some build fixes.
+
+0.99.3: (1.0pre3)
+Updated Player to include libvorbisfile and libmad for direct playback of MP3
+ and Ogg/Vorbis files.
+Various new Processors/SubProcessors.
+Some minor API additions.
+Combination SubProcessors allow multiple SubProcessors to be combined into one
+ composite.
+Bug fixes to the rGeddei subsystem.
+DomProcessor load balancing system updated and fixed.
+Sub/Dom buffer sizing and utilisation rewritten. Now typically faster and less
+ plagued by latency.
+
+0.99.2: (1.0pre2)
+Preliminary Jack support added.
+Updated configure script now uses package-cfg for autodetecting
+ packages.
+Exscalibar now has package config support.
+
+0.99.1: (1.0pre1)
+SignalTypePtr & SignalTypePtrs removed in favour of SignalTypeRef(s).
+Done to provide value-bsaed semantics throughout the API.
+Some further API documentation details.
+Updates to exinfo and tutorials.
+Some bug fixes in SubProcessor.
+
+0.99.0: (1.0pre0)
+Some API reorganisation to rGeddei (AbstractProc constructors).
+All 20 Tutorials done.
+Technical report (including tutorials) draft complete.
+Better documentation.
+New exinfo command.
+Some new Processors.
+Properties construction API changed.
+QSocketSession made better.
+BufferData performance improved.
+
+0.10.6:
+SC API addition to Processor - processorStarted().
+Allows better Recorder object - API addition waitUntilDone().
+Now have auto-inform working; Recorder-like classes very easy.
+First 11 tutorials done.
+Extra plunger on end of transfer now; autoignored due to auto-inform.
+Subtle timing bugs maqy still exist...
+doc/ subtree added.
+
+0.10.5:
+Major bug fixes to BufferReader, Buffer, Dom/Sub, *Coupling
+New Processor for recording data to csv.
+Some headway with GAT.
+Started grid functionality with nodecontroller.
+Minor API/documentation fixes.
+Some more tests.
+Some code cosmetic fixes.
+
+0.10.4:
+Added GAT test.
+Some (API compat) changes to Properties class.
+Updated build system.
+
+0.10.3:
+Added example, incremental.
+Verbosely commented and demonstrates basic use of Geddei, subclassing Processor
+objects and using them.
+
+0.10.2:
+Purged all Corba from rGeddei. Mico is no longer needed.
+Tweaked build settings.
+
+0.10.1:
+Public API documentation finished.
+Changed build settings to QTDIR based destinations.
+
+0.10.0:
+Some namespaces have been changed and the documentation is beginning to be
+completed.
+MultiProcessors have been implemented.
+Some slight API modifications.
+Major documentation updates.

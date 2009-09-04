@@ -1,0 +1,6 @@
+#ifdef __GEDDEI_BUILD
+#include "signaltypes.h"
+#else
+#include <geddei/signaltypes.h>
+#endif
+

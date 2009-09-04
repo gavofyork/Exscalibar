@@ -1,0 +1,1768 @@
+\section{Tutorial 1: Using Geddei: Basic Setup}
+
+Classes introduced:
+\begin{itemize}
+\item Processor
+\item ProcessorFactory
+\item Properties
+\end{itemize}
+
+In the first tutorial, we will just create a Geddei-based program, and get it compiled. The program will do just one thing - continuously generate a 1KHz tone for a second. It won't do anything with the tone, the generated data will be thrown away, and thus it is rather pointless.
+
+Before we start programming anything, let's take a look at the Exscalibar system. We have a useful tool at our hands now, the \texttt{exinfo} command. Simply open a shell and type \texttt{exinfo}:
+
+\begin{verbatim}
+$ exinfo
+Usage: exinfo <command> [options]
+Where <command> is one of:
+   list      List all *Processor plugins found.
+   version   Show version information and build configuration.
+   paths     List all paths used for searching plugins.
+\end{verbatim}
+
+Assuming you get a message similar to the one above, you have installed the Exscalibar system properly. If you don't you should go back to the installation procedure and double check you have everything installed correctly, especially the binary and library paths.
+
+Just for fun, we'll check the version of our Exscalibar install:
+
+\begin{verbatim}
+$ exinfo version
+Exscalibar version: 0.99.1
+Exscalibar built with features: fftw gat libsndfile alsa
+(as reported by Geddei)
+\end{verbatim}
+
+From my output we see I have installed version 0.99.1 with the full build configuration. To complete this tutorial you should have built Exscalibar with at least libsndfile installed. Now on to programming!
+
+We first create a new file, let's call it \texttt{tutorial1.cpp}. In our file the first thing we must do is declare that we are going to use Geddei. We do this by \texttt{\#include}ing the main Geddei header file:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+\end{verbatim}
+
+Since Geddei uses a C++ feature called namespaces to avoid name collisions, we must prefix \texttt{Geddei::} to any symbol in Geddei (i.e. all class names). This can be tedious. As a shortcut we can tell the compiler that we want it to look in Geddei's namespace automatically, by issuing the directive:
+
+\begin{verbatim}
+using namespace Geddei;
+\end{verbatim}
+
+Now we're ready to begin our program. We have to start our \texttt{main} function, but we won't be using any of our parameters this time, so we use:
+
+\begin{verbatim}
+int main(int, char **)
+{
+\end{verbatim}
+
+The first thing we need to do now is to make ourselves the \texttt{Processor} object. Specifically, we need an object to generate the tone (which will be in the form of a wave). Unsurprisingly we have a built-in class that do just that. It is called \texttt{WaveGen} and is contained inside a library used for signal processing which is accessible by the Geddei plugin system.
+
+The plugin system is based around a class \texttt{ProcessorFactory}. For creating new Processor objects, we can just use the static \texttt{create} method from \texttt{ProcessorFactory}. The factory allocates \texttt{Processor} objects dynamically on the heap, and thus they will not automatically be destructed at the end of the scope. Typically in C++ a pointer is used to refer to said objects:
+
+\begin{verbatim}
+// A possible way of doing things:
+// Processor *wavegen = ProcessorFactory::create("WaveGen");
+\end{verbatim}
+
+However, when accessing Processor objects individually, you may find it easier to use references to the objects rather than pointers. This is due to Geddei's considerable use of operator overloading to make the code more readable:
+
+\begin{verbatim}
+Processor &wavegen = *ProcessorFactory::create("WaveGen");
+\end{verbatim}
+
+Since this is the way most of the Geddei tests and examples are coded, this is the way the tutorial will go. Both forms are equally valid though.
+
+We must now initialise our component \texttt{Processor}s. This is done through the \texttt{init} method. This method has several forms but in its most basic it takes simply a (unique) name for the object. However, we wish to set a specific frequency for our generated wave, and so we require use of the \texttt{Properties} class. There are several ways to set the \texttt{Properties}, but we will use the most convenient:
+
+\begin{verbatim}
+wavegen.init("wavegen", Properties("Frequency", 1000));
+\end{verbatim}
+
+We can put any number of name/value pairs when constructing a \texttt{Properties} object. These are given two at a time, with each pair bracketed.
+
+Now we only have to start the \texttt{WaveGen} object and make sure all is well:
+
+\begin{verbatim}
+wavegen.go();
+\end{verbatim}
+
+Having started them we must make sure that all is well and that they are running correctly. Common problems are include unconnected inputs (all inputs in a network must be connected) or a problem with verifying the signal types. In this instance it is impossible, since there are no input ports or connections. Anyway, we'll check just in case! We use the \texttt{waitUntilGoing} method to make sure all is well:
+
+\begin{verbatim}
+if(wavegen.waitUntilGoing() != Processor::NoError) 
+    qFatal("Error starting wavegen!");
+\end{verbatim}
+
+Finally we wait for some condition. Typically this will be through either user input or automatically through a \texttt{waitUntilDone} call. Stream separators (\textbf{plungers}) can be used to make sure all data has been processed before stopping. Anyway, for this short example, we will just sleep for a second:
+
+\begin{verbatim}
+Geddei::sleep(1);
+\end{verbatim}
+
+Now we want to tidy up after ourselves (though usually Geddei will be able to untangle our mess, it's better practise for us to do it). The first thing we have to do is stop the processing:
+
+\begin{verbatim}
+wavegen.stop();
+\end{verbatim}
+
+Finally all that is left is to destroy our \texttt{WaveGen} object and leave the \texttt{main} function:
+
+\begin{verbatim}
+delete &wavegen;
+}
+\end{verbatim}
+
+Assuming that Geddei is installed to the default location under Qt, we may now compile the program with the command:
+
+\begin{verbatim}
+g++ tutorial1.cpp -o tutorial1 -lgeddei -I$QTDIR/include \
+-L$QTDIR/lib -DQT_THREAD_SUPPORT
+\end{verbatim}
+
+If you installed Geddei elsewhere, be sure to add an extra \texttt{-I} and \texttt{-L} to help the compiler find the include files and libraries. If your \texttt{EXSCALIBAR\_LOCATION} environment variable is set correctly, then simply using the following should also work fine:
+
+\begin{verbatim}
+g++ tutorial1.cpp -o tutorial1 -lgeddei -I$QTDIR/include \
+-I$EXSCALIBAR_LOCATION/lib -I$EXSCALIBAR_LOCATION/include \
+-L$QTDIR/lib -DQT_THREAD_SUPPORT
+\end{verbatim}
+
+Sadly, as of version 3.3 of Qt, we need to \texttt{QT\_THREAD\_SUPPORT} defined for Geddei to work correctly (though this may change with version 4). If all goes well, you'll have an executable named \texttt{tutorial1}. When running, it will appear to wait for a second and then exit. For that second you may rest assured that Geddei is working behind the scenes generating and transforming a 1KHz wave!
+
+
+
+
+\section{Tutorial 2: Connections and SubProcessors}
+
+Classes introduced:
+\begin{itemize}
+\item SubProcessor
+\item SubProcessorFactory
+\item ProcessorPort
+\end{itemize}
+
+In this tutorial, we will simply create a program that calculates the Fourier transform of a 1KHz tone. Rather pointless, I am sure you will agree, however it will be used to demonstrate the basics of setting up and using a Geddei system.
+
+Let's start a new file \texttt{tutorial2.cpp}. We set up the file similarly to tutorial 1:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+int main(int, char **)
+{
+\end{verbatim}
+
+Now we have to make ourselves some \texttt{Processor} objects. Specifically, we need an object to generate the tone (in the form of a wave), and we need an object to calculate a Fourier transform on such a waveform. We already used \texttt{WaveGen}, and our signal processing library provides \texttt{FFT}, which does the transform. \texttt{WaveGen} is a \texttt{Processor}-derived class, whereas \texttt{FFT} is derived from the simpler \texttt{SubProcessor} class, and thus must be encapsulated in a \texttt{DomProcessor} object.
+
+\texttt{SubProcessor}s are simpler than \texttt{Processor}s, since they do now allow the developer as much freedom with their implementation. You will likely find most components will be \texttt{SubProcessor}-derived classes since they are easier and more effective and scalable. However some concepts can only be implemented in a \texttt{Processor}-based class, mainly those that require a stateful implementation, which are often the source and sink classes.
+
+Since the \texttt{ProcessorFactory} class only applies to creating instances of \texttt{Processor}, we have to use a different class to create instances of \texttt{SubProcessor}s. This is called \texttt{SubProcessorFactory}. For creating new \texttt{Processor}-derived objects from a \texttt{SubProcessorFactory} we must use \texttt{createDom} instead of \texttt{create} (which creates \texttt{SubProcessor}-derived objects instead). The \texttt{DomProcessor} class is derived from the \texttt{Processor} class and may be used in exactly the same way. We end up with:
+
+\begin{verbatim}
+Processor &wavegen = *ProcessorFactory::create("WaveGen");
+DomProcessor &fft = *SubProcessorFactory::createDom("FFT");
+\end{verbatim}
+
+Before we can start setting up our (two node!) dataflow network, we must first initialise our network's components, the \texttt{Processor}s. We set up just like in tutorial 1. Our \texttt{FFT} takes two properties, the number of samples it should use in each time frame-window (\textit{size}), and the number of samples it should skip between successive windows (\textit{step}).
+
+\begin{verbatim}
+wavegen.init("wavegen", Properties("Frequency", 1000));
+fft.init("fft", Properties("Size", 512)("Step", 256));
+\end{verbatim}
+
+With the \texttt{Processor} objects initialised (and thus ready to go), we just need to connect up our dataflow network. We only wish to make one connection; i.e. from \textbf{wavegen} to \textbf{fft}. All \texttt{Processor} objects have ports, and we use them to determine how our objects shall be connected. They, like any array in C++, begin at zero and increase. The connection can be made by using the \texttt{Processor::connect} method directly, thus:
+
+\begin{verbatim}
+// One way of connecting:
+// wavegen.connect(0, &fft, 0);
+\end{verbatim}
+
+However, this doesn't read very well. By subscripting a \texttt{Processor} class, we get access to the \texttt{ProcessorPort} object. We never actually store it, we only use it for its method and operators which make connecting \texttt{Processor}s easy. Here are two equally valid ways of using a \texttt{ProcessorPort} object. The first uses the operator overload (the preferred way for internal development), the second uses the named method:
+
+\begin{verbatim}
+wavegen[0] >>= fft[0];
+// This is equivalent to:
+// wavegen[0].connect(fft[0]);
+\end{verbatim}
+
+If the line could talk, it would say: ``Connect output port 0 of wavegen to input port 0 of fft, please.''
+
+Now we only have to start the \texttt{Processor} objects and make sure all is well, as we did in tutorial 1:
+
+\begin{verbatim}
+wavegen.go();
+fft.go();
+
+if(wavegen.waitUntilGoing() != Processor::NoError) 
+    qFatal("Error starting wavegen!");
+if(fft.waitUntilGoing() != Processor::NoError)
+    qFatal("Error starting fft!");
+\end{verbatim}
+
+Having waited for a second, we stop both of our \texttt{Processor}s and disconnect them. We do this in terms of output connections, so rather than saying ``disconnect input 0 of fft'', we say ``disconnect output 0 of wavegen''):
+
+\begin{verbatim}
+Geddei::sleep(1);
+
+fft.stop();
+wavegen.stop();
+
+wavegen[0]--;
+// This is equivalent to:
+// wavegen[0].disconnect();
+// or:
+// wavegen.disconnect(0);
+\end{verbatim}
+
+We then delete our \texttt{Processor} objects before we exit. The \texttt{SubProcessor} object we created was adopted by the \texttt{DomProcessor}, and so when we delete the \texttt{fft}, our anonymous \texttt{SubProcessor} object will also be destroyed.
+
+\begin{verbatim}
+delete &fft;
+delete &wavegen;
+}
+\end{verbatim}
+
+As with to tutorial 1, we may compile the file with:
+
+\begin{verbatim}
+g++ tutorial2.cpp -o tutorial2 -lgeddei -I$QTDIR/include \
+-I$EXSCALIBAR_LOCATION/lib -I$EXSCALIBAR_LOCATION/include \
+-L$QTDIR/lib -DQT_THREAD_SUPPORT
+\end{verbatim}
+
+
+
+
+\section{Tutorial 3: Working with Groups}
+
+Classes introduced:
+\begin{itemize}
+\item ProcessorGroup
+\end{itemize}
+
+While we only have two \texttt{Processor} objects, the management overhead for them (i.e. starting, checking, stopping, deleting) is minimal. However as we create more complex dataflow networks it becomes tiresome and clunky to manage them individually. For some (non-individualistic) operations, we wish to be able to call all of our objects at once. The \texttt{ProcessorGroup} class was created to do just this.
+
+The \texttt{ProcessorGroup} class provides a storage and referencing space for \texttt{Processor} objects. They may be added and removed from a \texttt{ProcessorGroup} and operations may be performed on the group as a whole.
+
+We start with our basic file, as in the previous examples:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+int main(int, char **)
+{
+\end{verbatim}
+
+This time, we won't be using references, since \texttt{ProcessorGroup} provides the naming functionality for us. We could still use them but our code is more lightweight without. Before we can create and initialise our objects, we have to create a group. Let's give it a short name. `g' will do:
+
+\begin{verbatim}
+ProcessorGroup g;
+\end{verbatim}
+
+Now we have to create our group members. As we are using anonymous (i.e. without a variable) \texttt{Processor} objects, we must initialise them on the same line as we create them. We use a slightly larger form of the \texttt{init} method in order to specify the \texttt{ProcessorGroup}. The \texttt{Properties} remain unchanged from tutorial 2:
+
+\begin{verbatim}
+ProcessorFactory::create("WaveGen")->
+    init("wavegen", g, Properties("Frequency", 1000));
+SubProcessorFactory::createDom("FFT")->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+\end{verbatim}
+
+Notice the 2nd argument is now \texttt{g}, to specify the \texttt{ProcessorGroup}. We may now reference each \texttt{Processor} object directly by subscripting from \texttt{g}.
+
+The connection happens as before, but now we will use our new way of referencing:
+
+\begin{verbatim}
+g["wavegen"][0] >>= g["fft"][0];
+\end{verbatim}
+
+Now we have to set off our \texttt{Processor}s. All \texttt{Processor}s have to be started with \texttt{go()} before we can call \texttt{waitUntilGoing()} on them and so they cannot be rolled into one method in the \texttt{Processor} class. However since \texttt{ProcessorGroup} commands all such objects this is possible. Therefore we can start all \texttt{Processor} objects \textbf{and} wait until they are running with only one command:
+
+\begin{verbatim}
+if(!g.go(true))
+    qFatal("Error starting processors!");
+\end{verbatim}
+
+The argument \texttt{true} given to \texttt{go} is necessary for it to wait until all is well (or has failed with an error). Without it, it will merely `prime' all objects to begin, but not actually wait for the network as a whole to start running.
+
+We wait for a second as before and then shutdown:
+
+\begin{verbatim}
+Geddei::sleep(1);
+\end{verbatim} 
+
+The shutdown takes the steps as before of stop, disconnect and delete. Now we have all our \texttt{Processor}s in a group though, we can call do everything in only three lines:
+
+\begin{verbatim}
+g.stop();
+g.disconnectAll();
+g.deleteAll();
+\end{verbatim} 
+
+And that's it! Exactly the same behaviour as tutorial 2, but in less than two-thirds of the lines, and the code savings as the number of \texttt{Processor}s goes up only increases.
+
+
+
+
+\section{Tutorial 4: Subclassing Processor}
+
+Classes introduced:
+\begin{itemize}
+\item xLConnection
+\item BufferData
+\item SignalTypeRef
+\item SignalTypeRefs
+\item Spectrum
+\end{itemize}
+
+The time has come to add a class that actually tells us something. We're going to use the FFT, which is streaming out spectra, and carry out a very basic operation on it to find to find the band of the highest magnitude and print off the respective frequency, which theoretically should be 1000Hz.
+
+The first thing we have to do is include all necessary files. As we are building a new type of \texttt{Processor}, we'll need to be able to use signal types directly, so:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+#include <geddei/signaltypes.h>
+using namespace SignalTypes;
+\end{verbatim}
+
+Next, we will be declaring, defining and implementing our brand new \texttt{Processor}-based class. This class will sink exactly one channel of input and so it will have only one input port, and no output ports. On that port it will insist that it only receives \texttt{Spectrum}-based data. For each such sample coming down the connection, it will search for the highest band and print out an informative remark. Simple.
+
+We defined the behaviour of this object in three sentences. Geddei provides three mandatory overridable methods to define the behaviour of the \texttt{Processor} object. As you will soon see, each of method represents exactly one of those sentences.
+
+Before any of the definitions may begin, we have to start our class declaration. As we already noted we will be deriving from \texttt{Processor}. Let's call our new object `PrintModeFrequency', since that's what we're trying to get it to do:
+
+\begin{verbatim}
+class PrintModeFrequency: public Processor
+{
+\end{verbatim}
+
+First sentence: ``it will have only one input port, and no output ports''. We define this behaviour in the virtual method \texttt{initFromProperties}. As the name suggests this method is used to initialise the object once the \texttt{Properties} are known. The \texttt{Properties} for the object are given as a parameter for the method, but we won't be using them here, so we leave the parameter anonymous. The protected method \texttt{setupIO} is used to determine the number of ports on the \texttt{Processor} object. It must be called somewhere inside \texttt{initFromProperties} or Geddei will complain at you. We want only 1 input and 0 outputs, so we call it with the parameters \texttt{1, 0}:
+
+\begin{verbatim}
+virtual void initFromProperties(const Properties &)
+{
+    setupIO(1, 0);
+}
+\end{verbatim} 
+
+Second sentence: ``it will insist that it only receives \texttt{Spectrum}-based data''. Geddei provides the method \texttt{verifyAndSpecifyTypes} for overloading to not only define what its output types are but also to verify that the types given to it as inputs are valid. In the case of not being valid it may return false. As we wish to insist that we only receive data of type \texttt{Spectrum} down our input port, we must return false if that type is not derived from \texttt{Spectrum}. The types are provided in a special class, called \texttt{SignalTypeRef}. It has a special method called \texttt{isA()}, which allows you to check if the SignalType is a particular class:
+
+\begin{verbatim}
+virtual const bool verifyAndSpecifyTypes(
+    const SignalTypeRefs &inTypes, SignalTypeRefs &)
+{
+    if(!inTypes[0].isA<Spectrum>()) return false;
+    return true;
+}
+\end{verbatim}
+
+Notice that we are given a type of \texttt{const SignalTypeRefs} as input. \texttt{SignalTypeRefs} is an array-like class that contains \texttt{SignalTypeRef} objects.
+
+Last sentence: ``For each such sample coming down the connection, it will search for the highest band and print out an informative remark''. We define how the \texttt{Processor} acts with the innocuous and eponymous method \texttt{processor()}:
+
+\begin{verbatim}
+virtual void processor()
+{
+\end{verbatim}
+
+Inside this method you're pretty much given a free reign. We will be using only the \texttt{input()} method, since that provides us with the means of reading from our input port, however there are many more such \texttt{protected} methods to use. In this \texttt{Processor} class we don't actually care about exiting before we are told to \texttt{stop()}, and thus we will just keep doing the same thing forever (in some situations exitting prematurely is very useful):
+
+\begin{verbatim}
+while(true)
+{
+\end{verbatim}
+
+Notice that we can be rash and introduce an ``infinite'' loop, assuming that the only thing in the world that is important is our job. Geddei sees to it that when the time has come this loop will exit in a controlled manner, completely transparent to us.
+
+Let's break down the sentence into clauses. The first clause would be ``For each such sample coming down the connection''. We may use the \texttt{xLConnection} object to read a sample---to get a reference to this object, we can just use the protected \texttt{input()} method, which will return the connection at the input port of the given index. The method to read a sample from an xLConnection is, surprisingly, \texttt{readSample()}. We are returned a BufferData object, which we may use like an array allocated on the stack. As it is a read operation, the object will be const:
+
+\begin{verbatim}
+const BufferData d = input(0).readSample();
+\end{verbatim}
+
+The next clause is ``it will search for the highest band'' and so we have to search for the greatest band in this data chunk that represents a spectrum. This simply means finding the index of the \texttt{BufferData} object which contains the greatest value. We could determine how large the spectrum is from the signal type, as given by the connection. However, a more convenient way is simply to check how many values (elements) are in the given \texttt{BufferData} object, which is \textbf{guaranteed} to be exactly one sample's worth, and thus one spectrum's worth.
+
+\begin{verbatim}
+uint maxBand = 0;
+for(uint i = 1; i < d.elements(); i++)
+    if(d[i] > d[maxBand]) maxBand = i;
+\end{verbatim}
+
+Finally we have to determine the frequency that this band represents in this type of spectrum, as the last clause says ``print out an informative remark''. We have a useful method in the \texttt{Spectrum} class that does just this, \texttt{bandFrequency()}. \texttt{type()} returns an instance of our old friend  \texttt{SignalTypeRef} from which we can get a \texttt{Spectrum} object with the \texttt{asA()} method (this is only safe since we already determined that it is a \texttt{Spectrum} in \texttt{verifyAndSpecifyTypes}):
+
+\begin{verbatim}
+qDebug("Mode frequency: %fHz",
+    input(0).type().asA<Spectrum>().bandFrequency(maxBand));
+\end{verbatim}
+
+That's it - all that is left is to exit the loop and finish the declaration of the method:
+
+\begin{verbatim}
+}
+}
+\end{verbatim}
+
+Finally, the class declaration must be completed. We do this by providing a constructor, which must use the \texttt{Processor} object's constructor and provide its class name. No other construction code is necessary.
+
+\begin{verbatim}
+public:
+PrintModeFrequency(): Processor("PrintModeFrequency") {}
+};
+\end{verbatim}
+
+And that's our new \texttt{Processor} class defined, declared and implemented inline. All that is left is to instantiate an instance and connect it up to the network. We begin as before:
+
+\begin{verbatim}
+int main(int, char **)
+{
+ProcessorGroup g;
+
+ProcessorFactory::create("WaveGen")->
+    init("wavegen", g, Properties("Frequency", 1000));
+SubProcessorFactory::createDom("FFT")->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+\end{verbatim}
+
+But this time, we want our \texttt{PrintModeFrequency} class instantiating too. As it is not yet part of the plugin system, we will just use the C++ \texttt{new} operator. This could be done like:
+
+\begin{verbatim}
+// One way of doing it...
+// PrintModeFrequency *printmodefrequency
+//     = new PrintModeFrequency;
+// printmodefrequency->init("printmodefrequency", g);
+\end{verbatim} 
+
+But that's wasteful, since we will never again use the \texttt{printmodefrequency} variable. The typical way of doing it in Geddei is anonymously as with the other two factory-created \texttt{Processor} objects:
+
+\begin{verbatim}
+(new PrintModeFrequency)->init("printmodefrequency", g);
+\end{verbatim}
+
+Now to connect the network up. This time we want to connect the output of the \texttt{FFT} object to the input of the \texttt{PrintModeFrequency} object, too:
+
+\begin{verbatim}
+g["wavegen"][0] >>= g["fft"][0];
+g["fft"][0] >>= g["printmodefrequency"][0];
+\end{verbatim}
+
+The rest is as before, since we're using \texttt{ProcessorGroup}!
+
+\begin{verbatim}
+if(!g.go(true))
+    qFatal("Error starting processors!");
+
+Geddei::sleep(1);
+
+g.stop();
+g.disconnectAll();
+g.deleteAll();
+}
+\end{verbatim}
+
+Running it will cause it to print out some mode frequencies, which will all be (roughly) the same \footnote{Any discrepancies are due to either FFT implementation issues (approximation may be used), or from sampling errors due to the wave frequency being indivisible by the sampling frequency}:
+
+\begin{verbatim}
+Mode frequency: 990.527344Hz
+Mode frequency: 1033.593750Hz
+Mode frequency: 1033.593750Hz
+Mode frequency: 990.527344Hz
+Mode frequency: 1033.593750Hz
+...
+\end{verbatim}
+
+As you can see the values reported are around the 1KHz mark, as we would expect.
+
+
+
+
+\section{Tutorial 5: Subclassing SubProcessor}
+
+Classes introduced:
+\begin{itemize}
+\item BufferDatas
+\item Value
+\end{itemize}
+
+This time, we will be building upon what we achieved in tutorial 4. What we will do is divide the job done by \texttt{PrintModeFrequency} into two separate classes: \texttt{ModeFrequency}, whose job it will be to actually find the mode frequency in each spectrum, and \texttt{Print}, who will simply output any frequency values passed to it.
+
+The mode frequency ``task'' conforms to a real mathematical transform, i.e. there is one and only one correct output for a given input, and that output is wholly dependent upon that input and on no other. Because of this, we can instead relegate the job to a much simpler \texttt{SubProcessor}-derived object. This has two main advantages; ease and efficiency. It is easier for the programmer to define, since there is less freedom. It is more efficient because Geddei knows more about the function in its own terms, and can do certain tricks to make it execute faster.
+
+We will begin by converting \texttt{PrintModeFrequency} to a \texttt{SubProcessor} architecture. The includes stay the same, however the class declaration changes accordingly:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+#include <geddei/signaltypes.h>
+using namespace SignalTypes;
+
+class ModeFrequency: public SubProcessor
+{
+\end{verbatim}
+
+\texttt{initFromProperties} method does much the same in SubProcessor, but setupIO is slightly different; five values are now passed. The first two are the same as before, the number of input ports and the number of outputs, which are now both 1, since we will be outputing data also. The third argument determines how many samples need to be seen (from each input connection) for one transformation. We require only 1. The second determines how many samples are actually discarded from that read. It is typically the same as argument 3, but may be less than it if we wish to reuse a portion of the input each time. Obviously it must be greater than zero, or it would never discard any input and the same input data would be used indefinitely. We therefore have no option and discard our single sample. The last argument details how many samples are output per transformation. We wish to pass a single sample on.
+
+\begin{verbatim}
+virtual void initFromProperties(const Properties &)
+{
+    setupIO(1, 1, 1, 1, 1);
+}
+\end{verbatim}
+
+\texttt{verifyAndSpecifyTypes()} is similar to before, except that we are now outputing data and so must setup the type that we will be outputting. Since there is no Geddei signal type that means ``a value of a frequency'', we will simply use the type \texttt{Value}, which means ``a single value of an undefined meaning''. Since we never have direct access to the ports or the connections, we have to save a copy of the input type now for later.
+
+\begin{verbatim}
+virtual const bool verifyAndSpecifyTypes(
+    const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+{
+    if(!inTypes[0].isA<Spectrum>()) return false;
+    theSpectrum = inTypes[0].asA<Spectrum>();
+    outTypes[0] = Value(theSpectrum.frequency());
+    return true;
+}
+\end{verbatim}
+
+Notice that the sampling frequency of the input propagates to the output by including it in the \texttt{Value}'s constructor. Also notice that outTypes is preset to be exactly as large as is needed.
+
+Finally we have to convert the \texttt{processor()} method. Since this is a \texttt{SubProcessor} we only need to define what should happen in one iteration, and thus we are given an overloadable method that provides us with all our input data (pre-read) and preallocated space for putting our output data: \texttt{processChunk()}.
+
+\begin{verbatim}
+virtual void processChunk(const BufferDatas &in, BufferDatas &out)
+{
+\end{verbatim}
+
+The input and output data comes in the form of \texttt{BufferDatas}, another array-like class that is subscriptable. The first parameter, \texttt{in}, is \texttt{const}, so we can only read any of the \texttt{BufferData} objects is contains. The second parameter, \texttt{out}, isn't \texttt{const}, so we can write to it. We should consider it empty, but exactly the right size (according to our initial \texttt{setupIO()} call) for our output data. Subscripting it provides each of the \texttt{BufferData} objects for our input/output port connections correspondingly. We will only ever subscript to zero, since we only have one input port and one output port.
+
+\begin{verbatim}
+uint maxBand = 0;
+for(uint i = 1; i < in[0].elements(); i++)
+    if(in[0][i] > in[0][maxBand]) maxBand = i;
+out[0][0] = theSpectrum.bandFrequency(maxBand);
+\end{verbatim}
+
+Notice that aside from getting rid of the \texttt{while(true)} loop, and the \texttt{readSample()} call, it is remarkably similar to the pervious version. All we had to do was replace the \texttt{BufferData} instance \texttt{d} for \texttt{in[0]}, and set \texttt{out[0][0]} to the frequency rather than printing it with \texttt{qDebug}.
+
+Now we have to declare/define/implement the \texttt{Print} processor. We will implement this as a standard \texttt{Processor}, since it takes the form of a sink (no output ports), and thus is unsuitable for a \texttt{SubProcessor}. We start with the basic definition, and as before we setup the I/O with zero output ports and one input:
+
+\begin{verbatim}
+class Print: public Processor
+{
+virtual void initFromProperties(const Properties &)
+{
+    setupIO(1, 0);
+}
+\end{verbatim}
+
+Now we have to verify the input types. We have no outputs, so we don't have to specify anything. All we do here is to make sure that the input signal type is a \texttt{Value} (-based) type:
+
+\begin{verbatim}
+virtual const bool verifyAndSpecifyTypes(
+    const SignalTypeRefs &inTypes, SignalTypeRefs &)
+{
+    if(!inTypes[0].isA<Value>()) return false;
+    return true;
+}
+\end{verbatim}
+
+With the types confirmed, we have to define the \texttt{processor()} method, which will just print off each \texttt{Value} it receives. As our frequency is otherwise anonymous we will also print off the name of the \texttt{Processor} object:
+
+\begin{verbatim}
+virtual void processor()
+{
+    while(true)
+    {
+        const BufferData d = input(0).readSample();
+        qDebug("%s: Got frequency: %fHz", name().latin1(), d[0]);
+    }
+}
+\end{verbatim}
+
+This could be written equally well as:
+
+\begin{verbatim}
+//virtual void processor()
+//{
+//    while(true)
+//        qDebug("%s: Got frequency: %fHz", name().latin1(),
+//            input(0).readSample()[0]);
+//}
+\end{verbatim}
+
+It just depends on how compact you like your code. Finally, we finish off the class, as usual:
+
+\begin{verbatim}
+public:
+Print(): Processor("Print") {}
+};
+\end{verbatim}
+
+Our main function is just the same as before, with the exception that there is an extra \texttt{SubProcessor}-based object in before the end of the network. Therefore there is an extra object to create and \texttt{init()}, and an extra object to connect:
+
+\begin{verbatim}
+int main(int, char **)
+{
+    ProcessorGroup g;
+
+    ProcessorFactory::create("WaveGen")->
+        init("wavegen", g, Properties("Frequency", 1000));
+    SubProcessorFactory::createDom("FFT")->
+        init("fft", g, Properties("Size", 512)("Step", 256));
+    (new DomProcessor(new ModeFrequency))->init("modefrequency", g);
+    (new Print)->init("print", g);
+
+    g["wavegen"][0] >>= g["fft"][0];
+    g["fft"][0] >>= g["modefrequency"][0];
+    g["modefrequency"][0] >>= g["print"][0];
+
+    if(!g.go(true))
+        qFatal("Error starting processors!");
+
+    Geddei::sleep(1);
+
+    g.stop();
+    g.disconnectAll();
+    g.deleteAll();
+}
+\end{verbatim}
+
+That's it! Now we have created a custom derivations of both SubProcessor and Processor, and we have used them in the network. The program may be compiled as before, and running it will produce:
+
+\begin{verbatim}
+Got frequency: 990.527344Hz
+Got frequency: 990.527344Hz
+Got frequency: 1033.593750Hz
+Got frequency: 990.527344Hz
+Got frequency: 1033.593750Hz
+Got frequency: 1033.593750Hz
+...
+\end{verbatim}
+
+
+
+
+\section{Tutorial 6: The Power of Plungers}
+
+Now we introduce the concept of the \textit{plunger}. The best way to think about a plunger is to imagine you are in a supermarket checkout. There is a long stream of items to be checked out, and often these items are for different customers. So how do we know when Alice's stream of items stops and Bob's items start? Naturally we use separators, which notify the cashier of the end of the section of items.
+
+In Geddei we have a similar mechanism, only we call the separator a \textit{plunger}. This is due to the fact that when a plunger is detected in the stream samples may have to be discarded and we say the stream is \textit{plunged}. You need not worry about any samples being discarded - it will only happen if absolutely necessary.\footnote{e.g. suppose there are only 5 samples left before a plunger and we have been asked to read 6 samples. The operation cannot now continue until the stream is plunged, so the next 5 are discarded, the plunger acted upon and the next 6 are returned.} Plungers automatically propagate between connected \texttt{Processor}s, and, generally, if you leave them alone you need not even notice them. In fact there have been plungers in the stream we have been processing, but as they are inert unless explicitly interacted with, we have seen no sign of them. Now we will actually use them!
+
+Printing out every mode frequency from every FFT window analysed is quite rash. A more controlled manner of execute might be to print out, say, an average of all mode frequencies over the (signal time of) a second. We could do that by reading a whole second's worth of samples and taking the average over that huge array; this would be a valid if slightly clunky way of solving the problem - the amount of buffer memory needed would be larger than we might want. We will go over another, more powerful  way of doing it without the need to read in a whole second at once.
+
+We will use the stream plungers to determine spaces in the stream exactly a second apart (much like a supermarket checkout's separators might be 1 metre apart). We keep a running total of frequency and samples, and print the average frequency when we get a plunger (which should be every second's worth of signal data). This way we only need to read one sample at once. As luck would have it, the \texttt{WaveGen} class sends a plunger every second by default (this can be configured). Therefore, the includes and \texttt{ModeFrequency} class and most of the \texttt{main} function remain the same as in tutorial 5. We will discard the Print class, and introduce a new \texttt{PrintAverage} class, which has the same interface as \texttt{Print}:
+
+\begin{verbatim}
+class PrintAverage: public Processor
+{
+virtual void initFromProperties(const Properties &)
+{
+    setupIO(1, 0);
+}
+virtual const bool verifyAndSpecifyTypes(
+    const SignalTypeRefs &inTypes, SignalTypeRefs &)
+{
+    const Value *inType = dynamic_cast<const Value *>(inTypes[0]);
+    if(inType == 0) return false;
+    return true;
+}
+\end{verbatim}
+
+Now we need two internal variables to denote the current sum of frequencies and the number of frequencies used to make that sum. We will call these \texttt{sum} and \texttt{count}, respectively:
+
+\begin{verbatim}
+float sum;
+uint count;
+\end{verbatim}
+
+Now all our main \texttt{processor()} loop must do is keep these up to date. For every sample read, we add it to \texttt{sum} and increment \texttt{count}:
+
+\begin{verbatim}
+virtual void processor()
+{
+    sum = 0.;
+    count = 0;
+    while(true)
+    {
+        sum += input(0).readSample()[0];
+        count++;
+    }
+}
+\end{verbatim}
+
+Every time we receive a plunger, we want to print out the average and then reset \texttt{sum} and \texttt{count}. We use the virtual method \texttt{receivedPlunger()}:
+
+\begin{verbatim}
+virtual void receivedPlunger()
+{
+    qDebug("%s: Average frequency %fHz (from %d samples)",
+        name().latin1(), sum / count, count);
+    count = 0;
+    sum = 0.;
+}
+\end{verbatim}
+
+Since \texttt{receivedPlunger()} will only ever execute while another of \texttt{Processor}'s methods is blocking, we don't have to worry about any race conditions with the two counters. Finally we have to finish off the class:
+
+\begin{verbatim}
+public:
+PrintAverage(): Processor("PrintAverage") {}
+};
+\end{verbatim}
+
+The only change to the \texttt{main} function from tutorial 5 is the use of the \texttt{PrintAverage} class over the old \texttt{Print} class:
+
+\begin{verbatim}
+//(new Print)->init("print", g);
+// ... is changed to ...
+(new PrintAverage)->init("printaverage", g);
+// and
+//g["modefrequency"][0] >>= g["print"][0];
+// ... is changed to ...
+g["modefrequency"][0] >>= g["printaverage"][0];
+\end{verbatim}
+
+When this is compiled (as usual) and run you will find it repeatedly outputs:
+
+\begin{verbatim}
+Average frequency 1012.314338Hz (from 85 samples)
+\end{verbatim}
+
+So every second of signal time, 85 ($= \lfloor22050 / 256\rfloor$, the sampling rate of our tone / the number of samples between successive FFTs) samples worth of frequencies are averaged, and answer being about 1000Hz---just what it should be.
+
+
+
+
+\section{Tutorial 7: Stopping}
+
+Waiting for a second to get as much through as possible is a rather ugly hack that we introduced in the first tutorial because we didn't know any better. It would be much better to be able to say ``please wait until all the data I want to process it processed''. This tutorial presents one way of saying just that; we will wait until 10 seconds worth of signal data has been processed then stop all the \texttt{Processor} objects and exit.
+
+Half of the magic will be inside \texttt{PrintAverage}, which is just going to count 10 plungers and then exit its main loop. The other half will be in main, where instead of \texttt{Geddei::sleep()}ing for a second, we will wait until \texttt{PrintAverage} has exited its main loop: Easy. First of all we have to set up the counting mechanism in \texttt{PrintAverage}. This is done just by adding an extra unsigned int. Let's call it \texttt{plungers}:
+
+\begin{verbatim}
+class PrintAverage: public Processor
+{
+virtual void initFromProperties(const Properties &)
+{
+    setupIO(1, 0);
+}
+virtual const bool verifyAndSpecifyTypes(
+    const SignalTypeRefs &inTypes, SignalTypeRefs &)
+{
+    if(!inTypes[0].isA<Value>()) return false;
+    return true;
+}
+float sum;
+uint count, plungers;
+\end{verbatim}
+
+Next we want to exit the \texttt{processor()} loop when we have 10 plungers, or we want to stay in it only while we have less than 10 plungers:
+
+\begin{verbatim}
+virtual void processor()
+{
+    sum = 0.;
+    count = 0;
+    plungers = 0;
+    while(plungers < 10)
+    {
+        sum += input(0).readSample()[0];
+        count++;
+    }
+}
+\end{verbatim}
+
+Now, we have to increment the \texttt{plungers} counter every time we receive a plunger:
+
+\begin{verbatim}
+virtual void receivedPlunger()
+{
+    qDebug("%s: Average frequency %fHz (from %d samples)",
+        name().latin1(), sum / count, count);
+    count = 0;
+    sum = 0.;
+    plungers++;
+}
+\end{verbatim}
+
+Because this new class is one which will exit of its own accord we call it a \textit{Guarded} \texttt{Processor}. As such we give it a little attribute to denote its extra talent over other such classes: This is done in the constructor thus:
+
+\begin{verbatim}
+public:
+PrintAverage(): Processor("PrintAverage", NotMulti, Guarded) {}
+};
+\end{verbatim}
+
+The extra NotMulti is the default second argument, which refers to an experimental ability called \textit{Multiplicity}. We don't care about this at the moment.
+
+With the new \texttt{PrintAverage} coded up, we just have to change the \texttt{main()} function so it only waits until \texttt{PrintAverage} has done its processing. The method \texttt{waitUntilDone()} is used for this purpose, so we change \texttt{Geddei::sleep(1)} accordingly:
+
+\begin{verbatim}
+//Geddei::sleep(1);
+// ... is changed to ...
+g["printaverage"].waitUntilDone();
+\end{verbatim} 
+
+When the program is compiled and run, we will see:
+
+\begin{verbatim}
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+\end{verbatim}
+
+
+
+
+\section{Tutorial 8: Specifying Properties}
+
+Suppose we're not sure that we want 10 such frequency averages: Suppose instead we want to make that configurable from within the \texttt{main()} function. In this we could provide a parameter to the constructor of the object, but this will not work if the constructor is not directly visible (i.e. if the class is factory-based). So how are we to pass parameters across in the general case? As I'm sure you will have guessed the \texttt{Properties} object is for just that purpose.
+
+We have already seen how properties may be set and passed into the object by \texttt{init}, and you may remember that \texttt{initFromProperties()} in fact presents a \texttt{Properties} object for us to use. The final piece in the puzzle is to define the default properties so that we do not inadvertently read an undefined value. Geddei automatically populates the properties with defaults if the \texttt{init()} caller left them undefined. We specify the default properties with \texttt{specifyProperties()}.
+
+Let us have one property, \textit{AveragesUntilDone}, and we will default it to 10 and give it a description:
+
+\begin{verbatim}
+class PrintAverage: public Processor
+{
+virtual const PropertiesInfo specifyProperties()
+{
+    return PropertiesInfo("AveragesUntilDone", 10,
+        "The number of averages this Processor should carry out.");
+}
+\end{verbatim}
+
+Now we have to make an internal variable to store our given property. Many people have many different ways of naming their internal variables. I generally just put ``the'' before the property name, so let's call it \texttt{theAveragesUntilDone}:
+
+\begin{verbatim}
+int theAveragesUntilDone;
+\end{verbatim}
+
+Then we have to populate it from the actual given \texttt{Properties} object. We do this inside \texttt{initFromProperties} thus:
+
+\begin{verbatim}
+virtual void initFromProperties(const Properties &p)
+{
+    theAveragesUntilDone = p["AveragesUntilDone"].toInt();
+    setupIO(1, 0);
+}
+\end{verbatim}
+
+Now the only change left to make to \texttt{PrintAverage} is to use the new value rather than the hard-coded 10 in the \texttt{processor()} method:
+
+\begin{verbatim}
+//while(plungers < 10)
+// ... is changed to ...
+while(plungers < theAveragesUntilDone)
+\end{verbatim}
+
+And that's our new Property-sensitive class. The program will happily compile and run now, but it will just do the same because the default property value (10) will be used. Let's change it to 5 instead:
+
+\begin{verbatim}
+//(new PrintAverage)->init("printaverage", g);
+// ... is changed to ...
+(new PrintAverage)->
+    init("printaverage", g, Properties("AveragesUntilDone", 5));
+\end{verbatim}
+
+Compiling and running will result in:
+
+\begin{verbatim}
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+\end{verbatim}
+
+Perfect!
+
+
+
+
+\section{Tutorial 9: Stopping Intelligently}
+
+This is one of the few times we will be reverting to an older tutorial to base our code off. In this case we just revert two tutorials to that of 6's code base. We no longer care about telling \texttt{PrintAverage} the number of times it should collect data before exiting explicitly. Instead we want our program to be stopped when all data has been processed successfully, regardless of how much data there actually is.
+
+We will set up a system whereby the source outputs an amount of data to be processed and then exits. As if by magic, our trusty \texttt{WaveGen} class can do this when given some length of signal time. The property that determines how much it should output before declaring its job done is called \textit{Stop After}. We may set it up to stop after 5 seconds in our \texttt{main} function:
+
+\begin{verbatim}
+//ProcessorFactory::create("WaveGen")->
+//    init("wavegen", g, Properties("Frequency", 1000)("PlungersPerSecond", 1.));
+// ... is changed to ...
+ProcessorFactory::create("WaveGen")->
+    init("wavegen", g, Properties("Frequency", 1000)("PlungersPerSecond", 1.)
+        ("Stop After", 5.));
+\end{verbatim}
+
+Now if we wait for \texttt{wavegen} to be done (rather than \texttt{printaverage}), we have managed the same job, right?
+
+\begin{verbatim}
+//Geddei::sleep(1);
+// ... is changed to ...
+g["wavegen"].waitUntilDone();
+\end{verbatim}
+
+Wrong. The output from the running the program will be different depending upon the speed of your machine, but (unless you're very lucky) it will not be what we are expecting: It returns significantly less output than expected (i.e. none!).
+
+The problematic operation is due to the fact that the signal data \textit{flows} through the network. To take the analogy of a water fall: if you were to drop a bucket-load of dye at the top of it (our data), then freeze the waterfall immediately afterwards (stop processing), not all of the dye will have flowed to the bottom. Instead what we have to do is somehow mark the end of the data flow so that \texttt{PrintAverage} `knows' to stop when there will be no more signal data from \texttt{WaveGen}.
+
+Geddei is clever enough to propagate information concerning the dataflow between \texttt{Processor}s behind the scenes, and thus only two changes must be made: We have to add some \textit{guard} to \texttt{PrintAverage} so that it will exit once all the data has flowed from \texttt{WaveGen} to it. And secondly we have to change our \texttt{waitUntilDone()}, so that it waits upon \texttt{PrintAverage} instead. The good news is that both are all completely trivial.
+
+We need \texttt{PrintAverage} to be able to exit once it has processed all signal data that will ever come to it. This is done using the \texttt{thereIsInputForProcessing()} guard. It returns false iff there will never be any data left to be processed. Therefore in \texttt{PrintAverage}'s \texttt{processor()}:
+
+\begin{verbatim}
+//while(1)
+// .. is changed to ...
+while(thereIsInputForProcessing())
+\end{verbatim}
+
+We must also tell Geddei that we have now \textit{guarded} the \texttt{processor()} method:
+
+\begin{verbatim}
+//PrintAverage(): Processor("PrintAverage") {}
+// .. is changed to ...
+PrintAverage(): Processor("PrintAverage", NotMulti, Guarded) {}
+\end{verbatim}
+
+Now, to take our past analogy, rather than waiting for the dye to be thrown, we want to wait for it to have fallen, and so we must wait until \texttt{printaverage} is done:
+
+\begin{verbatim}
+//g["wavegen"].waitUntilDone();
+// ... is changed to ...
+g["printaverage"].waitUntilDone();
+\end{verbatim}
+
+And hey presto! On running, we always get exactly 5 lines of output:
+
+\begin{verbatim}
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+Average frequency 1012.314338Hz (from 85 samples)
+\end{verbatim}
+
+And what's more we can customise how much is shown, not by having to change the sink, but by changing the source. This allows us to plug in different sources now that follow the same basic rules and we will get the same functionality from the rest of the network.
+
+
+
+
+\section{Tutorial 10: Real Audio}
+
+Thus far we have only analysed a static waveform from our good ol' \texttt{WaveGen}. Though useful for demonstration purposes, it's not very exciting. In this tutorial, we will use a real audio file.
+
+The first thing we need in order to calculate the average mode frequency from a given audio file is said audio file. I'm going to assume you have an old .wav file somewhere on your system.\footnote{If you don't, I'm sure a quick search on Google will find you one.} Let's assume that this file is called \texttt{test.wav} and it put inside the same directory as that which we are running the tutorial program from.
+
+Because of Geddei's strong typing, and abstract connection system, plugging in a different source module is completely trivial. All we have to do is take out the old one (\texttt{WaveGen}), and put in the new one to play a .wav file; the class of \texttt{Processor} to do this is a \texttt{Player}:
+
+\begin{verbatim}
+//ProcessorFactory::create("WaveGen")->
+//    init("wavegen", g, Properties("Frequency", 1000)("PlungersPerSecond", 1.)
+//         ("Stop After", 1.));
+// ... is changed to ...
+ProcessorFactory::create("Player")->
+    init("player", g, Properties("Filename", "test.wav"));
+\end{verbatim}
+
+Since we changed the name of the object to \texttt{player}, we should also change it when we refer to it for connection:
+
+\begin{verbatim}
+//g["wavegen"][0] >>= g["fft"][0];
+// ... is changed to ...
+g["player"][0] >>= g["fft"][0];
+\end{verbatim}
+
+Thoughtfully, \texttt{Player} drops us a plunger when it has finished reading the file, before it drops out. In my case I analysed the superb track \textit{Prague Radio} by \textit{Plaid}. Here is my output:
+
+\begin{verbatim}
+Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+For me it takes a while longer to run than before since we're analysing the whole file, which, in my case, is about 5 minutes long. The frequency I get is 842Hz, which it turns out is slightly higher in pitch than $G^\#_5$. And there you have it; we have conducted audio signal analysis on a real music file.
+
+
+
+
+\section{Tutorial 11: Sharing Output Ports}
+
+So far the networks we have constructed have been completely linear. We set up a number of \texttt{Processor} objects, which flow from one to the other in a line. Quite often this will be fine, but suppose we get to the situation where we want to carry out two tasks on our input audio. Then what?
+
+Geddei an inbuilt mechanism for duplicating signal data from an output port efficiently; we call it \textit{sharing}, and it allows you drive an unlimited number of input ports from a single output port. First, though, we need to define another task to be done with the same data. Let's try to find the actual mean frequency. We will create another class, \texttt{MeanFrequency}, which we will use to determine it. The following is the class definition we will use:
+
+\begin{verbatim}
+class MeanFrequency: public SubProcessor
+{
+    virtual void initFromProperties(const Properties &)
+    {
+        setupIO(1, 1, 1, 1, 1);
+    }
+    Spectrum theSpectrum;
+    virtual const bool verifyAndSpecifyTypes(
+        const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+    {
+        if(!inTypes[0].isA<Spectrum>()) return false;
+        theSpectrum = inTypes[0].asA<Spectrum>();
+        outTypes[0] = Value(theSpectrum.frequency());
+        return true;
+    }
+    virtual void processChunk(const BufferDatas &in, BufferDatas &out) const
+    {
+        float sum = 0., magnitude = 0.;
+        for(uint i = 0; i < in[0].elements(); i++)
+        {    float e = in[0][i] < 0. ? -in[0][i] : in[0][i];
+            sum += theSpectrum.bandFrequency(i) * e;
+            magnitude += e;
+        }
+        out[0][0] = (magnitude > 0.) ? sum / magnitude : 0.;
+    }
+public:
+    MeanFrequency(): SubProcessor("MeanFrequency") {}
+};
+\end{verbatim}
+
+As you can see it is very similar to \texttt{ModeFrequency}. In fact the only thing to change is the name and the \texttt{processChunk()} method. We will just use the standard method for calculating the weighted mean which, as it turns out, doesn't work particularly well with an FFT.\footnote{This is due to the very large number of bands with small coefficients in. They push the mean value higher that we might otherwise expect.}
+
+Now all that is left is to instantiate the network properly. We will drive both a \texttt{MeanFrequency} object and a \texttt{ModeFrequency} object from the single output port of the \texttt{FFT}. We will then employ two \texttt{PrintAverage} objects to display the information. First we need to create the objects in the network:
+
+\begin{verbatim}
+int main(int, char **)
+{
+    ProcessorGroup g;
+
+    ProcessorFactory::create("Player")->
+        init("player", g, Properties("Filename", "test.wav"));
+    SubProcessorFactory::createDom("FFT")->
+        init("fft", g, Properties("Size", 512)("Step", 256));
+    (new DomProcessor(new ModeFrequency))->init("modefrequency", g);
+    (new PrintAverage)->init("modeaverage", g);
+    (new DomProcessor(new MeanFrequency))->init("meanfrequency", g);
+    (new PrintAverage)->init("meanaverage", g);
+\end{verbatim}
+
+Next we must connect the first part of the network up as before:
+
+\begin{verbatim}
+    g["player"][0] >>= g["fft"][0];
+\end{verbatim}
+
+Now before we connect multiple objects to the \texttt{FFT}'s single output port we must prime it to drive multiple input ports. We do this by issuing the \texttt{share()} method:
+
+\begin{verbatim}
+    g["fft"][0].share();
+\end{verbatim}
+
+With the output port 0 of \texttt{fft} shared, we may now connect it to as many input ports as we want. Two will do for this example:
+
+\begin{verbatim}
+    g["fft"][0] >>= g["modefrequency"][0];
+    g["fft"][0] >>= g["meanfrequency"][0];
+\end{verbatim}
+
+The two network sinks must now be connected:
+
+\begin{verbatim}
+    g["modefrequency"][0] >>= g["modeaverage"][0];
+    g["meanfrequency"][0] >>= g["meanaverage"][0];
+\end{verbatim}
+
+As before, the network must be started:
+
+\begin{verbatim}
+    if(!g.go(true))
+        qFatal("Error starting processors!");
+\end{verbatim}
+
+Having started the network, we want to wait for all data to be processed. Now we have two sinks and we don't know which of them will finish last---so we take the easy way out and wait for both of them. There is no need to do this in any particular order:
+
+\begin{verbatim}
+    g["printaverage"].waitUntilDone();
+    g["printaverage2"].waitUntilDone();
+\end{verbatim}
+
+The rest of \texttt{main()} is as before:
+
+\begin{verbatim}
+    g.stop();
+    g.disconnectAll();
+    g.deleteAll();
+}
+\end{verbatim}
+
+Compiling and running presents the output:
+
+\begin{verbatim}
+averagemode: Average frequency 842.886Hz (from 49273 samples)
+averagemean: Average frequency 1562.97Hz (from 49273 samples)
+\end{verbatim}
+
+Which is just what we want.
+
+
+
+
+\section{Tutorial 12: Building with QMake}
+
+So far we've only looked at actually programming in Geddei, the compiling process has just been a single G++ invocation. This tutorial will be useful to those on a Makefile-based platform, since we'll be using Qt's QMake build system to generate our Makefile automatically. There is plenty of documentation about QMake over at Trolltech's website\cite{web:trolltech}, but this will act as a quick primer for those who just want an easy way to build Geddei-based projects.
+
+First we have to make ourselves a directory: Let's call it tutorial12. Of course we will need some source code to build, so let's copy tutorial 11's code over into this directory, renaming it to \texttt{tutorial12.cpp}.
+
+The first thing we have to do is create our \textit{project} file. This is the file that QMake uses to decide what files should be compiled and what libraries should be linked. Let's call the project file \texttt{tutorial12.pro}. Inside this file we have to declare firstly that we wish to build an application and secondly that the sources comprise only one file (\texttt{tutorial12.cpp}):
+
+\begin{verbatim}
+TEMPLATE = app
+SOURCES += tutorial12.cpp
+\end{verbatim}
+
+Next we have to tell it about what our application needs. Firstly we have to say it requires the Geddei library:
+
+\begin{verbatim}
+LIBS += -lgeddei
+\end{verbatim}
+
+Finally we have to add the necessary paths for Geddei. We will use the Exscalibar environment variable in order to determine these:
+
+\begin{verbatim}
+INCLUDEPATH += ${EXSCALIBAR_LOCATION}/include
+QMAKE_LIBDIR += ${EXSCALIBAR_LOCATION}/lib
+\end{verbatim}
+
+Finally all that is left to do is tell QMake which bits of Qt and C++ we would like to enable. We obviously need Qt. Geddei requires threading and exceptions to be enabled. We will also leave the warnings on and debug code in. So:
+
+\begin{verbatim}
+CONFIG += qt thread exceptions debug warn_on
+\end{verbatim}
+
+And that's the whole file done. Whenever we want to add more source files to the project we only have to change the second line. To generate the Makefile we just run qmake in the directory. With this having been done, there is a Makefile in the directory. The standard GNU make command will happily compile and link our trivial program.
+
+Note: Installation of our newly created program with qmake is out of the scope of this tutorial.
+
+
+
+
+\section{Tutorial 13: Building New Plugins}
+
+In this tutorial we will be using the Exscalibar plugin system to actually create and install our new \texttt{Processor} and \texttt{SubProcessor} classes. The main benefit of having our new classes as plugins is that we need not know anything about them at compile time. This becomes very important later on when we wish to distribute our tasks.
+
+We can use the \texttt{exinfo} command to view the current installed plugins to the Geddei system:
+
+\begin{verbatim}
+$ exinfo list
+8 Processors available to Exscalibar:
+   ...
+15 SubProcessors available to Exscalibar:
+   ...
+\end{verbatim}
+
+Soon enough we'll see our two new plugins in that list!
+
+We will be basing all of this tutorial on tutorial 12, including the QMake project file. Some significant structural changes will need to be made first though. In Exscalibar a processor plugin takes the form of a library where each of our classes are defined and implemented. Aside from some slight build subtleties, the library can be assumed to be like any other class library. We can split up the definition and implementation of the classes (using header files), and we can also split up each class. However, in this simple example, we will keep everything in one file.
+
+The biggest change to our source code is that we must get rid of \texttt{main()} completely, since we're building a library. With main() gone, we are now in a the position where our source code would compile happily into a library. We must now alter it so that it compiles into a plugin library. The first thing to do is include the necessary header at the top of the file:
+
+\begin{verbatim}
+#include <qtextra/qfactoryexporter.h>
+\end{verbatim}
+
+Like Qt, all of QtExtra's names are in the global namespace, and so no explicit namespace command is needed. We leave the class definitions untouched, and merely add the necessary directive underneath each. When a class becomes ``advertised'' as being inside a plugin we say that we \textit{export} it. This is exactly what we will be doing for each of our classes now. The directive we use is aptly called \texttt{EXPORT\_CLASS}, and it takes five arguments; the class name, three denoting the version of the class (major, minor, tiny) and the class it inherits from that is known at compile time (also known as the \textit{interface} class).
+
+After each class definition, we put such a directive. We'll give each class a version of 1.0.0 (written as \texttt{1,0,0}):
+
+\begin{verbatim}
+class ModeFrequency: public SubProcessor
+{
+// The class definition...
+};
+EXPORT_CLASS(ModeFrequency, 1,0,0, SubProcessor);
+
+class MeanFrequency: public SubProcessor
+{
+// The class definition...
+};
+EXPORT_CLASS(MeanFrequency, 1,0,0, SubProcessor);
+
+class PrintAverage: public Processor
+{
+// The class definition...
+};
+EXPORT_CLASS(PrintAverage, 1,0,0, Processor);
+\end{verbatim}
+
+Finally, we need one more line to roll them all up into a single plugin. We call this operation ``exporting the factory''. It is a basic directive that takes no arguments, but \textbf{must only be called once} in the entire plugin library. Because of this, conventionally it is put into a .cpp file with the same name as the library and not much else in it. As we only have one file, we can just put it in at the bottom:
+
+\begin{verbatim}
+FACTORY_EXPORT;
+\end{verbatim}
+
+And that's it! When compiled correctly this file will be a plugin library. To compile it as a plugin library rather than an application we have to make two changes. We must use the library template rather than the app template, and we must give our library a version (typically the same as we gave for our plugins---1.0.0):
+
+\begin{verbatim}
+TEMPLATE = lib
+SOURCES += tutorial13.cpp
+LIBS += -lgeddei
+INCLUDEPATH += ${EXSCALIBAR_LOCATION}/include
+QMAKE_LIBDIR += ${EXSCALIBAR_LOCATION}/lib
+CONFIG += qt thread exceptions debug warn_on
+VERSION = 1.0.0
+\end{verbatim}
+
+Running \texttt{qmake}, and then \texttt{make} will result in our library being built. The name will depend upon your platform, but under Linux we can see that is called \texttt{libtutorial13.so.1.0.0}. Now we have to put this somewhere where Geddei's (\texttt{Sub})\texttt{ProcessorFactory} class can see it. A guaranteed location where it will search is \texttt{\$EXSCALIBAR\_LOCATION/plugins/geddei}. Copying it over is a platform dependant operation, and typically would be a function done by your software's installer.
+
+Instead of manually copying it over we will utilise QMake's installation functionality. With an extra two lines we can change the \texttt{Makefile} so that it will not only build our plugin, but also install it:
+
+\begin{verbatim}
+INSTALLS += target
+target.path = ${EXSCALIBAR_LOCATION}/plugins/geddei
+\end{verbatim}
+
+Running \texttt{qmake} followed by \texttt{make install} will now result in the necessary plugin libraries being copied to the correct location in the system (assuming the current user has the right privileges). Let's check everything went OK with the exinfo tool:
+
+\begin{verbatim}
+$ exinfo
+8 Processors available to Exscalibar:
+   PrintAverage (1.0.0)
+   Recorder (0.1.1)
+   Player (0.1.2)
+   ...
+15 SubProcessors available to Exscalibar:
+   ModeFrequency (1.0.0)
+   MeanFrequency (1.0.0)
+   Log (0.2.0)
+   Mean (0.3.0)
+   ...
+\end{verbatim} 
+
+Your output should be somewhat similar to that above. As you can see we have our three new processors installed correctly and the Exscalibar system can see them. Our three new libraries are now available for use in any Geddei program on this system; we may create them with the \texttt{ProcessorFactory} and \texttt{SubProcessorFactory} classes just as we have the built-in classes!
+
+
+
+
+\section{Tutorial 14: Using Our Plugins}
+
+With our plugins built and installed, let's actually use them. We'll make a program that is functionally the same as tutorial 12's code, but that instead uses our newly installed plugins.
+
+We start off our program in much the same way as we did tutorial 12's; we can drop the signaltypes include (since we won't need to define any new classes now) We start \texttt{main()} and make ourselves a group:
+
+\begin{verbatim}
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+int main(int, char **)
+{
+    ProcessorGroup g;
+\end{verbatim}
+
+Next we have to create our Processor objects. Note the change from tutorial 12's code that created them explicitly---now we just use the factory classes:
+
+\begin{verbatim}
+    ProcessorFactory::create("Player")->
+        init("player", g, Properties("Filename", "test.wav"));
+    SubProcessorFactory::createDom("FFT")->
+        init("fft", g, Properties("Size", 512)("Step", 256));
+    SubProcessorFactory::createDom("ModeFrequency")->init("modefrequency", g);
+    ProcessorFactory::create("PrintAverage")->init("averagemode", g);
+    SubProcessorFactory::createDom("MeanFrequency")->init("meanfrequency", g);
+    ProcessorFactory::create("PrintAverage")->init("averagemean", g);
+\end{verbatim}
+
+The rest of the program is exactly the same as tutorial 12:
+
+\begin{verbatim}
+    g["player"][0] >>= g["fft"][0];
+    g["fft"][0].share();
+    g["fft"][0] >>= g["modefrequency"][0];
+    g["modefrequency"][0] >>= g["averagemode"][0];
+    g["fft"][0] >>= g["meanfrequency"][0];
+    g["meanfrequency"][0] >>= g["averagemean"][0];
+
+    if(!g.go(true))
+        qFatal("Error starting processors!");
+
+    g["averagemode"].waitUntilDone();
+    g["averagemean"].waitUntilDone();
+
+    g.stop();
+    g.disconnectAll();
+    g.deleteAll();
+}
+\end{verbatim}
+
+Aside form the .cpp filename change, the project file is unchanged from tutorial 12. Compiling and running gives the same output as that from tutorial 12, just what we want:
+
+\begin{verbatim}
+averagemean: Average frequency 3141.314391Hz (from 49273 samples)
+averagemode: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+
+
+
+\section{Tutorial 15: Introducing Remote Geddei}
+
+Classes introduced:
+\begin{itemize}
+\item LocalSession
+\item LocalProcessor
+\item LocalDomProcessor
+\end{itemize}
+
+Until now all Geddei operations have been \textit{local}: All classes used have been instantiated in the current memory area, on the local host. In the next few tutorials we will spread our wings slightly. We will create the same network as before, except that we will host some of the \texttt{Processor}s in a different, remote, memory space.
+
+Geddei provides all the functionality necessary for inter-process and inter-machine data transfer, however setting up the Geddei objects between two memory spaces (and indeed two different machines) is difficult without some form of a request broker, and might be thought of as akin to attempting archery whilst holding the target board. We would like to be able to control another \textit{session} of Geddei objects from our program; Remote Geddei, or rGeddei provides this functionality.
+
+In this tutorial we will use the rGeddei API to do exactly what we have done so far with Geddei. If used carefully, the two APIs can be used together; for now, however, we will stick to just rGeddei.
+
+rGeddei works extremely similarly to Geddei in most aspects, however it introduces the idea of a \textit{session}. Logically, all \texttt{Processor} objects that can be accessed by rGeddei are associated with a \textit{session}. rGeddei works with entities called \texttt{AbstractProcessor}s, which for the most part function similarly to \texttt{Geddei}'s Processors, the main difference is that while a \texttt{Processor} is itself a ``real'' object, an \texttt{AbstractProcessor} is a proxy to a real object. Generally this difference doesn't matter and is hidden behind the API, but it is something to be aware of nonetheless.
+
+
+ in our new rGeddei program is include the necessary header files. Obviously we require the rGeddei headers, but for reasons noted soon, we also require the QSubApp include from QtExtra:
+
+\begin{verbatim}
+#include <qtextra/qsubapp.h>
+
+#include <rgeddei/rgeddei.h>
+using namespace rGeddei;
+\end{verbatim}
+
+Since all of our \texttt{Processor} objects will be based in our local memory space, (i.e. this program), we will use a \texttt{LocalSession} to host them. The other type, a \texttt{RemoteSession}, allows the use of objects based in other processes or machines. The LocalSession's constructor takes two arguments, the name this host can be referred to externally and the port that incoming Geddei requests should connect on. We will leave the port as the default, and (since we will not be using other machines) can just use 127.0.0.1 as the external host name.
+
+\begin{verbatim}
+LocalSession local("127.0.0.1");
+\end{verbatim}
+
+If a \texttt{LocalSession} object is used it is a requisite that the program be based on the Qt event loop (due to how incoming connections are handled). This unfortunately imposes two restrictions on us. The first is that our ``main'' program will have to run in its own thread. The second is that the \texttt{LocalSession} object must be constructed before we enter this thread (since it will use the event loop running in the main thread). Thus we must declare it in the global scope. This situation will be alleviated in a later version of Geddei (when Qt betters itself at threading).
+
+Making our simple \texttt{main()}-based program coexist with the Qt event loop is a laborious task made very easy by the \texttt{QSubApp} found in QtExtra (which is why we needed the header file included earlier). So rather than using the typical definition of \texttt{main()}, we will use the \texttt{QSubApp} definition:
+
+\begin{verbatim}
+class MySubApp: public QSubApp { void main(); } subApp;
+void MySubApp::main()
+{
+\end{verbatim}
+
+Now we can go ahead and write the \texttt{main()} \textbf{method}. The following code is almost exactly the same as our code from tutorial 14. Rather, however, than using a \texttt{ProcessorGroup}, we instead use the \texttt{AbstractProcessorGroup}:
+
+\begin{verbatim}
+    AbstractProcessorGroup g;
+\end{verbatim}
+
+To create our \texttt{AbstractProcessor} objects, we have to utilise a static method called, aptly, \texttt{create}. It functions \textit{very} similarly to the \texttt{ProcessorFactory} method, with the exception that it takes a second paramater which is the \texttt{Session} object that the \texttt{Processor} object will be hosted by; for us this is just our \texttt{LocalSession} object.
+
+\begin{verbatim}
+AbstractProcessor::create(local, "Player")->
+    init("player", g, Properties("Filename", "test.wav"));
+\end{verbatim}
+
+Similarly for the \texttt{AbstractDomProcessor} objects, we use the static method \texttt{create} in that class. The parameter given is a \texttt{SubProcessor} type, just like \texttt{createDom} in the relevant factory class. The second parameter is the session it should be created in:
+
+\begin{verbatim}
+AbstractDomProcessor::create(local, "FFT")->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+AbstractDomProcessor::create(other, "ModeFrequency")->
+    init("modefrequency", g);
+AbstractProcessor::create(local, "PrintAverage")->init("averagemode", g);
+AbstractDomProcessor::create(other, "MeanFrequency")->
+    init("meanfrequency", g);
+AbstractProcessor::create(other, "PrintAverage")->init("averagemean", g);
+\end{verbatim}
+
+Due to the \texttt{Abstract} interfaces being roughly analogous to the native Geddei interfaces, the rest of the program is completely unchanged!
+
+\begin{verbatim}
+g["player"][0] >>= g["fft"][0];
+g["fft"][0].share();
+g["fft"][0] >>= g["modefrequency"][0];
+g["modefrequency"][0] >>= g["averagemode"][0];
+g["fft"][0] >>= g["meanfrequency"][0];
+g["meanfrequency"][0] >>= g["averagemean"][0];
+
+if(!g.go(true))
+    qFatal("Error starting processors!");
+
+g["averagemode"].waitUntilDone();
+g["averagemean"].waitUntilDone();
+
+g.stop();
+g.disconnectAll();
+g.deleteAll();
+}
+\end{verbatim}
+
+The only thing left is to modify the project file accordingly. Aside from the change of tutorial number, the only difference is that we now link with rgeddei instead of geddei:
+
+\begin{verbatim}
+#LIBS += -lgeddei
+# ... is changed to ...
+LIBS += -lrgeddei
+\end{verbatim}
+
+Compiling and running produces:
+
+\begin{verbatim}
+averagemean: Average frequency 3141.314391Hz (from 49273 samples)
+averagemode: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+The same results as tutorial 14. Hurrah!
+
+
+
+
+\section{Tutorial 16: Using NodeServer with Remote Geddei}
+
+Classes introduced:
+\begin{itemize}
+\item RemoteSession
+\item RemoteProcessor
+\end{itemize}
+
+Our past tutorial was all fine and well, but it didn't actually achieve anything different internally than the one before it. Now we will spread our wings a little more. We will communicate across different memory spaces (on the same machine). Technically the communication is now achieved using network-transparent TCP sockets. Of course the communication will be a little slower now since we have an extra layer to go through, though for our small example this will hardly be noticeable.
+
+The Remote Geddei system includes an executable, \textit{nodeserver}, which will happily host Geddei \texttt{Processor} objects. We are going to utilise this to host some of our objects, rather than having them run inside the local program. So first of all we have to make sure that our nodeserver is running; start the program (it should be located under \texttt{\$EXSCALIBAR\_LOCATION/bin}). Make sure you start it in a terminal---we will wish to view the output later.
+
+There are two types of TCP/IP connection that we will be using now. This can cause some confusion so I'll go into a little more detail than usual. The first type of connection typically connected to on ports 16661-9 is known as a Geddei \textit{data} connection. It is the high speed link between Geddei \texttt{Processor} objects that allows us to have a Geddei data flow network spanning multiple processes and machines. The second type of connection is the Remote Geddei (rGeddei) \textit{control} connection; it typically spans 16671-9. It is responsible for the creation and control of \texttt{Processor} objects across different processes and machines. You don't need to care about any of that really.
+
+The only thing you need to know is that: \textbf{LocalSession classes can be told only the Geddei data port (for listening), RemoteSession classes can to be told only the Remote Geddei control port (for connecting).} Therefore the ports on the \texttt{LocalSession} object and the \texttt{RemoteSession} objects have nothing to do with each other. The nodeserver, since it \textbf{hosts} both objects and a session can be told both ports it listens to.
+
+The default setting for \texttt{LocalSession} is to use 16660 for its data port rather than 16661 or above. This allows us to use the default nodeserver port setting (16661) without having to explicitly evade a clash with our LocalSession. Therefore, unless you're doing something really quite complicated like hosting multiple nodeserver instances on the same machine or running multi Remote Geddei programs on the same set of machines, the defaults will probably do just fine.
+
+First, we have to set up another session, so rGeddei can connect and see what's what. We do this with a RemoteSession object. The only required argument is the IP address of this remote session, which is just our loopback again. The port defaults to 16661, which is fine, since that will be the port that our nodeserver instance will be listening on.
+
+\begin{verbatim}
+RemoteSession other("127.0.0.1");
+if(!other.isValid()) qFatal("Couldn't open remote session!");
+\end{verbatim}
+
+Finally, to take advantage of this other session, we will just change our program so that the \texttt{averagemean} processor is instantiated inside the \texttt{other} session:
+
+\begin{verbatim}
+//(AbstractProcessor::create(local, "PrintAverage"))->init("averagemean", g);
+// ... is changed to ...
+(AbstractProcessor::create(other, "PrintAverage"))->init("averagemean", g);
+\end{verbatim}
+
+That's it! Compiling and running will produce the averagemode output only:
+
+\begin{verbatim}
+averagemode: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+If you check the terminal in which you ran \textit{nodeserver} you will find the other half of the output:
+
+\begin{verbatim}
+averagemean: Average frequency 3141.314391Hz (from 49273 samples)
+\end{verbatim}
+
+Proof that \texttt{averagemean} was indeed executing under another program's memory space.
+
+
+
+
+\section{Tutorial 17: Share or Split?}
+
+Before we start experimenting with different permutations of processors and sessions, there is one caveat we must adhere to. The operation of sharing a connection, since it uses essentially pointer passing as a method of data transfer will not work when either the output \texttt{Processor} or any of the input \texttt{Processor}s are in different memory areas. This is where the split operation comes in.
+
+Suppose we wish to put our \texttt{meanfrequency} object in the other session. This would break it apart from \texttt{modefrequency} and \texttt{fft}, meaning a share operation could no longer be used. Instead we use a \textit{split} operation. This is semantically equivalent to the share operation, but doesn't use a shared memory as a means of driving multiple inputs, instead simply copying and sending the data as usual. The performance will not be as good as using a share operation, but in our trivial example this won't be noticeable.
+
+Therefore before we put the \texttt{meanfrequency} into the other session, we have to first change the share operation to a split operation:
+
+\begin{verbatim}
+//g["fft"][0].share();
+// ... is changed to ...
+g["fft"][0].split();
+\end{verbatim} 
+
+Now we will just switch which task goes to the other session:
+
+\begin{verbatim}
+//(AbstractDomProcessor::create(local, "MeanFrequency"))->
+//    init("meanfrequency", g);
+//(AbstractProcessor::create(other, "PrintAverage"))->init("averagemean", g);
+// ... is changed to ...
+(AbstractDomProcessor::create(other, "MeanFrequency"))->
+    init("meanfrequency", g);
+(AbstractProcessor::create(local, "PrintAverage"))->init("averagemean", g);
+\end{verbatim}
+
+Compiling and running will show the same output as tutorial 16:
+
+\begin{verbatim}
+averagemean: Average frequency 3141.314391Hz (from 49273 samples)
+averagemode: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+But we know that the meanfrequency part of the calculation was being done in a separate process.
+
+
+
+
+\section{Tutorial 18: Distributing over a Network}
+
+Now we will really bite the bullet and send off most of our processing onto another machine. If you don't have another machine available, you can skip this tutorial.
+
+As you might imagine, the changes we have to make are minimal. Firstly, we have to give our local session a real (externally visible) IP address. You should already know this. Let's suppose it is ``192.168.0.85'', then we make the change:
+
+\begin{verbatim}
+//LocalSession local("127.0.0.1");
+// ... is changed to ...
+LocalSession local("192.168.0.85");
+\end{verbatim}
+
+Now other sessions will be able to see us properly. Next we have to change our \texttt{RemoteSession} object so that it uses a different machine's session. Let's assume we are going to run nodeserver on ``192.168.0.2'', in that case our \texttt{RemoteSession} initialisation would change thus:
+
+\begin{verbatim}
+//RemoteSession other("127.0.0.1");
+// ... is changed to ...
+RemoteSession other("192.168.0.2");
+\end{verbatim}
+
+Now if the code was left alone, just the mean frequency calculation would be offloaded, but this time let's pretend our other machine is a real beast and can handle as much work as we throw at it. We'll put the FFT and both frequency calculations on it, so:
+
+\begin{verbatim}
+//(AbstractDomProcessor::create(local, "FFT"))->
+//    init("fft", g, Properties("Size", 512)("Step", 256));
+//(AbstractDomProcessor::create(local, "ModeFrequency"))->
+//    init("modefrequency", g);
+// ... is changed to ...
+(AbstractDomProcessor::create(other, "FFT"))->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+(AbstractDomProcessor::create(other, "ModeFrequency"))->
+    init("modefrequency", g);
+\end{verbatim}
+
+That's all we have to do to the tutorial. Once you have nodeserver running on your second machine, running the tutorial on this one will result in the other being used for most of the work (well...all of it, apart from the I/O). The rather clever side effect of all of this is that we still get the results back to our local machine:
+
+\begin{verbatim}
+averagemean: Average frequency 3141.314391Hz (from 49273 samples)
+averagemode: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+
+
+
+
+\section{Tutorial 19: Creating Workers}
+
+Again if you don't have another machine available, there's not much point in doing this tutorial (though looking through it anyway would be a good idea).
+
+As I mentioned some time before, \texttt{SubProcessor} objects are better than their \texttt{Processor} counterparts for several reasons; one of them was that it is much simpler to use, but another was the potential for efficient distribution. Because we force independence between subsequent operations of a \texttt{SubProcessor}, it means that we, through Geddei, can parallelise its operation fundamentally. We call it signal-time demultiplexing or timeslicing. Essentially, we are splitting the work into chunks and processing each chunk separately and (potentially) concurrently.
+
+To specify to Geddei how much of this concurrency we want, and in which sessions this concurrency should take place, we use the idea of a \textit{worker}. A worker is an agent for doing a \texttt{SubProcessor}'s signal processing. We can have as many workers as we want in as many sessions as we want. Each worker will get a small amount of signal to process dealt in a round robin fashion. Geddei includes a basic load balancing algorithm so sessions on slower running hardware will generally be given less work to do.
+
+First off, we will change our network so all \texttt{Processor} objects are hosted in the local session:
+
+\begin{verbatim}
+//(AbstractDomProcessor::create(other, "FFT"))->
+//    init("fft", g, Properties("Size", 512)("Step", 256));
+//(AbstractDomProcessor::create(other, "ModeFrequency"))->
+//    init("modefrequency", g);
+//(AbstractDomProcessor::create(other, "MeanFrequency"))->
+//    init("meanfrequency", g);
+// ... is changed to ...
+(AbstractDomProcessor::create(local, "FFT"))->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+(AbstractDomProcessor::create(local, "ModeFrequency"))->
+    init("modefrequency", g);
+(AbstractDomProcessor::create(local, "MeanFrequency"))->
+    init("meanfrequency", g);
+\end{verbatim}
+
+Now we have to set up Remote Geddei so that some work is shared out to our other session. This is done with the call \textit{spawnWorker()}; This is a method of \texttt{AbstractDomProcessor}, and since our \texttt{AbstractProcessorGroup} only returns \texttt{AbstractProcessor} objects from its subscript, we have to use an explicit method for returning \texttt{DomProcessor}s - \textit{dom()}. So directly after the construction/initialisation we add:
+
+\begin{verbatim}
+g.dom("fft").spawnWorker(other);
+g.dom("modefrequency").spawnWorker(other);
+g.dom("meanfrequency").spawnWorker(other);
+\end{verbatim}
+
+This spawns a worker in the other session for each of our three \texttt{DomProcessor} objects. That's all that has to be done. Now we can compile and run. The output, as always, is exactly the same, though it should have taken a (perhaps only) slightly shorter time. Communication and balancing overheads can have an adverse effect on the performance, which is why we don't get near a doubling of speed on homogeneous hardware.
+
+
+
+
+\section{Tutorial 20: Using Non-Plugin Classes}
+
+There are times when we need to be able to use an accessible, non-anonymous, \texttt{Processor} object in our Remote Geddei networks. This might be because it has functionality accessible only by extra methods to a normal Processor object, or because you may not wish to involve the plugin system since the \texttt{Processor} class is implemented locally.
+
+For whatever reason, Remote Geddei gives you the opportunity to use any (\texttt{Sub})\texttt{Processor} object with an \texttt{AbstractProcessor}, under the condition that said it is hosted by a \texttt{LocalSession} object (obviously!).
+
+Since we'll be implementing new Geddei classes, we'll have to include both the Geddei headers and the SignalType header. After our includes, let's bring back our original implementation for \texttt{PrintAverage}, \texttt{MeanFrequency} and \texttt{ModeFrequency} (from tutorial 12):
+
+\begin{verbatim}
+#include <qtextra/qsubapp.h>
+
+#include <geddei/geddei.h>
+using namespace Geddei;
+
+#include <geddei/signaltypes.h>
+using namespace SignalTypes;
+
+#include <rgeddei/rgeddei.h>
+using namespace rGeddei;
+
+class ModeFrequency: public SubProcessor
+{
+    virtual void initFromProperties(const Properties &)
+    {
+        setupIO(1, 1, 1, 1, 1);
+    }
+    Spectrum theSpectrum;
+    virtual const bool verifyAndSpecifyTypes(
+        const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+    {
+        if(!inTypes[0].isA<Spectrum>()) return false;
+        theSpectrum = inTypes[0].asA<Spectrum>();
+        outTypes[0] = Value(theSpectrum.frequency());
+        return true;
+    }
+    virtual void processChunk(const BufferDatas &in, BufferDatas &out) const
+    {
+        uint maxBand = 0;
+        for(uint i = 1; i < in[0].elements(); i++)
+            if(in[0][i] > in[0][maxBand]) maxBand = i;
+        out[0][0] = theSpectrum.bandFrequency(maxBand);
+    }
+public:
+    ModeFrequency(): SubProcessor("ModeFrequency") {}
+};
+
+class MeanFrequency: public SubProcessor
+{
+    virtual void initFromProperties(const Properties &)
+    {
+        setupIO(1, 1, 1, 1, 1);
+    }
+    Spectrum theSpectrum;
+    virtual const bool verifyAndSpecifyTypes(
+        const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+    {
+        if(!inTypes[0].isA<Spectrum>()) return false;
+        theSpectrum = inTypes[0].asA<Spectrum>();
+        outTypes[0] = Value(theSpectrum.frequency());
+        return true;
+    }
+    virtual void processChunk(const BufferDatas &in, BufferDatas &out) const
+    {
+        float sum = 0., magnitude = 0.;
+        for(uint i = 0; i < in[0].elements(); i++)
+        {    float e = in[0][i] < 0. ? -in[0][i] : in[0][i];
+            sum += theSpectrum.bandFrequency(i) * e;
+            magnitude += e;
+        }
+        out[0][0] = (magnitude > 0.) ? sum / magnitude : 0.;
+    }
+public:
+    MeanFrequency(): SubProcessor("MeanFrequency") {}
+};
+
+class PrintAverage: public Processor
+{
+    virtual void initFromProperties(const Properties &)
+    {
+        setupIO(1, 0);
+    }
+    virtual const bool verifyAndSpecifyTypes(
+        const SignalTypeRefs &inTypes, SignalTypeRefs &)
+    {
+        if(!inTypes[0].isA<Value>()) return false;
+        return true;
+    }
+    float sum;
+    uint count;
+    virtual void processor()
+    {
+        sum = 0.;
+        count = 0;
+        while(thereIsInputForProcessing(1))
+        {
+            sum += input(0).readSample()[0];
+            count++;
+        }
+    }
+    virtual void receivedPlunger()
+    {
+        qDebug("%s: Average frequency %fHz (from %d samples)",
+            name().latin1(), sum / count, count);
+        count = 0;
+        sum = 0.;
+    }
+public:
+    PrintAverage(): Processor("PrintAverage", NotMulti, Guarded) {}
+};
+\end{verbatim}
+
+We must declare our \texttt{LocalSession}, and start our SubApp as usual. This time we won't bother with remote distribution:
+
+\begin{verbatim}
+LocalSession local("192.168.0.85");
+
+class MySubApp: public QSubApp { void main(); } subApp;
+void MySubApp::main()
+{
+\end{verbatim}
+
+Now we create our objects, simply using the \texttt{new} operator:
+
+\begin{verbatim}
+ModeFrequency *meanf = new ModeFrequency;
+MeanFrequency *modef = new MeanFrequency;
+PrintAverage *meana = new PrintAverage;
+PrintAverage *modea = new PrintAverage;
+\end{verbatim}
+
+Next we define the group and the \texttt{player} and \texttt{fft} that still use the normal plugin system:
+
+\begin{verbatim}
+AbstractProcessorGroup g;
+
+(AbstractProcessor::create(local, "Player"))->
+    init("player", g, Properties("Filename", "test.wav"));
+(AbstractDomProcessor::create(local, "FFT"))->
+    init("fft", g, Properties("Size", 512)("Step", 256));
+\end{verbatim}
+
+But now we can use our already created objects rather than using the plugin system, by passing a pointer to \texttt{Processor}/\texttt{SubProcessor} objects rather than just a string to name the type:
+
+\begin{verbatim}
+(AbstractDomProcessor::create(local, modef))->init("modefrequency", g);
+(AbstractProcessor::create(local, modea))->init("averagemode", g);
+(AbstractDomProcessor::create(local, meanf))->init("meanfrequency", g);
+(AbstractProcessor::create(local, meana))->init("averagemean", g);
+\end{verbatim}
+
+The rest of the program goes unchanged:
+
+\begin{verbatim}
+    g["player"][0] >>= g["fft"][0];
+    g["fft"][0].split();
+    g["fft"][0] >>= g["modefrequency"][0];
+    g["modefrequency"][0] >>= g["averagemode"][0];
+    g["fft"][0] >>= g["meanfrequency"][0];
+    g["meanfrequency"][0] >>= g["averagemean"][0];
+    
+    if(!g.go(true))
+        qFatal("Error starting processors!");
+    
+    g["averagemode"].waitUntilDone();
+    g["averagemean"].waitUntilDone();
+    
+    g.stop();
+    g.disconnectAll();
+    g.deleteAll();
+}
+\end{verbatim}
+
+You will notice that since the objects we created with \texttt{new} are adopted into the abstract objects, they see to it that the objects are destroyed when necessary. We do not need to do it ourselves (indeed if we tried to, it would cause a memory error).
+
+This program is functionally equivalent to tutorial 12---we just used a different API as a front-end to manage the objects. Running it will give us the same output:
+
+\begin{verbatim}
+averagemode: Average frequency 3141.314391Hz (from 49273 samples)
+averagemean: Average frequency 842.885962Hz (from 49273 samples)
+\end{verbatim}
+

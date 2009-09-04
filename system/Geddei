@@ -1,0 +1,5 @@
+#ifdef __GEDDEI_BUILD
+#include "geddei.h"
+#else
+#include <geddei/geddei.h>
+#endif

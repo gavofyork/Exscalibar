@@ -1,0 +1,61 @@
+Building the Exscalibar software
+--------------------------------
+
+Exscalibar is developed under Linux on the x86 platform. However Qt, its only
+required dependancy is multiplatform. Qt version 3.2 or above is required, which
+for Windows users will be a problem until Trolltech release version 4.0 of Qt,
+which will have a Free Windows version.
+
+Currently Exscalibar supports only Qt with a major version of 3. Supporting later
+versions and other platforms will be made available in due course. The configure
+script requires an 'sh' shell interpreter.
+
+Geddei currently uses libsndfile, libmad and libvorbisfile for sound file
+I/O, and can use Jack and ALSA for audio I/O. GeddeiNite may not build without
+libsndfile.
+
+Exscalibar uses the Qt qmake building system and thus is fairly simple to build
+regardless of system/architecture. A simple configure script is provided to
+detect what software your system has and prepare the build options. So before
+building you must run (in the build root):
+
+	./configure
+
+If you wish to install Exscalibar somewhere other than the default location (the
+Qt path, $QTDIR), you must explicitly set $EXSCALIBAR_LOCATION before
+running ./configure. Example:
+
+	EXSCALIBAR_LOCATION=~/Software/exscalibar ./configure
+
+This must always be in the environment when using Exscalibar or Exscalibar-based
+applications. The simplest way to do this is to insert the appropriate line into
+your ~/.profile:
+
+(Editing ~/.profile: )
+	export EXSCALIBAR_LOCATION=~/Software/exscalibar
+
+It is highly recommended to use FFTW; it will seriously improve the speed of any
+Fourier transforms. Assuming version 3 or above is found on your system you
+it should be discovered automatically. FFTW can be found at the FFTW home.
+
+You should also have libsndfile, libmad and libvorbisfile on your system, which
+facilitates reading .wav, .mp3 and .ogg audio files.
+
+As Exscalibar uses the Qt build system, it can be built by using the Makefile
+"make". Installing it all just takes "make install", though if installing to a
+system location (like $QTDIR often is), you'll need to be the superuser first:
+
+	make && su -c make install
+
+That's it. You should make sure the Exscalibar libraries cvan be accessed by the
+dynamic linker. If you didn't set a different EXSCALIBAR_LOCATION, then you
+shouldn't have to do anything special, since it will ride on the back of your Qt
+setup. Otherwise, you'll probably have to add $EXSCALIBAR_LOCATION/lib to
+$LD_LIBRARY_PATH in your default environment:
+
+(Editing ~/.profile: )
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/Software/exscalibar
+
+Enjoy!
+
+-- Gav Wood, 2005

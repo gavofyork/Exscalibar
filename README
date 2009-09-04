@@ -1,0 +1,16 @@
+                            Exscalibar Framework
+
+                    Extensible Scalable Architecture for
+                   Live, Interactive and Batch-orientated
+                     Audio-signal information-Retrieval
+
+Copyright (c) 2002-2005 Gavin Wood.
+
+This is Free software and is licenced under the GPL. See COPYING for more
+details.
+
+See INSTALL for building and installation instructions.
+See NOTES for the release notes and dependencies.
+See CHANGELOG for a list of the changes of this release.
+See doc/ for the documentation and tutorials in Latex format.
+See src/ for the source code.
