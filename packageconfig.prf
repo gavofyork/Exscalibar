@@ -1,0 +1,22 @@
+
+# handle pkg-config files
+for(PV, $$list($$unique(PACKAGES))) {
+	P = ""
+	V = ""
+	for(X, $$list($$replace(PV, ":", " "))) {
+		isEmpty(P) {
+			P = $$X
+		} else {
+			V = $$X
+		}
+	}
+	system(pkg-config $$P --atleast-version $$V) {
+		QMAKE_CXXFLAGS += $$system(pkg-config $$P --cflags)
+		LIBS += $$system(pkg-config $$P --libs)
+		DEFINES += $$system("echo HAVE_$$P | awk \"{ print toupper(\\\$0) }\"")
+		CONFIG += $$P
+	} else {
+		message("!!! $$P >= $$V (dev. files) not detected: This package is recommended.")
+	}
+}
+

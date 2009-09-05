@@ -1,6 +1,8 @@
 #ifndef __EXSCALIBAR_H
 #define __EXSCALIBAR_H
 
+#define EXSCALIBAR_VERSION "1.1.0"
+
 #ifdef _MSC_VER
   #ifdef BUILDING_DLL
 	#define DLLEXPORT __declspec(dllexport)

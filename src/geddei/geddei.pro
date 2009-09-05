@@ -3,7 +3,7 @@
 # Subdir relative project main directory: ./src/geddei
 # Target is a library:  
 
-include(../../globallib.pro)
+include(../../exscalibar.pri)
 
 INSTALLS += headers \
             target 
@@ -108,8 +108,7 @@ SOURCES += buffer.cpp \
            processorport.cpp \
            signaltyperef.cpp \
            globals.cpp 
-TARGETDEPS += ../../src/qtextra/libqtextra.so
+TARGETDEPS += "$$DESTDIR/libqtextra.so"
 LIBS += -lqtextra
 INCLUDEPATH += ../../src/qtextra
-QMAKE_LIBDIR = ../../src/qtextra
 TEMPLATE = lib

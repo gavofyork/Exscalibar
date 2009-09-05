@@ -14,14 +14,14 @@
 
 #include <qapplication.h>
 
-#include "config.h"
+#include "exscalibar.h"
 
 #include "globals.h"
 
 namespace Geddei
 {
 
-static const char *theVersion = VERSION;
+static const char *theVersion = EXSCALIBAR_VERSION;
 
 class Sleeper : public QThread
 {
