@@ -1,8 +1,5 @@
-isEmpty(EXSCALIBAR_PREFIX) {
-	PREFIX = /usr/local
-} else {
-	PREFIX = $EXSCALIBAR_PREFIX
-}
+PREFIX = $$[EXSCALIBAR_PREFIX]
+isEmpty(PREFIX): PREFIX = $$[QT_INSTALL_PREFIX]
 
 CONFIG += debug \
 warn_on \

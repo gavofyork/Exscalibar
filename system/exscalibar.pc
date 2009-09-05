@@ -3,5 +3,5 @@ Description: An extendable, scalable framework for audio information retrieval
 #Requires: qt
 
 Version: 1.1.0
-Libs: -L/usr/local/lib -lqtextra -lgeddei -lrgeddei
-Cflags: -fexceptions -I/usr/local/include
+Libs: -L/usr/lib -lqtextra -lgeddei -lrgeddei
+Cflags: -fexceptions -I/usr/include

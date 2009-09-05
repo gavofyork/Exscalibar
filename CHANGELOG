@@ -1,3 +1,8 @@
+1.1.0:
+New build system (removed configure script).
+Clean compile on GCC 4.3 with Qt 4.5.
+Removed GAT.
+
 1.0.5:
 Visibility aware.
 Configure script improved.
