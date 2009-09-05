@@ -3,41 +3,41 @@
 # Subdir relative project main directory: ./src/processors/toolkit
 # Target is a library:
 PACKAGES = "sndfile:1.0.0" \
-    "vorbisfile:1.0.0" \
-    "mad:0.15" \
-    "jack:0.90.0" \
-    "alsa:0.9"
+	"vorbisfile:1.0.0" \
+	"mad:0.15" \
+	"jack:0.90.0" \
+	"alsa:0.9"
 include(../../../exscalibar.pri)
 INSTALLS += headers \
-    target
+	target
 target.path = $$PREFIX/plugins/geddei
 headers.files += *.h
 headers.path = $$PREFIX/include/geddeiprocessors
 TARGETDEPS += $$DESTDIR/libqtextra.so \
-    $$DESTDIR/libgeddei.so
+	$$DESTDIR/libgeddei.so
 LIBS += -lqtextra \
-    -lgeddei
+	-lgeddei
 INCLUDEPATH += $$SRCDIR/qtextra \
-    $$SRCDIR/geddei
+	$$SRCDIR/geddei
 HEADERS += monitor.h \
-    multiplayer.h \
-    player.h \
-    recorder.h
+	multiplayer.h \
+	player.h \
+	recorder.h
 SOURCES += monitor.cpp \
-    multiplayer.cpp \
-    player.cpp \
-    toolkit.cpp \
-    alsacapturer.cpp \
-    jackcapturer.cpp \
-    dumper.cpp \
-    fan.cpp \
-    stress.cpp \
-    recorder.cpp \
-    speaker.cpp
-!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
-    DEPLOYMENT += $$SOURCES
-    SOURCES = .composed.cpp
-    OBJECTS_DIR = $$OBJECTS_DIR/toolkit
+	multiplayer.cpp \
+	player.cpp \
+	toolkit.cpp \
+	alsacapturer.cpp \
+	jackcapturer.cpp \
+	dumper.cpp \
+	fan.cpp \
+	stress.cpp \
+	recorder.cpp \
+	alsaplayer.cpp
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/toolkit
 }
 TEMPLATE = lib
 CONFIG += plugin
