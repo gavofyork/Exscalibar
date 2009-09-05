@@ -1,3 +1,9 @@
+isEmpty(EXSCALIBAR_PREFIX) {
+	PREFIX = /usr/local
+} else {
+	PREFIX = $EXSCALIBAR_PREFIX
+}
+
 CONFIG += debug \
 warn_on \
 qt \
