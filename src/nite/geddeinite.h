@@ -77,7 +77,7 @@ protected:
 	void closeEvent(QCloseEvent *);
 
 private slots:
-	void slotPropertyChanged(int row, int column);
+	void slotPropertyChanged(QTableWidgetItem* _i);
 
 	void on_modeRun_toggled(bool testing);
 	void on_fileOpen_activated();
@@ -99,17 +99,17 @@ private:
 	void updateProperties();
 
 	QDockWidget *theDockSelector;
-	QDockWidget *theDockProperties;
 
 	Q3Canvas *theCanvas;
 	Q3CanvasItem *theActive;
-	Q3Table *theProperties;
 	Q3PtrList<Bob> theBobs;
 	ProcessorView *theSelector;
 
 	ProcessorGroup theGroup;
 
 	QString theFilename;
+
+	bool theUpdatingProperties;
 
 	bool theRunning;
 	bool theTested;

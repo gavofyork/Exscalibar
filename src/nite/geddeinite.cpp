@@ -74,30 +74,10 @@ GeddeiNite::GeddeiNite():
 	theDefaultBufferSize	(262144)
 {
 	setupUi(this);
-
-	theDockProperties = new QDockWidget("Properties", this);
-//	theDockProperties->setResizeEnabled(true);
-//	theDockProperties->setVerticallyStretchable(true);
-//	theDockProperties->setHorizontallyStretchable(true);
-	addDockWidget(Qt::BottomDockWidgetArea, theDockProperties);
-
-	theProperties = new Q3Table(0, 1, theDockProperties);
-	theProperties->setTopMargin(0);
-	theProperties->horizontalHeader()->hide();
-	theDockProperties->setWidget(theProperties);
-	theProperties->adjustSize();
-	theProperties->setLeftMargin(theDockProperties->width() / 2);
-	theProperties->verticalHeader()->setResizeEnabled(false);
-	theProperties->verticalHeader()->setStretchEnabled(false);
-	connect(theProperties, SIGNAL(valueChanged(int, int)), this, SLOT(slotPropertyChanged(int, int)));
-	theDockProperties->show();
+	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
 
 	theDockSelector = new QDockWidget("Available Processors", this);
-//	theDockSelector->setResizeEnabled(true);
-//	theDockSelector->setVerticallyStretchable(true);
-//	theDockSelector->setHorizontallyStretchable(true);
 	addDockWidget(Qt::RightDockWidgetArea, theDockSelector);
-
 	theSelector = new ProcessorView(theDockSelector);
 	theDockSelector->setWidget(theSelector);
 	theDockSelector->show();
@@ -117,9 +97,10 @@ GeddeiNite::GeddeiNite():
 	restoreGeometry(s.value("mainwindow/geometry").toByteArray());
 
 	if (QFile::exists(s.value("mainwindow/lastproject").toString()))
-		doLoad(s.value("mainwindow/lastproject").toString());
-
+		doLoad(theFilename = s.value("mainwindow/lastproject").toString());
 	statusBar()->message(tr("Ready"), 2000);
+
+	updateProperties();
 }
 
 GeddeiNite::~GeddeiNite()
@@ -277,32 +258,41 @@ void GeddeiNite::updateItems()
 
 void GeddeiNite::updateProperties()
 {
-	if (theActive)
+	theUpdatingProperties = true;
+	for (int i = 0; i < 2; i++)
+	if (theActive && dynamic_cast<SoftBob *>(theActive))
 	{
-		if (dynamic_cast<SoftBob *>(theActive))
-		{	Properties p(dynamic_cast<SoftBob *>(theActive)->theProperties);
-			theProperties->setNumRows(p.size() + 1);
-			theProperties->verticalHeader()->setLabel(0, "Name");
-			theProperties->setText(0, 0, dynamic_cast<Bob *>(theActive)->name());
-			for (uint i = 0; i < p.size(); i++)
-			{
-				theProperties->verticalHeader()->setLabel(i + 1, p.keys()[i]);
-				theProperties->setText(i + 1, 0, p[p.keys()[i]].toString());
-			}
+		Properties p(dynamic_cast<SoftBob *>(theActive)->theProperties);
+		theProperties->setRowCount(p.size() + 1);
+		theProperties->setVerticalHeaderItem(0, new QTableWidgetItem("Name"));
+		theProperties->setItem(0, 0, new QTableWidgetItem(dynamic_cast<Bob *>(theActive)->name()));
+		for (uint i = 0; i < p.size(); i++)
+		{
+			theProperties->setVerticalHeaderItem(i + 1, new QTableWidgetItem(p.keys()[i]));
+			theProperties->setItem(i + 1, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
 		}
-		else if (dynamic_cast<BobLink *>(theActive))
-		{	BobLink *link = dynamic_cast<BobLink *>(theActive);
-			theProperties->setNumRows(2);
-			theProperties->verticalHeader()->setLabel(0, "Buffer Size");
-			theProperties->setText(0, 0, QString::number(link->bufferSize()));
-			theProperties->verticalHeader()->setLabel(1, "Proximity");
-			theProperties->setText(1, 0, QString::number(link->proximity()));
-		}
-		else
-			theProperties->setNumRows(0);
+		theProperties->resizeColumnsToContents();
+		theProperties->setEnabled(true);
+	}
+	else if (theActive && dynamic_cast<BobLink *>(theActive))
+	{
+		BobLink *link = dynamic_cast<BobLink *>(theActive);
+		theProperties->setRowCount(2);
+		theProperties->setItem(0, 0, new QTableWidgetItem(QString::number(link->bufferSize())));
+		theProperties->setVerticalHeaderItem(0, new QTableWidgetItem("Buffer Size"));
+		theProperties->setItem(1, 0, new QTableWidgetItem(QString::number(link->proximity())));
+		theProperties->setVerticalHeaderItem(1, new QTableWidgetItem("Proximity"));
+		theProperties->resizeColumnsToContents();
+		theProperties->setEnabled(true);
 	}
 	else
-		theProperties->setNumRows(0);
+	{
+		theProperties->clear();
+		theProperties->setRowCount(1);
+		theProperties->setEnabled(false);
+	}
+	theUpdatingProperties = false;
+	theProperties->update();
 }
 
 void GeddeiNite::on_fileSave_activated()
@@ -371,28 +361,30 @@ void GeddeiNite::on_editRemove_activated()
 		statusBar()->message("Cannot delete this object: You didn't create it.", 2000);
 }
 
-void GeddeiNite::slotPropertyChanged(int row, int column)
+void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 {
+	if (theUpdatingProperties)
+		return;
+	assert(!theRunning);
 	assert(theActive);
-	if (dynamic_cast<SoftBob *>(theActive))
+	if (dynamic_cast<SoftBob *>(theActive) && theProperties->verticalHeaderItem(_i->row()))
 	{	Properties &p(dynamic_cast<SoftBob *>(theActive)->theProperties);
-		if (row > 0)
-		{	p.set(theProperties->verticalHeader()->label(row), theProperties->text(row, column));
+		if (_i->row() > 0)
+		{	p.set(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 			dynamic_cast<SoftBob *>(theActive)->propertiesChanged();
 		}
+		else if (theGroup.exists(_i->text()))
+		{	statusBar()->message("This name is already in use. Try another.", 2000);
+			_i->setText(dynamic_cast<Bob *>(theActive)->name());
+		}
 		else
-			if (theGroup.exists(theProperties->text(row, column)))
-			{	statusBar()->message("This name is already in use. Try another.", 2000);
-				theProperties->setText(row, column, dynamic_cast<Bob *>(theActive)->name());
-			}
-			else
-				dynamic_cast<Bob *>(theActive)->setName(theProperties->text(row, column));
+			dynamic_cast<Bob *>(theActive)->setName(_i->text());
 	}
 	else if (dynamic_cast<BobLink *>(theActive))
 	{	BobLink *link = dynamic_cast<BobLink *>(theActive);
-		switch (row)
-		{	case 0: link->setBufferSize(theProperties->text(row, column).toUInt()); break;
-			case 1: link->setProximity(theProperties->text(row, column).toUInt()); break;
+		switch (_i->row())
+		{	case 0: link->setBufferSize(_i->text().toUInt()); break;
+			case 1: link->setProximity(_i->text().toUInt()); break;
 			default: ;
 		}
 	}
@@ -401,11 +393,9 @@ void GeddeiNite::slotPropertyChanged(int row, int column)
 
 void GeddeiNite::on_modeTest_activated()
 {
+	setFocus();
 	theTested = connectAll();
-	if (theTested)
-	{	disconnectAll();
-		// TODO: disable test button.
-	}
+	disconnectAll();
 	modeRun->setEnabled(theTested);
 }
 
@@ -451,6 +441,10 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 
 void GeddeiNite::on_modeRun_toggled(bool running)
 {
+	setFocus();
+	if (!theTested)
+		return;
+
 	if (running == theRunning) { theIgnoreNext = true; return; }
 	if (theIgnoreNext) { theIgnoreNext = false; return; }
 	assert(theTested);
@@ -458,26 +452,27 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 	theRunning = running;
 	if (theRunning)
 	{	connectAll();
-		qDebug("OK - starting...");
 		bool successful = theGroup.go();
-		qDebug("Started.");
-//		if (successful) successful = theGroup.waitUntilGoing() == Processor::None;
 		if (!successful)
 		{
 			// some sort of cool depiction of the error.
 			// restore to stable state.
 			statusBar()->message("Problem starting processors.");
 			theCanvas->update();
+			theRunning = false;
+			theIgnoreNext = true;
+			modeStop->setChecked(true);
+			disconnectAll();
 			return;
 		}
-		// start some sort of monitor...
-		qDebug("Exitting...");
+		theProperties->setEnabled(false);
 	}
 	else if (!running)
 	{
 		theGroup.stop(false);
 		theGroup.reset();
 		disconnectAll();
+		theProperties->setEnabled(true);
 	}
 	theCanvas->update();
 }

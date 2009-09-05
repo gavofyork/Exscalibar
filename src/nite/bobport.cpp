@@ -161,7 +161,7 @@ GeddeiNite *BobPort::geddeiNite()
 void BobPort::updateProfile()
 {
 	if (theIsInput)
-	{	if (geddeiNite()->connected())
+	{	if (geddeiNite()->connected() && (uint)theIndex < processor()->numInputs())
 		{	//theInfo->show();
 			/*theInfo->setFill*/
 			theFill = processor()->bufferCapacity(theIndex);

@@ -44,7 +44,10 @@ class ALSAPlayer: public Processor
 	uint theChannels;
 	uint thePeriodSize;
 	uint thePeriods;
+	snd_pcm_t *thePcmHandle;
 
+	virtual bool processorStarted();
+	virtual void processorStopped();
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &_p)
@@ -59,11 +62,11 @@ class ALSAPlayer: public Processor
 	{
 		return PropertiesInfo	("device", "hw:0,1", "The ALSA hardware device to open.")
 								("channels", 2, "The number of channels to use.")
-								("periodsize", 8192, "The number of frames in each period.")
+								("periodsize", 1024, "The number of frames in each period.")
 								("periods", 2, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSAPlayer() : Processor("ALSAPlayer") {}
+	ALSAPlayer() : Processor("ALSAPlayer"), thePcmHandle(0) {}
 };
 
 bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
@@ -71,61 +74,39 @@ bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 	return true;
 }
 
+bool ALSAPlayer::processorStarted()
+{
+	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_hw_params_alloca(&hwparams);
+	thePcmHandle = 0;
+	if (snd_pcm_open(&thePcmHandle, theDevice.toLatin1(), SND_PCM_STREAM_PLAYBACK, thePeriodSize * thePeriods) < 0)
+		fprintf(stderr, "Error opening PCM device %s\n", qPrintable(theDevice));
+	else if (snd_pcm_hw_params_any(thePcmHandle, hwparams) < 0)
+		fprintf(stderr, "Can not configure this PCM device.\n");
+	else if (snd_pcm_hw_params_set_access(thePcmHandle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
+		fprintf(stderr, "Error setting access.\n");
+	else if (snd_pcm_hw_params_set_format(thePcmHandle, hwparams, SND_PCM_FORMAT_S16_LE) < 0)
+		fprintf(stderr, "Error setting format.\n");
+	else if (snd_pcm_hw_params_set_rate_resample(thePcmHandle, hwparams, (uint)input(0).type().frequency()))
+		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n", (uint)input(0).type().frequency());
+	else if (snd_pcm_hw_params_set_channels(thePcmHandle, hwparams, theChannels) < 0)
+		fprintf(stderr, "Error setting channels.\n");
+	else if (snd_pcm_hw_params_set_periods(thePcmHandle, hwparams, thePeriods, 0) < 0)
+		fprintf(stderr, "Error setting periods.\n");
+	else if (snd_pcm_hw_params_set_buffer_size(thePcmHandle, hwparams, (thePeriodSize * thePeriods)) < 0)
+		fprintf(stderr, "Error setting buffersize.\n");
+	else if (snd_pcm_hw_params(thePcmHandle, hwparams) < 0)
+		fprintf(stderr, "Error setting HW params.\n");
+	else
+		return true;
+	if (thePcmHandle)
+		snd_pcm_close(thePcmHandle);
+	thePcmHandle = 0;
+	return false;
+}
+
 void ALSAPlayer::processor()
 {
-	snd_pcm_t *pcm_handle;
-	snd_pcm_stream_t stream = SND_PCM_STREAM_PLAYBACK;
-	snd_pcm_hw_params_t *hwparams;
-	char *pcm_name;
-	pcm_name = strdup(theDevice.toLatin1());
-	snd_pcm_hw_params_alloca(&hwparams);
-	if (snd_pcm_open(&pcm_handle, pcm_name, stream, thePeriodSize * thePeriods) < 0)
-	{
-		fprintf(stderr, "Error opening PCM device %s\n", pcm_name);
-		return;
-	}
-	if (snd_pcm_hw_params_any(pcm_handle, hwparams) < 0)
-	{
-		fprintf(stderr, "Can not configure this PCM device.\n");
-		return;
-	}
-	uint rate = input(0).type().frequency();
-	if (snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
-	{
-		fprintf(stderr, "Error setting access.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_format(pcm_handle, hwparams, SND_PCM_FORMAT_S16_LE) < 0)
-	{
-		fprintf(stderr, "Error setting format.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_rate_resample(pcm_handle, hwparams, rate))
-	{
-		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n", rate);
-		return;
-	}
-	if (snd_pcm_hw_params_set_channels(pcm_handle, hwparams, theChannels) < 0)
-	{
-		fprintf(stderr, "Error setting channels.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_periods(pcm_handle, hwparams, thePeriods, 0) < 0)
-	{
-		fprintf(stderr, "Error setting periods.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_buffer_size(pcm_handle, hwparams, (thePeriodSize * thePeriods)) < 0)
-	{
-		fprintf(stderr, "Error setting buffersize.\n");
-		return;
-	}
-	if (snd_pcm_hw_params(pcm_handle, hwparams) < 0)
-	{
-		fprintf(stderr, "Error setting HW params.\n");
-		return;
-	}
-
 	short outdata[thePeriodSize * theChannels];
 	while (thereIsInputForProcessing(thePeriodSize))
 	{
@@ -141,14 +122,19 @@ void ALSAPlayer::processor()
 		uint written = 0;
 		while (written < thePeriodSize)
 		{
-			int pcmreturn = snd_pcm_writei(pcm_handle, outdata + written * theChannels, thePeriodSize - written);
+			int pcmreturn = snd_pcm_writei(thePcmHandle, outdata + written * theChannels, thePeriodSize - written);
 			if (pcmreturn > 0)
 				written += pcmreturn;
 			else
-				snd_pcm_prepare(pcm_handle);
+				snd_pcm_prepare(thePcmHandle);
 		}
 	}
+}
 
+void ALSAPlayer::processorStopped()
+{
+	snd_pcm_close(thePcmHandle);
+	thePcmHandle = 0;
 }
 
 EXPORT_CLASS(ALSAPlayer, 0,1,0, Processor);
