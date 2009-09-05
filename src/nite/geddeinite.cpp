@@ -113,6 +113,11 @@ public:
 		_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
 	}
 
+	static void fromDom(QDomElement _element, ProcessorItem* _parent)
+	{
+		new InputItem(_element.attribute("index").toInt(), _parent);
+	}
+
 	void saveYourself(QDomElement& _parent, QDomDocument& _doc) const
 	{
 		QDomElement out = _doc.createElement("input");
@@ -131,6 +136,7 @@ private:
 class ProcessorItem: public QGraphicsItem
 {
 	friend class InputItem;
+
 public:
 	ProcessorItem(Processor* _p): QGraphicsItem(), m_processor(_p)
 	{
@@ -151,10 +157,34 @@ public:
 	void disconnectYourself()
 	{
 	}
-	void saveYourself(QDomElement& _root, QDomDocument& _doc)
+	static void fromDom(QDomElement& _element, QGraphicsScene* _scene)
+	{
+		Properties p;
+		for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
+			if (n.toElement().tagName() == "property")
+				p[n.toElement().attribute("name")] = n.toElement().attribute("value");
+		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create(_element.attribute("type")), p, _element.attribute("name"));
+		pi->loadYourself(_element);
+		_scene->addItem(pi);
+	}
+	void loadYourself(QDomElement& _element)
+	{
+		setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
+		m_size = QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble());
+		for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
+			if (n.toElement().tagName() == "input")
+				InputItem::fromDom(n.toElement(), this);
+	}
+	void saveYourself(QDomElement& _root, QDomDocument& _doc) const
 	{
 		QDomElement proc = _doc.createElement("processor");
 		proc.setAttribute("type", m_processor->type());
+
+		proc.setAttribute("name", m_processor->name());
+		proc.setAttribute("x", pos().x());
+		proc.setAttribute("y", pos().y());
+		proc.setAttribute("w", m_size.width());
+		proc.setAttribute("h", m_size.height());
 
 		foreach (QString k, m_properties.keys())
 		{
@@ -163,19 +193,12 @@ public:
 			prop.setAttribute("name", k);
 			prop.setAttribute("value", m_properties[k].toString());
 		}
-
-		proc.setAttribute("name", m_processor->name());
-		proc.setAttribute("x", pos().x());
-		proc.setAttribute("y", pos().y());
-		proc.setAttribute("w", m_size.width());
-		proc.setAttribute("h", m_size.height());
-
 		foreach (QGraphicsItem* i, childItems())
 			if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
 				ii->saveYourself(proc, _doc);
 		_root.appendChild(proc);
 	}
-	void loadYourself()
+	void postLoad()
 	{
 	}
 
@@ -195,6 +218,13 @@ public:
 	virtual int type() const { return Type; }
 
 private:
+	ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr)
+	{
+		m_processor->init(_name, m_properties);
+		m_size = QSizeF(100, 100);
+		qDebug() << m_processor->numInputs() << m_processor->numOutputs();
+	}
+
 	Processor*	m_processor;
 	Properties	m_properties;
 	QSizeF		m_size;
@@ -202,12 +232,12 @@ private:
 
 InputItem::InputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i)
 {
-	m_size = QSizeF(_p->m_processor->input(m_index).capacity() / _p->m_processor->input(m_index).type().frequency() * 100 + cornerSize, portSize);
+	double secs = 0.1;//_p->m_processor->input(m_index).capacity() / _p->m_processor->input(m_index).type().frequency();
+	m_size = QSizeF(secs * 100 + cornerSize, portSize);
 	setPos(-m_size.width() - cornerSize, cornerSize + portLateralMargin + (portLateralMargin + portSize) * m_index);
 }
 
 inline ProcessorItem* InputItem::processorItem() const { return qgraphicsitem_cast<ProcessorItem*>(parentItem()); }
-
 
 void GeddeiNite::doSave(const QString& _filename)
 {
@@ -244,21 +274,10 @@ void GeddeiNite::doLoad(const QString &filename)
 	QDomElement root = doc.documentElement();
 	for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling())
 	{	QDomElement elem = n.toElement();
-		if (elem.isNull()) continue;
-		if (elem.tagName() == "processor")
-			(new SoftBob(0, 0, elem.attribute("type"), elem.attribute("name"), theCanvas))->loadYourselfPre(elem);
-		else if (elem.tagName() == "subprocessor")
-			(new DomSoftBob(0, 0, elem.attribute("type"), elem.attribute("name"), theCanvas))->loadYourselfPre(elem);
-		else if (elem.tagName() == "builtin")
-		{	if (elem.attribute("type") == "Player")
-				(new HardBob(0, 0, elem.attribute("name"), theCanvas, new Player(elem.attribute("path"))))->loadYourselfPre(elem);
-		}
-	}
-	for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling())
-	{	QDomElement elem = n.toElement();
-		if (elem.isNull()) continue;
-		if (elem.tagName() == "processor" || elem.tagName() == "subprocessor" || elem.tagName() == "builtin")
-			getBob(elem.attribute("name"))->loadYourselfPost(elem);
+		if (elem.isNull())
+			continue;
+		else if (elem.tagName() == "processor")
+			ProcessorItem::fromDom(elem, &theScene);
 	}
 	statusBar()->message("Loaded.", 2000);
 	setModified(false);
