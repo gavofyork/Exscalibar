@@ -58,7 +58,7 @@ void DomProcessor::paintProcessor(QPainter &p)
 	thePrimary->paintProcessor(p);
 }
 
-const bool DomProcessor::createAndAddWorker()
+bool DomProcessor::createAndAddWorker()
 {
 	SubProcessor *sub = SubProcessorFactory::create(thePrimary->theType);
 	if(!sub) return false;
@@ -66,7 +66,7 @@ const bool DomProcessor::createAndAddWorker()
 	return true;
 }
 
-const bool DomProcessor::createAndAddWorker(const QString &host, const uint key)
+bool DomProcessor::createAndAddWorker(const QString &host, uint key)
 {
 	return ProcessorForwarder::createCoupling(this, host, key, thePrimary->theType) != 0;
 }
@@ -112,7 +112,7 @@ void DomProcessor::haveStoppedNow()
 		}
 }
 
-const bool DomProcessor::processorStarted()
+bool DomProcessor::processorStarted()
 {
 	if(MESSAGES) qDebug("DomProcessor[%s]: Starting...", theName.latin1());
 
@@ -191,7 +191,7 @@ void DomProcessor::processor()
 		theQueueLock.unlock();
 
 		// Calculate how much data we're going to try to process this iteration.
-		const uint wouldReadSamples = theSamplesStep * (max(1, (*w)->theLoad) - 1) + 3;
+		uint wouldReadSamples = theSamplesStep * (max(1, (*w)->theLoad) - 1) + 3;
 
 		// This is some data to describe what we actually are doing this iteration.
 		uint willReadSamples, willReadChunks, discardFromOthers = 0;
@@ -269,7 +269,7 @@ void DomProcessor::processor()
 			if(MESSAGES && theDebug)
 			{	qDebug("\n---- NEXT WORKER ----");
 				char c = 'A';
-				for(Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end() && x != w; x++, c++);
+				for(Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end() && x != w; x++, c++) {}
 				qDebug("--------- %c ---------", c);
 			}
 		}
@@ -483,7 +483,7 @@ void DomProcessor::checkExit()
 	}
 }
 
-const bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// We can use just verifyAndSpecifyTypes here, since the outTypes will be recorded
 	// for our primary in the for loop later anyway (assuming they're valid).
@@ -536,11 +536,11 @@ void DomProcessor::specifyInputSpace(Q3ValueVector<uint> &samples)
 {
 	uint minimumSize = (theSamplesIn + theSamplesStep * (theWorkers.count() - 1));
 	uint optimalSize = Undefined;
-	for(uint i = 0; i < samples.count(); i++)
+	for(uint i = 0; i < (uint)samples.count(); i++)
 		if(optimalSize > max(theOptimalThroughput / input(i).type().scope(), minimumSize))
 			optimalSize = max(theOptimalThroughput / input(i).type().scope(), minimumSize);
 	theWantSize = uint(ceil(exp((log(double(optimalSize)) - log(double(minimumSize))) * theWeighting + log(double(minimumSize)))));
-	for(uint i = 0; i < samples.count(); i++)
+	for(uint i = 0; i < (uint)samples.count(); i++)
 		samples[i] = theAlterBuffer ? theWantSize : minimumSize;
 
 	if(theDebug && lMESSAGES) qDebug("sIS (%s): minimum=%d, workers=%d, optimal=%d, want=%d, alter=%d", name().latin1(), minimumSize, theWorkers.count(), optimalSize, theWantSize, theAlterBuffer);
@@ -548,7 +548,7 @@ void DomProcessor::specifyInputSpace(Q3ValueVector<uint> &samples)
 
 void DomProcessor::specifyOutputSpace(Q3ValueVector<uint> &samples)
 {
-	for(uint i = 0; i < samples.count(); i++)
+	for(uint i = 0; i < (uint)samples.count(); i++)
 		samples[i] = theAlterBuffer ? ((theWantSize - theSamplesIn) / theSamplesStep + 1) * theSamplesOut : theSamplesOut * theWorkers.count();
 }
 

@@ -68,14 +68,14 @@ public:
 	void reloadAll(const QStringList &thePaths)
 	{
 		clear();
-		for(uint i = 0; i < thePaths.size(); i++)
+		for(uint i = 0; i < (uint)thePaths.size(); i++)
 			loadLibraries(thePaths[i]);
 	}
 
 	const QStringList &getAvailable() { return theIds; }
-	const bool isAvailable(const QString &id) { return theIds.contains(id); }
+	bool isAvailable(const QString &id) { return theIds.contains(id); }
 
-	const int getVersion(const QString &id)
+	int getVersion(const QString &id)
 	{
 		if(!isAvailable(id)) return -1;
 		return theMappings[id]->getVersion(id);
@@ -123,7 +123,7 @@ void QFactoryManager<Base>::loadLibraries(const QString &thePath)
 	QDir d(thePath);
 	d.setFilter(QDir::Readable | QDir::Executable | QDir::Files | QDir::NoSymLinks);
 	QStringList l = d.entryList();
-	for(uint i = 0; i < l.count(); i++)
+	for(uint i = 0; i < (uint)l.count(); i++)
 	{	if(MESSAGES) qDebug("Loading library %s...", l[i].latin1());
 		loadLibrary(thePath + "/" + l[i]);
 	}

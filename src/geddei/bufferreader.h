@@ -40,7 +40,7 @@ class BufferReader : public ScreenOwner
 	/**
 	 * The guts of skipElements. Do not use directly.
 	 */
-	void skipElementsUNSAFE(const uint elements);
+	void skipElementsUNSAFE(uint elements);
 
 	/**
 	 * Just used for reseting the stuff.
@@ -74,7 +74,7 @@ public:
 	 * 
 	 * This takes into account theAlreadyPlungedHere counter.
 	 */
-	const int nextPlunger() const;
+	int nextPlunger() const;
 
 	/**
 	 * Returns the number of elements that would definately cause an immediate
@@ -87,7 +87,7 @@ public:
 	 * 
 	 * Thread-safe.
 	 */
-	const uint elementsReady() const;
+	uint elementsReady() const;
 
 	/**
 	 * Waits until the buffer is at least full enough to allow a read of a
@@ -100,7 +100,7 @@ public:
 	 * 
 	 * Thread-safe. Blocking.
 	 */
-	void waitForElements(const uint elements) const;
+	void waitForElements(uint elements) const;
 
 	/**
 	 * Reads a number of elements from the buffer.
@@ -115,7 +115,7 @@ public:
 	 * 
 	 * Thread-safe. Blocking.
 	 */
-	const BufferData readElements(const uint elements, bool autoFree = true);
+	const BufferData readElements(uint elements, bool autoFree = true);
 
 	/**
 	 * Reads a number of elements from the buffer, immediately discards them.
@@ -139,7 +139,7 @@ public:
 	 * 
 	 * Thread-safe.
 	 */
-	void skipElements(const uint elements);
+	void skipElements(uint elements);
 
 	//* Reimplementation from ScreenOwner.
 
@@ -173,7 +173,7 @@ public:
 	/**
 	 * Returns the size of the buffer.
 	 */
-	const uint size() const { return theBuffer->size(); }
+	uint size() const { return theBuffer->size(); }
 
 	void debug();
 

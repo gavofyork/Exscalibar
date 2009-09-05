@@ -23,7 +23,7 @@ class Trivial: public Processor
 			plunge();
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 	public: Trivial() : Processor("Trivial") {}
 };
@@ -35,7 +35,7 @@ class Trivial2: public Processor
 		for(int i = 0;; i++)
 			output(0).makeScratchSample(true)[0] = i;
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 	public: Trivial2() : Processor("Trivial2") {}
 };
@@ -43,7 +43,7 @@ class Trivial2: public Processor
 class Multiply: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = in[0][0] * in[1][0]; }
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(2, 1, 1, 1, 1); }
 	public: Multiply(): SubProcessor("Multiply") {}
 };

@@ -20,12 +20,12 @@ using namespace Geddei;
 namespace Geddei
 {
 
-const bool SignalTypeRef::operator==(const SignalType &p)
+bool SignalTypeRef::operator==(const SignalType &p)
 {
 	return thePtr->sameAs(&p);
 }
 
-const bool SignalTypeRef::operator==(const SignalTypeRef &p)
+bool SignalTypeRef::operator==(const SignalTypeRef &p)
 {
 	return thePtr->sameAs(p.thePtr);
 }
@@ -44,12 +44,12 @@ SignalTypeRef &SignalTypeRef::operator=(const SignalTypeRef &p)
 	return *this;
 }
 
-const uint SignalTypeRef::scope() const
+uint SignalTypeRef::scope() const
 {
 	return thePtr->scope();
 }
 
-const float SignalTypeRef::frequency() const
+float SignalTypeRef::frequency() const
 {
 	return thePtr->frequency();
 }

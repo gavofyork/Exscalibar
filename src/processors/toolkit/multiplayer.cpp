@@ -36,13 +36,13 @@ MultiPlayer::MultiPlayer() : Processor("MultiPlayer", OutConst, Guarded)
 {
 }
 
-const bool MultiPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool MultiPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
 	outTypes = Wave(theRate);
 	return true;
 }
 
-const bool MultiPlayer::openFile()
+bool MultiPlayer::openFile()
 {
 	if(theFile) sf_close(theFile);
 	SF_INFO sfinfo;

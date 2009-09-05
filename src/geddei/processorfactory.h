@@ -53,7 +53,7 @@ public:
 	 * @param type The type of Processor (i.e. class name) to be queried.
 	 * @return true if it can be create() -ed, false otherwise.
 	 */
-	static const bool available(const QString &type) { return factory().isAvailable(type); }
+	static bool available(const QString &type) { return factory().isAvailable(type); }
 
 	/**
 	 * Gets (latest available) version of a Processor -derived class.
@@ -62,7 +62,7 @@ public:
 	 * @return The version of the class @a type that is available, or -1 if
 	 * unavailable, in an integer code.
 	 */
-	static const int versionId(const QString &type) { return factory().getVersion(type); }
+	static int versionId(const QString &type) { return factory().getVersion(type); }
 
 	/**
 	 * Gets (latest available) version of a Processor -derived class.

@@ -25,8 +25,8 @@ class DownSample : public SubProcessor
 	enum { Mean = 0, Max, Min };
 	uint theConsolidate;
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -34,7 +34,7 @@ public:
 	DownSample() : SubProcessor("DownSample") {}
 };
 
-void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, const uint chunks) const
+void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	if(theCount <= 1)
 		if(theScope > 1)
@@ -69,7 +69,7 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, const 
 	}
 }
 
-const bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	theScope = inTypes[0].scope();
 	outTypes = inTypes[0];

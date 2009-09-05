@@ -44,7 +44,7 @@ Player::Player() : Processor("Player", OutConst, Guarded), thePath(""), theChann
 {
 }
 
-const bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
 	outTypes = Wave(theRate);
 	return true;
@@ -102,7 +102,7 @@ void Player::initFromProperties(const Properties &p)
 #ifdef HAVE_MAD
 	if(thePath.lower().contains(".mp3"))
 	{
-	const uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
+	uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
 	unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
 	QFile qfile(thePath);
 	if(!qfile.open(QIODevice::ReadOnly))
@@ -229,7 +229,7 @@ void Player::processor()
 	QFile qfile(thePath);
 	if(!qfile.open(QIODevice::ReadOnly)) return;
 	theMadFile = fdopen(qfile.handle(), "r");
-	const uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
+	uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
 	unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD], *GuardPtr=NULL;
 
 	mad_stream_init(&Stream);

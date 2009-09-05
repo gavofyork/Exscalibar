@@ -57,7 +57,7 @@ public:
 	 * 
 	 * Makes sure that readElements(@a elements) will never block indefinately.
 	 */
-	virtual void enforceMinimum(const uint elements) = 0;
+	virtual void enforceMinimum(uint elements) = 0;
 
 	/**
 	 * Simple constructor.

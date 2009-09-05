@@ -19,7 +19,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-ProcessorGroup::ProcessorGroup(const bool adopt) : theAdopt(adopt)
+ProcessorGroup::ProcessorGroup(bool adopt) : theAdopt(adopt)
 {
 	theProcessors.clear();
 }
@@ -29,7 +29,7 @@ ProcessorGroup::~ProcessorGroup()
 	if(theAdopt) deleteAll();
 }
 
-const bool ProcessorGroup::exists(const QString &name)
+bool ProcessorGroup::exists(const QString &name)
 {
 	return theProcessors.count(name);
 }
@@ -78,7 +78,7 @@ void ProcessorGroup::remove(Processor *o)
 		}
 }
 
-const bool ProcessorGroup::confirmTypes() const
+bool ProcessorGroup::confirmTypes() const
 {
 	bool ret = true;
 	if(MESSAGES) qDebug("ProcessorGroup::confirmTypes()");
@@ -103,7 +103,7 @@ void ProcessorGroup::disconnectAll()
 		i.data()->disconnectAll();
 }
 
-const bool ProcessorGroup::go(const bool waitUntilGoing) const
+bool ProcessorGroup::go(bool waitUntilGoing) const
 {
 	bool ret = true;
 //	if(!confirmTypes()) return false;
@@ -113,7 +113,7 @@ const bool ProcessorGroup::go(const bool waitUntilGoing) const
 	return ret;
 }
 
-const Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *errorData) const
+Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *errorData) const
 {
 	Processor::ErrorType ret;
 	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
@@ -140,7 +140,7 @@ const QString ProcessorGroup::error() const
 	return ret;
 }
 
-void ProcessorGroup::stop(const bool resetToo) const
+void ProcessorGroup::stop(bool resetToo) const
 {
 	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		i.data()->stop();

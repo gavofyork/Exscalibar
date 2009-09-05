@@ -96,16 +96,16 @@ protected:
 private:
 	virtual void doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p);
 public:
-	virtual const bool go() { return theSession->processorGo(theHandle); }
+	virtual bool go() { return theSession->processorGo(theHandle); }
 	virtual const Processor::ErrorType waitUntilGoing(int *errorData = 0) { int ed; return (Processor::ErrorType)theSession->processorWaitUntilGoing(theHandle, errorData ? *errorData : ed); }
 	virtual void waitUntilDone() { theSession->processorWaitUntilDone(theHandle); }
 	virtual void stop() { theSession->processorStop(theHandle); }
 	virtual void reset() { theSession->processorReset(theHandle); }
-	virtual void split(const uint sourceIndex) { theSession->processorSplit(theHandle, sourceIndex); }
-	virtual void share(const uint sourceIndex) { theSession->processorShare(theHandle, sourceIndex); }
-	virtual const bool connect(const uint sourceIndex, const RemoteProcessor *sink, const uint sinkIndex, const uint bufferSize = 1);
-	virtual const bool connect(const uint sourceIndex, const LocalProcessor *sink, const uint sinkIndex, const uint bufferSize = 1);
-	virtual void disconnect(const uint sourceIndex) { theSession->processorDisconnect(theHandle, sourceIndex); }
+	virtual void split(uint sourceIndex) { theSession->processorSplit(theHandle, sourceIndex); }
+	virtual void share(uint sourceIndex) { theSession->processorShare(theHandle, sourceIndex); }
+	virtual bool connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize = 1);
+	virtual bool connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize = 1);
+	virtual void disconnect(uint sourceIndex) { theSession->processorDisconnect(theHandle, sourceIndex); }
 	virtual void disconnectAll() { theSession->processorDisconnectAll(theHandle); }
 	virtual const QString name() const { return theName; }
 

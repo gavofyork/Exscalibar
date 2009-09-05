@@ -139,7 +139,7 @@ public:
 	 * Assert the reading came to its logical end and the data may be duely
 	 * disguarded.
 	 *
- 	 * @param data The data whose deletion is initiating the operation.
+	 * @param data The data whose deletion is initiating the operation.
 	 */
 	virtual void haveRead(const BufferData &) = 0;
 
@@ -196,7 +196,7 @@ class DLLEXPORT BufferData
 	// when the reference gets destroyed how the Buffer will react.
 	// As such it should remain generally unchanged.
 	BufferInfo *theInfo;
-	
+
 	// These are attributes specific to how we view the data.
 	// Changing them will have no discourse beyond how it is viewed in this class.
 	// In particular, if the data is written to a buffer, the original aperture
@@ -223,10 +223,10 @@ class DLLEXPORT BufferData
 	 * If so, two seperate sends of sizes firstPart() and secondPart() would be needed.
 	 * Otherwise, just firstPart() is needed.
 	 */
-	const bool rollsOver() const { return theOffset + theVisibleSize - 1 > theInfo->theMask; }
-	const uint sizeOnlyPart() const { return theVisibleSize; }
-	const uint sizeFirstPart() const { return (theInfo->theMask + 1) - theOffset; }
-	const uint sizeSecondPart() const { return theOffset + theVisibleSize - (theInfo->theMask + 1); }
+	bool rollsOver() const { return theOffset + theVisibleSize - 1 > theInfo->theMask; }
+	uint sizeOnlyPart() const { return theVisibleSize; }
+	uint sizeFirstPart() const { return (theInfo->theMask + 1) - theOffset; }
+	uint sizeSecondPart() const { return theOffset + theVisibleSize - (theInfo->theMask + 1); }
 	const float *firstPart() const { return theInfo->theData + theOffset; }
 	float *firstPart() { return theInfo->theData + theOffset; }
 	const float *secondPart() const { return theInfo->theData; }
@@ -235,15 +235,15 @@ class DLLEXPORT BufferData
 	 * Makes sure that isArray works ok.
 	 * You shouldn't need to touch this.
 	 */
-	BufferData &dontRollOver(const bool makeCopy = false);
-	const BufferData &dontRollOver(const bool makeCopy = true) const;
+	BufferData &dontRollOver(bool makeCopy = false);
+	const BufferData &dontRollOver(bool makeCopy = true) const;
 
 	/**
 	 * Invalidates data, making it unreadable/unwritable.
-	 * 
+	 *
 	 * Used by buffers and connections to make sure that once the data pointed
 	 * to becomes invalid, no access may happen on it.
-	 * 
+	 *
 	 * The data in theInfo must be destroyed or otherwise freed by the caller.
 	 * This object will no longer attempt to free it automatically.
 	 */
@@ -252,7 +252,7 @@ class DLLEXPORT BufferData
 	/**
 	 * Causes the preassigned end type to become None, meaning that on
 	 * destruction of the last reference nothing will happen to the data.
-	 * 
+	 *
 	 * Used by buffers/connections if the data is explicity used, to make sure
 	 * that it doesn't happen twice.
 	 */
@@ -260,8 +260,8 @@ class DLLEXPORT BufferData
 
 	BufferData(uint size, uint scope, float *data, ScratchOwner *scratch = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
 	BufferData(uint size, uint scope, float *data, ScreenOwner *screen = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
-	
-	BufferData(BufferInfo *info, const uint offset);
+
+	BufferData(BufferInfo *info, uint offset);
 
 public:
 	/** @internal
@@ -278,13 +278,13 @@ public:
 	 * Grabs a the unique ID code - will be the same for all BufferData
 	 * objects that share data.
 	 */
-	const BufferID identity() const { return theInfo; }
+	BufferID identity() const { return theInfo; }
 
 	/** @internal
 	 * Grabs the info object. This is the implicitly shared object throughout
 	 * BufferData, and actually holds the data pointer.
-	 * 
-	 * All BufferData objects that share this data will have the same info 
+	 *
+	 * All BufferData objects that share this data will have the same info
 	 * object.
 	 */
 	BufferInfo *info() { return theInfo; }
@@ -292,8 +292,8 @@ public:
 	/** @internal @overload
 	 * Grabs the info object. This is the implicitly shared object throughout
 	 * BufferData, and actually holds the data pointer.
-	 * 
-	 * All BufferData objects that share this data will have the same info 
+	 *
+	 * All BufferData objects that share this data will have the same info
 	 * object.
 	 */
 	const BufferInfo *info() const { return theInfo; }
@@ -333,7 +333,7 @@ public:
 	 *
 	 * @return true iff this data is terminated by a plunger.
 	 */
-	const bool plunger() const;
+	bool plunger() const;
 
 	/**
 	 * Used to get the number of elements (single values) used to represent
@@ -345,21 +345,21 @@ public:
 	 *
 	 * @return The number of elements in the data.
 	 */
-	const uint elements() const { return theVisibleSize; }
+	uint elements() const { return theVisibleSize; }
 
 	/** @internal
 	 * Get the scope of the signal data.
-	 * 
+	 *
 	 * @return The scope of the signal data.
 	 */
-	const uint scope() const { return theInfo->theScope; }
-	
+	uint scope() const { return theInfo->theScope; }
+
 	/**
 	 * Used to get the number of elements inside the data chunk.
 	 *
 	 * @return The number of samples in the data.
 	 */
-	const uint samples() const { return theVisibleSize / theInfo->theScope; }
+	uint samples() const { return theVisibleSize / theInfo->theScope; }
 
 	/**
 	 * Get another BufferData object referencing some portion of elements in
@@ -380,7 +380,7 @@ public:
 	 * @return A new (shared data) BufferData object that points to the section
 	 * from this object's data.
 	 */
-	const BufferData mid(const uint start, const uint length) const;
+	const BufferData mid(uint start, uint length) const;
 
 	/** @overload
 	 * Get another BufferData object referencing some portion of elements in
@@ -401,7 +401,7 @@ public:
 	 * @return A new (shared data) BufferData object that points to a section
 	 * from this object's data.
 	 */
-	BufferData mid(const uint start, const uint length);
+	BufferData mid(uint start, uint length);
 
 	/**
 	 * Get another BufferData object referencing a sample of data in this one.
@@ -416,7 +416,7 @@ public:
 	 * @return A new (shared data) BufferData object that points to the
 	 * specific sample from this object's data.
 	 */
-	const BufferData sample(const uint index) const;
+	const BufferData sample(uint index) const;
 
 	/** @overload
 	 * Get another BufferData object referencing a sample of data in this one.
@@ -431,7 +431,7 @@ public:
 	 * @return A new (shared data) BufferData object that points to the
 	 * specific sample from this object's data.
 	 */
-	BufferData sample(const uint index);
+	BufferData sample(uint index);
 
 	/**
 	 * Returns a new (shared data) BufferData object that points to specific
@@ -449,12 +449,12 @@ public:
 	 * @return A new (shared data) BufferData object that points to the
 	 * specific samples from this object's data.
 	 */
-	const BufferData samples(const uint index, const uint amount) const;
+	const BufferData samples(uint index, uint amount) const;
 
 	/** @overload
 	 * Returns a new (shared data) BufferData object that points to specific
 	 * samples from this object's data.
-	 * 
+	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
 	 * one would. The scope of the transformation is only use this in so far
@@ -467,14 +467,14 @@ public:
 	 * @return A new (shared data) BufferData object that points to the
 	 * specific samples from this object's data.
 	 */
-	BufferData samples(const uint index, const uint amount);
+	BufferData samples(uint index, uint amount);
 
 	/**
 	 * Tests for validity (invalid means it should never be used).
 	 *
 	 * @return true iff the BufferData object is valid.
 	 */
-	const bool isValid() const { return theInfo->theValid; }
+	bool isValid() const { return theInfo->theValid; }
 
 	/**
 	 * Makes this bufferdata invalid, ending the life of the previous data.
@@ -491,7 +491,7 @@ public:
 	 *
 	 * @return true iff this BufferData is null.
 	 */
-	const bool isNull() const { return theInfo->theValid && theInfo->theAccessibleSize == Undefined; }
+	bool isNull() const { return theInfo->theValid && theInfo->theAccessibleSize == Undefined; }
 
 	/**
 	 * Operator to give easy and transparent access to the data contained
@@ -506,7 +506,7 @@ public:
 	 * less than the size (scope) of a sample.
 	 * @return The value of the element at position @a j in sample @a i .
 	 */
-	const float &operator()(const uint i, const uint j) const
+	const float &operator()(uint i, uint j) const
 	{
 #ifdef EDEBUG
 		assert(theInfo->theValid);
@@ -529,7 +529,7 @@ public:
 	 * less than the size (scope) of a sample.
 	 * @return The value of the element at position @a j in sample @a i .
 	 */
-	float &operator()(const uint i, const uint j)
+	float &operator()(uint i, uint j)
 	{
 #ifdef EDEBUG
 		assert(theInfo->theValid);
@@ -537,10 +537,10 @@ public:
 		assert(j < theInfo->theScope || !theInfo->theScope);
 		if(theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all reads, or you\n"
-			         "             might accidentally taint the data.\n");
+					 "             might accidentally taint the data.\n");
 		if(theWritePointer)
 			qWarning("*** WARNING: You still have a borrowed array active. Changing any data before\n"
-			         "             that has been returned will not do anything.\n");
+					 "             that has been returned will not do anything.\n");
 #endif
 		return theInfo->theData[(i * theInfo->theScope + j + theOffset) & theInfo->theMask];
 	}
@@ -559,17 +559,17 @@ public:
 	 * @param i The element to be accessed.
 	 * @return The value of the element at position @a i .
 	 */
-	float &operator[](const uint i)
+	float &operator[](uint i)
 	{
 #ifdef EDEBUG
 		assert(i < theVisibleSize);
 		assert(theInfo->theValid);
 		if(theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all reads, or you\n"
-			         "             might accidentally taint the data.\n");
+					 "             might accidentally taint the data.\n");
 		if(theWritePointer)
 			qWarning("*** WARNING: You still have a borrowed array active. Changing any data before\n"
-			         "             that has been returned will not do anything.\n");
+					 "             that has been returned will not do anything.\n");
 #endif
 		return theInfo->theData[(i + theOffset) & theInfo->theMask];
 	}
@@ -588,7 +588,7 @@ public:
 	 * @param i The element to be accessed.
 	 * @return The value of the element at position @a i .
 	 */
-	const float &operator[](const uint i) const
+	const float &operator[](uint i) const
 	{
 #ifdef EDEBUG
 		assert(i < theVisibleSize);
@@ -641,26 +641,26 @@ public:
 	 *
 	 * As it's not a const method, we assume that BufferData doesn't contain
 	 * data yet, so array wont contain anything.
-	 * 
+	 *
 	 * The pointer returned will only be valid as long as this object exists.
 	 * As soon as this object goes out of scope, the pointer will become
 	 * invalid. This means that the following code is incorrect:
-	 * 
+	 *
 	 * @code
 	 * BufferData &d(someBufferData);
 	 * float *f = d.sample(0).writePointer();
 	 * f[0] = 0;
 	 * d.sample(0).endWritePointer()
 	 * @endcode
-	 * 
+	 *
 	 * This is because by the time we come to write to the array, the
 	 * BufferData object used to make the borrowArray() call (given by
 	 * d.sample(0)) will have been destroyed through being anonymous and
 	 * therefore out of scope. The endWritePointer() call will be useless since
 	 * it is being called on a different instance.
-	 * 
+	 *
 	 * You must instead deanonymise it with a named BufferData instance:
-	 * 
+	 *
 	 * @code
 	 * BufferData &d(someBufferData);
 	 * BufferData portion = d.sample(0);
@@ -685,11 +685,11 @@ public:
 		assert(theInfo->theValid);
 		if(theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all read, or you\n"
-			         "             might accidentally taint the data.\n");
+					 "             might accidentally taint the data.\n");
 #endif
 		if(theInfo->theAccessibleSize == Undefined) return 0;
 		if(!rollsOver()) return theInfo->theData + theOffset;
-		
+
 		if(!theWritePointer)
 			theWritePointer = new float[theVisibleSize];
 		return theWritePointer;
@@ -698,7 +698,7 @@ public:
 	/**
 	 * Forces propogation of the previously borrowed array into this BufferData
 	 * object. You should call this before you attempt to push() the data.
-	 * 
+	 *
 	 * This pointer is invalid after this call.
 	 */
 	void endWritePointer()
@@ -708,7 +708,7 @@ public:
 		delete theWritePointer;
 		theWritePointer = 0;
 	}
-	
+
 	/**
 	 * Assignment operator. This is used to set this BufferData object to
 	 * become equivalent to the BufferData object @a source.
@@ -735,7 +735,7 @@ public:
 	 * @param valid If false (default), any attempt to access it will result in an
 	 * error. Otherwise, it will still be useable, but wont actually store anything.
 	 */
-	BufferData(const bool valid = false);
+	BufferData(bool valid = false);
 
 	/**
 	 * Creates a bufferdata object whose data is self-managed.
@@ -748,7 +748,7 @@ public:
 	 * @param scope The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(const uint size, const uint scope = 1);
+	BufferData(uint size, uint scope = 1);
 
 	/**
 	 * Creates a read-only BufferData object whose data is foreign.
@@ -763,7 +763,7 @@ public:
 	 * @param scope The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(const float *data, const uint size, const uint scope = 1);
+	BufferData(const float *data, uint size, uint scope = 1);
 
 	/** @overload
 	 * Creates a writable BufferData object whose data is foreign.
@@ -777,7 +777,7 @@ public:
 	 * @param scope The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(float *data, const uint size, const uint scope = 1);
+	BufferData(float *data, uint size, uint scope = 1);
 
 	/**
 	 * Copy constructor. Acts like the assignment operator in that it adopts

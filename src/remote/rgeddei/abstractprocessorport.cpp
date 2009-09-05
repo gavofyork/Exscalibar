@@ -21,19 +21,19 @@ using namespace rGeddei;
 namespace rGeddei
 {
 
-const bool AbstractProcessorPort::split()
+bool AbstractProcessorPort::split()
 {
 	theParent->split(thePort);
 	return true;
 }
 
-const bool AbstractProcessorPort::share()
+bool AbstractProcessorPort::share()
 {
 	theParent->share(thePort);
 	return true;
 }
 
-const bool AbstractProcessorPort::connect(const AbstractProcessorPort &input)
+bool AbstractProcessorPort::connect(const AbstractProcessorPort &input)
 {
 	if(dynamic_cast<RemoteProcessor *>(input.theParent))
 		return theParent->connect(thePort, dynamic_cast<RemoteProcessor *>(input.theParent), input.thePort, input.theBufferSize);
@@ -43,7 +43,7 @@ const bool AbstractProcessorPort::connect(const AbstractProcessorPort &input)
 		return false;
 }
 
-const bool AbstractProcessorPort::disconnect()
+bool AbstractProcessorPort::disconnect()
 {
 	theParent->disconnect(thePort);
 	return true;

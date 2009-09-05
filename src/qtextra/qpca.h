@@ -30,7 +30,7 @@
 namespace QtExtra
 {
 
-inline const float qClamp(float const _v, float const _min = 0.f, float const _max = 1.f)
+inline float qClamp(float const _v, float const _min = 0.f, float const _max = 1.f)
 {
 	return _v < _min ? _min : _v > _max ? _max : _v;
 }

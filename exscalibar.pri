@@ -14,10 +14,8 @@ UI_DIR = $$PWD/.objects
 RCC_DIR = $$PWD/.objects
 DESTDIR = $$PWD/build
 INCLUDEPATH += $$PWD/system
+SRCDIR = $$PWD/src
 QMAKE_LIBDIR += $$DESTDIR
-
-# Set in the .pro files.
-#PACKAGES = "newmat:0.10" "sndfile:1.0.0" "vorbisfile:1.0.0" "mad:0.15" "fftw3f:3.0.0" "jack:0.90.0" "alsa:0.9"
 
 QMAKE_CXXFLAGS_RELEASE += -DRELEASE \
 -g0 \

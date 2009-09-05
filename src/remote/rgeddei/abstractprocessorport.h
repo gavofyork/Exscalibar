@@ -38,7 +38,7 @@ class DLLEXPORT AbstractProcessorPort
 	AbstractProcessor *theParent;
 	uint thePort, theBufferSize;
 
-	AbstractProcessorPort(AbstractProcessor *parent, const uint port) : theParent(parent), thePort(port), theBufferSize(1) {}
+	AbstractProcessorPort(AbstractProcessor *parent, uint port) : theParent(parent), thePort(port), theBufferSize(1) {}
 
 public:
 	/**
@@ -58,7 +58,7 @@ public:
 	 *
 	 * @sa Processor::specifyInputSpace() @sa Processor::specifyOutputSpace()
 	 */
-	AbstractProcessorPort &setSize(const uint bufferSize) { theBufferSize = bufferSize; return *this; }
+	AbstractProcessorPort &setSize(uint bufferSize) { theBufferSize = bufferSize; return *this; }
 
 	/**
 	 * Split the output of a Processor.
@@ -76,7 +76,7 @@ public:
 	 * P[0].connect(Q[1]);
 	 * @endcode
 	 */
-	const bool split();
+	bool split();
 
 	/**
 	 * Share the output of a Processor.
@@ -94,7 +94,7 @@ public:
 	 * P[0].connect(Q[1]);
 	 * @endcode
 	 */
-	const bool share();
+	bool share();
 
 	/**
 	 * Assert that this port represents an output port, and create a
@@ -113,7 +113,7 @@ public:
 	 *
 	 * @sa disconnect()
 	 */
-	const bool connect(const AbstractProcessorPort &input);
+	bool connect(const AbstractProcessorPort &input);
 
 	/**
 	 * Assert that this port represents an output port and delete the
@@ -129,7 +129,7 @@ public:
 	 *
 	 * @sa connect()
 	 */
-	const bool disconnect();
+	bool disconnect();
 
 	/**
 	 * Shorthand operator for connecting. Does the same as the connect()
@@ -148,7 +148,7 @@ public:
 	 *
 	 * @sa connect()
 	 */
-	const bool operator>>=(const AbstractProcessorPort &input) { return connect(input); }
+	bool operator>>=(const AbstractProcessorPort &input) { return connect(input); }
 
 	/**
 	 * Shorthand operator for disconnecting. Does the same as the disconnect()
@@ -164,7 +164,7 @@ public:
 	 *
 	 * @sa disconnect()
 	 */
-	const bool operator--(int) { return disconnect(); }
+	bool operator--(int) { return disconnect(); }
 };
 
 }

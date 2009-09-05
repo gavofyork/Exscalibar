@@ -3,19 +3,18 @@
 # Subdir relative project main directory: ./src/processors/example
 # Target is a library:  
 
-include(../../../globalplugin.pro)
+include(../../../exscalibar.pri)
 
 SOURCES += add.cpp \
            example.cpp \
            multiply.cpp \
            sink.cpp \
            split.cpp
-TARGETDEPS += ../../../src/qtextra/libqtextra.so \
-../../../src/geddei/libgeddei.so
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+              $$DESTDIR/libgeddei.so 
 LIBS += -lqtextra \
--lgeddei
-INCLUDEPATH = ../../../src/qtextra \
-../../../src/geddei
-QMAKE_LIBDIR = ../../../src/qtextra \
-../../../src/geddei
+	-lgeddei
+INCLUDEPATH += ../../../src/qtextra \
+		../../../src/geddei
 TEMPLATE = lib
+CONFIG += plugin

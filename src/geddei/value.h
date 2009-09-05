@@ -33,7 +33,7 @@ namespace SignalTypes
  */
 class DLLEXPORT Value: public SignalType
 {
-	virtual const uint id() const { return 0; }
+	virtual uint id() const { return 0; }
 	virtual SignalType *copyBE() const { return new Value(theFrequency); }
 
 public:
@@ -46,7 +46,7 @@ public:
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	Value(const float frequency = 0) : SignalType(1, frequency) {}
+	Value(float frequency = 0) : SignalType(1, frequency) {}
 };
 
 };

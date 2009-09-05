@@ -44,16 +44,16 @@ class DLLEXPORT MLConnection: public xLConnection
 	virtual void reset();
 	virtual void sinkStopping();
 	virtual void sinkStopped();
-	virtual const uint elementsReady() const;
-	virtual void waitForElements(const uint elements) const;
-	virtual const BufferData readElements(const uint elements);
-	virtual const BufferData peekElements(const uint elements);
-	virtual void enforceMinimum(const uint elements);
+	virtual uint elementsReady() const;
+	virtual void waitForElements(uint elements) const;
+	virtual const BufferData readElements(uint elements);
+	virtual const BufferData peekElements(uint elements);
+	virtual void enforceMinimum(uint elements);
 	virtual BufferReader *newReader();
 	virtual void killReader();
 	virtual void resurectReader();
-	virtual const bool plungeSync(const uint samples) const;
-	virtual const uint capacity() const;
+	virtual bool plungeSync(uint samples) const;
+	virtual uint capacity() const;
 
 protected:
 	LMConnection *theConnection;
@@ -63,7 +63,7 @@ public:
 	/**
 	 * Blocks until sink is happy that all inputs are confirmed.
 	 */
-	const bool waitUntilReady();
+	bool waitUntilReady();
 
 	/**
 	 * Resets the (essentially cached) type of the connection.
@@ -95,7 +95,7 @@ public:
 	 */
 	void noMorePlungers();
 	
-	MLConnection(Sink *sink, const uint sinkIndex, LMConnection *connection);
+	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();
 };
 

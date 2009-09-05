@@ -107,7 +107,7 @@ void Recorder::receivedPlunger()
 	// Skip to next file?
 }
 
-const bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 {
 //	theScope = inTypes[0].scope();
 //	theFrequency = inTypes[0].frequency();

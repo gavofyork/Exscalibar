@@ -50,7 +50,7 @@ DRCoupling::~DRCoupling()
 	}
 }
 
-void DRCoupling::setCredentials(const QString &remoteHost, const uint remoteKey, const uint remoteSubProcessorKey)
+void DRCoupling::setCredentials(const QString &remoteHost, uint remoteKey, uint remoteSubProcessorKey)
 {
 	theRemoteHost = remoteHost;
 	theRemoteKey = remoteKey;
@@ -117,7 +117,7 @@ void DRCoupling::initFromProperties(const Properties &p)
 {
 	if(MESSAGES) qDebug("> DRCoupling::initFromProperties()");
 	QMutexLocker lock(&theComm);
-	if(MESSAGES) for(uint i = 0; i < p.keys().count(); i++) qDebug("p[%s] = %s", p.keys()[i].latin1(), p[p.keys()[i]].toString().latin1());
+	if(MESSAGES) for(uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", p.keys()[i].latin1(), p[p.keys()[i]].toString().latin1());
 	theRemote.sendByte(InitFromProperties);
 	// Serialise and send properties.
 	QByteArray sp = p.serialise();
@@ -126,7 +126,7 @@ void DRCoupling::initFromProperties(const Properties &p)
 	if(MESSAGES) qDebug("< DRCoupling::initFromProperties()");
 }
 
-void DRCoupling::transact(const BufferDatas &d, const uint chunks)
+void DRCoupling::transact(const BufferDatas &d, uint chunks)
 {
 	if(MESSAGES) qDebug("> DRCoupling::transact() (%d chunks)", chunks);
 	QMutexLocker lock(&theComm);
@@ -156,8 +156,8 @@ BufferDatas DRCoupling::deliverResults(uint *timeTaken)
 	// Wait for results to be sent.
 	BufferDatas d(theRemote.safeReceiveWord<int>());
 	for(uint i = 0; i < d.size(); i++)
-	{	const uint size = theRemote.safeReceiveWord<int>();
-		const uint scope = theRemote.safeReceiveWord<int>();
+	{	uint size = theRemote.safeReceiveWord<int>();
+		uint scope = theRemote.safeReceiveWord<int>();
 		BufferData *data = new BufferData(size, scope);
 		theRemote.safeReceiveWordArray((int *)data->firstPart(), size);
 		d.setData(i, data);
@@ -168,7 +168,7 @@ BufferDatas DRCoupling::deliverResults(uint *timeTaken)
 	return d;
 }
 
-void DRCoupling::defineIO(const uint inputs, const uint outputs)
+void DRCoupling::defineIO(uint inputs, uint outputs)
 {
 	QMutexLocker lock(&theComm);
 	theRemote.sendByte(DefineIO);

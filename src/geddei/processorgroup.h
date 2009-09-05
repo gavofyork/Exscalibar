@@ -54,7 +54,7 @@ public:
 	 *
 	 * @return true iff all types confirm correctly.
 	 */
-	const bool confirmTypes() const;
+	bool confirmTypes() const;
 
 	/**
 	 * Start all Processor objects in the group. Note this returns once all have
@@ -69,7 +69,7 @@ public:
 	 *
 	 * @sa waitUntilGoing()
 	 */
-	const bool go(const bool waitUntilGoing = true) const;
+	bool go(bool waitUntilGoing = true) const;
 
 	/**
 	 * Waits for all Processor objects to be actaully running correctly. Use this
@@ -81,16 +81,16 @@ public:
 	 * the error arose with.
 	 * @return The Error it failed with or Processor::NoError if all went correctly.
 	 */
-	const Processor::ErrorType waitUntilGoing(Processor **errorProc = 0, int *errorData = 0) const;
+	Processor::ErrorType waitUntilGoing(Processor **errorProc = 0, int *errorData = 0) const;
 
 	/**
 	 * Returns a QString describing each error that occured. Should only be called
 	 * after either go() or waitUntilGoing();
-	 * 
+	 *
 	 * @return Error in pretty form.
 	 */
 	const QString error() const;
-	
+
 	/**
 	 * Stops all Processor objects in the group.
 	 *
@@ -99,7 +99,7 @@ public:
 	 *
 	 * @sa reset()
 	 */
-	void stop(const bool resetToo = true) const;
+	void stop(bool resetToo = true) const;
 
 	/**
 	 * Resets all Processor objects in the group. They must already be stop()ed.
@@ -128,7 +128,7 @@ public:
 	 * @param name The name of the Processor object to be found.
 	 * @return true if a Processor object of name @a name is contained in the group.
 	 */
-	const bool exists(const QString &name);
+	bool exists(const QString &name);
 
 	/**
 	 * Get a reference to a named Processor object. It must exist in the group.
@@ -161,7 +161,7 @@ public:
 	 *
 	 * @return The number of Processor objects in the group.
 	 */
-	const uint count() const { return theProcessors.count(); }
+	uint count() const { return theProcessors.count(); }
 
 	/**
 	 * Default constructor.
@@ -169,7 +169,7 @@ public:
 	 * @param adopt If true, this will adopt all the Processor objects and thus
 	 * delete any left over on destruction.
 	 */
-	ProcessorGroup(const bool adopt = false);
+	ProcessorGroup(bool adopt = false);
 
 	/**
 	 * Default destructor.

@@ -1,8 +1,5 @@
-# system .pro file
-include( ../global.pro )
-
-TEMPLATE = lib
-
+include(../exscalibar.h)
+TEMPLATE = subdirs
 INSTALLS += pc headers
 headers.path = $$PREFIX/include
 headers.files = Geddei SignalTypes rGeddei QtExtra *.h

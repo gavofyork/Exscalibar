@@ -30,16 +30,16 @@ class SelfSimilarity : public SubProcessor
 	uint theSize, theStep, theBandWidth;
 	float(*theDistance)(const float *, const float *, const uint);
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual void initFromProperties(const Properties &properties);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 
 public:
 	SelfSimilarity() : SubProcessor("SelfSimilarity") {}
 };
 
-float cosineDistance(const float *x, const float *y, const uint bandWidth)
+float cosineDistance(const float *x, const float *y, uint bandWidth)
 {
 	double ret = 0., mx = 0., my = 0.;
 
@@ -54,7 +54,7 @@ float cosineDistance(const float *x, const float *y, const uint bandWidth)
 	return 0;
 }
 
-float magnitudeDistance(const float *x, const float *y, const uint bandWidth)
+float magnitudeDistance(const float *x, const float *y, uint bandWidth)
 {
 	float ret = 0.;
 	for(uint i = 0; i < bandWidth; i++)
@@ -62,7 +62,7 @@ float magnitudeDistance(const float *x, const float *y, const uint bandWidth)
 	return sqrt(ret);
 }
 
-void SelfSimilarity::processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const
+void SelfSimilarity::processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const
 {
 	float *theMatrix = new float[theSize * theSize];
 
@@ -82,7 +82,7 @@ void SelfSimilarity::processChunks(const BufferDatas &in, BufferDatas &out, cons
 	}
 }
 
-const bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Spectrum>()) return false;
 	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency() / theStep, inTypes[0].frequency());

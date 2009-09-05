@@ -58,7 +58,7 @@ protected:
 	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but
 	 * harder for LR). Useful for gauging amount to push.
 	 */
-	virtual const uint bufferElementsFree() = 0;
+	virtual uint bufferElementsFree() = 0;
 
 	/**
 	 * Actually moves the data to the receiving "place" (either a connection or an object).
@@ -68,7 +68,7 @@ protected:
 	/**
 	 * Simple constructor.
 	 */
-	LxConnectionReal(Source *source, const uint sourceIndex) : LxConnection(source, sourceIndex), theLastElementsFree(0) {}
+	LxConnectionReal(Source *source, uint sourceIndex) : LxConnection(source, sourceIndex), theLastElementsFree(0) {}
 
 	/**
 	 * Simple virtual destructor.

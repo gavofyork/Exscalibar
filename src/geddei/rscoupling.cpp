@@ -59,7 +59,7 @@ void RSCoupling::run()
 	{
 		if(MESSAGES) qDebug("= RSC::run(): Receiving...");
 		uchar command;
-		while(theSession.isOpen() && !theSession.receiveChunk(&command, 1, 501));
+		while(theSession.isOpen() && !theSession.receiveChunk(&command, 1, 501)) {}
 		if(!theSession.isOpen()) break;
 
 		if(MESSAGES) qDebug("= RSC::run(): command = %d", (int)command);
@@ -105,8 +105,8 @@ void RSCoupling::run()
 			if(MESSAGES) qDebug("RSC: BufferDatas size = %d", channels);
 			BufferDatas d(channels);
 			for(uint i = 0; i < d.size(); i++)
-			{	const uint size = theSession.safeReceiveWord<int>();
-				const uint scope = theSession.safeReceiveWord<int>();
+			{	uint size = theSession.safeReceiveWord<int>();
+				uint scope = theSession.safeReceiveWord<int>();
 				BufferData *data = new BufferData(size, scope);
 				theSession.safeReceiveWordArray((int *)data->firstPart(), size);
 				d.setData(i, data);

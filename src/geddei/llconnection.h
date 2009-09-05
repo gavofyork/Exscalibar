@@ -39,31 +39,31 @@ class Source;
 class DLLEXPORT LLConnection: public LxConnectionReal, public xLConnectionReal
 {
 	//* Reimplementations from LxConnection
-	virtual const bool waitUntilReady();
+	virtual bool waitUntilReady();
 	virtual const SignalTypeRef type() { return xLConnectionReal::type(); }
 	virtual void setType(const SignalType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();
 	virtual void reset() {}
-	virtual BufferData makeScratchElements(const uint elements, bool autoPush);
+	virtual BufferData makeScratchElements(uint elements, bool autoPush);
 	virtual void pushPlunger();
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual const uint maximumScratchElements(const uint minimum) { while(bufferElementsFree() < minimum) bufferWaitForFree(); return bufferElementsFree(); }
-	virtual const uint maximumScratchElementsEver() { return theBuffer.size(); }
+	virtual uint maximumScratchElements(uint minimum) { while(bufferElementsFree() < minimum) bufferWaitForFree(); return bufferElementsFree(); }
+	virtual uint maximumScratchElementsEver() { return theBuffer.size(); }
 
 	//* Reimplementation from xLConnection.
-	virtual const bool pullType();
+	virtual bool pullType();
 
 	//* Reimplementation from LxConnectionReal.
 	virtual void bufferWaitForFree();
-	virtual const uint bufferElementsFree();
+	virtual uint bufferElementsFree();
 	virtual void transport(const BufferData &data);
 
 	friend class Processor;
-	LLConnection(Source *newSource, const uint newSourceIndex, Sink *newSink, const uint newSinkIndex, const uint bufferSize);
+	LLConnection(Source *newSource, uint newSourceIndex, Sink *newSink, uint newSinkIndex, uint bufferSize);
 };
 
 };

@@ -35,7 +35,7 @@ using namespace Geddei;
 
 #include "geddeinite.h"
 
-const bool Capturer::verifyAndSpecifyTypes(Q3PtrList<SignalType> &, Q3PtrList<SignalType> &outTypes)
+bool Capturer::verifyAndSpecifyTypes(Q3PtrList<SignalType> &, Q3PtrList<SignalType> &outTypes)
 {
 	outTypes.append(new SignalTypes::Wave(44100));
 	return true;

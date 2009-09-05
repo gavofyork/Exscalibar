@@ -53,10 +53,10 @@ public:
 	void saveYourself(QDomElement &element, QDomDocument &doc);
 	void loadYourself(QDomElement &element);
 
-	void setBufferSize(const uint bufferSize) { theBufferSize = bufferSize; }
-	const uint bufferSize() { return theBufferSize; }
-	void setProximity(const uint proximity) { theProximity = proximity; }
-	const uint proximity() { return theProximity; }
+	void setBufferSize(uint bufferSize) { theBufferSize = bufferSize; }
+	uint bufferSize() { return theBufferSize; }
+	void setProximity(uint proximity) { theProximity = proximity; }
+	uint proximity() { return theProximity; }
 
 	BobLink(BobPort *from, BobPort *to);
 	~BobLink();

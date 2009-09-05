@@ -31,7 +31,7 @@ class Similarity : public Processor
 
 protected:
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void specifyInputSpace(Q3ValueVector<uint> &samples) { samples[0] = theSize; }
@@ -40,7 +40,7 @@ public:
 	Similarity() : Processor("Similarity") {}
 };
 
-inline float cosineDistance(const float *x, const float *y, const uint bandWidth)
+inline float cosineDistance(const float *x, const float *y, uint bandWidth)
 {
 	double ret = 0., mx = 0., my = 0.;
 
@@ -57,7 +57,7 @@ inline float cosineDistance(const float *x, const float *y, const uint bandWidth
 
 void Similarity::processor()
 {
-	const uint bandWidth = input(0).type().asA<Spectrum>().size();
+	uint bandWidth = input(0).type().asA<Spectrum>().size();
 
 	float *theMatrix = new float[theSize * theSize];
 
@@ -86,7 +86,7 @@ void Similarity::processor()
 	}
 }
 
-const bool Similarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Similarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Spectrum>()) return false;
 	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency() / theStep, inTypes[0].frequency());

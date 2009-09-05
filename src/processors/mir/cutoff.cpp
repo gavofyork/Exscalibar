@@ -29,24 +29,24 @@ class CutOff : public SubProcessor
 	float theFreqFrom, theFreqTo;
 	uint theFrom, theTo, theSize;
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
-	void processSamples(const BufferData &in, BufferData &out, const uint chunks);
+	void processSamples(const BufferData &in, BufferData &out, uint chunks);
 
 public:
 	CutOff() : SubProcessor("CutOff") {}
 };
 
-void CutOff::processChunks(const BufferDatas &ins, BufferDatas &outs, const uint chunks) const
+void CutOff::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	for(uint i = 0; i < chunks; i++)
 		outs[0].sample(i).copyFrom(ins[0].mid(i * theSize + theFrom, theTo - theFrom));
 }
 
-const bool CutOff::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool CutOff::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &s = inTypes[0].asA<Spectrum>();

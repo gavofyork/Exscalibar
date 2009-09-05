@@ -28,7 +28,7 @@ AbstractProcessorGroup::~AbstractProcessorGroup()
 {
 }
 
-const bool AbstractProcessorGroup::exists(const QString &name)
+bool AbstractProcessorGroup::exists(const QString &name)
 {
 	return theProcessors.count(name);
 }
@@ -99,7 +99,7 @@ void AbstractProcessorGroup::init() const
 		i.data()->init();
 }
 
-const bool AbstractProcessorGroup::go(const bool waitUntilGoing) const
+bool AbstractProcessorGroup::go(bool waitUntilGoing) const
 {
 	for(QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		if(!i.data()->go())
@@ -131,7 +131,7 @@ const Processor::ErrorType AbstractProcessorGroup::waitUntilGoing(AbstractProces
 	return Processor::NoError;
 }
 
-void AbstractProcessorGroup::stop(const bool resetToo) const
+void AbstractProcessorGroup::stop(bool resetToo) const
 {
 	for(QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		i.data()->stop();

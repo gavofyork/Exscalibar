@@ -66,7 +66,7 @@ void LocalProcessor::doInit(const QString &name, AbstractProcessorGroup *g, cons
 	if(g) setGroup(*g);
 }
 
-const bool LocalProcessor::connect(const uint sourceIndex, const LocalProcessor *sink, const uint sinkIndex, const uint bufferSize)
+bool LocalProcessor::connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize)
 {
 	if(MESSAGES) qDebug("LocalProcessor::connect(): port=%d, host=%s, processor=%s", sink->theSession->thePort, sink->theSession->theHost.latin1(), sink->theProcessor->name().latin1());
 	if(theSession != sink->theSession)
@@ -75,13 +75,13 @@ const bool LocalProcessor::connect(const uint sourceIndex, const LocalProcessor 
 		return theProcessor->connect(sourceIndex, sink->theProcessor, sinkIndex, bufferSize);
 }
 
-const bool LocalProcessor::connect(const uint sourceIndex, const RemoteProcessor *sink, const uint sinkIndex, const uint bufferSize)
+bool LocalProcessor::connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize)
 {
 	if(MESSAGES) qDebug("LocalProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, sink->theSession->theHost.latin1(), sink->theName.latin1());
 	return theProcessor->connect(sourceIndex, sink->theSession->theHost, sink->theSession->theKey, sink->theHandle, sinkIndex, bufferSize);
 }
 
-void LocalProcessor::disconnect(const uint sourceIndex)
+void LocalProcessor::disconnect(uint sourceIndex)
 {
 	theProcessor->disconnect(sourceIndex);
 }

@@ -22,7 +22,7 @@ namespace Geddei
 MultiProcessor::~MultiProcessor()
 {
 	// delete all processors
-	for(uint i = 0; i < theProcessors.count(); i++)
+	for(uint i = 0; i < (uint)theProcessors.count(); i++)
 		delete theProcessors[i];
 	delete theCreator;
 }
@@ -45,7 +45,7 @@ void MultiProcessor::doInit(const QString &name, ProcessorGroup *g, const Proper
 	if(MESSAGES) qDebug("Initialising (M=%d)...", properties["Multiplicity"].toInt());
 	theProcessors.resize(properties["Multiplicity"].toInt());
 	//qDebug("Multiplicity %d.", theProcessors.count());
-	for(uint i = 0; i < theProcessors.count(); i++)
+	for(uint i = 0; i < (uint)theProcessors.count(); i++)
 	{	theProcessors[i] = theCreator->newProcessor();
 		//qDebug("Processor %d created as %p", i, theProcessors[i]);
 		theProcessors[i]->doInit(name + QString::number(i), g, properties);

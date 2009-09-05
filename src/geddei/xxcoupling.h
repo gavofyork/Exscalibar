@@ -41,7 +41,7 @@ protected:
 	 * may be legally zero iff @a d is empty. In this case the transaction is a
 	 * plunger.
 	 */
-	virtual void transact(const BufferDatas &d, const uint chunks) = 0;
+	virtual void transact(const BufferDatas &d, uint chunks) = 0;
 
 	/**
 	 * Requests the next transaction results to be returned from the RHS.
@@ -115,7 +115,7 @@ public:
 	 * @param numInputs The number of inputs for the SubProcessor.
 	 * @param numOutputs The number of outputs for the SubProcessor.
 	 */
-	virtual void defineIO(const uint numInputs, const uint numOutputs) = 0;
+	virtual void defineIO(uint numInputs, uint numOutputs) = 0;
 
 	/**
 	 * Convenience function that combines the two protected stopping methods

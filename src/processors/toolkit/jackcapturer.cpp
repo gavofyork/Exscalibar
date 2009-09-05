@@ -79,8 +79,8 @@ class JackCapturer: public Processor
 	
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out);
-	virtual const bool processorStarted();
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out);
+	virtual bool processorStarted();
 	virtual void processor();
 	virtual void processorStopped();
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
@@ -110,13 +110,13 @@ void JackCapturer::initFromProperties(const Properties &)
 	}
 }
 
-const bool JackCapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out)
+bool JackCapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out)
 {
 	out = Wave(theFreq);
 	return true;
 }
 
-const bool JackCapturer::processorStarted()
+bool JackCapturer::processorStarted()
 {
 	if(!numOutputs()) return false;
 	theBuffer.nullify();

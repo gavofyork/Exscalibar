@@ -24,7 +24,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-LMConnection::LMConnection(Source *source, const uint sourceIndex, const uint bufferSize)
+LMConnection::LMConnection(Source *source, uint sourceIndex, uint bufferSize)
 	: LxConnectionReal(source, sourceIndex), theBuffer(bufferSize)
 {
 	// we want to own the outputs.
@@ -36,13 +36,13 @@ LMConnection::~LMConnection()
 	theConnections.clear();
 }
 
-void LMConnection::enforceMinimum(const uint elements)
+void LMConnection::enforceMinimum(uint elements)
 {
 	if(theBuffer.size() < elements)
 		theBuffer.resize(elements);
 }
 
-const bool LMConnection::waitUntilReady()
+bool LMConnection::waitUntilReady()
 {
 	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		if(!(*i)->waitUntilReady()) return false;
@@ -87,24 +87,24 @@ void LMConnection::bufferWaitForFree()
 	theSource->checkExit();
 }
 
-const uint LMConnection::bufferElementsFree()
+uint LMConnection::bufferElementsFree()
 {
 	return theBuffer.elementsFree();
 }
 
-const uint LMConnection::maximumScratchElementsEver()
+uint LMConnection::maximumScratchElementsEver()
 {
 	return theBuffer.size();
 }
 
-const uint LMConnection::maximumScratchElements(const uint minimum)
+uint LMConnection::maximumScratchElements(uint minimum)
 {
 	while(bufferElementsFree() < minimum)
 		bufferWaitForFree();
 	return bufferElementsFree();
 }
 
-BufferData LMConnection::makeScratchElements(const uint elements, bool autoPush)
+BufferData LMConnection::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret;
 	if(theBuffer.size() >= elements)

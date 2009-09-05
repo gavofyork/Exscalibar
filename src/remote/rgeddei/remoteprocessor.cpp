@@ -61,12 +61,12 @@ void RemoteProcessor::doInit(const QString &name, AbstractProcessorGroup *g, con
 	theHandle = theName;
 }
 
-const bool RemoteProcessor::connect(const uint sourceIndex, const LocalProcessor *sink, const uint sinkIndex, const uint bufferSize)
+bool RemoteProcessor::connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize)
 {
 	return theSession->processorConnect(theHandle, bufferSize, sourceIndex, sink->theSession->theHost, sink->theSession->thePort, sink->theProcessor->name().latin1(), sinkIndex);
 }
 
-const bool RemoteProcessor::connect(const uint sourceIndex, const RemoteProcessor *sink, const uint sinkIndex, const uint bufferSize)
+bool RemoteProcessor::connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize)
 {
 	if(MESSAGES) qDebug("RemoteProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, sink->theSession->theHost.latin1(), sink->theHandle.latin1());
 	if(sink->theSession != theSession)

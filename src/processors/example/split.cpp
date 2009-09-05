@@ -21,7 +21,7 @@ using namespace Geddei;
 class Split : public Processor
 {
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
 	Split() : Processor("Split", Out, Guarded) {}
@@ -42,7 +42,7 @@ void Split::processor()
 	}
 }
 
-const bool Split::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Split::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes = inTypes[0];
 	return true;

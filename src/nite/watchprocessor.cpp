@@ -92,7 +92,7 @@ void WatchProcessor::repaint()
 //	else qDebug("-");
 }
 
-const bool WatchProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool WatchProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	if(inTypes[0].isA<Value>())
@@ -110,8 +110,8 @@ const bool WatchProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, 
 
 void WatchProcessor::watchWave()
 {
-	const uint width = theWidth, height = theHeight;
-	const uint widthM1 = width - 1, heightM1 = height - 1;
+	uint width = theWidth, height = theHeight;
+	uint widthM1 = width - 1, heightM1 = height - 1;
 	QPainter *p;
 	float min = -1, max = 1;
 	QTime t;
@@ -162,9 +162,9 @@ void WatchProcessor::watchWave()
 void WatchProcessor::watchGraph()
 {
 	QPainter *p;
-	const uint width = theWidth, height = theHeight;
-	const uint widthM1 = width - 1, heightM1 = height - 1;
-	const uint speed = 2;
+	uint width = theWidth, height = theHeight;
+	uint widthM1 = width - 1, heightM1 = height - 1;
+	uint speed = 2;
 	int oldy = heightM1;
 	float min = 0, max = 1;
 
@@ -199,8 +199,8 @@ void WatchProcessor::watchGraph()
 
 void WatchProcessor::watchSpectrograph()
 {
-	const uint width = theWidth, height = theHeight;
-	const uint widthM1 = width - 1/*, heightM1 = height - 1*/;
+	uint width = theWidth, height = theHeight;
+	uint widthM1 = width - 1/*, heightM1 = height - 1*/;
 	QPainter *p;
 	uint bandWidth = theScope;
 	while(true)
@@ -226,8 +226,8 @@ void WatchProcessor::watchSpectrograph()
 
 void WatchProcessor::watchMatrix()
 {
-	const uint width = theWidth, height = theHeight;
-	const uint size = ::min(width, height);
+	uint width = theWidth, height = theHeight;
+	uint size = ::min(width, height);
 	QPainter *p;
 	uint bandWidth = uint(sqrt(double(theScope)));
 
@@ -262,8 +262,8 @@ void WatchProcessor::watchMatrix()
 
 void WatchProcessor::watchSpectrum()
 {
-	const uint width = theWidth, height = theHeight;
-	const uint heightM1 = height - 1;
+	uint width = theWidth, height = theHeight;
+	uint heightM1 = height - 1;
 	QPainter *p;
 	cin.get();
 	while(true)

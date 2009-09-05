@@ -41,13 +41,13 @@ using namespace SignalTypes;
 class ALSACapturer: public Processor
 {
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &) { setupIO(0, 2); }
 public:
 	ALSACapturer() : Processor("ALSACapturer") {}
 };
 
-const bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = Wave(44100.0);
 	outTypes[1] = Wave(44100.0);

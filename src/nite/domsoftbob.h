@@ -44,7 +44,7 @@ class DomSoftBob : public SoftBob
 	virtual void rebuild();
 
 public:
-	DomSoftBob(const int x, const int y, const QString &type, const QString &name, Q3Canvas *c);
+	DomSoftBob(int x, int y, const QString &type, const QString &name, Q3Canvas *c);
 	virtual ~DomSoftBob();
 };
 

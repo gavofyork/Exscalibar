@@ -75,7 +75,7 @@ class NodeServer : public Q3ServerSocket
 	friend class NodeServerSession;
 
 public:
-	NodeServer(const uint port = RGEDDEI_PORT) : Q3ServerSocket(port) {}
+	NodeServer(uint port = RGEDDEI_PORT) : Q3ServerSocket(port) {}
 };
 
 void NodeServerSession::run()

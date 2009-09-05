@@ -25,7 +25,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-Splitter::Splitter(Processor *source, const uint sourceIndex) : LxConnection(source, sourceIndex)
+Splitter::Splitter(Processor *source, uint sourceIndex) : LxConnection(source, sourceIndex)
 {
 	theConnections.setAutoDelete(true);
 }
@@ -35,7 +35,7 @@ Splitter::~Splitter()
 	theConnections.clear();
 }
 
-void Splitter::enforceMinimum(const uint elements)
+void Splitter::enforceMinimum(uint elements)
 {
 	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->enforceMinimum(elements);
@@ -65,18 +65,18 @@ void Splitter::checkExit()
 	theSource->checkExit();
 }
 
-const bool Splitter::confirmTypes()
+bool Splitter::confirmTypes()
 {
 	return theSource->confirmTypes();
 }
 
-void Splitter::doRegisterOut(LxConnection *me, const uint port)
+void Splitter::doRegisterOut(LxConnection *me, uint port)
 {
 	if(MESSAGES) qDebug("Registering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
 	theConnections.append(me);
 }
 
-void Splitter::undoRegisterOut(LxConnection *me, const uint port)
+void Splitter::undoRegisterOut(LxConnection *me, uint port)
 {
 	if(MESSAGES) qDebug("Unregistering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
 	theConnections.setAutoDelete(false);
@@ -84,7 +84,7 @@ void Splitter::undoRegisterOut(LxConnection *me, const uint port)
 	theConnections.setAutoDelete(true);
 }
 
-const bool Splitter::waitUntilReady()
+bool Splitter::waitUntilReady()
 {
 	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		if(!((*i)->waitUntilReady()))
@@ -126,7 +126,7 @@ void Splitter::reset()
 		(*i)->reset();
 }
 
-BufferData Splitter::makeScratchElements(const uint elements, bool autoPush)
+BufferData Splitter::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret = theConnections.first()->makeScratchElements(elements, autoPush);
 	ret.adopt(dynamic_cast<ScratchOwner *>(this));
@@ -167,7 +167,7 @@ void Splitter::noMorePlungers()
 		(*i)->noMorePlungers();
 }
 
-const uint Splitter::maximumScratchElements(const uint minimum)
+uint Splitter::maximumScratchElements(uint minimum)
 {
 	Q3PtrList<LxConnection>::iterator i = theConnections.begin();
 	uint ret = (*i)->maximumScratchElements(minimum);
@@ -176,7 +176,7 @@ const uint Splitter::maximumScratchElements(const uint minimum)
 	return ret;
 }
 
-const uint Splitter::maximumScratchElementsEver()
+uint Splitter::maximumScratchElementsEver()
 {
 	Q3PtrList<LxConnection>::iterator i = theConnections.begin();
 	uint ret = (*i)->maximumScratchElementsEver();

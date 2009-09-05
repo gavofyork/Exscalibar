@@ -26,15 +26,15 @@ class Mean : public SubProcessor
 {
 	uint theSize;
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &) { setupIO(Undefined, 1, 1, 1, 1); }
 
 public:
 	Mean() : SubProcessor("Mean", In) {}
 };
 
-void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, const uint chunks) const
+void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	for(uint c = 0; c < chunks; c++)
 		for(uint j = 0; j < theSize; j++)
@@ -45,7 +45,7 @@ void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, const uint c
 				outs[0](c, j) += ins[i](c, j) / float(multiplicity());
 }
 
-const bool Mean::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Mean::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	theSize = inTypes[0].scope();

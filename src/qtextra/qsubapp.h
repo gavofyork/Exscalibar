@@ -74,14 +74,14 @@ public:
 	 * 
 	 * @param Minimum number of seconds to block for.
 	 */
-	static void sleep(const uint secs) { sleep(secs); }
+	static void sleep(uint secs) { sleep(secs); }
 	
 	/**
 	 * Block for at least @a usecs microseconds.
 	 * 
 	 * @param Minimum number of microseconds to block for.
 	 */
-	static void usleep(const uint usecs) { usleep(usecs); }
+	static void usleep(uint usecs) { usleep(usecs); }
 };
 
 // Basically, the main() of a normal Qt program, except we can't call it that

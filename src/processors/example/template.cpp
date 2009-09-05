@@ -29,7 +29,7 @@ class Template : public Processor
 
 	virtual void processor();
 	virtual void processorStopped();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -51,7 +51,7 @@ void Template::processorStopped()
 	// TODO: Deinitialisations.
 }
 
-const bool Template::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Template::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: Check input types and return correct output types.
 	// Don't forget to make copy()s!

@@ -127,16 +127,16 @@ protected:
 private:
 	virtual void doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p);
 public:
-	virtual const bool go() { return theProcessor->go(); }
+	virtual bool go() { return theProcessor->go(); }
 	virtual const Processor::ErrorType waitUntilGoing(int *errorData = 0) { return theProcessor->waitUntilGoing(errorData); }
 	virtual void waitUntilDone() { theProcessor->waitUntilDone(); }
 	virtual void stop() { theProcessor->stop(); }
 	virtual void reset() { theProcessor->reset(); }
-	virtual void share(const uint sourceIndex) { theProcessor->share(sourceIndex); }
-	virtual void split(const uint sourceIndex) { theProcessor->split(sourceIndex); }
-	virtual const bool connect(const uint sourceIndex, const RemoteProcessor *sink, const uint sinkIndex, const uint bufferSize = 1);
-	virtual const bool connect(const uint sourceIndex, const LocalProcessor *sink, const uint sinkIndex, const uint bufferSize = 1);
-	virtual void disconnect(const uint sourceIndex);
+	virtual void share(uint sourceIndex) { theProcessor->share(sourceIndex); }
+	virtual void split(uint sourceIndex) { theProcessor->split(sourceIndex); }
+	virtual bool connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize = 1);
+	virtual bool connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize = 1);
+	virtual void disconnect(uint sourceIndex);
 	virtual void disconnectAll();
 	virtual const QString name() const { return theProcessor->name(); }
 

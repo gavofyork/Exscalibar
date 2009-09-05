@@ -33,7 +33,7 @@ class Dumper: public Processor
 	
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Floats", false, "Use binary floats instead of bytes."); }
 	virtual void initFromProperties(const Properties &p);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void processor();
 	virtual void processorStopped();
 	
@@ -53,7 +53,7 @@ void Dumper::initFromProperties(const Properties &p)
 	setupIO(Undefined, 0);
 }
 
-const bool Dumper::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+bool Dumper::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 {
 	return true;
 }

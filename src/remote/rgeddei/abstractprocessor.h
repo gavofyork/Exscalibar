@@ -117,7 +117,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::go()
 	 */
-	virtual const bool go() = 0;
+	virtual bool go() = 0;
 
 	/**
 	 * Sends a message to the Processor object that this represents, telling it
@@ -165,7 +165,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::split()
 	 */
-	virtual void split(const uint sourceIndex) = 0;
+	virtual void split(uint sourceIndex) = 0;
 
 	/**
 	 * Sends a message to the Processor object that this represents, telling it
@@ -175,7 +175,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::share()
 	 */
-	virtual void share(const uint sourceIndex) = 0;
+	virtual void share(uint sourceIndex) = 0;
 
 	/**
 	 * Attempts to create a connection between the Processor object this
@@ -198,7 +198,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::connect()
 	 */
-	virtual const bool connect(const uint sourceIndex, const RemoteProcessor *sink, const uint sinkIndex, const uint bufferSize = 1) = 0;
+	virtual bool connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize = 1) = 0;
 
 	/** @overload
 	 * Attempts to create a connection between the Processor object this
@@ -221,7 +221,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::connect()
 	 */
-	virtual const bool connect(const uint sourceIndex, const LocalProcessor *sink, const uint sinkIndex, const uint bufferSize = 1) = 0;
+	virtual bool connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize = 1) = 0;
 
 	/**
 	 * Disguard all connections going from a given port (generally only one,
@@ -232,7 +232,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::disconnect()
 	 */
-	virtual void disconnect(const uint sourceIndex) = 0;
+	virtual void disconnect(uint sourceIndex) = 0;
 
 	/**
 	 * Disguard all connections going from this object.
@@ -287,7 +287,7 @@ public:
 	 * linearity of the parameter, input and output cannot be differentiated here
 	 * and is instead left to later on in its usage for clarification.
 	 */
-	AbstractProcessorPort operator[](const uint port) { return AbstractProcessorPort(this, port); }
+	AbstractProcessorPort operator[](uint port) { return AbstractProcessorPort(this, port); }
 
 	/** @overload
 	 * Constructs a LocalProcessor object that uses, but

@@ -72,7 +72,7 @@ class WatchProcessor: public Processor
 	void watchMatrix();
 
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &) { setupIO(1, 1); }
 	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples) { specifyInputSpace(samples); }

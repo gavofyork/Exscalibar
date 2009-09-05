@@ -30,7 +30,7 @@ class Stress: public SubProcessor
 	uint theSize;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &/*properties*/) { setupIO(1, 1, 1, 1, 1); }
 
 public:
@@ -48,7 +48,7 @@ void Stress::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-const bool Stress::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Stress::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	theSize = inTypes[0].scope();

@@ -3,4 +3,4 @@ TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so $$DESTDIR/libtoolki
 LIBS += -lqtextra -lgeddei -ltoolkit -lrgeddei
 INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei $$SRCDIR/processors/toolkit $$SRCDIR/remote/rgeddei
 TEMPLATE = app 
-SOURCES += testrdemux.cpp
+SOURCES += testrspeed.cpp

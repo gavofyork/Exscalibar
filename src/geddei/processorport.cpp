@@ -44,7 +44,7 @@ void ProcessorPort::split() const
 	theParent->split(thePort);
 }
 
-ProcessorPort &ProcessorPort::setSize(const uint bufferSize)
+ProcessorPort &ProcessorPort::setSize(uint bufferSize)
 {
 	theBufferSize = bufferSize;
 	return *this;

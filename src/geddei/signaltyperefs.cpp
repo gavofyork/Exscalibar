@@ -39,7 +39,7 @@ SignalTypeRefs::SignalTypeRefs(Q3PtrList<SignalType> &src): theImplicitCopying(t
 		theData[i] = src.at(i)->copy();
 }
 
-SignalTypeRefs::SignalTypeRefs(const uint count, const bool implicitCopying) : theCount(count), theImplicitCopying(implicitCopying)
+SignalTypeRefs::SignalTypeRefs(uint count, bool implicitCopying) : theCount(count), theImplicitCopying(implicitCopying)
 {
 	theData = new const SignalType *[count];
 	for(uint i = 0; i < theCount; i++)
@@ -85,7 +85,7 @@ SignalTypeRefs &SignalTypeRefs::operator=(const SignalTypeRef &src)
 	return *this;
 }
 
-const bool SignalTypeRefs::allSame() const
+bool SignalTypeRefs::allSame() const
 {
 	if(!theData[0]) return false;
 	for(uint i = 1; i < theCount; i++)
@@ -94,7 +94,7 @@ const bool SignalTypeRefs::allSame() const
 	return true;
 }
 
-void SignalTypeRefs::resize(const uint count)
+void SignalTypeRefs::resize(uint count)
 {
 	for(uint i = 0; i < theCount; i++)
 		delete theData[i];
@@ -105,13 +105,13 @@ void SignalTypeRefs::resize(const uint count)
 		theData[i] = 0;
 }
 
-void SignalTypeRefs::setData(const uint i, const SignalType *d)
+void SignalTypeRefs::setData(uint i, const SignalType *d)
 {
 	delete theData[i];
 	theData[i] = d;
 }
 
-void SignalTypeRefs::setFill(const SignalType *d, const bool replaceExisting)
+void SignalTypeRefs::setFill(const SignalType *d, bool replaceExisting)
 {
 	bool okToDel = true;
 	for(uint i = 0; i < theCount; i++)
@@ -131,7 +131,7 @@ void SignalTypeRefs::setFill(const SignalType *d, const bool replaceExisting)
 	if(!theCount || okToDel) delete d;
 }
 
-void SignalTypeRefs::copyData(const uint i, const SignalType *d)
+void SignalTypeRefs::copyData(uint i, const SignalType *d)
 {
 	delete theData[i];
 	theData[i] = d->copy();

@@ -106,13 +106,13 @@ class DLLEXPORT BailException
  * of the network may be checked (before the processors have been started) with
  * the confirmTypes() method. split() and share() may be used to fork outputs
  * for connection to multiple destinations.
- * 
+ *
  * Processor objects may inform other such Processor objects about the current
  * plunger situation in the data stream. Plungers may be thought of as
  * seperators in the signal data stream. They segment one portion of the stream
  * and allow equivalent points in the data stream to be defined. You might
  * liken them to the "Next customer please" signs at supermarket checkouts.
- * 
+ *
  * All Processor (-derived) objects are potential informers, however some
  * objects may be able to "become informed". Such objects are said to have the
  * "Guarded" attribute. In such a case they can be told to cease processing
@@ -120,9 +120,9 @@ class DLLEXPORT BailException
  * will arrive. This is useful since there is a blocking method that can be
  * called on such an object, waitUntilDone(), which waits until the object
  * enters such a state.
- * 
+ *
  * See the file testfileout.cpp for a concrete example of this usage.
- * 
+ *
  * Creating new Processor classes:
  *
  * To create your own Processor class, you must subclass this and reimplement
@@ -163,7 +163,7 @@ public:
 		RecursiveFailure, ///< Indicates a failure of a Processor that this depends on.
 		NotStarted ///< Internal - Indicated the operation has yet to start.
 	};
-	
+
 	enum
 	{	Guarded = 1 ///< Indicates a subclass is able to finish when input EOS is given.
 	};
@@ -193,7 +193,7 @@ private:
 	bool theIOSetup, theStopping, theIsInitialised, theAllDone;
 	void doInit(const QString &name, ProcessorGroup *group, const Properties &properties);
 	//@}
-	
+
 protected:
 	/** @internal
 	 * Causes a bail exception. Used to exit from the processor thread in a controlled
@@ -263,7 +263,7 @@ private:
 	Q3ValueVector<LxConnection *> theOutputs;
 	friend class RLConnection;
 	friend class ProcessorForwarder;
-	void dropInput(const uint index);
+	void dropInput(uint index);
 	//@}
 
 	//@{
@@ -274,22 +274,22 @@ private:
 
 	//@{
 	/** Reimplementations from Multiplicative. */
-	const bool knowMultiplicity() const { return theIsInitialised; }
+	bool knowMultiplicity() const { return theIsInitialised; }
 protected:
-	const uint multiplicity() const { return theMulti&Out ? numOutputs() : numInputs(); }
+	uint multiplicity() const { return theMulti&Out ? numOutputs() : numInputs(); }
 private:
-	const bool initGiven() const { return theIsInitialised || theDeferredInit; }
+	bool initGiven() const { return theIsInitialised || theDeferredInit; }
 	//@}
 
 	//@{
 	/** Reimplementations from MultiSource. */
-	virtual ProcessorPort sourcePort(const uint i) { return (*this)[i]; }
+	virtual ProcessorPort sourcePort(uint i) { return (*this)[i]; }
 	virtual void connectCheck() const { assert(theMulti&Out); }
 	//@}
 
 	//@{
 	/** Reimplementation from MultiSink. */
-	virtual ProcessorPort sinkPort(const uint i) { return (*this)[i]; }
+	virtual ProcessorPort sinkPort(uint i) { return (*this)[i]; }
 	//@}
 
 	//@{
@@ -303,29 +303,29 @@ private:
 	Q3ValueVector<uint> thePlungersLeft, thePlungersNotified;
 	bool thePlungersStarted, thePlungersEnded;
 	virtual void startPlungers();
-	virtual void plungerSent(const uint index);
+	virtual void plungerSent(uint index);
 	virtual void noMorePlungers();
 	//@}
 
 	//@{
 	/** Reimplementation from Sink. */
-	virtual void plunged(const uint index);
+	virtual void plunged(uint index);
 	virtual void resetTypes();
 	//@}
 
 	//@{
 	/** Reimplementations from Source. */
-	virtual void doRegisterOut(LxConnection *me, const uint port);
-	virtual void undoRegisterOut(LxConnection *me, const uint port);
+	virtual void doRegisterOut(LxConnection *me, uint port);
+	virtual void undoRegisterOut(LxConnection *me, uint port);
 	//@}
 
 	//@{
 	/** Reimplementations from Sink. */
-	virtual void doRegisterIn(xLConnection *me, const uint port);
-	virtual void undoRegisterIn(xLConnection *me, const uint port);
-	virtual const bool readyRegisterIn(const uint sinkIndex) const;
+	virtual void doRegisterIn(xLConnection *me, uint port);
+	virtual void undoRegisterIn(xLConnection *me, uint port);
+	virtual bool readyRegisterIn(uint sinkIndex) const;
 	virtual void waitToStop() { wait(); }
-	virtual const bool waitUntilReady();
+	virtual bool waitUntilReady();
 	//@}
 
 	//@{
@@ -351,7 +351,7 @@ protected:
 	 * @return Returns the input Connection object.
 	 * @sa numInputs() output()
 	 */
-	xLConnection &input(const uint index)
+	xLConnection &input(uint index)
 	{
 #ifdef EDEBUG
 		assert(index < theInputs.size());
@@ -368,7 +368,7 @@ protected:
 	 * @return The output Connection object at output port @a index.
 	 * @sa numOutputs() input()
 	 */
-	LxConnection &output(const uint index)
+	LxConnection &output(uint index)
 	{
 #ifdef EDEBUG
 		assert(index < theOutputs.size());
@@ -379,11 +379,11 @@ protected:
 
 	/**
 	 * Insert a plunger into all output connections immediately.
-	 * 
+	 *
 	 * Plungers can be thought of a stream seperators, not disimilar from those
 	 * "Next customer please" signs you get at supermarket checkouts to
 	 * determine where your items start and the previous person's stops.
-	 * 
+	 *
 	 * @note This should never be called when there is any unpushed data on any
 	 * of the outputs. Doing so will may in stream corruption.
 	 */
@@ -391,14 +391,14 @@ protected:
 
 	/**
 	 * Blocks until either:
-	 * 
+	 *
 	 * 1) There will never again be enough input for any processing. In this
 	 * instance, it returns false.
-	 * 
+	 *
 	 * 2) There are at least @a samples samples ready for reading immediately.
 	 * It guarantees that reading this data will not require any more plunging.
 	 * In this case, true is returned.
-	 * 
+	 *
 	 * If there are any plungers to be read immediately, then they are read.
 	 * This is only the case if the next read would cause a plunger to be read.
 	 *
@@ -407,25 +407,25 @@ protected:
 	 * @return true iff a read of @a samples will not block or cause a plunger
 	 * to be read, false iff no more data can *ever* be read.
 	 */
-	const bool thereIsInputForProcessing(const uint samples);
+	bool thereIsInputForProcessing(uint samples);
 
 	/** @overload
 	 * Blocks until either:
-	 * 
+	 *
 	 * 1) There will never again be enough input for any processing. In this
 	 * instance, it returns false.
-	 * 
+	 *
 	 * 2) There are at least specifyInputSpace() samples (for each input)ready
 	 * for reading immediately. It guarantees that reading this data will not
 	 * require any more plunging. In this case, true is returned.
-	 * 
+	 *
 	 * If there are any plungers to be read immediately, then they are read.
 	 * This is only the case if the next read would cause a plunger to be read.
 	 *
 	 * @return true iff a read of @a samples will not block or cause a plunger
 	 * to be read, false iff no more data can *ever* be read.
 	 */
-	const bool thereIsInputForProcessing();
+	bool thereIsInputForProcessing();
 
 	/**
 	 * Call this from initFromProperties to initialise I/O connections.
@@ -436,7 +436,7 @@ protected:
 	 * the Processor has been declared as a multi of Output (not ConstOutput though).
 	 * @sa setupVisual()
 	 */
-	void setupIO(const uint inputs, const uint outputs);
+	void setupIO(uint inputs, uint outputs);
 
 	/**
 	 * Call this from initFromProperties to initialise the visual properties of
@@ -450,7 +450,7 @@ protected:
 	 * be redrawn in milliseconds. A value of zero means no explicit redraw.
 	 * @sa setupIO()
 	 */
-	void setupVisual(const uint width = 50, const uint height = 30, const uint redrawPeriod = 0);
+	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0);
 
 	/**
 	 * Reimplement for to define how the processor should be drawn visually.
@@ -477,26 +477,26 @@ protected:
 	 * Note this is executed inside the go() call, and as such MUST NEVER BLOCK
 	 * under any circumstances, as doing so will almost certainly break the
 	 * main program.
-	 * 
+	 *
 	 * This different from initFromProperties, since that represents a one-off
 	 * initialiser for the object, like the constructor. This is called
 	 * potentially many times in an object's life, each time it is started.
-	 * 
+	 *
 	 * Generally you wont have to use this since you'll be able to do any
 	 * internal initialisations inside processor() much more easily. However
 	 * this is useful if you need to reset some external or shared value that
 	 * must happen before the main program gets past the starting stage.
-	 * 
+	 *
 	 * The other reason for using this method to specify initialisation
 	 * procedures is because it facilitates error detection and reporting. By
 	 * returning false, all startup can be simply aborted.
-	 * 
+	 *
 	 * @return false iff the object could not be started for some reason. The
 	 * ErrorType will automatically be filled with ErrorType::Custom.
-	 * 
+	 *
 	 * @sa initFromProperties() processor() processorStopped()
 	 */
-	virtual const bool processorStarted() { return true; }
+	virtual bool processorStarted() { return true; }
 
 	/** @overload
 	 * Reimplement to initialise any stuff that processor may need to be open/
@@ -505,28 +505,28 @@ protected:
 	 * Note this is executed inside the go() call, and as such MUST NEVER BLOCK
 	 * under any circumstances, as doing so will almost certainly break the
 	 * main program.
-	 * 
+	 *
 	 * This different from initFromProperties, since that represents a one-off
 	 * initialiser for the object, like the constructor. This is called
 	 * potentially many times in an object's life, each time it is started.
-	 * 
+	 *
 	 * Generally you wont have to use this since you'll be able to do any
 	 * internal initialisations inside processor() much more easily. However
 	 * this is useful if you need to reset some external or shared value that
 	 * must happen before the main program gets past the starting stage.
-	 * 
+	 *
 	 * The other reason for using this method to specify initialisation
 	 * procedures is because it facilitates error detection and reporting. By
 	 * returning false, all startup can be simply aborted.
-	 * 
+	 *
 	 * @param description A QString in which to place a description of the
 	 * error, if any.
 	 * @return false iff the object could not be started for some reason. The
 	 * ErrorType will automatically be filled with ErrorType::Custom.
-	 * 
+	 *
 	 * @sa initFromProperties() processor() processorStopped()
 	 */
-	virtual const bool processorStarted(QString &description) { description = QString::null; return true; }
+	virtual bool processorStarted(QString &description) { description = QString::null; return true; }
 
 	/**
 	 * Reimplement to cleanup any stuff that processor may have left open/locked/
@@ -587,7 +587,7 @@ protected:
 	 * @return true if @a inTypes is valid and @a outTypes is populated correctly.
 	 */
 	//TODO: enforce the same basic class rule.
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
 
 	/**
 	 * Reimplement to force the inputs' buffer size to be at least samples big, explicitly
@@ -629,7 +629,7 @@ protected:
 	 * @param multi Declares the type of multiplicity this Processor offers. Defaults to
 	 * NotMulti.
 	 */
-	Processor(const QString &type, const MultiplicityType multi = NotMulti, const uint flags = 0);
+	Processor(const QString &type, const MultiplicityType multi = NotMulti, uint flags = 0);
 
 	//@}
 
@@ -703,11 +703,11 @@ public:
 	 * @return false if there has been an error with the init(). true if initialisation has
 	 * been deferred or suceeded. Undefined if init() hasn't been called yet.
 	 */
-	const bool isInitFailed() const { return !(theIsInitialised || theDeferredInit); }
+	bool isInitFailed() const { return !(theIsInitialised || theDeferredInit); }
 
 	/**
 	 * Use this method for driving multiple inputs from one output.
-	 * 
+	 *
 	 * All data is explicitly copied to each connection buffer. Any type of connection
 	 * may be used. Once called, just keep calling connect as many times as you need.
 	 *
@@ -716,7 +716,7 @@ public:
 	 *
 	 * @sa share() connect()
 	 */
-	void split(const uint sourceIndex);
+	void split(uint sourceIndex);
 
 	/**
 	 * Use this method for driving multiple inputs from one output.
@@ -735,7 +735,7 @@ public:
 	 *
 	 * @sa split() connect()
 	 */
-	void share(const uint sourceIndex, const uint bufferSize = 1);
+	void share(uint sourceIndex, uint bufferSize = 1);
 
 	/**
 	 * Create a connection to another Processor object running in this program.
@@ -752,7 +752,7 @@ public:
 	 * @return A pointer to the outbound connection, if creation was successful,
 	 * otherwise 0.
 	 */
-	const Connection *connect(const uint sourceIndex, Sink *sink, const uint sinkIndex, const uint bufferSize = 1);
+	const Connection *connect(uint sourceIndex, Sink *sink, uint sinkIndex, uint bufferSize = 1);
 
 	/**
 	 * Create a connection to another Processor object. Connection uses a TCP/IP
@@ -772,20 +772,20 @@ public:
 	 * @return A pointer to the outbound connection, if creation was successful,
 	 * otherwise 0.
 	 */
-	const Connection *connect(const uint sourceIndex, const QString &sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex, const uint bufferSize = 1);
+	const Connection *connect(uint sourceIndex, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex, uint bufferSize = 1);
 
 	/*
-	const Connection *connect(const uint sourceIndex, Endpoint sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex, const uint bufferSize = 1);
+	const Connection *connect(uint sourceIndex, Endpoint sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex, uint bufferSize = 1);
 	void inform(Processor &target);
 	*/
-		
+
 	/**
 	 * Destoy a connection to another Processor object.
 	 *
 	 * @param index The output port, which *must* be connected. If the port
 	 * has been split() or share()d, then all connections will be deleted.
 	 */
-	void disconnect(const uint index);
+	void disconnect(uint index);
 
 	/**
 	 * Destoy all outgoing connections.
@@ -801,7 +801,7 @@ public:
 	 * linearity of the parameter, input and output cannot be differentiated here
 	 * and is instead left to later on in its usage for clarification.
 	 */
-	ProcessorPort operator[](const uint port) { return ProcessorPort(this, port); }
+	ProcessorPort operator[](uint port) { return ProcessorPort(this, port); }
 
 	/**
 	 * Checks the types (recursively if necessary) and reports if all is ok. Sets
@@ -814,7 +814,7 @@ public:
 	 *
 	 * Reimplementation from Source.
 	 */
-	virtual const bool confirmTypes();
+	virtual bool confirmTypes();
 
 	/**
 	 * Make the thing start doing stuff. i.e. Starts processor thread.
@@ -823,7 +823,7 @@ public:
 	 *
 	 * @sa waitUntilGoing() confirmTypes() errorType() errorData() stop()
 	 */
-	const bool go();
+	bool go();
 
 	/**
 	 * Blocks until processor is active, and gives error information if processor startup
@@ -837,18 +837,18 @@ public:
 	 *
 	 * @sa go()
 	 */
-	const ErrorType waitUntilGoing(int *errorData = 0);
+	ErrorType waitUntilGoing(int *errorData = 0);
 
 	/**
 	 * Blocks until the Processor object is finished and has exited it's main
 	 * processor() method.
-	 * 
+	 *
 	 * This is not the same as a Processor object that has stop()ed. In this
 	 * case, the object is in a "zombie" state. While not yet stopped, it will
 	 * never again process any data.
 	 */
 	void waitUntilDone();
-	
+
 	/**
 	 * Get the last error (if any) from starting up.
 	 *
@@ -858,7 +858,7 @@ public:
 	 *
 	 * @sa waitUntilGoing().
 	 */
-	const ErrorType errorType() const { QMutexLocker lock(&theErrorSystem); return theError; }
+	ErrorType errorType() const { QMutexLocker lock(&theErrorSystem); return theError; }
 
 	/**
 	 * Get any (numerical) data associated with the error condition given
@@ -870,7 +870,7 @@ public:
 	 *
 	 * @sa errorType
 	 */
-	const int errorData() const { QMutexLocker lock(&theErrorSystem); return theErrorData; }
+	int errorData() const { QMutexLocker lock(&theErrorSystem); return theErrorData; }
 
 	/**
 	 * Get a string which is a human readable interpretation of the last
@@ -908,7 +908,7 @@ public:
 	 *
 	 * @sa pause() unpause()
 	 */
-	const bool paused() const { QMutexLocker lock(&thePause); return thePaused; }
+	bool paused() const { QMutexLocker lock(&thePause); return thePaused; }
 
 	/**
 	 * Make the thing stop doing stuff. i.e. Cancels processor thread.
@@ -930,28 +930,28 @@ public:
 	 *
 	 * @return The number of inputs.
 	 */
-	const uint numInputs() const { return theInputs.size(); }
+	uint numInputs() const { return theInputs.size(); }
 
 	/**
 	 * Gets the number of outputs this processor has.
 	 *
 	 * @return The number of outputs.
 	 */
-	const uint numOutputs() const { return theOutputs.size(); }
+	uint numOutputs() const { return theOutputs.size(); }
 
 	/**
 	 * Gets the width of the processor's image. Used by the Nite for drawing.
 	 *
 	 * @return The image's width.
 	 */
-	const uint width() const { return theWidth; }
+	uint width() const { return theWidth; }
 
 	/**
 	 * Gets the height of the processor's image. Used by the Nite for drawing.
 	 *
 	 * @return The image's height.
 	 */
-	const uint height() const { return theHeight; }
+	uint height() const { return theHeight; }
 
 	/**
 	 * Gets the (automatic) redraw period of the processor in milliseconds. Used by
@@ -959,7 +959,7 @@ public:
 	 *
 	 * @return The automatic redraw rate.
 	 */
-	const uint redrawPeriod() const { return theRedrawPeriod; }
+	uint redrawPeriod() const { return theRedrawPeriod; }
 
 	/**
 	 * Front-end routing for drawing the Processor to a canvas. Used by the Nite
@@ -977,7 +977,7 @@ public:
 	 * @return A float between 0 and 1 which is the fractional filled-ness of the
 	 * port's connection buffer.
 	 */
-	const float bufferCapacity(const uint index);
+	float bufferCapacity(uint index);
 
 	/**
 	 * Gets the (instance-wise) name of the processor. This is unique for any group

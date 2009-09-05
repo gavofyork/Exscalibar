@@ -32,7 +32,7 @@ class JustOnes: public Processor
   // Here we setup our I/O. We want 0 inputs and 1 output:
   virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
   // Here we specify our types, we just want a Wave output.
-  virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
+  virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
   // Now we specify what this processor should output. We want it to infinitely produce 1s.
   virtual void processor() { while(true) output(0).makeScratchSamples(1, true)[0] = 1.; }
   // And a public constructor is necessary for use.
@@ -55,7 +55,7 @@ class Incremental: public Processor
   virtual void initFromProperties(const Properties &p) { theFirst = p["First"].toDouble(); setupIO(1, 1); }
   // Here we specify the output type. We trust that the input type is something
   // sensible and copy it blindly.
-  virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
+  virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
   // Here we define the actual operation this processor does.
   // f(0) = theFirst
   // f(i | i > 0) = f(i - 1) + [readElement]
@@ -73,7 +73,7 @@ class Printer: public Processor
   virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
   // And here can verify our input type. As it happens, we dont care, so we
   // just return true.
-  virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+  virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
   // Here we define the operation of this processor. We just read a sample and
   // print off the (first) value. Easy.
   virtual void processor() { for(int i = 1; true; i++) { cout << "[" << qPrintable(name()) << "] " << i << "th element: " << input(0).readSamples(1)[0] << endl; sleep(1); } }

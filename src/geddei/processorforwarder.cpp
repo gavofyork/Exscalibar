@@ -34,7 +34,7 @@ namespace Geddei
 QMutex *ProcessorForwarder::theReaper;
 Q3PtrList<RLConnection> ProcessorForwarder::theGraveyard;
 
-ProcessorForwarder::ProcessorForwarder(const uint port) : Q3ServerSocket(port ? port : GEDDEI_PORT )
+ProcessorForwarder::ProcessorForwarder(uint port) : Q3ServerSocket(port ? port : GEDDEI_PORT )
 {
 	if(MESSAGES) qDebug("Starting server on port: %d.", port ? port : GEDDEI_PORT);
 }
@@ -143,7 +143,7 @@ void ProcessorForwarder::newConnection(int socket)
 	delete link;
 }
 
-LRConnection *ProcessorForwarder::createConnection(Source *source, const uint sourceIndex, const uint bufferSize, const QString &sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex)
+LRConnection *ProcessorForwarder::createConnection(Source *source, uint sourceIndex, uint bufferSize, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex)
 {
 	LRConnection *ret;
 	Q3SocketDevice *link = new Q3SocketDevice;
@@ -166,7 +166,7 @@ LRConnection *ProcessorForwarder::createConnection(Source *source, const uint so
 	return ret;
 }
 
-const bool ProcessorForwarder::deleteConnection(const QString &sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex)
+bool ProcessorForwarder::deleteConnection(const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex)
 {
 	Q3SocketDevice link;
 	if(MESSAGES) qDebug("> ProcessorForwarder::deleteConnection() : sinkHost = %s", sinkHost.latin1());
@@ -183,7 +183,7 @@ const bool ProcessorForwarder::deleteConnection(const QString &sinkHost, const u
 	return header.readLine() == "OK";
 }
 
-Q3SocketDevice *ProcessorForwarder::login(const QString &host, const uint key)
+Q3SocketDevice *ProcessorForwarder::login(const QString &host, uint key)
 {
 	Q3SocketDevice *link = new Q3SocketDevice;
 	if(MESSAGES) qDebug("> ProcessorForwarder::login() : host = %s, key = %d", host.latin1(), key);
@@ -195,7 +195,7 @@ Q3SocketDevice *ProcessorForwarder::login(const QString &host, const uint key)
 	return link;
 }
 
-DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString &host, const uint key, const QString &type)
+DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString &host, uint key, const QString &type)
 {
 	Q3SocketDevice *link = login(host, key);
 	if(!link) return 0;
@@ -206,7 +206,7 @@ DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString 
 	if(MESSAGES) qDebug("Sending credentials (key=%d, type=%s)", key, type.latin1());
 	header << key << endl << "couple" << endl << type << endl;
 	if(MESSAGES) qDebug("Sent. Reading subProcKey...");
-	const uint sPK = header.readLine().toUInt();
+	uint sPK = header.readLine().toUInt();
 	if(MESSAGES) qDebug("Got %d. Creating DRC...", sPK);
 	ret = new DRCoupling(dom, link);
 	ret->setCredentials(host, key, sPK);
@@ -214,7 +214,7 @@ DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString 
 	return ret;
 }
 
-const bool ProcessorForwarder::deleteCoupling(const QString &host, const uint key, const uint sPK)
+bool ProcessorForwarder::deleteCoupling(const QString &host, uint key, uint sPK)
 {
 	Q3SocketDevice *link = login(host, key);
 	if(!link) return false;

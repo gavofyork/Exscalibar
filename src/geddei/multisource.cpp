@@ -28,7 +28,7 @@ void MultiSource::disconnect()
 		sourcePort(i) --;
 }
 
-const bool MultiSource::deferConnect(MultiSink *sink, const uint bufferSize)
+bool MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 {
 	// If our multiplicity is explicitly defined
 	if(knowMultiplicity())
@@ -57,7 +57,7 @@ const bool MultiSource::deferConnect(MultiSink *sink, const uint bufferSize)
 	return false;
 }
 
-void MultiSource::setSourceMultiplicity(const uint multiplicity)
+void MultiSource::setSourceMultiplicity(uint multiplicity)
 {
 	if(MESSAGES) qDebug("MultiSource::setSourceMultiplicity(%d) DC=%d", multiplicity, theDeferredConnect);
 	if(theDeferredConnect)
@@ -66,7 +66,7 @@ void MultiSource::setSourceMultiplicity(const uint multiplicity)
 	}
 }
 
-void MultiSource::connect(MultiSink *sink, const uint bufferSize)
+void MultiSource::connect(MultiSink *sink, uint bufferSize)
 {
 	// TODO: Warn & exit.
 	assert(!theConnected);

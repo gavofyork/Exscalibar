@@ -86,7 +86,7 @@ class DLLEXPORT SignalType
 	 * @param comp The object to be compared to this.
 	 * @return true iff they are equivalent.
 	 */
-	const bool sameAs(const SignalType *comp) const { return sameAsBE(comp); }
+	bool sameAs(const SignalType *comp) const { return sameAsBE(comp); }
 
 	/**
 	 * Static method for creation of a new SignalType-derived class from its
@@ -98,7 +98,7 @@ class DLLEXPORT SignalType
 	 * @param id The unique class identifier of the SignalType to be created.
 	 * @return A new SignalType object whose id() is equal to @a id .
 	 */
-	static SignalType *create(const uint id);
+	static SignalType *create(uint id);
 
 protected:
 	/**
@@ -174,7 +174,7 @@ protected:
 	 *
 	 * @return The unique identity of the new class.
 	 */
-	virtual const uint id() const = 0;
+	virtual uint id() const = 0;
 
 	/**
 	 * Duplicate this SignalType object.
@@ -209,7 +209,7 @@ protected:
 	 * @param comp The object to be compared to this.
 	 * @return true iff they are equivalent.
 	 */
-	virtual const bool sameAsBE(const SignalType *comp) const { return id() == comp->id() && theScope == comp->theScope && theFrequency == comp->theFrequency; }
+	virtual bool sameAsBE(const SignalType *comp) const { return id() == comp->id() && theScope == comp->theScope && theFrequency == comp->theFrequency; }
 
 	//@}
 
@@ -225,34 +225,34 @@ protected:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	SignalType(const uint scope = 1, const float frequency = 0);
+	SignalType(uint scope = 1, float frequency = 0);
 
 public:
 	/**
 	 * @return The scope, or number of single value elements per sample of the
 	 * data represented by this SignalType.
 	 */
-	const uint scope() const { return theScope; }
+	uint scope() const { return theScope; }
 
 	/**
 	 * @return The frequency, or number of samples per Signal-time second of
 	 * the data represented by this SignalType.
 	 */
-	const float frequency() const { return theFrequency; }
+	float frequency() const { return theFrequency; }
 
 	/**
 	 * Sets the scope of this SignalType.
 	 *
 	 * @param scope The new scope.
 	 */
-	void setScope(const uint scope) { theScope = scope; }
+	void setScope(uint scope) { theScope = scope; }
 
 	/**
 	 * Sets the frequency of this SignalType.
 	 *
 	 * @param frequency The new frequency.
 	 */
-	void setFrequency(const float frequency) { theFrequency = frequency; }
+	void setFrequency(float frequency) { theFrequency = frequency; }
 
 	/**
 	 * Get the number of samples represented by the given number of elements.
@@ -261,7 +261,7 @@ public:
 	 * @return The number of samples that @a elements constitute. This will be
 	 * less than or equal to @a elements .
 	 */
-	const uint samples(const uint elements) const { return elements / theScope; }
+	uint samples(uint elements) const { return elements / theScope; }
 
 	/**
 	 * Get the number of seconds represented by the given number of elements.
@@ -269,7 +269,7 @@ public:
 	 * @param elements The number of elements.
 	 * @return The number of Signal-time seconds that @a elements constitute.
 	 */
-	const float seconds(const uint elements) const { return float(elements / theScope) / theFrequency; }
+	float seconds(uint elements) const { return float(elements / theScope) / theFrequency; }
 
 	/**
 	 * Get the number of elements a number of samples represents.
@@ -278,7 +278,7 @@ public:
 	 * @return The number of elements represented by @a samples . This will be
 	 * greater than or equal to @a samples .
 	 */
-	const uint elementsFromSamples(const uint samples) const { return samples * theScope; }
+	uint elementsFromSamples(uint samples) const { return samples * theScope; }
 
 	/**
 	 * Get the number of elements a Signal-time length of seconds represents.
@@ -286,7 +286,7 @@ public:
 	 * @param seconds The length of Signal-time.
 	 * @return The number of elements.
 	 */
-	const uint elementsFromSeconds(const float seconds) const { return (uint)(seconds * theFrequency) * theScope; }
+	uint elementsFromSeconds(float seconds) const { return (uint)(seconds * theFrequency) * theScope; }
 
 	/**
 	 * Virtual destructor.

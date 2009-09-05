@@ -40,7 +40,7 @@ class MultiSink;
 class DLLEXPORT MultiSource: virtual public Multiplicative
 {
 	//* Reimplementations from Multiplicative
-	virtual void setSourceMultiplicity(const uint multiplicity);
+	virtual void setSourceMultiplicity(uint multiplicity);
 
 	//@{
 	/** Deferred connect data. */
@@ -56,7 +56,7 @@ protected:
 	 * @param i The source port to be returned.
 	 * @return A ProcessorPort reference to the given source (output) port.
 	 */
-	virtual ProcessorPort sourcePort(const uint i) = 0;
+	virtual ProcessorPort sourcePort(uint i) = 0;
 
 	/**
 	 * Override to provide a check to make sure a connection is possible.
@@ -73,7 +73,7 @@ public:
 	 * @return true if the connect should be abandoned. false if both
 	 * multiplicative source and sink are ready.
 	 */
-	const bool deferConnect(MultiSink *sink, const uint bufferSize);
+	bool deferConnect(MultiSink *sink, uint bufferSize);
 
 	/**
 	 * Connect this to a multiplicative sink.
@@ -81,7 +81,7 @@ public:
 	 * @param sink Pointer to the sink to which it is to be connected.
 	 * @param bufferSize A minimum size of the buffer to be employed.
 	 */
-	void connect(MultiSink *sink, const uint bufferSize = 1);
+	void connect(MultiSink *sink, uint bufferSize = 1);
 
 	/**
 	 * Disconnect all outputs from the multiplicitive sink. This must already

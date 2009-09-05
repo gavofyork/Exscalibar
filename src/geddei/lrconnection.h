@@ -45,7 +45,7 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	virtual const SignalTypeRef type();
 
 	//* Reimplementations from LxConnection
-	virtual const bool waitUntilReady();
+	virtual bool waitUntilReady();
 	virtual void setType(const SignalType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
@@ -55,14 +55,14 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual const uint maximumScratchElements(const uint) { return Undefined; }
-	virtual const uint maximumScratchElementsEver() { return Undefined; }
-	virtual void enforceMinimum(const uint elements);
+	virtual uint maximumScratchElements(const uint) { return Undefined; }
+	virtual uint maximumScratchElementsEver() { return Undefined; }
+	virtual void enforceMinimum(uint elements);
 
 	//* Reimplementations from LxConnectionReal
 	virtual void transport(const BufferData &data);
 	virtual void bufferWaitForFree();
-	virtual const uint bufferElementsFree();
+	virtual uint bufferElementsFree();
 
 	QString theRemoteHost, theRemoteProcessorName;
 	uint theRemoteKey, theRemoteIndex;
@@ -71,14 +71,14 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	QMutex theTrapdoor;
 	void openTrapdoor() { theTrapdoor.lock(); }
 	void closeTrapdoor() { theTrapdoor.unlock(); }
-	const bool trapdoor() { bool ret = theTrapdoor.tryLock(); if(ret) theTrapdoor.unlock(); return !ret; }
+	bool trapdoor() { bool ret = theTrapdoor.tryLock(); if(ret) theTrapdoor.unlock(); return !ret; }
 
 	/**
 	 * Simple constructor.
 	 * Used from ProcessorForwarder object.
 	 */
 	friend class ProcessorForwarder;
-	LRConnection(Source *newSource, const uint newSourceIndex, Q3SocketDevice *newSink);
+	LRConnection(Source *newSource, uint newSourceIndex, Q3SocketDevice *newSink);
 
 	/**
 	 * Simple destructor.
@@ -86,7 +86,7 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	~LRConnection();
 
 public:
-	void setCredentials(const QString &remoteHost, const uint remoteKey, const QString &remoteProcessorName, const uint remoteIndex);
+	void setCredentials(const QString &remoteHost, uint remoteKey, const QString &remoteProcessorName, uint remoteIndex);
 };
 
 };

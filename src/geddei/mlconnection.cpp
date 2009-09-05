@@ -19,7 +19,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-MLConnection::MLConnection(Sink *sink, const uint sinkIndex, LMConnection *connection)
+MLConnection::MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection)
 	: xLConnection(sink, sinkIndex), theConnection(connection)
 {
 	theConnection->theConnections.append(this);
@@ -47,7 +47,7 @@ void MLConnection::noMorePlungers()
 	theSink->noMorePlungers();
 }
 
-const uint MLConnection::capacity() const
+uint MLConnection::capacity() const
 {
 	return theReader->size();
 }
@@ -69,12 +69,12 @@ BufferReader *MLConnection::newReader()
 	return new BufferReader(&(theConnection->theBuffer));
 }
 
-void MLConnection::enforceMinimum(const uint elements)
+void MLConnection::enforceMinimum(uint elements)
 {
 	theConnection->enforceMinimum(elements);
 }
 
-const uint MLConnection::elementsReady() const
+uint MLConnection::elementsReady() const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -88,7 +88,7 @@ const uint MLConnection::elementsReady() const
 	return ret;
 }
 
-void MLConnection::waitForElements(const uint elements) const
+void MLConnection::waitForElements(uint elements) const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -102,7 +102,7 @@ void MLConnection::waitForElements(const uint elements) const
 	theSink->checkExit();
 }
 
-const bool MLConnection::plungeSync(const uint samples) const
+bool MLConnection::plungeSync(uint samples) const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -123,7 +123,7 @@ const bool MLConnection::plungeSync(const uint samples) const
 	return true;
 }
 
-const BufferData MLConnection::readElements(const uint elements)
+const BufferData MLConnection::readElements(uint elements)
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -146,7 +146,7 @@ const BufferData MLConnection::readElements(const uint elements)
 	}
 }
 
-const BufferData MLConnection::peekElements(const uint elements)
+const BufferData MLConnection::peekElements(uint elements)
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -191,7 +191,7 @@ void MLConnection::setType(const SignalType *type)
 	theType = type->copy();
 }
 
-const bool MLConnection::waitUntilReady()
+bool MLConnection::waitUntilReady()
 {
 //	return theSink->confirmTypes();
 	return theSink->waitUntilReady();

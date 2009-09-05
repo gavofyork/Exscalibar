@@ -54,7 +54,7 @@ class DLLEXPORT RLConnection: public xLConnectionReal, protected QThread
 	virtual void run();
 
 	//* Reimplementation from xLConnection.
-	virtual const bool pullType();
+	virtual bool pullType();
 
 public:
 	/**

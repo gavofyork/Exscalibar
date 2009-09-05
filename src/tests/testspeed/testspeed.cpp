@@ -34,7 +34,7 @@ class MySource: public Processor
 			}
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &o) { o[0] = 10; }
 public:
@@ -55,7 +55,7 @@ class MySink: public Processor
 //	sched_yield();
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
 	MySink() : Processor("MySink", NotMulti, Guarded) {}
@@ -72,7 +72,7 @@ class LatencySource: public Processor
 			output(0).makeScratchSamples(1, true)[0] = *((float *)&t);
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out) { out[0] = Value(); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out) { out[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 public:
 	LatencySource() : Processor("LatencySource") {}
@@ -93,10 +93,10 @@ class LatencySink: public Processor
 			delete t;
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
-	const float latency() const { return float(theElapsedSum) / float(theSamples); }
+	float latency() const { return float(theElapsedSum) / float(theSamples); }
 	LatencySink() : Processor("LatencySink", NotMulti, Guarded) {}
 };
 
@@ -106,7 +106,7 @@ class PassThrough: public SubProcessor
 	{
 		setupIO(1, 1, 1, 1);
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 	{
 		out = in;
 		return true;

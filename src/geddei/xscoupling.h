@@ -45,9 +45,9 @@ class xSCoupling : virtual public xxCoupling
 	virtual void stoppedR();
 	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &p);
-	virtual void transact(const BufferDatas &d, const uint chunks);
+	virtual void transact(const BufferDatas &d, uint chunks);
 	virtual BufferDatas deliverResults(uint *timeTaken);
-	virtual void defineIO(const uint inputs, const uint outputs);
+	virtual void defineIO(uint inputs, uint outputs);
 
 protected:
 

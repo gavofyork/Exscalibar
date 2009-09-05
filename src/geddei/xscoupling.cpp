@@ -56,7 +56,7 @@ void xSCoupling::stop()
 	theSubProc->stop();
 }
 
-void xSCoupling::transact(const BufferDatas &d, const uint chunks)
+void xSCoupling::transact(const BufferDatas &d, uint chunks)
 {
 	theSubProc->transact(d, chunks);
 }
@@ -82,7 +82,7 @@ void xSCoupling::initFromProperties(const Properties &p)
 	theSubProc->initFromProperties(p);
 }
 
-void xSCoupling::defineIO(const uint inputs, const uint outputs)
+void xSCoupling::defineIO(uint inputs, uint outputs)
 {
 	theSubProc->defineIO(inputs, outputs);
 }

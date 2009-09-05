@@ -30,7 +30,7 @@ class Log : public SubProcessor
 	uint theSize;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &/*properties*/) { setupIO(1, 1, 1, 1, 1); }
 
 public:
@@ -43,7 +43,7 @@ void Log::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 		outs[0][i] = log(ins[0][i]);
 }
 
-const bool Log::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Log::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	theSize = inTypes[0].scope();

@@ -56,7 +56,7 @@ public:
 	 * @param i The index to be poplulated.
 	 * @param d The BufferData object to be "duplicated".
 	 */
-	void copyData(const uint i, const BufferData &d) { theData[i] = new BufferData(d); }
+	void copyData(uint i, const BufferData &d) { theData[i] = new BufferData(d); }
 
 	/** @internal
 	 * Sets the BufferData at index @a i to be a reference to the BufferData at
@@ -68,7 +68,7 @@ public:
 	 * @param i The index to be poplulated.
 	 * @param d The BufferData object to be adopted.
 	 */
-	void setData(const uint i, const BufferData *d) { theData[i] = d; }
+	void setData(uint i, const BufferData *d) { theData[i] = d; }
 
 	/** @internal
 	 * Get a subset of samples from the BufferData objects.
@@ -78,7 +78,7 @@ public:
 	 * @return The array containing only a subset of samples from each of the
 	 * BufferData objects
 	 */
-	const BufferDatas samples(const uint index, const uint amount) const;
+	const BufferDatas samples(uint index, uint amount) const;
 
 	/** @internal @overload
 	 * Get a subset of samples from the BufferData objects.
@@ -88,7 +88,7 @@ public:
 	 * @return The array containing only a subset of samples from each of the
 	 * BufferData objects
 	 */
-	BufferDatas samples(const uint index, const uint amount);
+	BufferDatas samples(uint index, uint amount);
 
 	/** @internal
 	 * Discards all BufferData objects from the array and resizes it to
@@ -98,7 +98,7 @@ public:
 	 *
 	 * @param count The new size of this BufferDatas object.
 	 */
-	void resize(const uint count);
+	void resize(uint count);
 
 	/** @internal
 	 * Discards all BufferData objects from the array.
@@ -127,7 +127,7 @@ public:
 	 *
 	 * For notice of internal development:
 	 * Don't be tempted to use this method to set the contents BufferDatas.
-	 * Use setData() instead. It is only non-const for access to non-const
+	 * Use setData() instead. It is only non-for access to non-const
 	 * methods of the returned BufferData. BufferDatas itself should be left
 	 * unchanged.
 	 *
@@ -148,14 +148,14 @@ public:
 	 *
 	 * @return The number of slots for BufferData objects.
 	 */
-	const uint size() const { return theCount; }
+	uint size() const { return theCount; }
 	
 	/**
 	 * Get the number of BufferDatas objects stored.
 	 *
 	 * @return The number of slots for BufferData objects.
 	 */
-	const uint count() const { return theCount; }
+	uint count() const { return theCount; }
 
 	/** @internal
 	 * Assignment operator.
@@ -189,7 +189,7 @@ public:
 	 * @param count The number of slots for BufferData objects this object
 	 * should have.
 	 */
-	BufferDatas(const uint count = 0);
+	BufferDatas(uint count = 0);
 
 	/** @internal
 	 * Default destructor.

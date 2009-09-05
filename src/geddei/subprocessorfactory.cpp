@@ -34,7 +34,7 @@ QFactoryManager<SubProcessor> &SubProcessorFactory::factory()
 	return *theOne;
 }
 
-const bool SubProcessorFactory::available(const QString &type)
+bool SubProcessorFactory::available(const QString &type)
 {
 	if(type.contains("&"))
 		return available(type.section("&", 0, 0)) && available(type.section("&", 1));
@@ -42,7 +42,7 @@ const bool SubProcessorFactory::available(const QString &type)
 		return factory().isAvailable(type);
 }
 
-const int SubProcessorFactory::versionId(const QString &type)
+int SubProcessorFactory::versionId(const QString &type)
 {
 	if(type.contains("&"))
 		return min(versionId(type.section("&", 0, 0)), versionId(type.section("&", 1)));

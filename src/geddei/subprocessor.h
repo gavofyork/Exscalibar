@@ -186,7 +186,7 @@ class DLLEXPORT SubProcessor: public QThread
 	 * @param chunks The number of chunks that the data represents. Note if
 	 * chunks == 0, we implicitly mean a plunger.
 	 */
-	void transact(const BufferDatas &i, const uint chunks);
+	void transact(const BufferDatas &i, uint chunks);
 
 	/** @internal
 	 * Blocks until the last transaction is completed. Then retrieves the results
@@ -206,13 +206,13 @@ class DLLEXPORT SubProcessor: public QThread
 	 * in fact does an extra thing, namely records the outTypes for later use.
 	 * DO NOT call verifyAndSpecifyTypes(...) directly: Use proxyVSTypes(...) instead.
 	 */
-	const bool proxyVSTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
+	bool proxyVSTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
 
 	/** @internal
 	 * (Re)defines the number of inputs/outputs after any multiplicity concerns are
 	 * accounted for.
 	 */
-	void defineIO(const uint numInputs, const uint numOutputs);
+	void defineIO(uint numInputs, uint numOutputs);
 
 protected:
     /**
@@ -251,7 +251,7 @@ protected:
 	 *
 	 * @sa processChunk()
 	 */
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 
 	/**
 	 * Reimplement to provide property specifications and default values for this
@@ -287,7 +287,7 @@ protected:
 	 * @sa proxyVSTypes(), for internal development.
 	 */
 	//TODO: enforce the same basic class rule.
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
 
 	/**
 	 * Initialises from the given @a properties. Should call setupIO() (and
@@ -311,7 +311,7 @@ protected:
 	 * or the number of inputs in the case of an Input Multiplicitive object. Undefined
 	 * is given otherwise.
 	 */
-	const uint multiplicity() const { return theMulti == In ? theNumInputs : theMulti == Out ? theNumOutputs : Undefined; }
+	uint multiplicity() const { return theMulti == In ? theNumInputs : theMulti == Out ? theNumOutputs : Undefined; }
 
 	/**
 	 * Call from initFromProperties(). Use it to set up the number of inputs/outputs,
@@ -344,9 +344,9 @@ protected:
 	 *
 	 * @sa setupVisual()
 	 */
-	void setupIO(const uint numInputs = 1, const uint numOutputs = 1, const uint samplesIn = 1, const uint samplesStep = 1, const uint samplesOut = 1);
+	void setupIO(uint numInputs = 1, uint numOutputs = 1, uint samplesIn = 1, uint samplesStep = 1, uint samplesOut = 1);
 
-	void setupSamplesIO(const uint samplesIn, const uint samplesStep, const uint samplesOut);
+	void setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut);
 	
 	/**
 	 * Call this from initFromProperties to initialise the visual properties of
@@ -361,7 +361,7 @@ protected:
 	 *
 	 * @sa setupIO() paintProcessor()
 	 */
-	void setupVisual(const uint width = 50, const uint height = 30, const uint redrawPeriod = 0);
+	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0);
 
 	/**
 	 * Reimplement for to define how the SubProcessor should be drawn visually.

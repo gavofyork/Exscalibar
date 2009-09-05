@@ -72,7 +72,7 @@ class GeddeiNite: public QMainWindow, public Ui::GeddeiNiteBase
 	void updateItems();
 	void doSave(const QString &filename);
 	void doLoad(const QString &filename);
-	const bool connectAll();
+	bool connectAll();
 	void disconnectAll();
 
 	void updateProperties();
@@ -97,14 +97,14 @@ public:
 	void setActive(Q3CanvasItem *item = NULL);
 	void setModified(bool modified = true);
 
-	const int defaultBufferSize() const { return theDefaultBufferSize; }
-	const bool tested() const { return theTested; }
-	const bool connected() const { return theConnected; }
+	int defaultBufferSize() const { return theDefaultBufferSize; }
+	bool tested() const { return theTested; }
+	bool connected() const { return theConnected; }
 
 	ProcessorGroup &group() { return theGroup; }
 	WatchProcessor *watch() { return theWatch; }
 
-	const bool bobCollision(Bob *b);
+	bool bobCollision(Bob *b);
 	void addBob(Bob *b);
 	void removeBob(Bob *b);
 	Bob *getBob(const QString &name);

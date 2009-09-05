@@ -52,17 +52,17 @@ private:
 	virtual void reset() { theBuffer.clear(); }
 	virtual void sinkStopping();
 	virtual void sinkStopped();
-	virtual const uint elementsReady() const;
-	virtual void waitForElements(const uint elements) const;
-	virtual const BufferData readElements(const uint elements);
-	virtual const BufferData peekElements(const uint elements);
-	virtual void enforceMinimum(const uint elements);
+	virtual uint elementsReady() const;
+	virtual void waitForElements(uint elements) const;
+	virtual const BufferData readElements(uint elements);
+	virtual const BufferData peekElements(uint elements);
+	virtual void enforceMinimum(uint elements);
 	virtual BufferReader *newReader() { return new BufferReader(&theBuffer); }
 	virtual void killReader();
 	virtual void resurectReader();
-	virtual const uint capacity() const { return theBuffer.size() / theType->scope(); }
-	virtual const float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
-	virtual const bool plungeSync(const uint samples) const;
+	virtual uint capacity() const { return theBuffer.size() / theType->scope(); }
+	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
+	virtual bool plungeSync(uint samples) const;
 	
 protected:
 	friend class BobPort;
@@ -72,7 +72,7 @@ protected:
 	/**
 	 * Extracts the type from the source end of the connection.
 	 */
-	virtual const bool pullType() = 0;
+	virtual bool pullType() = 0;
 
 	/**
 	 * Simple constructor.
@@ -83,7 +83,7 @@ protected:
 	 * this Connection shall be tied.
 	 * @param bufferSize The size of the buffer for this Connection.
 	 */
-	xLConnectionReal(Sink *newSink, const uint newSinkIndex, const uint bufferSize);
+	xLConnectionReal(Sink *newSink, uint newSinkIndex, uint bufferSize);
 
 	/**
 	 * Simple destructor.

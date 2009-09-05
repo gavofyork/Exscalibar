@@ -60,11 +60,11 @@ class DLLEXPORT MultiPlayer: public Processor
 	uint theLength, thePosition, theFrames;
 	uint theIndex;
 
-	const bool openFile();
+	bool openFile();
 
 	virtual void processor();
 	virtual void processorStopped();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
@@ -76,7 +76,7 @@ public:
 	 * @param index The index of the file whose title you wish to attain.
 	 * @return The title of the track with index @a index (starting at 0).
 	 */
-	const QString &getTitle(const int index) { return thePaths[index]; }
+	const QString &getTitle(int index) { return thePaths[index]; }
 
 	/**
 	 * Basic constructor.

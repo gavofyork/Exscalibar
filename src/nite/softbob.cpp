@@ -36,7 +36,7 @@ using namespace Geddei;
 
 int SoftBob::RTTI = 1005;
 
-SoftBob::SoftBob(const int x, const int y, const QString &type, const QString &name, Q3Canvas *c) : Bob(name, c)
+SoftBob::SoftBob(int x, int y, const QString &type, const QString &name, Q3Canvas *c) : Bob(name, c)
 {
 	theType = type;
 

@@ -3,19 +3,19 @@
 # Subdir relative project main directory: ./src/processors/mir
 # Target is a library:  
 
-include( ../../../globalplugin.pro )
+PACKAGES = "fftw3f:3.0.0"
+include(../../../exscalibar.pri)
 
 INSTALLS += target 
 target.path = $$PREFIX/plugins/geddei 
-TARGETDEPS += ../../../src/qtextra/libqtextra.so \
-              ../../../src/geddei/libgeddei.so 
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+              $$DESTDIR/libgeddei.so 
 LIBS += -lgeddei \
         -lqtextra
 INCLUDEPATH += ../../../src/geddei \
                ../../../src/qtextra 
-QMAKE_LIBDIR = ../../../src/geddei \
-               ../../../src/qtextra 
-TEMPLATE = lib 
+TEMPLATE = lib
+CONFIG += plugin
 SOURCES += bark.cpp \
            cepstrum.cpp \
            checkerboard.cpp \

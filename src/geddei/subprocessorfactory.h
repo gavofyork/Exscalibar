@@ -56,7 +56,7 @@ public:
 	 * @param type The type of SubProcessor (i.e. class name) to be queried.
 	 * @return true if it can be create() -ed, false otherwise.
 	 */
-	static const bool available(const QString &type);
+	static bool available(const QString &type);
 
 	/**
 	 * Gets (latest available) version of a SubProcessor -derived class.
@@ -65,7 +65,7 @@ public:
 	 * @return The version of the class @a type that is available, or -1 if
 	 * unavailable, given in the integer code representation.
 	 */
-	static const int versionId(const QString &type);
+	static int versionId(const QString &type);
 
 	/**
 	 * Gets (latest available) version of a SubProcessor -derived class.

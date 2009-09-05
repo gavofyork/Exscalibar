@@ -41,16 +41,16 @@ protected:
 	QString theDeferredName;
 	ProcessorGroup *theDeferredGroup;
 
-	virtual void setSourceMultiplicity(const uint multiplicity) = 0;
-	virtual void setSinkMultiplicity(const uint multiplicity) = 0;
+	virtual void setSourceMultiplicity(uint multiplicity) = 0;
+	virtual void setSinkMultiplicity(uint multiplicity) = 0;
 
 public:
-	virtual const bool initGiven() const = 0;
-	virtual const bool knowMultiplicity() const = 0;
-	virtual const uint multiplicity() const = 0;
+	virtual bool initGiven() const = 0;
+	virtual bool knowMultiplicity() const = 0;
+	virtual uint multiplicity() const = 0;
 	virtual void doInit(const QString &name, ProcessorGroup *g = 0, const Properties &properties = Properties()) = 0;
 
-	void setMultiplicity(const uint multiplicity);
+	void setMultiplicity(uint multiplicity);
 
 	Multiplicative() : theDeferredInit(false) {}
 	virtual ~Multiplicative() {}

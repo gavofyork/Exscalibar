@@ -61,11 +61,11 @@ class Buffer: public ScratchOwner
 	 */
 	void updateUNSAFE();
 
-	const bool trapdoorUNSAFE() const;
-	const uint waitForUNSAFE(const uint elements) const;
-	const uint waitForUNSAFE(const uint elements, const BufferReader *reader) const;
-	const uint waitForIgnorePlungersUNSAFE(const uint elements, const BufferReader *reader) const;
-	void waitForFreeUNSAFE(const uint elements) const;
+	bool trapdoorUNSAFE() const;
+	uint waitForUNSAFE(uint elements) const;
+	uint waitForUNSAFE(uint elements, const BufferReader *reader) const;
+	uint waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *reader) const;
+	void waitForFreeUNSAFE(uint elements) const;
 
 	/**
 	 * Discards the next plunger, if there is one.
@@ -79,7 +79,7 @@ class Buffer: public ScratchOwner
 	 * 
 	 * @return -1 if there isn't one.
 	 */
-	const int nextPlungerUNSAFE() const;
+	int nextPlungerUNSAFE() const;
 
 	/**
 	 * Finds the next plunger from @a pos and returns its position relative to
@@ -87,7 +87,7 @@ class Buffer: public ScratchOwner
 	 * 
 	 * @return -1 if there isn't such a plunger.
 	 */
-	const int nextPlungerUNSAFE(const uint pos, const uint ignore) const;
+	int nextPlungerUNSAFE(uint pos, uint ignore) const;
 
 public:
 	// USE THIS FROM processor on stop() - dont forget to reinitialise
@@ -106,7 +106,7 @@ public:
 	 * 
 	 * Thread-safe.
 	 */
-	const uint elementsFree() const;
+	uint elementsFree() const;
 
 	/**
 	 * Waits until the buffer is at least empty enough to allow a number of
@@ -117,14 +117,14 @@ public:
 	 * 
 	 * Thread-safe. Blocking.
 	 */
-	void waitForFreeElements(const uint elements) const;
+	void waitForFreeElements(uint elements) const;
 
 	/**
 	 * Creates a scratch of a given length in either samples or seconds (or elements, but this is discouraged).
 	 * 
 	 * Thread-safe.
 	 */
-	BufferData makeScratchElements(const uint elements, bool autoPush = false);
+	BufferData makeScratchElements(uint elements, bool autoPush = false);
 
 	/**
 	 * Invalidates the last scratch. Should only be used if scratch was *not* auto-pushing.
@@ -174,7 +174,7 @@ public:
 	 * Resizes buffer.
 	 * Shouldn't be called with native BufferData objects floating.
 	 */
-	void resize(const uint size);
+	void resize(uint size);
 
 	/**
 	 * Sets the buffer's SignalType. Causes a clear() (see caveats for clear()).
@@ -184,7 +184,7 @@ public:
 	/**
 	 * Returns the size of the buffer.
 	 */
-	const uint size() const { return theSize; }
+	uint size() const { return theSize; }
 
 	/**
 	 * Returns the type of the buffer.
@@ -198,7 +198,7 @@ public:
 
 	void debug();
 
-	Buffer(const uint size, const SignalType *type = 0);
+	Buffer(uint size, const SignalType *type = 0);
 	virtual ~Buffer();
 };
 

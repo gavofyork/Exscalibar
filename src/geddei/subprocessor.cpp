@@ -33,14 +33,14 @@ SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi) :
 	theNumInputs = theNumOutputs = theIn = theStep = theOut = 1;
 }
 
-void SubProcessor::setupIO(const uint numInputs, const uint numOutputs, const uint samplesIn, const uint samplesStep, const uint samplesOut)
+void SubProcessor::setupIO(uint numInputs, uint numOutputs, uint samplesIn, uint samplesStep, uint samplesOut)
 {
 	theNumInputs = numInputs;
 	theNumOutputs = numOutputs;
 	setupSamplesIO(samplesIn, samplesStep, samplesOut);
 }
 
-void SubProcessor::setupSamplesIO(const uint samplesIn, const uint samplesStep, const uint samplesOut)
+void SubProcessor::setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut)
 {
 	if(samplesIn < samplesStep)
 	{	theIn = samplesStep;
@@ -89,7 +89,7 @@ void SubProcessor::stop()
 	theCurrentOut.resize(0);
 }
 
-void SubProcessor::setupVisual(const uint width, const uint height, const uint redrawPeriod)
+void SubProcessor::setupVisual(uint width, uint height, uint redrawPeriod)
 {
 	if(thePrimaryOf)
 		thePrimaryOf->setupVisual(width, height, redrawPeriod);
@@ -119,7 +119,7 @@ void SubProcessor::processChunk(const BufferDatas &, BufferDatas &) const
 	qFatal("*** FATAL: Missing SubProcessor processChunk implementation.");
 }
 
-void SubProcessor::processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const
+void SubProcessor::processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const
 {
 	for(uint i = 0; i < chunks; i++)
 	{	const BufferDatas ini = in.samples(i * theStep, theIn);
@@ -128,7 +128,7 @@ void SubProcessor::processChunks(const BufferDatas &in, BufferDatas &out, const 
 	}
 }
 
-void SubProcessor::defineIO(const uint numInputs, const uint numOutputs)
+void SubProcessor::defineIO(uint numInputs, uint numOutputs)
 {
 	theNumInputs = numInputs;
 	theNumOutputs = numOutputs;
@@ -176,7 +176,7 @@ void SubProcessor::run()
 	}
 }
 
-void SubProcessor::transact(const BufferDatas &i, const uint chunks)
+void SubProcessor::transact(const BufferDatas &i, uint chunks)
 {
 	if(MESSAGES)
 	{	if(chunks)

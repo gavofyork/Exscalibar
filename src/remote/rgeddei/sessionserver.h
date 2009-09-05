@@ -67,7 +67,7 @@ class DLLEXPORT SessionServer
 
 	void setAlive();
 	void resetAlive();
-	const bool alive() const;
+	bool alive() const;
 
 public:
 	// implementations of rpcs
@@ -81,16 +81,16 @@ public:
 	bool processorWaitUntilDone(const QString &name);
 	bool processorStop(const QString &name);
 	bool processorReset(const QString &name);
-	bool processorConnectNetwork(const QString &name, const uint bufferSize, const uint output, const QString &desthost, const uint destkey, const QString &destname, const uint destinput, bool &ret);
+	bool processorConnectNetwork(const QString &name, uint bufferSize, uint output, const QString &desthost, uint destkey, const QString &destname, uint destinput, bool &ret);
 	// to be finalised - need some way of identifying sockets from keys
-	bool processorConnectSocket(const QString &name, const uint bufferSize, const uint output, const uint destkey, const QString &destname, const uint destinput, bool &ret);
-	bool processorConnectLocal(const QString &name, const uint bufferSize, const uint output, const QString &destname, const uint destinput, bool &ret);
-	bool processorDisconnect(const QString &name, const uint output);
+	bool processorConnectSocket(const QString &name, uint bufferSize, uint output, uint destkey, const QString &destname, uint destinput, bool &ret);
+	bool processorConnectLocal(const QString &name, uint bufferSize, uint output, const QString &destname, uint destinput, bool &ret);
+	bool processorDisconnect(const QString &name, uint output);
 	bool processorDisconnectAll(const QString &name);
-	bool processorSplit(const QString &name, const uint output);
-	bool processorShare(const QString &name, const uint output);
+	bool processorSplit(const QString &name, uint output);
+	bool processorShare(const QString &name, uint output);
 	bool domProcessorCreateAndAddLocal(const QString &name, bool &ret);
-	bool domProcessorCreateAndAddNetwork(const QString &name, const QString &host, const uint key, bool &ret);
+	bool domProcessorCreateAndAddNetwork(const QString &name, const QString &host, uint key, bool &ret);
 	bool typeAvailable(const QString &id, bool &ret);
 	bool typeVersion(const QString &id, int &ret);
 	bool typeSubAvailable(const QString &id, bool &ret);

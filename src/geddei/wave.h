@@ -32,7 +32,7 @@ namespace SignalTypes
  */
 class DLLEXPORT Wave: public SignalType
 {
-	virtual const uint id() const { return 1; }
+	virtual uint id() const { return 1; }
 	virtual SignalType *copyBE() const { return new Wave(theFrequency); }
 
 public:
@@ -44,7 +44,7 @@ public:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	Wave(const float frequency = 0) : SignalType(1, frequency) {}
+	Wave(float frequency = 0) : SignalType(1, frequency) {}
 };
 
 };

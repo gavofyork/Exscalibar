@@ -49,7 +49,7 @@ Bob::Bob(const QString &name, Q3Canvas *c): QObject(0, name), Q3CanvasRectangle(
 	theCanvas = c;
 }
 
-void Bob::init(const int x, const int y)
+void Bob::init(int x, int y)
 {
 	theProcessor->init(theName, geddeiNite()->group());
 	int w = theProcessor->width(), h = theProcessor->height();
@@ -101,7 +101,7 @@ void Bob::updatePorts()
 		(*i)->refresh();
 }
 
-void drawRect(QPainter &p, const int width, const int height, const int offset, const int val)
+void drawRect(QPainter &p, int width, int height, int offset, int val)
 {
 	p.setPen(QColor(val, val, val));
 	p.drawRect(offset, offset, width - offset * 2, height - offset * 2);

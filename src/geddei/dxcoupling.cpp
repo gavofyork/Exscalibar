@@ -32,11 +32,11 @@ DxCoupling::~DxCoupling()
 	theDomProcessor->theWorkers.remove(this);
 }
 
-void DxCoupling::skipPlungeAndSend(const uint samples)
+void DxCoupling::skipPlungeAndSend(uint samples)
 {
 	if(MESSAGES) qDebug("> DRCoupling::skipPlungeAndSend()");
 
-	for(uint i = 0; i < theReaders.count(); i++)
+	for(uint i = 0; i < (uint)theReaders.count(); i++)
 	{	theReaders[i]->skipElements(samples * theReaders[i]->type()->scope());
 		theReaders[i]->skipPlunger();
 	}
@@ -45,13 +45,13 @@ void DxCoupling::skipPlungeAndSend(const uint samples)
 	if(MESSAGES) qDebug("< DRCoupling::skipPlungeAndSend()");
 }
 
-void DxCoupling::skip(const uint samples)
+void DxCoupling::skip(uint samples)
 {
-	for(uint i = 0; i < theReaders.count(); i++)
+	for(uint i = 0; i < (uint)theReaders.count(); i++)
 		theReaders[i]->skipElements(samples * theReaders[i]->type()->scope());
 }
 
-void DxCoupling::peekAndSend(const uint samples, const uint chunks)
+void DxCoupling::peekAndSend(uint samples, uint chunks)
 {
 	if(MESSAGES) qDebug("> DxCoupling::peekAndSend()");
 
@@ -93,14 +93,14 @@ void DxCoupling::peekAndSend(const uint samples, const uint chunks)
 void DxCoupling::stoppingL()
 {
 	if(MESSAGES) qDebug("DxCoupling::stopping(): Opening trapdoors...");
-	for(uint i = 0; i < theReaders.count(); i++)
+	for(uint i = 0; i < (uint)theReaders.count(); i++)
 		theReaders[i]->openTrapdoor(theDomProcessor);
 }
 
 void DxCoupling::stoppedL()
 {
 	if(MESSAGES) qDebug("DxCoupling::stopped(): Closing trapdoors...");
-	for(uint i = 0; i < theReaders.count(); i++)
+	for(uint i = 0; i < (uint)theReaders.count(); i++)
 		theReaders[i]->closeTrapdoor(theDomProcessor);
 }
 

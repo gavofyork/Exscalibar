@@ -49,10 +49,10 @@
  */
 class DLLEXPORT Monitor: public Processor
 {
-	virtual const bool processorStarted();
+	virtual bool processorStarted();
 	virtual void processor();
 	virtual void processorStopped();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void receivedPlunger();
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
@@ -75,28 +75,28 @@ public:
 	 * @return The number of bits that flowed through this processor per
 	 * (real time) second.
 	 */
-	const double averageThroughput() { return double(elementsProcessed() * 32) / theTotalTime; }
+	double averageThroughput() { return double(elementsProcessed() * 32) / theTotalTime; }
 	
 	/**
 	 * Determine time elapsed between go() and stop().
 	 * 
 	 * @return The number of seconds elapsed between go() and stop().
 	 */
-	const double elapsedTime() { return theTotalTime; }
+	double elapsedTime() { return theTotalTime; }
 	
 	/**
 	 * Determine the number of (32-bit) elements that flowed through this object.
 	 * 
 	 * @return The total number of elements to flow through this object.
 	 */
-	const uint elementsProcessed() { return theTotalSamples * theScope; }
+	uint elementsProcessed() { return theTotalSamples * theScope; }
 	
 	/**
 	 * Determine the number of samples that flowed through this object.
 	 * 
 	 * @return The total number of samples to flow through this object.
 	 */
-	const uint samplesProcessed() { return theTotalSamples; }
+	uint samplesProcessed() { return theTotalSamples; }
 	
 	/**
 	 * Determine the total amount of signal time to flow through this object.
@@ -104,7 +104,7 @@ public:
 	 * @return the amount of signal, measured in seconds, that flowed through
 	 * this object.
 	 */
-	const double signalProcessed() { return double(theTotalSamples) / theFrequency; }
+	double signalProcessed() { return double(theTotalSamples) / theFrequency; }
 	
 	/**
 	 * Determine how many times faster than realtime the signal flowed through
@@ -114,7 +114,7 @@ public:
 	 * 
 	 * @return The number of times faster than real the signal was processed.
 	 */
-	const double timesFasterThanReal() { return signalProcessed() / theTotalTime; }
+	double timesFasterThanReal() { return signalProcessed() / theTotalTime; }
 	
 	/**
 	 * Block until a plunger flows through this object. If a plunger has

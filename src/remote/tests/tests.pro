@@ -6,4 +6,4 @@
 TEMPLATE = subdirs
 SUBDIRS += testnodeclient \
            testrdemux \
-           testspeed
+           testrspeed

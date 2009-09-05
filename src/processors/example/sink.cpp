@@ -23,7 +23,7 @@ class SignalSink: public Processor
 protected:
 	virtual void processor();
 	virtual void initFromProperties(const Properties &props);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &/*inTypes*/, SignalTypeRefs &/*outTypes*/) { return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &/*inTypes*/, SignalTypeRefs &/*outTypes*/) { return true; }
 public:
 	SignalSink() : Processor("SignalSink") {}
 };

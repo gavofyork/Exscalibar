@@ -77,7 +77,7 @@ public:
 
 	bool connectYourself();
 	void disconnectYourself();
-	const bool connected() const { return theProfileTimer != 0; }
+	bool connected() const { return theProfileTimer != 0; }
 	virtual void saveYourself(QDomElement &element, QDomDocument &doc);
 	virtual void loadYourselfPre(QDomElement &element);
 	virtual void loadYourselfPost(QDomElement &element);
@@ -88,7 +88,7 @@ public:
 
 	void refresh() { updatePorts(); }
 
-	void init(const int x, const int y);
+	void init(int x, int y);
 
 	Bob(const QString &name, Q3Canvas *c);
 	virtual ~Bob();

@@ -73,7 +73,7 @@ void Player::paintProcessor(QPainter &p)
 	}
 }
 
-const bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
 	outTypes = Wave(theRate);
 	return true;

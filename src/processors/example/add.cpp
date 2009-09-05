@@ -22,7 +22,7 @@ class DLLEXPORT Add: public Processor
 {
 	int count;
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
 	Add() : Processor("Add") {}
@@ -45,7 +45,7 @@ void Add::processor()
 	}
 }
 
-const bool Add::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Add::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes.allSame()) return false;
 	outTypes[0] = inTypes[0];

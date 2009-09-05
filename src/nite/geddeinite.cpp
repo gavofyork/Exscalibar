@@ -137,7 +137,7 @@ const QString GeddeiNite::makeUniqueName(const QString &type)
 	return ret;
 }
 
-const bool GeddeiNite::bobCollision(Bob *b)
+bool GeddeiNite::bobCollision(Bob *b)
 {
 	for(Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
 		if(b->collidesWith(*i) && b != *i)
@@ -397,7 +397,7 @@ void GeddeiNite::on_modeTest_activated()
 	modeRun->setEnabled(theTested);
 }
 
-const bool GeddeiNite::connectAll()
+bool GeddeiNite::connectAll()
 {
 	bool successful = true;
 	theWatch = 0;

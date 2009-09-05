@@ -85,7 +85,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(const uint size, const SignalType *type) : theDataFlux(false)
+Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(false)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -105,7 +105,7 @@ Buffer::Buffer(const uint size, const SignalType *type) : theDataFlux(false)
 	lastScratch = new BufferInfo(theData, this, theMask, BufferInfo::Foreign, BufferInfo::Write);
 	if(MESSAGES) qDebug("Creating new scratch: %p", lastScratch);
 	lastScratch->thePlunger = false;
-	
+
 	theTrapdoors.clear();
 	theDataFlux.unlock();
 }
@@ -121,7 +121,7 @@ Buffer::~Buffer()
 	if(MESSAGES) qDebug("< ~Buffer");
 }
 
-void Buffer::resize(const uint size)
+void Buffer::resize(uint size)
 {
 	theDataFlux.lock();
 	delete [] theData;
@@ -140,20 +140,20 @@ void Buffer::resize(const uint size)
 	theUsed = 0;
 	theData = new float[theSize];
 	for(uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
-	
+
 	if(lastScratch->isReferenced())
 		qFatal("FATAL: Resizing buffer when scratch BufferData objects are still around.");
 	lastScratch->theData = theData;
 	lastScratch->theMask = theMask;
 	lastScratch->thePlunger = false;
-	
+
 	theTrapdoors.clear();
 	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
 	{	(*i)->clearUNSAFE();
 		(*i)->lastRead->theData = theData;
 		(*i)->lastRead->theMask = theMask;
 	}
-	
+
 	theDataFlux.unlock();
 }
 
@@ -161,12 +161,12 @@ void Buffer::appendPlunger()
 {
 	if(MESSAGES) qDebug("Appending plunger to position %d", writePos);
 	QMutexLocker lock(&theDataFlux);
-	
+
 #ifdef EDEBUG
 	if(theSize - theUsed == 0 && !thePlungers.count())
 		qWarning("*** WARNING: appendPlunger(): Size of buffer is critically low (size: %d).\n"
-		         "             There is not enough room for one plunger. Please\n"
-		         "             make use of Processor::specifyOutputSpace().", theSize);
+				 "             There is not enough room for one plunger. Please\n"
+				 "             make use of Processor::specifyOutputSpace().", theSize);
 #endif
 
 	// Need at least 1 element free or theUsed == theSize, meaning that the plunger position
@@ -195,7 +195,7 @@ void Buffer::discardNextPlungerUNSAFE()
 		thePlungers.remove(thePlungers.begin());
 }
 
-const bool Buffer::trapdoorUNSAFE() const
+bool Buffer::trapdoorUNSAFE() const
 {
 	if(MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? Processor::getCallersProcessor()->name().latin1() : "[SubProcessor]");
 	Q3ValueVector<const Processor *>::const_iterator i;
@@ -225,7 +225,7 @@ void Buffer::closeTrapdoor(const Processor *processor)
 //	for(i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 //		qDebug("List: iterator %p", *i);
 	if(MESSAGES) qDebug("Size: %d", theTrapdoors.size());
-		
+
 	Q3ValueVector<const Processor *>::iterator i;
 	for(i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 		if(*i == processor) break;
@@ -237,26 +237,26 @@ void Buffer::closeTrapdoor(const Processor *processor)
 	if(MESSAGES) qDebug("< closeTrapdoor");
 }
 
-const int Buffer::nextPlungerUNSAFE() const
+int Buffer::nextPlungerUNSAFE() const
 {
 	if(thePlungers.begin() == thePlungers.end()) return -1;
 	return *thePlungers.begin();
 }
 
-const int Buffer::nextPlungerUNSAFE(const uint pos, const uint ignore) const
+int Buffer::nextPlungerUNSAFE(uint pos, uint ignore) const
 {
 	// 'ii' starts at first plunger
 	Q3ValueList<uint>::const_iterator ii = thePlungers.begin();
-	
+
 	// First we skip down the plunger list until we find the first plunger at or past 'pos'
-	for(; ii != thePlungers.end() && ((*ii - readPos) & theMask) < ((pos - readPos) & theMask); ii++);
-	
+	for(; ii != thePlungers.end() && ((*ii - readPos) & theMask) < ((pos - readPos) & theMask); ii++) {}
+
 	// Then we skip upto ignore plungers from the list while they are situated on 'pos'
-	for(uint i = 0; i < ignore && ii != thePlungers.end() && *ii == pos; i++, ii++);
-	
+	for(uint i = 0; i < ignore && ii != thePlungers.end() && *ii == pos; i++, ii++) {}
+
 	// If we ran out of plungers, return -1
 	if(ii == thePlungers.end()) return -1;
-	
+
 	// Otherwise return the relative position of the next plunger
 	return (*ii - pos) & theMask;
 }
@@ -267,7 +267,7 @@ const int Buffer::nextPlungerUNSAFE(const uint pos, const uint ignore) const
  *  0 <= r < elements: If a plunger occurs before elements are available
  *  r = Undefined: If trapdoor is open(-ed).
  */
-const uint Buffer::waitForUNSAFE(const uint elements) const
+uint Buffer::waitForUNSAFE(uint elements) const
 {
 	if(MESSAGES) qDebug("Waiting for %d elements...", elements);
 	int nextPlunger = -1;
@@ -284,7 +284,7 @@ const uint Buffer::waitForUNSAFE(const uint elements) const
 	return Undefined;
 }
 
-const uint Buffer::waitForUNSAFE(const uint elements, const BufferReader *reader) const
+uint Buffer::waitForUNSAFE(uint elements, const BufferReader *reader) const
 {
 	if(MESSAGES) qDebug("Waiting for %d elements...", elements);
 	int nextPlunger = -1;
@@ -292,7 +292,7 @@ const uint Buffer::waitForUNSAFE(const uint elements, const BufferReader *reader
 	{
 		if(nextPlunger == -1)
 			nextPlunger = nextPlungerUNSAFE(reader->readPos, reader->theAlreadyPlungedHere);
-		
+
 		if(nextPlunger < signed(elements) && nextPlunger != -1)
 		{	if(MESSAGES) qDebug("Too close. Exiting...");
 			return nextPlunger;
@@ -304,7 +304,7 @@ const uint Buffer::waitForUNSAFE(const uint elements, const BufferReader *reader
 	return Undefined;
 }
 
-const uint Buffer::waitForIgnorePlungersUNSAFE(const uint elements, const BufferReader *reader) const
+uint Buffer::waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *reader) const
 {
 	if(MESSAGES) qDebug("Waiting for %d elements, ignoring plungers...", elements);
 	while(!trapdoorUNSAFE())
@@ -314,14 +314,14 @@ const uint Buffer::waitForIgnorePlungersUNSAFE(const uint elements, const Buffer
 	return Undefined;
 }
 
-const uint Buffer::elementsFree() const
+uint Buffer::elementsFree() const
 {
 	if(MESSAGES) qDebug("= elementsFree");
 	QMutexLocker lock(&theDataFlux);
 	return theSize - theUsed;
 }
 
-void Buffer::waitForFreeUNSAFE(const uint elements) const
+void Buffer::waitForFreeUNSAFE(uint elements) const
 {
 	if(MESSAGES) qDebug("> waitForFreeUNSAFE(%d): size: %d, used: %d", elements, theSize, theUsed);
 	while(theSize - theUsed < elements && !trapdoorUNSAFE())
@@ -329,14 +329,14 @@ void Buffer::waitForFreeUNSAFE(const uint elements) const
 	if(MESSAGES) qDebug("< waitForFreeUNSAFE(%d)", elements);
 }
 
-void Buffer::waitForFreeElements(const uint elements) const
+void Buffer::waitForFreeElements(uint elements) const
 {
 	if(MESSAGES) qDebug("= waitForFreeElements");
 	QMutexLocker lock(&theDataFlux);
 	return waitForFreeUNSAFE(elements);
 }
 
-BufferData Buffer::makeScratchElements(const uint elements, bool autoPush)
+BufferData Buffer::makeScratchElements(uint elements, bool autoPush)
 {
 	if(MESSAGES) qDebug("> makeScratchElements");
 	QMutexLocker lock(&theDataFlux);
@@ -344,7 +344,7 @@ BufferData Buffer::makeScratchElements(const uint elements, bool autoPush)
 #ifdef EDEBUG
 	if(elements >= size())
 		qWarning("*** WARNING: makeScratchElements(): Size of buffer is critically low (size: %d,\n"
-		         "             elements: %d). Make use of Processor::specifyOutputSpace().", theSize, elements);
+				 "             elements: %d). Make use of Processor::specifyOutputSpace().", theSize, elements);
 #endif
 	waitForFreeUNSAFE(elements);
 	if(trapdoorUNSAFE())
@@ -369,7 +369,7 @@ BufferData Buffer::makeScratchElements(const uint elements, bool autoPush)
 	lastScratch->theEndType = autoPush ? BufferInfo::Activate : BufferInfo::Forget;
 	lastScratch->theScope = theType->scope();
 	lastScratch->theValid = true;
-	
+
 	if(MESSAGES) qDebug("< Creating BufferData...");
 	return BufferData(lastScratch, writePos);
 }
@@ -395,10 +395,10 @@ void Buffer::pushScratch(const BufferData &data)
 void Buffer::forgetScratch(const BufferData &data)
 {
 	QMutexLocker lock(&theDataFlux);
-	
+
 	if(data.info() != lastScratch)
 	{	qFatal("*** FATAL: forgetScratch called on object whose info is not owned by this.\n"
-		       "           We own %p, given %p. It's aux is %p. We are %p", lastScratch, data.info(), data.info()->theAux, this);
+			   "           We own %p, given %p. It's aux is %p. We are %p", lastScratch, data.info(), data.info()->theAux, this);
 	}
 	lastScratch->invalidateAndIgnore();
 }
@@ -410,7 +410,7 @@ void Buffer::pushData(const BufferData &data)
 #ifdef EDEBUG
 	if(data.theInfo->theAccessibleSize >= size())
 		qWarning("*** WARNING: pushData(): Size of buffer is critically low (size: %d,\n"
-		         "             data.size: %d). Make use of Processor::specifyOutputSpace().", theSize, data.theInfo->theAccessibleSize);
+				 "             data.size: %d). Make use of Processor::specifyOutputSpace().", theSize, data.theInfo->theAccessibleSize);
 #endif
 	if(MESSAGES) qDebug("* pushData");
 	waitForFreeUNSAFE(data.theVisibleSize);
@@ -423,14 +423,14 @@ void Buffer::pushData(const BufferData &data)
 #endif
 		// We just want to invalidate the old object, not jettison it, since we won't be creating another to
 		// take over its duty.
-		// 
+		//
 		// We could jettison it and then create another, but we don't need to since we don't actually need
 		// another BufferData --- unlike makeScratch we just want to write into the Buffer, not return a BD.
 		lastScratch->invalidateAndIgnore();
 	}
 
 	if(writePos + data.theVisibleSize > theSize)
-	{	const uint sizeFirstPart = theSize - writePos, sizeSecondPart = data.theVisibleSize - (theSize - writePos);
+	{	uint sizeFirstPart = theSize - writePos, sizeSecondPart = data.theVisibleSize - (theSize - writePos);
 		float *firstPart = theData + writePos, *secondPart = theData;
 		if(data.rollsOver())
 			if(sizeFirstPart > data.sizeFirstPart())
@@ -472,10 +472,10 @@ void Buffer::push(const BufferData &data)
 			pushData(data);
 	else
 		qWarning("*** WARNING: You are trying to push an invalid BufferData object. This is\n"
-		         "             probably because the source of the scratch has since been used\n"
-		         "             for another write.\n"
-		         "             You have to push the data *before* you create another scratch.\n"
-		         "             This push will be ignored.");
+				 "             probably because the source of the scratch has since been used\n"
+				 "             for another write.\n"
+				 "             You have to push the data *before* you create another scratch.\n"
+				 "             This push will be ignored.");
 }
 
 void Buffer::clear()

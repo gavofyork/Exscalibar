@@ -3,15 +3,14 @@
 # Subdir relative project main directory: ./src/nite
 # Target is an application:
 
-include( ../../global.pro )
+include(../../exscalibar.pri)
 
 INSTALLS += target
 target.path = $$PREFIX/bin
-TARGETDEPS += ../../src/geddei/libgeddei.so ../../src/qtextra/libqtextra.so
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+              $$DESTDIR/libgeddei.so 
 LIBS +=	-lqtextra \
 	-lgeddei
-QMAKE_LIBDIR = ../../src/qtextra \
-               ../../src/geddei
 INCLUDEPATH += ../../src/geddei \
                ../../src/qtextra
 TEMPLATE = app

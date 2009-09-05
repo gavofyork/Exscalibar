@@ -28,7 +28,7 @@ class SimpleSplit: public SubProcessor
 	int theWidth;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
 public:
@@ -45,7 +45,7 @@ void SimpleSplit::processChunk(const BufferDatas &in, BufferDatas &out) const
 		out[i].copyFrom(in[0].mid(i * theWidth, theWidth));
 }
 
-const bool SimpleSplit::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool SimpleSplit::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Spectrum>()) return false;
 	Spectrum s = inTypes[0].asA<Spectrum>();

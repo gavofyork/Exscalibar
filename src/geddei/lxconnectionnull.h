@@ -41,19 +41,19 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual void startPlungers() {}
 	virtual void plungerSent() {}
 	virtual void noMorePlungers() {}
-	virtual const uint maximumScratchElements(const uint) { return Undefined; }
-	virtual const uint maximumScratchElementsEver() { return Undefined; }
+	virtual uint maximumScratchElements(const uint) { return Undefined; }
+	virtual uint maximumScratchElementsEver() { return Undefined; }
 	virtual BufferData makeScratchElements(const uint, bool = false) { return BufferData::fake(); }
 	virtual void setType(const SignalType *type) { theType = type->copy(); }
 	virtual void resetType() { delete theType; theType = 0L; }
-	virtual const bool waitUntilReady() { return true; }
+	virtual bool waitUntilReady() { return true; }
 	virtual void sourceStopping() {}
 	virtual void sourceStopped() {}
 	virtual void reset() {}
 	virtual void enforceMinimum(const uint) {}
 
 public:
-	LxConnectionNull(Source *source, const uint sourceIndex) : LxConnection(source, sourceIndex) {}
+	LxConnectionNull(Source *source, uint sourceIndex) : LxConnection(source, sourceIndex) {}
 };
 
 };

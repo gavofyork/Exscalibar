@@ -35,7 +35,7 @@ class Checkerboard : public Processor
 
 	virtual void processor();
 	virtual void processorStopped();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -48,11 +48,11 @@ Checkerboard::Checkerboard() : Processor("Checkerboard")
 	theBoard = 0;
 }
 
-inline const float sqr(const float a) { return a * a; }
+inline float sqr(float a) { return a * a; }
 
 void Checkerboard::processor()
 {
-	const float halfSize = theSize / 2;
+	float halfSize = theSize / 2;
 	theBoard = new float[theSize * theSize];
 	float max = 0;
 	for(uint y = 0; y < theSize; y++)
@@ -81,7 +81,7 @@ void Checkerboard::processorStopped()
 	delete [] theBoard;
 }
 
-const bool Checkerboard::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Checkerboard::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();

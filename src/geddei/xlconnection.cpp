@@ -22,7 +22,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-xLConnection::xLConnection(Sink *newSink, const uint newSinkIndex) : Connection()
+xLConnection::xLConnection(Sink *newSink, uint newSinkIndex) : Connection()
 {
 	theSink = newSink;
 	theSinkIndex = newSinkIndex;

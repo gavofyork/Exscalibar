@@ -61,7 +61,7 @@ class DLLEXPORT Recorder: public Processor
 {
 	virtual void processor();
 	virtual PropertiesInfo specifyProperties() const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void initFromProperties(const Properties &p);
 	virtual void receivedPlunger();
 	

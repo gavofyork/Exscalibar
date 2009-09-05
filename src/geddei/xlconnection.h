@@ -102,7 +102,7 @@ protected:
 	 * plunger. If neither plunger nor enough data are forthcoming in the input
 	 * stream, it will block indefinately.
 	 */
-	virtual const bool plungeSync(const uint samples) const = 0;
+	virtual bool plungeSync(uint samples) const = 0;
 	
 	/** @internal
 	 * Returns the number of elements currently available to be read without
@@ -114,7 +114,7 @@ protected:
 	 * essentially a technical issue. As such the value returned may be an
 	 * underestimate.
 	 */
-	virtual const uint elementsReady() const = 0;
+	virtual uint elementsReady() const = 0;
 
 	/** @internal
 	 * Waits until a read @a elements elements can be guaranteed without
@@ -122,7 +122,7 @@ protected:
 	 *
 	 * @param elements Numnber of elements to wait for.
 	 */
-	virtual void waitForElements(const uint elements) const = 0;
+	virtual void waitForElements(uint elements) const = 0;
 
 	/** @internal
 	 * Reads a number of samples or seconds (or elements, but this is
@@ -143,7 +143,7 @@ protected:
 	 *
 	 * @sa peekElements()
 	 */
-	virtual const BufferData readElements(const uint elements) = 0;
+	virtual const BufferData readElements(uint elements) = 0;
 
 	/** @internal plunge
 	 * Reads a number of samples or seconds (or elements, but this is
@@ -163,7 +163,7 @@ protected:
 	 *
 	 * @sa readElements
 	 */
-	virtual const BufferData peekElements(const uint elements) = 0;
+	virtual const BufferData peekElements(uint elements) = 0;
 
 	/** @internal
 	 * Deletes the reader. Any reads must now be done by creating your own
@@ -196,7 +196,7 @@ protected:
 	/** @internal
 	 * Simple constructor.
 	 */
-	xLConnection(Sink *newSink, const uint newSinkIndex);
+	xLConnection(Sink *newSink, uint newSinkIndex);
 
 public:
 	/**
@@ -217,7 +217,7 @@ public:
 	 * @param samples The number of samples this call should no longer block
 	 * at.
 	 */
-	void waitForSamples(const uint samples = 1) const { waitForElements(theType->elementsFromSamples(samples)); }
+	void waitForSamples(uint samples = 1) const { waitForElements(theType->elementsFromSamples(samples)); }
 
 	/**
 	 * Checks how many samples are currently ready to be read. This is correct
@@ -233,7 +233,7 @@ public:
 	 * @return The number of samples ready. Due to the timing semantics, this
 	 * may be an underestimate.
 	 */
-	const uint samplesReady() const { return theType->samples(elementsReady()); }
+	uint samplesReady() const { return theType->samples(elementsReady()); }
 
 	/**
 	 * Read a single sample from the connection. This will block until a sample
@@ -276,7 +276,7 @@ public:
 	 * @return A BufferData object containing the samples read. If samples > 0
 	 * then this is guaranteed to contain exactly @a samples samples.
 	 */
-	const BufferData readSamples(const uint samples = 0, const bool allowZero = false) { if(!allowZero && !samples) while(!samplesReady()) plungeSync(1); return readElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
+	const BufferData readSamples(uint samples = 0, bool allowZero = false) { if(!allowZero && !samples) while(!samplesReady()) plungeSync(1); return readElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
 
 	/**
 	 * Read a second's worth of signal data from the connection. This will block
@@ -305,7 +305,7 @@ public:
 	 * @return A BufferData object containing the data read. This is guarenteed
 	 * to be exactly @a seconds seconds of signal data.
 	 */
-	const BufferData readSeconds(const float seconds) { return readElements(theType->elementsFromSeconds(seconds)); }
+	const BufferData readSeconds(float seconds) { return readElements(theType->elementsFromSeconds(seconds)); }
 
 	/**
 	 * Read a single sample from the connection. This will block until a sample
@@ -339,7 +339,7 @@ public:
 	 * @return A BufferData object containing the samples read. If samples > 0
 	 * then this is guaranteed to contain exactly @a samples samples.
 	 */
-	const BufferData peekSamples(const uint samples = 0, const bool allowZero = false) { if(!allowZero && !samples) while(samplesReady() < 1) plungeSync(1); return peekElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
+	const BufferData peekSamples(uint samples = 0, bool allowZero = false) { if(!allowZero && !samples) while(samplesReady() < 1) plungeSync(1); return peekElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
 
 	/**
 	 * Read a second's worth of signal data from the connection. This will
@@ -360,7 +360,7 @@ public:
 	 * @return A BufferData object containing the data read. This is guarenteed
 	 * to be exactly @a seconds seconds of signal data.
 	 */
-	const BufferData peekSeconds(const float seconds) { return peekElements(theType->elementsFromSeconds(seconds)); }
+	const BufferData peekSeconds(float seconds) { return peekElements(theType->elementsFromSeconds(seconds)); }
 
 	/**
 	 * Get the capacity of the buffer. Any reads above this amount will block
@@ -368,7 +368,7 @@ public:
 	 *
 	 * @return The number of samples that this buffer can hold at once.
 	 */
-	virtual const uint capacity() const = 0;
+	virtual uint capacity() const = 0;
 
 	/**
 	 * Get the current filled-ness of the buffer.
@@ -376,7 +376,7 @@ public:
 	 * @return 0 if there is no buffer on this side of the connection.
 	 * Otherwise return the filledness relative to the size (range 0. to 1.).
 	 */
-	virtual const float filled() const { return 0.; }
+	virtual float filled() const { return 0.; }
 
 	/**
 	 * Simple destructor.

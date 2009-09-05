@@ -3,25 +3,19 @@
 # Subdir relative project main directory: ./src/nite
 # Target is an application:
 
-include( ../../global.pro )
+PACKAGES = "sndfile:1.0.0" "alsa:0.9"
+include(../../exscalibar.pri)
 
-geddeinitebase.ui.target = geddeinitebase.ui
+QT += xml
+
 INSTALLS += target
 target.path = $$PREFIX/bin
-TARGETDEPS += ../../src/geddei/libgeddei.so
-alsa:LIBS += -lasound
-LIBS += -lsndfile \
-	-lqtextra \
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+              $$DESTDIR/libgeddei.so 
+LIBS += -lqtextra \
 	-lgeddei
-QMAKE_LIBDIR = ../../src/qtextra \
-               ../../src/geddei
 INCLUDEPATH += ../../src/geddei \
                ../../src/qtextra
-CONFIG += debug \
-          warn_on \
-          qt \
-          thread \
-          exceptions
 TEMPLATE = app
 FORMS += geddeinitebase.ui
 IMAGES += memory.xpm

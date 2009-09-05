@@ -44,7 +44,7 @@ class DLLEXPORT ProcessorPort
 	 * @param port The port number.
 	 * @param bufferSize A buffer minimum size. Typically left at one.
 	 */
-	ProcessorPort(Processor *parent, const uint port, const uint bufferSize = 1): theParent(parent), thePort(port), theBufferSize(bufferSize) {}
+	ProcessorPort(Processor *parent, uint port, uint bufferSize = 1): theParent(parent), thePort(port), theBufferSize(bufferSize) {}
 
 public:
 	/**
@@ -64,7 +64,7 @@ public:
 	 *
 	 * @sa Processor::specifyInputSpace() @sa Processor::specifyOutputSpace()
 	 */
-	ProcessorPort &setSize(const uint bufferSize);
+	ProcessorPort &setSize(uint bufferSize);
 
 	/**
 	 * Share the output of a Processor object.

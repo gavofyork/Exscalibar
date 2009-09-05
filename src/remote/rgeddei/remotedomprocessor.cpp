@@ -43,7 +43,7 @@ RemoteDomProcessor::~RemoteDomProcessor()
 	theType = "";
 }
 
-const bool RemoteDomProcessor::spawnWorker(RemoteSession &session)
+bool RemoteDomProcessor::spawnWorker(RemoteSession &session)
 {
 	if(MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Node)");
 	if(theSession == &session)
@@ -52,7 +52,7 @@ const bool RemoteDomProcessor::spawnWorker(RemoteSession &session)
 		return theSession->domProcessorCreateAndAdd(theHandle, session.theHost, session.theKey);
 }
 
-const bool RemoteDomProcessor::spawnWorker(LocalSession &session)
+bool RemoteDomProcessor::spawnWorker(LocalSession &session)
 {
 	if(MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Local)");
 	return theSession->domProcessorCreateAndAdd(theHandle, session.theHost, session.thePort);

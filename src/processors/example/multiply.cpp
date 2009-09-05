@@ -22,7 +22,7 @@ class Multiply: public Processor
 {
 	int count;
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
 	Multiply() : Processor("Multiply") {}
@@ -44,7 +44,7 @@ void Multiply::processor()
 	}
 }
 
-const bool Multiply::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Multiply::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes.allSame()) return false;
 	outTypes[0] = inTypes[0];

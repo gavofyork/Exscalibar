@@ -40,7 +40,7 @@ class DLLEXPORT MultiSink: virtual public Multiplicative
 	Q3ValueList<MultiSource *> theDeferrals;
 
 	//* Reimplementations from Multiplicative
-	virtual void setSinkMultiplicity(const uint multiplicity);
+	virtual void setSinkMultiplicity(uint multiplicity);
 
 	//* Neccessary so MultiSource can use append-/remove-Deferral
 	friend class MultiSource;
@@ -63,7 +63,7 @@ public:
 	/**
 	 * Override to provide the routine for providing a sink port.
 	 */
-	virtual ProcessorPort sinkPort(const uint i) = 0;
+	virtual ProcessorPort sinkPort(uint i) = 0;
 };
 
 };

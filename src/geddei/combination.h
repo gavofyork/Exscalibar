@@ -28,10 +28,10 @@ class DLLEXPORT Combination: public SubProcessor
 	uint theInterScope;
 	mutable BufferData *theResident;
 	
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	
 public:
 	Combination(SubProcessor *x, SubProcessor *y);

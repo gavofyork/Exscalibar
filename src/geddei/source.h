@@ -40,20 +40,20 @@ public:
 	 * Note this is done automatically if neccessary at go(), but it's good
 	 * practise to call it beforehand anyway.
 	 */
-	virtual const bool confirmTypes() = 0;
+	virtual bool confirmTypes() = 0;
 
 	/**
 	 * Make a record that @a me is now inhabiting @a port of this Source.
 	 * If the source produces only one ubiquitous output stream, use the
 	 * default port of 0.
 	 */
-	virtual void doRegisterOut(LxConnection *me, const uint port = 0) = 0;
+	virtual void doRegisterOut(LxConnection *me, uint port = 0) = 0;
 
 	/**
 	 * Asserts that @a me has been previously registered at @a port on
 	 * this source and deregisters it.
 	 */
-	virtual void undoRegisterOut(LxConnection *me, const uint port = 0) = 0;
+	virtual void undoRegisterOut(LxConnection *me, uint port = 0) = 0;
 
 	/**
 	 * @return is the processor who is driving this source. Should be left alone

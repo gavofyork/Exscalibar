@@ -29,7 +29,7 @@ using namespace SignalTypes;
 class Sum: public SubProcessor
 {
 	virtual void initFromProperties (const Properties &);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 public:
 	Sum();
@@ -44,7 +44,7 @@ void Sum::initFromProperties (const Properties &)
 	setupIO(1, 1, 1, 1, 1);
 }
 
-const bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes = Value(inTypes[0].frequency());
 	return true;

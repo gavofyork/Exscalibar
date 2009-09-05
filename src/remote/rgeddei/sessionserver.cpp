@@ -74,7 +74,7 @@ SessionServer::~SessionServer()
 	if(MESSAGES) qDebug("< ~SessionServer(): key = %d", theSessionKey);
 }
 
-void SessionServer::safeDelete(const uint key)
+void SessionServer::safeDelete(uint key)
 {
 	QMutexLocker lock(&mutSessionKeyMap);
 	if(theSessionKeyMap.count(key))
@@ -94,7 +94,7 @@ void SessionServer::reap()
 	}
 }
 
-const bool SessionServer::alive() const
+bool SessionServer::alive() const
 {
 	QMutexLocker lock(&theCalling);
 	return theAlive;
@@ -177,7 +177,7 @@ bool SessionServer::domProcessorCreateAndAddLocal(const QString &name, bool &ret
 	return true;
 }
 
-bool SessionServer::domProcessorCreateAndAddNetwork(const QString &name, const QString &host, const uint key, bool &ret)
+bool SessionServer::domProcessorCreateAndAddNetwork(const QString &name, const QString &host, uint key, bool &ret)
 {
 	if(MESSAGES) qDebug("> domProcessorCreateAndAddNetwork()");
 	QMutexLocker lock(&theCalling);
@@ -259,7 +259,7 @@ bool SessionServer::processorReset(const QString &name)
 	return true;
 }
 
-bool SessionServer::processorConnectLocal(const QString &name, const uint bufferSize, const uint output, const QString &destname, const uint destinput, bool &ret)
+bool SessionServer::processorConnectLocal(const QString &name, uint bufferSize, uint output, const QString &destname, uint destinput, bool &ret)
 {
 	if(MESSAGES) qDebug("> processorConnectLocal(): name=%s", destname.latin1());
 	QMutexLocker lock(&theCalling);
@@ -272,7 +272,7 @@ bool SessionServer::processorConnectLocal(const QString &name, const uint buffer
 	return true;
 }
 
-bool SessionServer::processorConnectNetwork(const QString &name, const uint bufferSize, const uint output, const QString &desthost, const uint destkey, const QString &destname, const uint destinput, bool &ret)
+bool SessionServer::processorConnectNetwork(const QString &name, uint bufferSize, uint output, const QString &desthost, uint destkey, const QString &destname, uint destinput, bool &ret)
 {
 	if(MESSAGES) qDebug("> processorConnectNetwork(): key=%d, host=%s, name=%s", destkey, desthost.latin1(), destname.latin1());
 	QMutexLocker lock(&theCalling);
@@ -283,7 +283,7 @@ bool SessionServer::processorConnectNetwork(const QString &name, const uint buff
 	return true;
 }
 
-bool SessionServer::processorDisconnect(const QString &name, const uint output)
+bool SessionServer::processorDisconnect(const QString &name, uint output)
 {
 	if(MESSAGES) qDebug("> processorDisconnect()");
 	QMutexLocker lock(&theCalling);
@@ -307,7 +307,7 @@ bool SessionServer::processorDisconnectAll(const QString &name)
 	return true;
 }
 
-bool SessionServer::processorSplit(const QString &name, const uint output)
+bool SessionServer::processorSplit(const QString &name, uint output)
 {
 	if(MESSAGES) qDebug("> processorSplit()");
 	QMutexLocker lock(&theCalling);
@@ -318,7 +318,7 @@ bool SessionServer::processorSplit(const QString &name, const uint output)
 	return true;
 }
 
-bool SessionServer::processorShare(const QString &name, const uint output)
+bool SessionServer::processorShare(const QString &name, uint output)
 {
 	if(MESSAGES) qDebug("> processorShare()");
 	QMutexLocker lock(&theCalling);

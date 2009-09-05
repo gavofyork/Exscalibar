@@ -29,7 +29,7 @@ using namespace SignalTypes;
 class Magnitude: public SubProcessor
 {
 	virtual void initFromProperties(const Properties &);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	
 public:
@@ -45,7 +45,7 @@ void Magnitude::initFromProperties(const Properties &)
 	setupIO(1, 1, 1, 1, 1);
 }
 
-const bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 {
 	if(!in[0].isA<Spectrum>()) return false;
 	out = Value(in[0].frequency());

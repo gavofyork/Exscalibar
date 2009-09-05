@@ -34,19 +34,19 @@ public:
 	 * If the source produces only one ubiquitous output stream, use the
 	 * default port of 0.
 	 */
-	virtual void doRegisterIn(xLConnection *me, const uint port) = 0;
+	virtual void doRegisterIn(xLConnection *me, uint port) = 0;
 
 	/**
 	 * Asserts that @a me has been previously registered at @a port on
 	 * this source and deregisters it.
 	 */
-	virtual void undoRegisterIn(xLConnection *me, const uint port) = 0;
+	virtual void undoRegisterIn(xLConnection *me, uint port) = 0;
 
 	/**
 	 * Checks that the input port @a sinkIndex is valid for a new connection.
 	 * This is just used to check before a doRegisterIn call.
 	 */
-	virtual const bool readyRegisterIn(const uint sinkIndex) const = 0;
+	virtual bool readyRegisterIn(uint sinkIndex) const = 0;
 
 	/**
 	 * Called by an incoming signal to suggest that the sink should initialise
@@ -67,12 +67,12 @@ public:
 	 * Called when an incoming signal to affirm that another plunger will
 	 * be available sometime in the future.
 	 */
-	virtual void plungerSent(const uint index) = 0;
+	virtual void plungerSent(uint index) = 0;
 	
 	/**
 	 * Callback for when a plunger is in the input.
 	 */
-	virtual void plunged(const uint index) = 0;
+	virtual void plunged(uint index) = 0;
 
 	/**
 	 * Reimplement to allow exit status checking around i/o (and also in the main
@@ -84,7 +84,7 @@ public:
 	 * This should return only when the Sink has started processing or bailed
 	 * due to error.
 	 */
-	virtual const bool waitUntilReady() = 0;
+	virtual bool waitUntilReady() = 0;
 
 	/**
 	 * This should return only when the Sink has finished all processing.
@@ -97,7 +97,7 @@ public:
 	 * Note this is done automatically if neccessary at go(), but it's a good practice
 	 * to call it beforehand anyway.
 	 */
-	virtual const bool confirmTypes() = 0;
+	virtual bool confirmTypes() = 0;
 
 	/**
 	 * May be called upon between stop() and start() to reset any cached data stored

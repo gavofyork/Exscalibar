@@ -21,12 +21,12 @@ namespace Geddei
 	
 	enum { FFTW = 1, GAT = 2, LIBSNDFILE = 4, ALSA = 8, LIBVORBISFILE = 16, LIBMAD = 32 };
 	enum MultiplicityType { NotMulti = 0, In = 1, Out = 2, InOut = 3, Const = 4, InConst = 5, OutConst = 6, InOutConst = 7 };
-	static const uint Undefined = (uint)-1;
+	static uint Undefined = (uint)-1;
 	
-	DLLEXPORT void sleep(const uint secs);
-	DLLEXPORT void usleep(const uint usecs);
+	DLLEXPORT void sleep(uint secs);
+	DLLEXPORT void usleep(uint usecs);
 	
-	inline const uint ceillog2(const uint i)
+	inline uint ceillog2(uint i)
 	{
 		for(uint l = 0; ; l++)
 			if(i <= uint(1 << l))
@@ -34,7 +34,7 @@ namespace Geddei
 	}
 	
 	DLLEXPORT const char *getVersion();
-	DLLEXPORT const uint getConfig();
+	DLLEXPORT uint getConfig();
 	DLLEXPORT const QStringList getPaths();
 	
 }

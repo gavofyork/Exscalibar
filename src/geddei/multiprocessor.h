@@ -84,7 +84,7 @@ class DLLEXPORT MultiProcessor: public MultiSource, public MultiSink
 	/**
 	 * @return true iff the quantity of multiplicity is known.
 	 */
-	const bool knowMultiplicity() const { return theIsInitialised; }
+	bool knowMultiplicity() const { return theIsInitialised; }
 
 	/**
 	 * Get the quantity of multiplicity.
@@ -92,21 +92,21 @@ class DLLEXPORT MultiProcessor: public MultiSource, public MultiSink
 	 * @return The quantity of multiplicity. This value is only valid if
 	 * knowMultiplicity() returns true.
 	 */
-	const uint multiplicity() const { return theProcessors.count(); }
+	uint multiplicity() const { return theProcessors.count(); }
 
 	/**
 	 * @return true iff init() has been called on this object.
 	 */
-	const bool initGiven() const { return theIsInitialised || theDeferredInit; }
+	bool initGiven() const { return theIsInitialised || theDeferredInit; }
 
 	//* Reimplementation from Multiplicative
 	virtual void doInit(const QString &name, ProcessorGroup *g, const Properties &properties);
 
 	//* Reimplementation from MultiSource
-	virtual ProcessorPort sourcePort(const uint i) { return (*theProcessors[i])[0]; }
+	virtual ProcessorPort sourcePort(uint i) { return (*theProcessors[i])[0]; }
 
 	//* Reimplementation from MultiSink
-	virtual ProcessorPort sinkPort(const uint i) { return (*theProcessors[i])[0]; }
+	virtual ProcessorPort sinkPort(uint i) { return (*theProcessors[i])[0]; }
 
 public:
 	/**

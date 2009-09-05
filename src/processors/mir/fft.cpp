@@ -46,7 +46,7 @@ class FFT: public SubProcessor
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 public:
 	FFT() : SubProcessor("FFT") {}
 	~FFT();
@@ -104,7 +104,7 @@ class FFT : public SubProcessor
 	float *real, *imag;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -113,7 +113,7 @@ public:
 	virtual ~FFT();
 };
 
-const int reverseBits(uint initial, const uint logSize)
+int reverseBits(uint initial, uint logSize)
 {
 	uint reversed = 0;
 	for(uint loop = 0; loop < logSize; loop++)
@@ -212,7 +212,7 @@ void FFT::initFromProperties(const Properties &properties)
 
 #endif
 
-const bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Wave>()) return false;
 	// TODO: should output a "stepped spectrum".

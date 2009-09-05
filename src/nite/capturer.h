@@ -36,7 +36,7 @@ using namespace Geddei;
 class Capturer: public Processor
 {
 	virtual void processor();
-	virtual const bool verifyAndSpecifyTypes(Q3PtrList<SignalType> &, Q3PtrList<SignalType> &outTypes);
+	virtual bool verifyAndSpecifyTypes(Q3PtrList<SignalType> &, Q3PtrList<SignalType> &outTypes);
 	virtual void initFromProperties(const Properties &) { setupIO(0, 2); }
 
 public:

@@ -58,7 +58,7 @@ class DLLEXPORT SignalTypeRefs
 
 	uint theCount;
 	const SignalType **theData;
-	const bool theImplicitCopying;
+	bool theImplicitCopying;
 
 	/**
 	 * Copies all the SignalType objects into the @a dest list.
@@ -95,9 +95,9 @@ class DLLEXPORT SignalTypeRefs
 	 * copies. This should not be changed without very good reason (and I can't
 	 * think of one yet).
 	 */
-	explicit SignalTypeRefs(const uint count = 0, const bool implicitCopying = true);
+	explicit SignalTypeRefs(uint count = 0, bool implicitCopying = true);
 
-	const bool populated(const uint i) const
+	bool populated(uint i) const
 	{
 		return theData[i];
 	}
@@ -127,7 +127,7 @@ class DLLEXPORT SignalTypeRefs
 	 *
 	 * @sa copyData()
 	 */
-	void setData(const uint i, const SignalType *d);
+	void setData(uint i, const SignalType *d);
 
 	/**
 	 * Sets index @a i to point to a SignalType equivilent to that pointed to
@@ -152,7 +152,7 @@ class DLLEXPORT SignalTypeRefs
 	 *
 	 * @sa setData()
 	 */
-	void copyData(const uint i, const SignalType *d);
+	void copyData(uint i, const SignalType *d);
 
 	/** @overload
 	 * Retrieve a const SignalTypePtr for the object at index @a i.
@@ -161,7 +161,7 @@ class DLLEXPORT SignalTypeRefs
 	 * @return A const SignalTypePtr object representing the data at index
 	 * @a i .
 	 */
-	const SignalType *ptrAt(const uint i) const
+	const SignalType *ptrAt(uint i) const
 	{
 #ifdef EDEBUG
 		if(i >= theCount)
@@ -199,7 +199,7 @@ class DLLEXPORT SignalTypeRefs
 	 * @param i The index of the SignalTypePtr object to be referenced.
 	 * @return A SignalTypePtr object representing the data at index @a i .
 	 */
-	SignalType *&mutablePtrAt(const uint i)
+	SignalType *&mutablePtrAt(uint i)
 	{
 #ifdef EDEBUG
 		if(i >= theCount)
@@ -219,7 +219,7 @@ class DLLEXPORT SignalTypeRefs
 	 *
 	 * @param count The number of SignalTypePtr objects it should store now.
 	 */
-	void resize(const uint count);
+	void resize(uint count);
 
 	/**
 	 * Fills all entries with the SignalType @a d. Deletes any entries before
@@ -239,18 +239,18 @@ class DLLEXPORT SignalTypeRefs
 	 *
 	 * @sa copyFill()
 	 */
-	void setFill(const SignalType *d, const bool replaceExisting = true);
+	void setFill(const SignalType *d, bool replaceExisting = true);
 	
 public:
-	const SignalTypeRef operator[](const uint i) const { return SignalTypeRef((SignalType *&)(theData[i])); }
-	SignalTypeRef operator[](const uint i) { return SignalTypeRef((SignalType *&)(theData[i])); }
+	const SignalTypeRef operator[](uint i) const { return SignalTypeRef((SignalType *&)(theData[i])); }
+	SignalTypeRef operator[](uint i) { return SignalTypeRef((SignalType *&)(theData[i])); }
 
 	/**
 	 * Get the amount of SignalTypePtr spaces currently allocated.
 	 *
 	 * @return The number of spaces allocated.
 	 */
-	const uint count() const { return theCount; }
+	uint count() const { return theCount; }
 
 	/**
 	 * Check if all SignalType objects contained in this object are actually
@@ -260,7 +260,7 @@ public:
 	 * types. If any are null, returns false. If fewer than two objects are
 	 * contained it returns true.
 	 */
-	const bool allSame() const;
+	bool allSame() const;
 
 	/**
 	 * Assignment operator. Makes an identical copy of the list given by

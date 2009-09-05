@@ -40,7 +40,7 @@ class DLLEXPORT HostProcessorForwarder: public ProcessorForwarder
 	virtual Processor *lookup(uint key, const QString &name);
 	
 public:
-	HostProcessorForwarder(const uint port = RGEDDEI_PORT) : ProcessorForwarder(port) {}
+	HostProcessorForwarder(uint port = RGEDDEI_PORT) : ProcessorForwarder(port) {}
 };
 
 };

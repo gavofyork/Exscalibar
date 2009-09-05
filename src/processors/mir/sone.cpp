@@ -24,7 +24,7 @@ using namespace SignalTypes;
 class Terhardt : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
 public:
@@ -41,7 +41,7 @@ void Terhardt::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-const bool Terhardt::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Terhardt::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
 	if(!inTypes[0].isA<Spectrum>()) return false;
@@ -68,7 +68,7 @@ EXPORT_CLASS(Terhardt, 1,0,1, SubProcessor);
 class Sone : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
 public:
@@ -87,7 +87,7 @@ void Sone::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-const bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
 	if(!inTypes[0].isA<Spectrum>()) return false;
@@ -106,7 +106,7 @@ EXPORT_CLASS(Sone, 1,0,1, SubProcessor);
 class Rhythm: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
 	
@@ -119,7 +119,7 @@ void Rhythm::initFromProperties(const Properties &)
 	setupIO(1, 1, 64, 4, 1);
 }
 
-const bool Rhythm::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Rhythm::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	return true;
 }
@@ -139,7 +139,7 @@ class Histogram: public SubProcessor
 	float *theWindow;
 	
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 public:
@@ -163,7 +163,7 @@ void Histogram::initFromProperties(const Properties &p)
 	setupIO(1, 1);
 }
 
-const bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if(!inTypes[0].isA<Spectrum>()) return false;
 	theColumns = inTypes[0].scope();

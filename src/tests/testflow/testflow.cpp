@@ -33,7 +33,7 @@ class PlungeGenerator : public Processor
 			}
 		}
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 
 public:
@@ -51,7 +51,7 @@ class PlungeDetector : public Processor
 		}
 	}
 
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if(!inTypes[0].isA<Wave>()) return false; outTypes[0] = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if(!inTypes[0].isA<Wave>()) return false; outTypes[0] = inTypes[0]; return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 1); }
 	virtual void receivedPlunger()
 	{
@@ -76,7 +76,7 @@ class PlungeEater : public Processor
 	}
 
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
 	virtual void receivedPlunger()
 	{
 		std::cout << "Eater: Received plunger!" << std::endl;

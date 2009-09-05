@@ -18,7 +18,7 @@
 namespace Geddei
 {
 
-void MultiSink::setSinkMultiplicity(const uint multiplicity)
+void MultiSink::setSinkMultiplicity(uint multiplicity)
 {
 	Q3ValueList<MultiSource *> t = theDeferrals;
 	for(Q3ValueList<MultiSource *>::Iterator i = t.begin(); i != t.end(); i++)

@@ -46,24 +46,24 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	virtual const SignalTypeRef type();
 
 	//* Reimplementations from LxConnection
-	virtual const bool waitUntilReady();
+	virtual bool waitUntilReady();
 	virtual void setType(const SignalType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();
 	virtual void reset();
-	virtual BufferData makeScratchElements(const uint elements, bool autoPush = false);
+	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
 	virtual void pushPlunger();
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual const uint maximumScratchElements(const uint minimum = 1);
-	virtual const uint maximumScratchElementsEver();
-	virtual void enforceMinimum(const uint elements);
+	virtual uint maximumScratchElements(uint minimum = 1);
+	virtual uint maximumScratchElementsEver();
+	virtual void enforceMinimum(uint elements);
 	
 	//* Reimplementations from LxConnectionReal
 	virtual void bufferWaitForFree();
-	virtual const uint bufferElementsFree();
+	virtual uint bufferElementsFree();
 	virtual void transport(const BufferData &data);
 
 	/**
@@ -96,7 +96,7 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	 * @param bufferSize The minimum size of buffer to be used for the
 	 * new connection.
 	 */
-	LMConnection(Source *source, const uint sourceIndex, const uint bufferSize);
+	LMConnection(Source *source, uint sourceIndex, uint bufferSize);
 
 	/**
 	 * Simple destructor.

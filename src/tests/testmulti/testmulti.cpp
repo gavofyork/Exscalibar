@@ -40,8 +40,8 @@ class DownSample : public SubProcessor
 	enum { Mean = 0, Max, Min };
 	uint theConsolidate;
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, const uint chunks) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -49,7 +49,7 @@ public:
 	DownSample() : SubProcessor("DownSample") {}
 };
 
-void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, const uint chunks) const
+void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	if(theCount <= 1)
 		if(theScope > 1)
@@ -83,7 +83,7 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, const 
 	}
 }
 
-const bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	theScope = inTypes[0].scope();
 	outTypes = inTypes[0];
@@ -126,7 +126,7 @@ class SpectrumSource: public Processor
 		}
 		plunge();
 	}
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 	{
 		outTypes[0] = Spectrum(theWidth, 1, 1);
 		return true;
@@ -149,7 +149,7 @@ class SuitableSplit: public SubProcessor
 	float theBass, theTreble;
 	int theBand[4];
 	virtual void initFromProperties (const Properties &) { setupIO(1, 3, 1, 1, 1); }
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].scope() - 4); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].scope() - 4); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{	cerr << "Sizes: i=" << ins[0].elements() << ", o = " << outs[0].elements() << ", " << outs[1].elements() << ", " << outs[2].elements() << endl;
 	}

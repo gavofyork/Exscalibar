@@ -71,7 +71,7 @@ void Monitor::waitForPlunger()
 	thePlunge.wakeAll();
 }
 
-const bool Monitor::processorStarted()
+bool Monitor::processorStarted()
 {
 	thePlungersCaught = 0;
 	return true;
@@ -87,7 +87,7 @@ void Monitor::specifyOutputSpace(Q3ValueVector<uint> &samples)
 	samples[0] = input(0).capacity() / 2;
 }
 
-const bool Monitor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Monitor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	theScope = inTypes[0].scope();

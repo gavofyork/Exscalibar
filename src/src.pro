@@ -6,9 +6,9 @@
 SUBDIRS += qtextra \
            geddei \
            processors \
-           tests \
-           remote \
            exinfo \
-           nite \
-           examples 
+           tests \
+           examples \
+           remote \
+           nite 
 TEMPLATE = subdirs

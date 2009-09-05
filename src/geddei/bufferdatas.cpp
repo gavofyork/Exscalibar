@@ -36,7 +36,7 @@ BufferDatas::BufferDatas(const BufferDatas &src)
 		theData[i] = src.theData[i] ? new BufferData(*(src.theData[i])) : 0;
 }
 
-BufferDatas::BufferDatas(const uint count) : theCount(count)
+BufferDatas::BufferDatas(uint count) : theCount(count)
 {
 	theData = new const BufferData *[count];
 	for(uint i = 0; i < theCount; i++)
@@ -50,7 +50,7 @@ BufferDatas::~BufferDatas()
 	delete [] theData;
 }
 
-void BufferDatas::resize(const uint count)
+void BufferDatas::resize(uint count)
 {
 	for(uint i = 0; i < theCount; i++)
 		delete theData[i];
@@ -61,7 +61,7 @@ void BufferDatas::resize(const uint count)
 		theData[i] = 0;
 }
 
-const BufferDatas BufferDatas::samples(const uint index, const uint amount) const
+const BufferDatas BufferDatas::samples(uint index, uint amount) const
 {
 	BufferDatas ret(theCount);
 	for(uint i = 0; i < theCount; i++)
@@ -69,7 +69,7 @@ const BufferDatas BufferDatas::samples(const uint index, const uint amount) cons
 	return ret;
 }
 
-BufferDatas BufferDatas::samples(const uint index, const uint amount)
+BufferDatas BufferDatas::samples(uint index, uint amount)
 {
 	BufferDatas ret(theCount);
 	for(uint i = 0; i < theCount; i++)

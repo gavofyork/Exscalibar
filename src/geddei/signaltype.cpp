@@ -13,7 +13,7 @@ using namespace SignalTypes;
 namespace Geddei
 {
 
-SignalType::SignalType(const uint scope, const float frequency)
+SignalType::SignalType(uint scope, float frequency)
 {
 	theScope = scope;
 	theFrequency = frequency;
@@ -44,7 +44,7 @@ void SignalType::deserialise(QSocketSession &source)
 	theFrequency = source.safeReceiveWord<float>();
 }
 
-SignalType *SignalType::create(const uint id)
+SignalType *SignalType::create(uint id)
 {
 	switch(id)
 	{

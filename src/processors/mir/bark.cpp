@@ -28,14 +28,14 @@ class Bark : public SubProcessor
 	uint theBins[24], bandWidth, theUsedBins;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
 public:
 	Bark() : SubProcessor("Bark") {}
 };
 
-static const uint barkBands[24] = { 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500 };
+static uint barkBands[24] = { 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500 };
 
 void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
@@ -58,7 +58,7 @@ void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 //	qDebug("Bark: Max in = %f, max out = %f", ins[0][maxi], outs[0][maxo]);
 }
 
-const bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
 	if(!inTypes[0].isA<Spectrum>()) return false;

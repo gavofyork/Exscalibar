@@ -60,7 +60,7 @@ public:
 	 *
 	 * @return true if the current connection is open (i.e. connected).
 	 */
-	const bool isOpen()
+	bool isOpen()
 	{
 		if(!theSD->isValid())
 			theClosed = true;
@@ -81,7 +81,7 @@ public:
 	 *
 	 * @sa waitForAck()
 	 */
-	void ack(const bool sign = true) { sendByte(sign ? 1 : 2); }
+	void ack(bool sign = true) { sendByte(sign ? 1 : 2); }
 
 	/**
 	 * Sends a byte value down the connection. Matches receiveByte().
@@ -90,7 +90,7 @@ public:
 	 *
 	 * @sa receiveByte()
 	 */
-	void sendByte(const uchar c)
+	void sendByte(uchar c)
 	{
 		if(theSD->writeBlock((char *)&c, 1) == 1)
 			return;
@@ -107,7 +107,7 @@ public:
 	 *
 	 * @sa receiveChunk()
 	 */
-	void sendChunk(const uchar *buffer, const uint size);
+	void sendChunk(const uchar *buffer, uint size);
 
 	/**
 	 * Receive a single byte from the connection. Matches sendByte().
@@ -120,7 +120,7 @@ public:
 	 *
 	 * @sa sendByte()
 	 */
-	const uchar receiveByte()
+	uchar receiveByte()
 	{
 		uchar c;
 		if(theSD->readBlock((char *)&c, 1) == 1)
@@ -143,7 +143,7 @@ public:
 	 *
 	 * @sa sendChunk()
 	 */
-	void receiveChunk(uchar *buffer, const uint size);
+	void receiveChunk(uchar *buffer, uint size);
 
 	/** @overload
 	 * Receive some number of bytes from the connection. The number received is
@@ -161,7 +161,7 @@ public:
 	 *
 	 * @sa sendChunk()
 	 */
-	const bool receiveChunk(uchar *buffer, const uint size, const uint timeOut);
+	bool receiveChunk(uchar *buffer, uint size, uint timeOut);
 
 	/**
 	 * Block until the next communication is received. It is interpreted as an
@@ -177,7 +177,7 @@ public:
 	 *
 	 * @sa ack()
 	 */
-	const bool waitForAck(bool *ackType = 0);
+	bool waitForAck(bool *ackType = 0);
 
 	/**
 	 * Block until the next communication is received. It is interpreted as an
@@ -194,7 +194,7 @@ public:
 	 *
 	 * @sa ack()
 	 */
-	const bool waitForAck(const uint timeOut, bool *ackType = 0);
+	bool waitForAck(uint timeOut, bool *ackType = 0);
 
 	//@}
 
@@ -223,7 +223,7 @@ public:
 	 * @param opposite This must be true on one side of the handshake and false
 	 * on the other. It won't work otherwise.
 	 */
-	void handshake(const bool opposite);
+	void handshake(bool opposite);
 
 	/** @overload
 	 * Conduct a handshake operation. This should be done when ever possible at
@@ -243,7 +243,7 @@ public:
 	 *
 	 * @return true if they share the same byte-ordering.
 	 */
-	const bool sameByteOrder() const { return theSameByteOrder; }
+	bool sameByteOrder() const { return theSameByteOrder; }
 
 	/**
 	 * Send a single word down the connection. This can be one of int, float
@@ -253,9 +253,9 @@ public:
 	 *
 	 * @sa safeReceiveWord()
 	 */
-	void safeSendWord(const float i) { sendChunk((const uchar *)&i, 4); }
-	void safeSendWord(const int32_t i) { sendChunk((const uchar *)&i, 4); }
-	void safeSendWord(const uint32_t i) { sendChunk((const uchar *)&i, 4); }
+	void safeSendWord(float i) { sendChunk((const uchar *)&i, 4); }
+	void safeSendWord(int32_t i) { sendChunk((const uchar *)&i, 4); }
+	void safeSendWord(uint32_t i) { sendChunk((const uchar *)&i, 4); }
 
 	/**
 	 * Send a number of words down the connection. These can be one of int,
@@ -266,9 +266,9 @@ public:
 	 *
 	 * @sa safeReceiveWordArray()
 	 */
-	void safeSendWordArray(const float *i, const uint size) { sendChunk((const uchar *)i, 4 * size); }
-	void safeSendWordArray(const int32_t *i, const uint size) { sendChunk((const uchar *)i, 4 * size); }
-	void safeSendWordArray(const uint32_t *i, const uint size) { sendChunk((const uchar *)i, 4 * size); }
+	void safeSendWordArray(const float *i, uint size) { sendChunk((const uchar *)i, 4 * size); }
+	void safeSendWordArray(const int32_t *i, uint size) { sendChunk((const uchar *)i, 4 * size); }
+	void safeSendWordArray(const uint32_t *i, uint size) { sendChunk((const uchar *)i, 4 * size); }
 
 	/**
 	 * Receive a single word from the connection. The word type must be
@@ -283,7 +283,7 @@ public:
 	 *
 	 * @sa safeSendWord()
 	 */
-	template<typename T> const T safeReceiveWord() { return T(); }
+	template<typename T> T safeReceiveWord() { return T(); }
 
 	/**
 	 * Receive a number of words from the connection. The word type may be one
@@ -299,7 +299,7 @@ public:
 	 *
 	 * @sa safeSendWordArray()
 	 */
-	template<typename T> void safeReceiveWordArray(T *t, const uint32_t size) {}
+	template<typename T> void safeReceiveWordArray(T *t, uint32_t size) {}
 
 	/**
 	 * Send a string value down the connection.
@@ -334,11 +334,11 @@ public:
 	~QSocketSession();
 };
 
-template<> const float QSocketSession::safeReceiveWord();
-template<> const int32_t QSocketSession::safeReceiveWord();
-template<> const uint32_t QSocketSession::safeReceiveWord();
-template<> void QSocketSession::safeReceiveWordArray(float *t, const uint32_t size);
-template<> void QSocketSession::safeReceiveWordArray(int32_t *t, const uint32_t size);
-template<> void QSocketSession::safeReceiveWordArray(uint32_t *t, const uint32_t size);
+template<> float QSocketSession::safeReceiveWord();
+template<> int32_t QSocketSession::safeReceiveWord();
+template<> uint32_t QSocketSession::safeReceiveWord();
+template<> void QSocketSession::safeReceiveWordArray(float *t, uint32_t size);
+template<> void QSocketSession::safeReceiveWordArray(int32_t *t, uint32_t size);
+template<> void QSocketSession::safeReceiveWordArray(uint32_t *t, uint32_t size);
 
 #endif

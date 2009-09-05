@@ -27,7 +27,7 @@ BufferData &BufferData::fake()
 	return *(theFake = new BufferData(true));
 }
 
-BufferData::BufferData(const bool valid) : theWritePointer(0)
+BufferData::BufferData(bool valid) : theWritePointer(0)
 {
 	theInfo = new BufferInfo(valid ? Undefined : 0, 0, valid ? new float[1] : 0, 0, BufferInfo::Ignore, 0, new bool(valid), valid ? BufferInfo::Write : BufferInfo::Read, valid ? BufferInfo::Managed : BufferInfo::Foreign, false);
 	theOffset = 0;
@@ -48,28 +48,28 @@ BufferData::BufferData(uint size, uint scope, float *data, ScreenOwner *screen, 
 	theVisibleSize = size;
 }
 
-BufferData::BufferData(const uint size, const uint scope) : theWritePointer(0)
+BufferData::BufferData(uint size, uint scope) : theWritePointer(0)
 {
 	theInfo = new BufferInfo(size, scope, new float[size], 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Managed, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
 
-BufferData::BufferData(const float *data, const uint size, const uint scope) : theWritePointer(0)
+BufferData::BufferData(const float *data, uint size, uint scope) : theWritePointer(0)
 {
 	theInfo = new BufferInfo(size, scope, (float *)data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Read, BufferInfo::Foreign, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
 
-BufferData::BufferData(float *data, const uint size, const uint scope) : theWritePointer(0)
+BufferData::BufferData(float *data, uint size, uint scope) : theWritePointer(0)
 {
 	theInfo = new BufferInfo(size, scope, data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Foreign, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
 
-BufferData::BufferData(BufferInfo *info, const uint offset): theInfo(info), theWritePointer(0)
+BufferData::BufferData(BufferInfo *info, uint offset): theInfo(info), theWritePointer(0)
 {
 	theInfo->reference();
 	theVisibleSize = theInfo->theAccessibleSize;
@@ -122,7 +122,7 @@ ostream &operator<<(ostream &out, const BufferData &me)
 	return out << "]";
 }
 
-const bool BufferData::plunger() const
+bool BufferData::plunger() const
 {
 	return theInfo->thePlunger;
 }
@@ -176,7 +176,7 @@ void BufferData::copyFrom(const BufferData &data)
 			memcpy(firstPart(), data.firstPart(), data.sizeOnlyPart() * 4);
 }
 
-BufferData &BufferData::dontRollOver(const bool makeCopy)
+BufferData &BufferData::dontRollOver(bool makeCopy)
 {
 	if(rollsOver())
 	{	BufferData temp(*this);
@@ -187,7 +187,7 @@ BufferData &BufferData::dontRollOver(const bool makeCopy)
 	return *this;
 }
 
-const BufferData &BufferData::dontRollOver(const bool makeCopy) const
+const BufferData &BufferData::dontRollOver(bool makeCopy) const
 {
 	if(rollsOver())
 	{	const BufferData temp(*this);
@@ -198,7 +198,7 @@ const BufferData &BufferData::dontRollOver(const bool makeCopy) const
 	return *this;
 }
 
-const BufferData BufferData::sample(const uint index) const
+const BufferData BufferData::sample(uint index) const
 {
 #ifdef EDEBUG
 	assert(theInfo->theScope);
@@ -207,7 +207,7 @@ const BufferData BufferData::sample(const uint index) const
 	return mid(index * theInfo->theScope, theInfo->theScope);
 }
 
-BufferData BufferData::sample(const uint index)
+BufferData BufferData::sample(uint index)
 {
 #ifdef EDEBUG
 	assert(theInfo->theScope);
@@ -216,7 +216,7 @@ BufferData BufferData::sample(const uint index)
 	return mid(index * theInfo->theScope, theInfo->theScope);
 }
 
-const BufferData BufferData::samples(const uint index, const uint amount) const
+const BufferData BufferData::samples(uint index, uint amount) const
 {
 #ifdef EDEBUG
 	assert(theInfo->theScope);
@@ -225,7 +225,7 @@ const BufferData BufferData::samples(const uint index, const uint amount) const
 	return mid(index * theInfo->theScope, theInfo->theScope * amount);
 }
 
-BufferData BufferData::samples(const uint index, const uint amount)
+BufferData BufferData::samples(uint index, uint amount)
 {
 #ifdef EDEBUG
 	assert(theInfo->theScope);
@@ -254,7 +254,7 @@ void BufferData::debugInfo() const
 	}
 }
 */
-const BufferData BufferData::mid(const uint start, const uint length) const
+const BufferData BufferData::mid(uint start, uint length) const
 {
 	BufferData ret = *this;
 	if(theInfo->theMask == (uint)~0)
@@ -268,7 +268,7 @@ const BufferData BufferData::mid(const uint start, const uint length) const
 	return ret;
 }
 
-BufferData BufferData::mid(const uint start, const uint length)
+BufferData BufferData::mid(uint start, uint length)
 {
 	BufferData ret = *this;
 	if(theInfo->theMask == (uint)~0)

@@ -30,9 +30,9 @@ class DLLEXPORT Matrix: public SignalType
 {
 	virtual void serialise(QSocketSession &sink) const;
 	virtual void deserialise(QSocketSession &source);
-	virtual const uint id() const { return 3; }
+	virtual uint id() const { return 3; }
 	virtual SignalType *copyBE() const { return new Matrix(theWidth, theHeight, theFrequency); }
-	virtual const bool sameAsBE(const SignalType *cmp) const;
+	virtual bool sameAsBE(const SignalType *cmp) const;
 
 protected:
 	uint theWidth; ///< Width of the represented matrix in elements.
@@ -46,21 +46,21 @@ public:
 	 *
 	 * @return The number of elements in a row (number of columns)
 	 */
-	const uint width() const { return theWidth; }
+	uint width() const { return theWidth; }
 
 	/**
 	 * Get the number of rows in the matrix this object represents.
 	 *
 	 * @return The number of elements in a column (number of rows).
 	 */
-	const uint height() const { return theHeight; }
+	uint height() const { return theHeight; }
 
 	/**
 	 * Get the frequency represented by the progression of elements in a row.
 	 *
 	 * @return The pitch width of the matrix elements.
 	 */
-	const float pitchWidth() const { return thePitchWidth; }
+	float pitchWidth() const { return thePitchWidth; }
 
 	/**
 	 * Get the frequency represented by the progression of elements in a
@@ -68,7 +68,7 @@ public:
 	 *
 	 * @return The pitch height of the matrix elements.
 	 */
-	const float pitchHeight() const { return thePitchHeight; }
+	float pitchHeight() const { return thePitchHeight; }
 
 	/**
 	 * Constrictor for a new matrix whose row size is equal to column size.
@@ -84,7 +84,7 @@ public:
 	 * would represent a second in signal time. Of course this property may be
 	 * left as its default (0) if it makes no sense for the data.
 	 */
-	Matrix(const uint width = 1, const uint height = 1, const float frequency = 0, const float pitchWidth = 0, const float pitchHeight = 0) : SignalType(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
+	Matrix(uint width = 1, uint height = 1, float frequency = 0, float pitchWidth = 0, float pitchHeight = 0) : SignalType(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
 };
 
 /** @ingroup SignalTypes
@@ -97,7 +97,7 @@ public:
  */
 class DLLEXPORT SquareMatrix: public Matrix
 {
-	virtual const uint id() const { return 4; }
+	virtual uint id() const { return 4; }
 	virtual SignalType *copyBE() const { return new SquareMatrix(theWidth, theFrequency); }
 
 public:
@@ -108,7 +108,7 @@ public:
 	 *
 	 * @return The number of elements in every row and column of the matrix.
 	 */
-	const uint size() const { return theWidth; }
+	uint size() const { return theWidth; }
 
 	/**
 	 * Get the frequency represented by the progression of elements in either
@@ -116,7 +116,7 @@ public:
 	 *
 	 * @return The pitch of the matrix elements.
 	 */
-	const float pitch() const { return thePitchWidth; }
+	float pitch() const { return thePitchWidth; }
 
 	/**
 	 * Constrictor for a new matrix whose row size is equal to column size.
@@ -128,7 +128,7 @@ public:
 	 * represent a second in signal time. Of course this property may be left
 	 * as its default (0) if it makes no sense for the data.
 	 */
-	SquareMatrix(const uint size = 1, const float frequency = 0., const float pitch = 0.) : Matrix(size, size, frequency, pitch, pitch) {}
+	SquareMatrix(uint size = 1, float frequency = 0., float pitch = 0.) : Matrix(size, size, frequency, pitch, pitch) {}
 };
 
 };

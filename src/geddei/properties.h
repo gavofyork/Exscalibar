@@ -101,7 +101,7 @@ public:
 	 * @return A QVariant object (which acts similarly to a union of all types
 	 * supported) containing the data mapped to @a key .
 	 */
-	const QVariant &get(const QString &key) const { return theData[key]; }
+	QVariant get(const QString &key) const { return theData[key]; }
 
 	/**
 	 * Set a value in the mapping.
@@ -134,7 +134,7 @@ public:
 	 *
 	 * @return The number of keys in this object.
 	 */
-	const uint size() const { return theData.size(); }
+	uint size() const { return theData.size(); }
 
 	/** @internal
 	 * Get a list of the keys in this object.
@@ -144,7 +144,7 @@ public:
 	const QStringList keys() const { return theData.keys(); }
 
 	/**
-	 * Subscript operator giving const access to the mapping.
+	 * Subscript operator giving access to the mapping.
 	 *
 	 * Functions the same as get().
 	 *
@@ -153,7 +153,7 @@ public:
 	 *
 	 * @sa get()
 	 */
-	const QVariant &operator[](const QString &key) const { if(!theData.contains(key)) qWarning("*** WARNING: Reading undefined property (%s)", key.latin1()); return theData[key]; }
+	QVariant operator[](const QString &key) const { if(!theData.contains(key)) qWarning("*** WARNING: Reading undefined property (%s)", key.latin1()); return theData[key]; }
 
 	/**
 	 * Subscript operator giving full access to the mapping. This can be used
@@ -252,7 +252,7 @@ public:
 	 *
 	 * @return The number of keys in this object.
 	 */
-	const uint size() const { return Properties::size(); }
+	uint size() const { return Properties::size(); }
 
 	/**
 	 * Get a list of the keys in this object.
@@ -299,7 +299,7 @@ public:
 	 * @param key The name of the property.
 	 * @return The default value for the property named @a key.
 	 */
-	const QVariant &defaultValue(const QString &key) const { return Properties::get(key); }
+	QVariant defaultValue(const QString &key) const { return Properties::get(key); }
 
 	/**
 	 * Retrieve the description of a given property.

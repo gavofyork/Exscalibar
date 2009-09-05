@@ -3,7 +3,8 @@
 # Subdir relative project main directory: ./src/processors/toolkit
 # Target is a library:  
 
-include( ../../../globalplugin.pro )
+PACKAGES = "sndfile:1.0.0" "vorbisfile:1.0.0" "mad:0.15" "jack:0.90.0" "alsa:0.9"
+include(../../../exscalibar.pri)
 INSTALLS += headers \
             target 
 target.path = $$PREFIX/plugins/geddei 
@@ -23,14 +24,13 @@ SOURCES += monitor.cpp \
 	   fan.cpp \
 	   stress.cpp \
            recorder.cpp 
-TARGETDEPS += ../../../src/qtextra/libqtextra.so \
-../../../src/geddei/libgeddei.so
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+              $$DESTDIR/libgeddei.so 
 
 LIBS += -lgeddei \
--lqtextra
+	-lqtextra
 
 INCLUDEPATH += ../../../src/geddei \
 ../../../src/qtextra
-QMAKE_LIBDIR = ../../../src/geddei \
-../../../src/qtextra
 TEMPLATE = lib
+CONFIG += plugin

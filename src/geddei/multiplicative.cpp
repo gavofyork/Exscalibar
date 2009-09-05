@@ -17,7 +17,7 @@
 namespace Geddei
 {
 
-void Multiplicative::setMultiplicity(const uint multiplicity)
+void Multiplicative::setMultiplicity(uint multiplicity)
 {
 	if(MESSAGES) qDebug("Multiplicative::setMultiplicity(%d)", multiplicity);
 	if(theDeferredInit)

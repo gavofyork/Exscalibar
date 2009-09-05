@@ -97,15 +97,15 @@ public:
 	 * @return true iff we reference an object of type @a T.
 	 */
 	template<class T>
-	const bool isA() const { return dynamic_cast<const T *>(thePtr); }
+	bool isA() const { return dynamic_cast<const T *>(thePtr); }
 	
 	/**
-	 * Return a const reference of class @a T that we represent. If we cannot
+	 * Return a reference of class @a T that we represent. If we cannot
 	 * represent such a class then this will cause Geddei to exit immediately.
 	 * To prevent this from happening, always make sure isA() returns true
 	 * first.
 	 * 
-	 * @return A "real" const reference to our instance of @a T.
+	 * @return A "real" reference to our instance of @a T.
 	 */
 	template<class T>
 	const T &asA() const
@@ -150,7 +150,7 @@ public:
 	 * @return The scope, or number of single value elements per sample of the
 	 * data represented by this SignalType.
 	 */
-	const uint scope() const;
+	uint scope() const;
 
 	/**
 	 * Convenience function to go through the reference and retrieve the
@@ -165,7 +165,7 @@ public:
 	 * @return The frequency, or number of samples per Signal-time second of
 	 * the data represented by this SignalType.
 	 */
-	const float frequency() const;
+	float frequency() const;
 	
 	/**
 	 * Assignment operator. This will turn us into a copy of the SignalType
@@ -197,7 +197,7 @@ public:
 	 * @param p The type against which to be compared.
 	 * @return true iff we are completely equivalent.
 	 */
-	const bool operator==(const SignalType &p);
+	bool operator==(const SignalType &p);
 	
 	/** @overload
 	 * Check to see if we are the same as some other SignalType. This not only
@@ -207,7 +207,7 @@ public:
 	 * @param p The type against which to be compared.
 	 * @return true iff we are completely equivalent.
 	 */
-	const bool operator==(const SignalTypeRef &p);
+	bool operator==(const SignalTypeRef &p);
 	
 	/** @internal
 	 * For the explicit copy constructor we actually make a copy of ourselves.

@@ -34,7 +34,7 @@ using namespace Geddei;
 #include "bobport.h"
 #include "boblink.h"
 
-DomSoftBob::DomSoftBob(const int x, const int y, const QString &type, const QString &name, Q3Canvas *c) : SoftBob(name, c), theDom(*((DomProcessor **)&theProcessor))
+DomSoftBob::DomSoftBob(int x, int y, const QString &type, const QString &name, Q3Canvas *c) : SoftBob(name, c), theDom(*((DomProcessor **)&theProcessor))
 {
 	theType = type;
 

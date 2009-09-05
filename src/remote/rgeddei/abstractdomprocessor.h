@@ -55,7 +55,7 @@ class DLLEXPORT AbstractDomProcessor: virtual public AbstractProcessor
 	 * worker object.
 	 * @return true if the worker was created successfully.
 	 */
-	virtual const bool spawnWorker(LocalSession &session) = 0;
+	virtual bool spawnWorker(LocalSession &session) = 0;
 
 	/**
 	 * @overload
@@ -70,7 +70,7 @@ class DLLEXPORT AbstractDomProcessor: virtual public AbstractProcessor
 	 * worker object.
 	 * @return true if the worker was created successfully.
 	 */
-	virtual const bool spawnWorker(RemoteSession &session) = 0;
+	virtual bool spawnWorker(RemoteSession &session) = 0;
 
 	/**
 	 * Constructs a new LocalDomProcessor object that

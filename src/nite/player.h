@@ -47,7 +47,7 @@ class Player: public Processor
 	virtual void paintProcessor(QPainter &p);
 	virtual void processor();
 	virtual void processorStopped();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &);
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &sizes);
 

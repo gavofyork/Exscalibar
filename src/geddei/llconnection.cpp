@@ -23,11 +23,11 @@ using namespace Geddei;
 namespace Geddei
 {
 
-LLConnection::LLConnection(Source *newSource, const uint sourceIndex, Sink *newSink, const uint newSinkIndex, const uint bufferSize): LxConnectionReal(newSource, sourceIndex), xLConnectionReal(newSink, newSinkIndex, bufferSize)
+LLConnection::LLConnection(Source *newSource, uint sourceIndex, Sink *newSink, uint newSinkIndex, uint bufferSize): LxConnectionReal(newSource, sourceIndex), xLConnectionReal(newSink, newSinkIndex, bufferSize)
 {
 }
 
-const bool LLConnection::pullType()
+bool LLConnection::pullType()
 {
 	theSource->confirmTypes();
 	return theType;
@@ -57,12 +57,12 @@ void LLConnection::bufferWaitForFree()
 	theSource->checkExit();
 }
 
-const uint LLConnection::bufferElementsFree()
+uint LLConnection::bufferElementsFree()
 {
 	return theBuffer.elementsFree();
 }
 
-BufferData LLConnection::makeScratchElements(const uint elements, bool autoPush)
+BufferData LLConnection::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret;
 	if(theBuffer.size() >= elements)
@@ -74,7 +74,7 @@ BufferData LLConnection::makeScratchElements(const uint elements, bool autoPush)
 	return ret;
 }
 
-const bool LLConnection::waitUntilReady()
+bool LLConnection::waitUntilReady()
 {
 	// Perhaps this shouldn't always call confirmTypes(), since it will clear stuff that we may not want cleared
 	//theSink->confirmTypes();

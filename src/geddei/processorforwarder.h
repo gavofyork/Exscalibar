@@ -65,7 +65,7 @@ class DLLEXPORT ProcessorForwarder: public Q3ServerSocket
 	 * This point is moot though, since the returned QSD is adopted by a connection
 	 * or coupling.
 	 */
-	static Q3SocketDevice *login(const QString &host, const uint key);
+	static Q3SocketDevice *login(const QString &host, uint key);
 
 public:
 	/**
@@ -74,14 +74,14 @@ public:
 	 * code close to each other (code originally from Processor).
 	 * Method is static to show lack of home for code.
 	 */
-	static LRConnection *createConnection(Source *source, const uint sourceIndex, const uint bufferSize, const QString &sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex);
+	static LRConnection *createConnection(Source *source, uint sourceIndex, uint bufferSize, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex);
 
 	/**
 	 * Delete an existing connection.
 	 * Simply calls disconnect on the given processor/input.
 	 * Used for LRCs to kill their RLC ends.
 	 */
-	static const bool deleteConnection(const QString &sinkHost, const uint sinkKey, const QString &sinkProcessorName, const uint sinkIndex);
+	static bool deleteConnection(const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex);
 
 	/**
 	 * Delets a "child" RLConnection.
@@ -94,7 +94,7 @@ public:
 	 * remote subprocessor described by @a host, @a key and @a subProcessorKey.
 	 * The DomProcessor is given by @a dom.
 	 */
-	static DRCoupling *createCoupling(DomProcessor *dom, const QString &host, const uint key, const QString &type);
+	static DRCoupling *createCoupling(DomProcessor *dom, const QString &host, uint key, const QString &type);
 
 	/**
 	 * Initiates a remote deletion request on @a host with session @a key.
@@ -103,12 +103,12 @@ public:
 	 * This should be called *before* the accompanying DRCoupling object is fully deleted
 	 * (and is can/should be indirectly called by the DRC destructor).
 	 */
-	static const bool deleteCoupling(const QString &host, const uint key, const uint subProcessorKey);
+	static bool deleteCoupling(const QString &host, uint key, uint subProcessorKey);
 
 	/**
 	 * Simple constructor.
 	 */
-	ProcessorForwarder(const uint port = 0);
+	ProcessorForwarder(uint port = 0);
 };
 
 };

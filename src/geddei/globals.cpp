@@ -26,16 +26,16 @@ static const char *theVersion = EXSCALIBAR_VERSION;
 class Sleeper : public QThread
 {
 public:
-	static void sleep(const uint secs) { QThread::sleep(secs); }
-	static void usleep(const uint usecs) { QThread::usleep(usecs); }
+	static void sleep(uint secs) { QThread::sleep(secs); }
+	static void usleep(uint usecs) { QThread::usleep(usecs); }
 };
 
-void sleep(const uint secs)
+void sleep(uint secs)
 {
 	Sleeper::sleep(secs);
 }
 
-void usleep(const uint usecs)
+void usleep(uint usecs)
 {
 	Sleeper::usleep(usecs);
 }
@@ -45,7 +45,7 @@ const char *getVersion()
 	return theVersion;
 }
 
-const uint getConfig()
+uint getConfig()
 {
 	return 0
 #ifdef HAVE_FFTW
@@ -72,6 +72,9 @@ const uint getConfig()
 const QStringList getPaths()
 {
 	QStringList ret;
+#ifdef DEBUG
+	ret += ".";
+#endif
 	if(std::getenv("GEDDEI_PLUGINS"))
 		ret += QStringList::split(":", std::getenv("GEDDEI_PLUGINS"));
 	if(std::getenv("EXSCALIBAR_LOCATION"))

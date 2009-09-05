@@ -161,15 +161,15 @@ class DLLEXPORT DomProcessor: public Processor
 	 *
 	 * @sa Processor
 	 */
-	void setupVisual(const uint width = 50, const uint height = 30, const uint redrawPeriod = 0) { Processor::setupVisual(width, height, redrawPeriod); }
+	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0) { Processor::setupVisual(width, height, redrawPeriod); }
 	friend class SubProcessor;
 
 	//* Reimplementations from Processor.
-	virtual const bool processorStarted();
+	virtual bool processorStarted();
 	virtual void processor();
 	virtual void wantToStopNow();
 	virtual void haveStoppedNow();
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
@@ -216,7 +216,7 @@ public:
 	 *
 	 * @return true iff a worker was added.
 	 */
-	const bool createAndAddWorker();
+	bool createAndAddWorker();
 
 	/**
 	 * Creates and adds a remote SubProcessor to this Processor's list of
@@ -227,7 +227,7 @@ public:
 	 * @param key The session key under which the SubProcessor will be added.
 	 * @return true iff a worker was added.
 	 */
-	const bool createAndAddWorker(const QString &host, const uint key);
+	bool createAndAddWorker(const QString &host, uint key);
 
 	/**
 	 * Constructor. A valid primary SubProcessor must be passed in @a primary.

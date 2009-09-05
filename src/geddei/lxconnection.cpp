@@ -23,7 +23,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-LxConnection::LxConnection(Source *source, const uint sourceIndex) : theSource(source), theSourceIndex(sourceIndex)
+LxConnection::LxConnection(Source *source, uint sourceIndex) : theSource(source), theSourceIndex(sourceIndex)
 {
 	theSource->doRegisterOut(this, sourceIndex);
 
@@ -38,17 +38,17 @@ LxConnection::~LxConnection()
 	theSource->undoRegisterOut(this, theSourceIndex);
 }
 
-BufferData LxConnection::makeScratchSamples(const uint samples, bool autoPush)
+BufferData LxConnection::makeScratchSamples(uint samples, bool autoPush)
 {
 	return makeScratchElements(theType->elementsFromSamples(samples), autoPush);
 }
 
-BufferData LxConnection::makeScratchSeconds(const float seconds, bool autoPush)
+BufferData LxConnection::makeScratchSeconds(float seconds, bool autoPush)
 {
 	return makeScratchElements(theType->elementsFromSeconds(seconds), autoPush);
 }
 
-BufferData LxConnection::makeScratchElements(const uint elements, bool autoPush)
+BufferData LxConnection::makeScratchElements(uint elements, bool autoPush)
 {
 	if(theScratchSize != elements)
 	{	if(theScratch) delete [] theScratch;

@@ -88,8 +88,8 @@ class DLLEXPORT LocalDomProcessor : virtual public LocalProcessor, virtual publi
 
 public:
 	//* Reimplementations from AbstractDomProcessor
-	virtual const bool spawnWorker(LocalSession &session);
-	virtual const bool spawnWorker(RemoteSession &session);
+	virtual bool spawnWorker(LocalSession &session);
+	virtual bool spawnWorker(RemoteSession &session);
 
 	/**
 	 * Default destructor.

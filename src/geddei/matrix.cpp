@@ -16,7 +16,7 @@
 namespace SignalTypes
 {
 
-const bool Matrix::sameAsBE(const SignalType *cmp) const
+bool Matrix::sameAsBE(const SignalType *cmp) const
 {
 	return SignalType::sameAsBE(cmp) &&
 		theWidth == dynamic_cast<const Matrix *>(cmp)->theWidth &&

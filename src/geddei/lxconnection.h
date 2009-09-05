@@ -101,7 +101,7 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 *
 	 * @return false if something went wrong.
 	 */
-	virtual const bool waitUntilReady() = 0;
+	virtual bool waitUntilReady() = 0;
 
 	/**
 	 * Conducts the setting of the type if an object wants to do it without
@@ -163,7 +163,7 @@ protected:
 	/**
 	 * Simple constructor.
 	 */
-	LxConnection(Source *source, const uint sourceIndex);
+	LxConnection(Source *source, uint sourceIndex);
 
 	/**
 	 * Get the maximum amount of scratch elements we can make that won't cause
@@ -174,7 +174,7 @@ protected:
 	 * must be less than or equal to maximumScratchElementsEver().
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	virtual const uint maximumScratchElements(const uint minimum = 1) = 0;
+	virtual uint maximumScratchElements(uint minimum = 1) = 0;
 
 	/**
 	 * Returns the maximum amount of scratch elements we could ever make that
@@ -185,7 +185,7 @@ protected:
 	 *
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	virtual const uint maximumScratchElementsEver() = 0;
+	virtual uint maximumScratchElementsEver() = 0;
 
 	/** @deprecated
 	 * TODO: Kill this method
@@ -206,7 +206,7 @@ protected:
 	 * instance, when it goes out of semantic scope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchElements(const uint elements, bool autoPush = false);
+	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
 
 public:
 	/**
@@ -230,7 +230,7 @@ public:
 	 * instance, when it goes out of semantic scope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSamples(const uint samples, bool autoPush = false);
+	virtual BufferData makeScratchSamples(uint samples, bool autoPush = false);
 
 	/**
 	 * Create a new scratch pad with which data may be sent efficiently. The
@@ -262,7 +262,7 @@ public:
 	 * instance, when it goes out of semantic scope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSeconds(const float seconds, bool autoPush = false);
+	virtual BufferData makeScratchSeconds(float seconds, bool autoPush = false);
 
 	/**
 	 * Create a new scratch pad with which data may be sent efficiently. The
@@ -303,7 +303,7 @@ public:
 	 * must be less than or equal to maximumScratchSamplesEver().
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	const uint maximumScratchSamples(const uint minimum = 1) { return maximumScratchElements(theType->elementsFromSamples(minimum)) == Undefined ? Undefined : theType->samples(maximumScratchElements(theType->elementsFromSamples(minimum))); }
+	uint maximumScratchSamples(uint minimum = 1) { return maximumScratchElements(theType->elementsFromSamples(minimum)) == Undefined ? Undefined : theType->samples(maximumScratchElements(theType->elementsFromSamples(minimum))); }
 
 	/**
 	 * Returns the maximum amount of scratch samples we could ever make that
@@ -314,7 +314,7 @@ public:
 	 *
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	const uint maximumScratchSamplesEver() { return maximumScratchElementsEver() == Undefined ? Undefined : theType->samples(maximumScratchElementsEver()); }
+	uint maximumScratchSamplesEver() { return maximumScratchElementsEver() == Undefined ? Undefined : theType->samples(maximumScratchElementsEver()); }
 
 	/**
 	 * Some syntactic sugar, if you're into that sort of thing. Equivalent to
@@ -346,7 +346,7 @@ public:
 	 * @param samples The size of the data chunk required in samples.
 	 * @return The BufferData object into which data can be written.
 	 */
-	BufferData operator+(const uint samples) { return makeScratchSamples(samples); }
+	BufferData operator+(uint samples) { return makeScratchSamples(samples); }
 
 	/**
 	 * Simple destructor.

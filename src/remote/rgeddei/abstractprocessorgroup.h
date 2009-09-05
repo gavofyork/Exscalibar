@@ -73,7 +73,7 @@ public:
 	 * Processor objects are either running or have failed to start.
 	 * @return true if the operation succeeded.
 	 */
-	const bool go(const bool waitUntilGoing = true) const;
+	bool go(bool waitUntilGoing = true) const;
 
 	/**
 	 * Block until all represented Processor objects are started or have failed
@@ -96,7 +96,7 @@ public:
 	 * @param resetToo Conduct a reset of all processors as well. Leave as true
 	 * unless you know what you're doing.
 	 */
-	void stop(const bool resetToo = true) const;
+	void stop(bool resetToo = true) const;
 
 	/**
 	 * Resets all Processor objects in the group. They must already be
@@ -125,7 +125,7 @@ public:
 	 * @param name The name to be checked for.
 	 * @return true iff the object of name @a name exists in this group.
 	 */
-	const bool exists(const QString &name);
+	bool exists(const QString &name);
 
 	/**
 	 * Retreive the AbstractProcessor object of name @a name.

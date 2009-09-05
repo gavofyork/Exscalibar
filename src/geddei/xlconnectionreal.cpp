@@ -24,7 +24,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-xLConnectionReal::xLConnectionReal(Sink *newSink, const uint newSinkIndex, const uint bufferSize)
+xLConnectionReal::xLConnectionReal(Sink *newSink, uint newSinkIndex, uint bufferSize)
 	: xLConnection(newSink, newSinkIndex), theBuffer(bufferSize)
 {
 	theReader = new BufferReader(&theBuffer);
@@ -47,7 +47,7 @@ void xLConnectionReal::resurectReader()
 		theReader = new BufferReader(&theBuffer);
 }
 
-const uint xLConnectionReal::elementsReady() const
+uint xLConnectionReal::elementsReady() const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -61,7 +61,7 @@ const uint xLConnectionReal::elementsReady() const
 	return ret;
 }
 
-void xLConnectionReal::waitForElements(const uint elements) const
+void xLConnectionReal::waitForElements(uint elements) const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -85,7 +85,7 @@ void xLConnectionReal::waitForElements(const uint elements) const
 */	theSink->checkExit();
 }
 
-const bool xLConnectionReal::plungeSync(const uint samples) const
+bool xLConnectionReal::plungeSync(uint samples) const
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -110,13 +110,13 @@ const bool xLConnectionReal::plungeSync(const uint samples) const
 	return true;
 }
 
-void xLConnectionReal::enforceMinimum(const uint elements)
+void xLConnectionReal::enforceMinimum(uint elements)
 {
 	if(theBuffer.size() < elements)
 		theBuffer.resize(elements);
 }
 
-const BufferData xLConnectionReal::readElements(const uint elements)
+const BufferData xLConnectionReal::readElements(uint elements)
 {
 #ifdef EDEBUG
 	if(!theReader)
@@ -139,7 +139,7 @@ const BufferData xLConnectionReal::readElements(const uint elements)
 	}
 }
 
-const BufferData xLConnectionReal::peekElements(const uint elements)
+const BufferData xLConnectionReal::peekElements(uint elements)
 {
 #ifdef EDEBUG
 	if(!theReader)

@@ -67,7 +67,7 @@ void RLConnection::run()
 	{
 		if(MESSAGES) qDebug("= RLC::run(): Receiving...");
 		uchar command;
-		while(theSource.isOpen() && !theSource.receiveChunk(&command, 1, 501));
+		while(theSource.isOpen() && !theSource.receiveChunk(&command, 1, 501)) {}
 		if(!theSource.isOpen()) break;
 
 		if(MESSAGES) qDebug("= RLC::run(): command = %d", (int)command);
@@ -194,7 +194,7 @@ void RLConnection::run()
 */	if(MESSAGES) qDebug("< RLC::run()");
 }
 
-const bool RLConnection::pullType()
+bool RLConnection::pullType()
 {
 	QMutexLocker lock(&theGotTypeM);
 	while(!theHaveType) theGotType.wait(&theGotTypeM);

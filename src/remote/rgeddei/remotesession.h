@@ -71,28 +71,28 @@ public:
   friend class LocalProcessor;
   friend class RemoteDomProcessor;
   friend class LocalDomProcessor;
-  const bool newProcessor(const QString &type, const QString &name);
+  bool newProcessor(const QString &type, const QString &name);
   void deleteProcessor(const QString &name);
-  const bool newDomProcessor(const QString &subType, const QString &name);
+  bool newDomProcessor(const QString &subType, const QString &name);
   void deleteDomProcessor(const QString &name);
   void processorInit(const QString &name, const Properties &p, const QString &newName);
-  const bool processorGo(const QString &name);
-  const int processorWaitUntilGoing(const QString &name, int &errorData);
+  bool processorGo(const QString &name);
+  int processorWaitUntilGoing(const QString &name, int &errorData);
   void processorWaitUntilDone(const QString &name);
   void processorStop(const QString &name);
   void processorReset(const QString &name);
-  const bool processorConnect(const QString &name, const uint bufferSize, const uint output, const QString &destName, const uint destInput);
-  const bool processorConnect(const QString &name, const uint bufferSize, const uint output, const QString &destHost, const uint destKey, const QString &destName, const uint destInput);
-  void processorDisconnect(const QString &name, const uint output);
+  bool processorConnect(const QString &name, uint bufferSize, uint output, const QString &destName, uint destInput);
+  bool processorConnect(const QString &name, uint bufferSize, uint output, const QString &destHost, uint destKey, const QString &destName, uint destInput);
+  void processorDisconnect(const QString &name, uint output);
   void processorDisconnectAll(const QString &name);
-  void processorSplit(const QString &name, const uint output);
-  void processorShare(const QString &name, const uint output);
-  const bool domProcessorCreateAndAdd(const QString &name);
-  const bool domProcessorCreateAndAdd(const QString &name, const QString &host, const uint hostKey);
-  const bool typeAvailable(const QString &type);
-  const int typeVersion(const QString &type);
-  const bool typeSubAvailable(const QString &type);
-  const int typeSubVersion(const QString &type);
+  void processorSplit(const QString &name, uint output);
+  void processorShare(const QString &name, uint output);
+  bool domProcessorCreateAndAdd(const QString &name);
+  bool domProcessorCreateAndAdd(const QString &name, const QString &host, uint hostKey);
+  bool typeAvailable(const QString &type);
+  int typeVersion(const QString &type);
+  bool typeSubAvailable(const QString &type);
+  int typeSubVersion(const QString &type);
   void keepAlive();
 
   const QString makeUniqueProcessorName() { return "!_" + QString().setNum(++theProcessorCount); }
@@ -106,7 +106,7 @@ public:
 	 * @return true iff the Geddei system on the remote side is able to create
 	 * a Processor-derived class @a type .
 	 */
-	const bool available(const QString &type);
+	bool available(const QString &type);
 
 	/**
 	 * Determine if the remote host has a particular type of SubProcessor
@@ -116,7 +116,7 @@ public:
 	 * @return true iff the Geddei system on the remote side is able to create
 	 * a SubProcessor-derived class @a type .
 	 */
-	const bool subAvailable(const QString &type);
+	bool subAvailable(const QString &type);
 
 	/**
 	 * Determine the latest version of a given Processor type available on the
@@ -126,7 +126,7 @@ public:
 	 * @return The latest available version of Processor-derived class
 	 * @a type .
 	 */
-	const int version(const QString &type);
+	int version(const QString &type);
 
 	/**
 	 * Determine the latest version of a given SubProcessor type available on
@@ -136,7 +136,7 @@ public:
 	 * @return The latest available version of SubProcessor-derived class
 	 * @a type .
 	 */
-	const int subVersion(const QString &type);
+	int subVersion(const QString &type);
 
 	/**
 	 * Check whether the session is established. This should be verified after
@@ -144,7 +144,7 @@ public:
 	 *
 	 * @return true if this session is valid and ready.
 	 */
-	const bool isValid();
+	bool isValid();
 
 	/**
 	 * Simple constructor. Creates a new session on host @a host . This machine
@@ -156,7 +156,7 @@ public:
 	 * @param port The post of the remote machine to connect to. Default is the
 	 * default Remote Geddei port, 16671.
 	 */
-	RemoteSession(const QString &host, const uint port = RGEDDEI_PORT);
+	RemoteSession(const QString &host, uint port = RGEDDEI_PORT);
 
 	/**
 	 * Default destructor.

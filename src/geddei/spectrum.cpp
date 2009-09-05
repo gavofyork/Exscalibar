@@ -16,7 +16,7 @@
 namespace SignalTypes
 {
 
-const bool Spectrum::sameAsBE(const SignalType *cmp) const
+bool Spectrum::sameAsBE(const SignalType *cmp) const
 {
 	return SignalType::sameAsBE(cmp) && dynamic_cast<const Spectrum *>(cmp)->theStep == theStep;
 }

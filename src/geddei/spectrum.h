@@ -35,8 +35,8 @@ class DLLEXPORT Spectrum: public SignalType
 {
 	virtual void serialise(QSocketSession &sink) const;
 	virtual void deserialise(QSocketSession &source);
-	virtual const uint id() const { return 2; }
-	virtual const bool sameAsBE(const SignalType *cmp) const;
+	virtual uint id() const { return 2; }
+	virtual bool sameAsBE(const SignalType *cmp) const;
 	virtual SignalType *copyBE() const { return new Spectrum(theScope, theFrequency, theStep); }
 
 protected:
@@ -49,7 +49,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	const float bandFrequency(uint band) const { return band * theStep; }
+	float bandFrequency(uint band) const { return band * theStep; }
 
 	/**
 	 * Gets the number of bands in the spectra of the signal to which this
@@ -57,7 +57,7 @@ public:
 	 *
 	 * @return The number of bands.
 	 */
-	const uint size() const { return theScope; }
+	uint size() const { return theScope; }
 
 	/**
 	 * Gets the difference in audio frequency between each band in the
@@ -65,7 +65,7 @@ public:
 	 *
 	 * @return The frequency stepping between bands.
 	 */
-	const float step() const { return theStep; }
+	float step() const { return theStep; }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -73,7 +73,7 @@ public:
 	 *
 	 * @return The Nyquist frequency.
 	 */
-	const float nyquist() const { return float(theScope) * theStep; }
+	float nyquist() const { return float(theScope) * theStep; }
 
 	/**
 	 * Create a new SignalType to represent a spectrum.
@@ -84,7 +84,7 @@ public:
 	 * @param step The increase in audio frequency (in Hz) per band. It is
 	 * currently assumed that the signal is a monotonically stepped spectrum.
 	 */
-	Spectrum(const uint size = 1, const float frequency = 0, const float step = 1) : SignalType(size, frequency), theStep(step) {}
+	Spectrum(uint size = 1, float frequency = 0, float step = 1) : SignalType(size, frequency), theStep(step) {}
 };
 
 };

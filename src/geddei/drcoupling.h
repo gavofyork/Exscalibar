@@ -53,9 +53,9 @@ class DRCoupling : virtual public DxCoupling
 	virtual void stoppedR();
 	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &p);
-	virtual void transact(const BufferDatas &d, const uint chunks);
+	virtual void transact(const BufferDatas &d, uint chunks);
 	virtual BufferDatas deliverResults(uint *timeTaken);
-	virtual void defineIO(const uint inputs, const uint outputs);
+	virtual void defineIO(uint inputs, uint outputs);
 
 	QMutex theComm;
 	QSocketSession theRemote;
@@ -67,7 +67,7 @@ public:
 	 * Sets up the essential information about the SubProc on the remote end.
 	 * Needed for eventual remote deletion.
 	 */
-	void setCredentials(const QString &remoteHost, const uint remoteKey, const uint remoteSubProcessorKey);
+	void setCredentials(const QString &remoteHost, uint remoteKey, uint remoteSubProcessorKey);
 
 	/**
 	 * Basic constructor.

@@ -71,7 +71,7 @@ void QSocketSession::handshake()
 	findByteOrder();
 }
 
-void QSocketSession::handshake(const bool opposite)
+void QSocketSession::handshake(bool opposite)
 {
 
 	if(MESSAGES) qDebug("Handshaking... (isOpen()=%d)", isOpen());
@@ -118,7 +118,7 @@ void QSocketSession::findByteOrder()
 	}
 }
 
-void QSocketSession::receiveChunk(uchar *buffer, const uint size)
+void QSocketSession::receiveChunk(uchar *buffer, uint size)
 {
 	int r = 1;
 	uint read = 0;
@@ -132,7 +132,7 @@ void QSocketSession::receiveChunk(uchar *buffer, const uint size)
 	}
 }
 
-void QSocketSession::sendChunk(const uchar *buffer, const uint size)
+void QSocketSession::sendChunk(const uchar *buffer, uint size)
 {
 	int r = 1;
 	uint sent = 0;
@@ -147,7 +147,7 @@ void QSocketSession::sendChunk(const uchar *buffer, const uint size)
 	}
 }
 
-const bool QSocketSession::receiveChunk(uchar *buffer, const uint size, const uint timeOut)
+bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 {
 	if(!isOpen()) return false;
 	theSD->setBlocking(false);
@@ -175,7 +175,7 @@ const bool QSocketSession::receiveChunk(uchar *buffer, const uint size, const ui
 	return !timedOut;
 }
 
-const bool QSocketSession::waitForAck(const uint timeOut, bool *ackType)
+bool QSocketSession::waitForAck(uint timeOut, bool *ackType)
 {
 	uchar c = 0;
 	while(isOpen() && c != 1 && c != 2)
@@ -189,7 +189,7 @@ const bool QSocketSession::waitForAck(const uint timeOut, bool *ackType)
 	return true;
 }
 
-const bool QSocketSession::waitForAck(bool *ackType)
+bool QSocketSession::waitForAck(bool *ackType)
 {
 	uchar c = 0;
 	while(isOpen() && c != 1 && c != 2)
@@ -201,7 +201,7 @@ const bool QSocketSession::waitForAck(bool *ackType)
 }
 
 template<>
-const float QSocketSession::safeReceiveWord()
+float QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; float t; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
@@ -210,7 +210,7 @@ const float QSocketSession::safeReceiveWord()
 }
 
 template<>
-const int32_t QSocketSession::safeReceiveWord()
+int32_t QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
@@ -219,7 +219,7 @@ const int32_t QSocketSession::safeReceiveWord()
 }
 
 template<>
-const uint32_t QSocketSession::safeReceiveWord()
+uint32_t QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; uint32_t t; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
@@ -228,7 +228,7 @@ const uint32_t QSocketSession::safeReceiveWord()
 }
 
 template<>
-void QSocketSession::safeReceiveWordArray(float *t, const uint32_t size)
+void QSocketSession::safeReceiveWordArray(float *t, uint32_t size)
 {
 	int32_t *array = (int32_t *)t;
 	receiveChunk((uchar *)array, 4 * size);
@@ -238,7 +238,7 @@ void QSocketSession::safeReceiveWordArray(float *t, const uint32_t size)
 }
 
 template<>
-void QSocketSession::safeReceiveWordArray(int32_t *t, const uint32_t size)
+void QSocketSession::safeReceiveWordArray(int32_t *t, uint32_t size)
 {
 	receiveChunk((uchar *)t, 4 * size);
 	if(!theSameByteOrder)
@@ -247,7 +247,7 @@ void QSocketSession::safeReceiveWordArray(int32_t *t, const uint32_t size)
 }
 
 template<>
-void QSocketSession::safeReceiveWordArray(uint32_t *t, const uint32_t size)
+void QSocketSession::safeReceiveWordArray(uint32_t *t, uint32_t size)
 {
 	int32_t *array = (int32_t *)t;
 	receiveChunk((uchar *)array, 4 * size);

@@ -28,7 +28,7 @@ class CrossSimilarity: public SubProcessor
 	int theScope, theCount;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &/*properties*/) { setupIO(Undefined, 1, 1, 1, 1); }
 
 public:
@@ -45,7 +45,7 @@ void CrossSimilarity::processChunk(const BufferDatas &in, BufferDatas &out) cons
 		}
 }
 
-const bool CrossSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool CrossSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	theScope = inTypes[0].scope();
 	theCount = multiplicity();

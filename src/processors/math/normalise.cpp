@@ -33,7 +33,7 @@ class Normalise: public Processor
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &);
-	virtual const bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &out);
 	virtual void processor();
 	virtual void receivedPlunger();
@@ -57,7 +57,7 @@ void Normalise::initFromProperties(const Properties &p)
 	setupIO(1, 1);
 }
 
-const bool Normalise::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+bool Normalise::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 {
 	theScope = in[0].scope();
 	out[0] = in[0];

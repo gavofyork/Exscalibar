@@ -57,7 +57,7 @@ class DxCoupling : virtual public xxCoupling
 	 * @return Returns false if it exitted due to stopping.
 	 * UNSAFE: Needs theDataX to be locked throughout the *entire* transaction, from start to finish.
 	 */
-	const bool transactCheckerUNSAFE();
+	bool transactCheckerUNSAFE();
 
 protected:
 	// TODO: Look into moving any accesses to theReaders into this class to get rid of friend.
@@ -73,19 +73,19 @@ public:
 	/**
 	 * Skips @a samples from the inputs.
 	 */
-	void skip(const uint samples);
+	void skip(uint samples);
 
 	/**
 	 * Skips @a samples from the inputs, gets rid of any plungers immediately after them and
 	 * sends the plunger to the SubProc.
 	 */
-	void skipPlungeAndSend(const uint samples);
+	void skipPlungeAndSend(uint samples);
 
 	/**
 	 * Reads @a samples from the inputs and sends the data to the SubProc.
 	 * @a chunks *must* be the number of chunks that @a samples represents.
 	 */
-	void peekAndSend(const uint samples, const uint chunks);
+	void peekAndSend(uint samples, uint chunks);
 
 	/**
 	 * Conceptually similar to deliverResults, in that it returns the resultant

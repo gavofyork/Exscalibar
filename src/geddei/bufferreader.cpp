@@ -62,7 +62,7 @@ void BufferReader::skipPlunger()
 	if(MESSAGES) qDebug("< skipPlunger (rP: %d, tAPH: %d)", readPos, theAlreadyPlungedHere);
 }
 
-const uint BufferReader::elementsReady() const
+uint BufferReader::elementsReady() const
 {
 	if(MESSAGES) qDebug("= elementsReady (rP: %d, tAPH: %d", readPos, theAlreadyPlungedHere);
 	QMutexLocker lock(&theBuffer->theDataFlux);
@@ -73,21 +73,21 @@ const uint BufferReader::elementsReady() const
 		return untilPlunger;
 }
 
-const int BufferReader::nextPlunger() const
+int BufferReader::nextPlunger() const
 {
 	if(MESSAGES) qDebug("= nextPlunger");
 	QMutexLocker lock(&theBuffer->theDataFlux);
 	return theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere);
 }
 
-void BufferReader::waitForElements(const uint elements) const
+void BufferReader::waitForElements(uint elements) const
 {
 	if(MESSAGES) qDebug("= waitForElements");
 	QMutexLocker lock(&theBuffer->theDataFlux);
 	theBuffer->waitForUNSAFE(elements, this);
 }
 
-void BufferReader::skipElements(const uint elements)
+void BufferReader::skipElements(uint elements)
 {
 	if(MESSAGES) qDebug("> skipElements");
 	QMutexLocker lock(&theBuffer->theDataFlux);
@@ -101,7 +101,7 @@ void BufferReader::skipElements(const uint elements)
 	if(MESSAGES) qDebug("< skipElements");
 }
 
-void BufferReader::skipElementsUNSAFE(const uint elements)
+void BufferReader::skipElementsUNSAFE(uint elements)
 {
 	if(qMESSAGES) qDebug("> skipElementsUNSAFE (%d)", elements);
 	
@@ -155,7 +155,7 @@ void BufferReader::skipElementsUNSAFE(const uint elements)
 	if(qMESSAGES) qDebug("< skipElementsUNSAFE");
 }
 
-const BufferData BufferReader::readElements(const uint elements, bool autoFree)
+const BufferData BufferReader::readElements(uint elements, bool autoFree)
 {
 	if(MESSAGES) qDebug("> [%p] readElements(%d)", this, elements);
 	QMutexLocker lock(&theBuffer->theDataFlux);

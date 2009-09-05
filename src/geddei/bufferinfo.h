@@ -79,7 +79,7 @@ public:
 	 * 
 	 * @return true if this object is still a live portion of a Buffer.
 	 */
-	const bool isLive() const
+	bool isLive() const
 	{
 		bool ret = (theLife == Foreign);
 #ifdef EDEBUG
@@ -102,7 +102,7 @@ public:
 	 * 
 	 * @return true if this object is still a live portion of a Buffer.
 	 */
-	const bool isActive() const
+	bool isActive() const
 	{
 		bool ret = (theLife == Foreign && theCounter > 0);
 #ifdef EDEBUG
@@ -111,7 +111,7 @@ public:
 		return ret;
 	}
 	
-	const bool isReferenced() const { return theCounter > 0; }
+	bool isReferenced() const { return theCounter > 0; }
 	void reference();
 	void unreference(BufferData &client);
 	
@@ -151,10 +151,10 @@ public:
 	 */
 	void jettison();
 
-	BufferInfo(float *data, Auxilliary *aux, const uint mask, const Payload life, const Access type):
+	BufferInfo(float *data, Auxilliary *aux, uint mask, const Payload life, const Access type):
 		theCounter(0), theResident(true), theMask(mask), theAux(aux), theType(type), theLife(life), theData(data) {}
-	BufferInfo(const uint accessibleSize, const uint scope, float *data, Auxilliary *aux, const Legacy endType,
-		const uint mask, const bool valid, const Access type, const Payload life, const bool plunger):
+	BufferInfo(uint accessibleSize, uint scope, float *data, Auxilliary *aux, const Legacy endType,
+		uint mask, bool valid, const Access type, const Payload life, bool plunger):
 		theCounter(1), theResident(false), theMask(mask), theAccessibleSize(accessibleSize), theScope(scope), theAux(aux),
 		theValid(valid), theType(type), theLife(life), theEndType(endType), theData(data), thePlunger(plunger) {}
 };

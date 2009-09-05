@@ -27,7 +27,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-LRConnection::LRConnection(Source *newSource, const uint sourceIndex, Q3SocketDevice *sinkSocketDevice) : LxConnectionReal(newSource, sourceIndex), theSink(sinkSocketDevice)
+LRConnection::LRConnection(Source *newSource, uint sourceIndex, Q3SocketDevice *sinkSocketDevice) : LxConnectionReal(newSource, sourceIndex), theSink(sinkSocketDevice)
 {
 	if(MESSAGES) qDebug("LRC: Handshaking...");
 	theSink.handshake(true);
@@ -50,7 +50,7 @@ LRConnection::~LRConnection()
 	}
 }
 
-void LRConnection::setCredentials(const QString &remoteHost, const uint remoteKey, const QString &remoteProcessorName, const uint remoteIndex)
+void LRConnection::setCredentials(const QString &remoteHost, uint remoteKey, const QString &remoteProcessorName, uint remoteIndex)
 {
 	theRemoteHost = remoteHost;
 	theRemoteKey = remoteKey;
@@ -88,7 +88,7 @@ void LRConnection::noMorePlungers()
 	theSink.sendByte(NoMorePlungers);
 }
 
-void LRConnection::enforceMinimum(const uint size)
+void LRConnection::enforceMinimum(uint size)
 {
 	theSink.sendByte(EnforceMinimum);
 	theSink.safeSendWord(size);
@@ -120,13 +120,13 @@ void LRConnection::bufferWaitForFree()
 	if(MESSAGES) qDebug("> LRC::bWFF()");
 	if(theSink.isOpen())
 	{	theSink.sendByte(BufferWaitForFree);
-		while(!trapdoor() && theSink.isOpen() && !theSink.waitForAck(502));
+		while(!trapdoor() && theSink.isOpen() && !theSink.waitForAck(502)) {}
 	}
 	theSource->checkExit();
 	if(MESSAGES) qDebug("< LRC::bWFF()");
 }
 
-const uint LRConnection::bufferElementsFree()
+uint LRConnection::bufferElementsFree()
 {
 	if(MESSAGES) qDebug("> LRC::bEF()");
 	uint ret;
@@ -139,13 +139,13 @@ const uint LRConnection::bufferElementsFree()
 	return ret;
 }
 
-const bool LRConnection::waitUntilReady()
+bool LRConnection::waitUntilReady()
 {
 	if(MESSAGES) qDebug("> LRC::wUR()");
 	if(theSink.isOpen())
 	{	theSink.sendByte(WaitUntilReady);
 		if(MESSAGES) qDebug("= LRC::wUR(): isOpen() = %d", theSink.isOpen());
-		while(!trapdoor() && theSink.isOpen() && !theSink.waitForAck(503));
+		while(!trapdoor() && theSink.isOpen() && !theSink.waitForAck(503)) {}
 	}
 	if(MESSAGES) qDebug("= LRC::wUR(): checkExit() (isOpen() = %d)", theSink.isOpen());
 	theSource->checkExit();

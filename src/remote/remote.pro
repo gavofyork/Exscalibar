@@ -10,5 +10,3 @@ SUBDIRS += rgeddei \
            nodeserver \
            tests
 
-gat:SUBDIRS += nodecontroller
-

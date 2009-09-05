@@ -64,7 +64,7 @@ public:
 	virtual int rtti() const { return 1005; }
 
 	SoftBob(const QString &name, Q3Canvas *c);
-	SoftBob(const int x, const int y, const QString &type, const QString &name, Q3Canvas *c);
+	SoftBob(int x, int y, const QString &type, const QString &name, Q3Canvas *c);
 	virtual ~SoftBob();
 };
 
