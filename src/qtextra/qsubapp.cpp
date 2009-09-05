@@ -27,27 +27,9 @@
 
 #include <exscalibar.h>
 
-class QLauncher;
-
-class DLLEXPORT QSubApp : public QThread
-{
-	friend class QLauncher;
-	static QSubApp *theSubApp;
-	virtual void run();
-
-protected:
-	virtual void main() = 0;
-	QSubApp();
-};
+#include "qsubappengine.h"
 
 QSubApp *QSubApp::theSubApp = 0;
-
-class QLauncher : public QTimer
-{
-Q_OBJECT
-public slots:
-	void go() { if(QSubApp::theSubApp) QSubApp::theSubApp->start(); }
-};
 
 QSubApp::QSubApp()
 {
@@ -68,6 +50,4 @@ DLLEXPORT int main_stub(int argc, char **argv)
 	app.exec();
 	return 0;
 }
-
-#include "qsubapp.moc"
 

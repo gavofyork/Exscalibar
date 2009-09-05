@@ -7,7 +7,7 @@ echo Checking out...
 git clone $opwd
 
 cd exscalibar
-version=`grep EXSCALIBAR_VERSION \"$$PWD/system/exscalibar.h\" | sed \"s:.define EXSCALIBAR_VERSION ::g\""`
+version=$(grep EXSCALIBAR_VERSION system/exscalibar.h | sed "s:.define EXSCALIBAR_VERSION ::g" | sed s:\"::g)
 archdir="exscalibar-$version"
 archfile="exscalibar-$version.tar.bz2"
 

@@ -18,12 +18,56 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#pragma once
+#include <QObject>
+#include <qthread.h>
+#include <qtimer.h>
+#include <qapplication.h>
+//Added by qt3to4:
+#include <QEvent>
 
-#include "qsubappengine.h"
+#include <exscalibar.h>
 
-int main(int argc, char **argv)
+class QLauncher;
+
+class DLLEXPORT QSubApp : public QThread
 {
-	return main_stub(argc, argv);
+Q_OBJECT
+
+	friend class QLauncher;
+	static QSubApp *theSubApp;
+	virtual void run();
+
+protected:
+	virtual void main() = 0;
+	QSubApp();
+};
+
+class QLauncher : public QTimer
+{
+Q_OBJECT
+public slots:
+	void go() { if(QSubApp::theSubApp) QSubApp::theSubApp->start(); }
+};
+
+QSubApp *QSubApp::theSubApp = 0;
+
+QSubApp::QSubApp()
+{
+	theSubApp = this;
+}
+
+void QSubApp::run()
+{
+	main();
+	QApplication::postEvent(qApp, new QEvent(QEvent::Quit));
+}
+
+DLLEXPORT int main_stub(int argc, char **argv)
+{
+	QApplication app(argc, argv, false);
+	QLauncher t;
+	QTimer::singleShot(0, &t, SLOT(go()));
+	app.exec();
+	return 0;
 }
 

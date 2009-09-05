@@ -6,14 +6,15 @@ target.path = $$PREFIX/lib
 headers.files += *.h 
 headers.path = $$PREFIX/include/qtextra/ 
 
-SOURCES += qsubapp.cpp \
-           qtextra.cpp \
-           qsocketsession.cpp
+SOURCES += qtextra.cpp \
+           qsocketsession.cpp \
+	   qsubappengine.cpp
 
 HEADERS += qcleaner.h \
            qfactory.h \
            qfactoryexporter.h \
            qfactorymanager.h \
+           qsubappengine.h \
            qsubapp.h \
            qsocketsession.h \
            qfastwaitcondition.h \
