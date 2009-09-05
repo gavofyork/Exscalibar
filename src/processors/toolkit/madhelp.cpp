@@ -134,7 +134,7 @@ bstdfile_t *NewBstdFile(FILE *fp)
 
 	/* Allocate the bstdfile structure. */
 	BstdFile=(bstdfile_t *)malloc(sizeof(bstdfile_t));
-	if(BstdFile==NULL)
+	if (BstdFile==NULL)
 	{
 		errno=ENOMEM;
 		return(NULL);
@@ -156,7 +156,7 @@ bstdfile_t *NewBstdFile(FILE *fp)
  ****************************************************************************/
 int BstdFileDestroy(bstdfile_t *BstdFile)
 {
-	if(BstdFile==NULL)
+	if (BstdFile==NULL)
 	{
 		errno=EBADF;
 		return(1);
@@ -196,45 +196,45 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	int		OldErrno=errno;
 
 	/* Check the validity of the arguments. */
-	if(BstdFile==NULL)
+	if (BstdFile==NULL)
 	{
 		errno=EBADF;
 		return((size_t)0);
 	}
-	if(UserBuffer==NULL)
+	if (UserBuffer==NULL)
 	{
 		errno=EFAULT;
 		return((size_t)0);
 	}
-	if(RequestSize<1)
+	if (RequestSize<1)
 	{
 		errno=EINVAL;
 		return((size_t)0);
 	}
 
 	/* Return immediately if an exceptional situation exists. */
-	if(BstdFile->eof)
+	if (BstdFile->eof)
 		return((size_t)0);
-	if(BstdFile->error)
+	if (BstdFile->error)
 	{
 		errno=BstdFile->error;
 		return((size_t)0);
 	}
 
 	/* The easy case. */
-	if(RequestSize==0U)
+	if (RequestSize==0U)
 		return((size_t)0);
 
 	/* First feed the target buffer from the BstdFile buffer if it has
 	 * some meat to be feeded on.
 	 */
-	if(BstdFile->live_size>0)
+	if (BstdFile->live_size>0)
 	{
 		/* If there is more data in the buffer than requested by the
 		 * user then we feed him directly from our buffer without a
 		 * read operation.
 		 */
-		if(BstdFile->live_size>RequestSize)
+		if (BstdFile->live_size>RequestSize)
 		{
 			memcpy(UserBuffer,BstdFile->live,RequestSize);
 			BstdFile->live+=RequestSize;
@@ -255,7 +255,7 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	/* If the user request was not yet fulfilled we then read from the
 	 * file the remaining data requested by the user.
 	 */
-	if(FeededSize<RequestSize)
+	if (FeededSize<RequestSize)
 	{
 		ReadSize=RequestSize-FeededSize;
 		ObtainedSize=fread(UserBuffer,1,ReadSize,BstdFile->fp);
@@ -267,16 +267,16 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 		 * transferred no data to the user buffer then we directly
 		 * return the error.
 		 */
-		if(ObtainedSize==0U)
+		if (ObtainedSize==0U)
 		{
-			if(feof(BstdFile->fp))
+			if (feof(BstdFile->fp))
 				BstdFile->eof=1;
 			else
 			{
 				BstdFile->error=errno;
 				errno=OldErrno;
 			}
-			if(FeededSize!=0)
+			if (FeededSize!=0)
 				return(FeededSize);
 			else
 				return(0U);
@@ -288,9 +288,9 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	 * was feeded to the user buffer.
 	 */
 	ObtainedSize=fread(BstdFile->buffer,1,BFILE_BUFSIZE,BstdFile->fp);
-	if(ObtainedSize==0)
+	if (ObtainedSize==0)
 	{
-		if(feof(BstdFile->fp))
+		if (feof(BstdFile->fp))
 			BstdFile->eof=1;
 		else
 		{
@@ -327,9 +327,9 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 
 static signed short MadFixedToSshort(mad_fixed_t Fixed)
 {
-	if(Fixed>=MAD_F_ONE)
+	if (Fixed>=MAD_F_ONE)
 		return(SHRT_MAX);
-	if(Fixed<=-MAD_F_ONE)
+	if (Fixed<=-MAD_F_ONE)
 		return(-SHRT_MAX);
 	Fixed=Fixed>>(MAD_F_FRACBITS-15);
 	return((signed short)Fixed);
@@ -341,7 +341,7 @@ static signed short MadFixedToSshort(mad_fixed_t Fixed)
 				*Mode,
 				*Emphasis;
 
-	switch(Header->layer)
+	switch (Header->layer)
 	{
 		case MAD_LAYER_I:
 			Layer="I";
@@ -357,7 +357,7 @@ static signed short MadFixedToSshort(mad_fixed_t Fixed)
 			break;
 	}
 
-	switch(Header->mode)
+	switch (Header->mode)
 	{
 		case MAD_MODE_SINGLE_CHANNEL:
 			Mode="single channel";
@@ -376,7 +376,7 @@ static signed short MadFixedToSshort(mad_fixed_t Fixed)
 			break;
 	}
 
-	switch(Header->emphasis)
+	switch (Header->emphasis)
 	{
 		case MAD_EMPHASIS_NONE:
 			Emphasis="no";

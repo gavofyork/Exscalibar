@@ -21,11 +21,11 @@
 
 QSocketSession::QSocketSession(Q3SocketDevice *sd): theSD(sd)
 {
-	if(MESSAGES) qDebug("New QSocketSession...");
+	if (MESSAGES) qDebug("New QSocketSession...");
 	theClosed = false;
-	if(MESSAGES) qDebug("Setting up blocking...");
+	if (MESSAGES) qDebug("Setting up blocking...");
 	theSD->setBlocking(true);
-	if(MESSAGES) qDebug("Done.");
+	if (MESSAGES) qDebug("Done.");
 }
 
 QSocketSession::~QSocketSession()
@@ -35,37 +35,37 @@ QSocketSession::~QSocketSession()
 
 void QSocketSession::close()
 {
-	if(theClosed) return;
+	if (theClosed) return;
 	theClosed = true;
-	if(theSD->isValid())
+	if (theSD->isValid())
 		theSD->close();
 }
 
 void QSocketSession::handshake()
 {
-	if(MESSAGES) qDebug("Handshaking... (isOpen()=%d)", isOpen());
+	if (MESSAGES) qDebug("Handshaking... (isOpen()=%d)", isOpen());
 	ack();
-	if(!waitForAck(1000) || !isOpen())
+	if (!waitForAck(1000) || !isOpen())
 	{	qWarning("*** ERROR: Handshake failed: Didn't receive ack. Closing link.");
 		close();
 		return;
 	}
-	if(MESSAGES) qDebug("Got ack!");
-	for(bool know = false; !know;)
+	if (MESSAGES) qDebug("Got ack!");
+	for (bool know = false; !know;)
 	{	uchar mi = rand() & 255;
 		sendByte(mi);
 		uchar i;
-		if(!receiveChunk((uchar *)&i, 1, 1000) || !isOpen())
+		if (!receiveChunk((uchar *)&i, 1, 1000) || !isOpen())
 		{	qWarning("*** ERROR: Handshake failed: Didn't receive random. Closing link.");
 			close();
 			return;
 		}
-		if(mi != i)
+		if (mi != i)
 		{	theIsMaster = mi > i;
 			know = true;
 		}
 		else
-		{	if(MESSAGES) qDebug("Doh! Number clash (%d = %d)", mi, i);
+		{	if (MESSAGES) qDebug("Doh! Number clash (%d = %d)", mi, i);
 		}
 	}
 	findByteOrder();
@@ -74,14 +74,14 @@ void QSocketSession::handshake()
 void QSocketSession::handshake(bool opposite)
 {
 
-	if(MESSAGES) qDebug("Handshaking... (isOpen()=%d)", isOpen());
+	if (MESSAGES) qDebug("Handshaking... (isOpen()=%d)", isOpen());
 	ack();
-	if(!waitForAck(1000) || !isOpen())
+	if (!waitForAck(1000) || !isOpen())
 	{	qWarning("*** ERROR: Handshake failed: Didn't receive ack. Closing link.");
 		close();
 		return;
 	}
-	if(MESSAGES) qDebug("Got ack!");
+	if (MESSAGES) qDebug("Got ack!");
 	theIsMaster = opposite;
 	findByteOrder();
 }
@@ -89,9 +89,9 @@ void QSocketSession::handshake(bool opposite)
 void QSocketSession::findByteOrder()
 {
 	float i = 3.1415;
-	if(theIsMaster)
+	if (theIsMaster)
 	{	sendChunk((uchar *)&i, 4);
-		if(!waitForAck(1000, &theSameByteOrder) || !isOpen())
+		if (!waitForAck(1000, &theSameByteOrder) || !isOpen())
 		{	qWarning("*** ERROR: Handshake failed: Didn't receive ack. Closing link.");
 			close();
 			return;
@@ -99,7 +99,7 @@ void QSocketSession::findByteOrder()
 	}
 	else
 	{	float remotei;
-		if(!receiveChunk((uchar *)&remotei, 4, 1000) || !isOpen())
+		if (!receiveChunk((uchar *)&remotei, 4, 1000) || !isOpen())
 		{	qWarning("*** ERROR: Handshake failed: Didn't receive remote bit pattern. Closing link.");
 			close();
 			return;
@@ -108,9 +108,9 @@ void QSocketSession::findByteOrder()
 		uint &t = *((uint *)&rremotei);
 		t = bswap_32(*((uint *)&remotei));
 
-		if(remotei == i)
+		if (remotei == i)
 			theSameByteOrder = true;
-		else if(rremotei == i)
+		else if (rremotei == i)
 			theSameByteOrder = false;
 		else
 			qWarning("*** CRITICAL: Two hosts have neither same nor opposite byte order. (%f or %f should be %f)", remotei, rremotei, i);
@@ -122,11 +122,11 @@ void QSocketSession::receiveChunk(uchar *buffer, uint size)
 {
 	int r = 1;
 	uint read = 0;
-	while(r > 0 && read < size && isOpen())
+	while (r > 0 && read < size && isOpen())
 	{	r = theSD->readBlock((char *)(buffer + read), size - read);
 		read += r;
 	}
-	if(r <= 0 || read != size)
+	if (r <= 0 || read != size)
 	{	qWarning("*** INFO: Socket receive error (read %d of %d). Closing connection.", read, size);
 		close();
 	}
@@ -136,11 +136,11 @@ void QSocketSession::sendChunk(const uchar *buffer, uint size)
 {
 	int r = 1;
 	uint sent = 0;
-	while(r > 0 && sent < size && isOpen())
+	while (r > 0 && sent < size && isOpen())
 	{	r = theSD->writeBlock((const char *)(buffer + sent), size - sent);
 		sent += r;
 	}
-	if(sent != size)
+	if (sent != size)
 	{	qWarning("*** INFO: Couldn't transmit data. Attempted to send %d bytes, sent %d."
 				 "          Closing connection.", size, sent);
 		close();
@@ -149,16 +149,16 @@ void QSocketSession::sendChunk(const uchar *buffer, uint size)
 
 bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 {
-	if(!isOpen()) return false;
+	if (!isOpen()) return false;
 	theSD->setBlocking(false);
 	int r = 1;
 	uint read = 0;
 	bool timedOut = false;
-	while(isOpen() && read < size && !timedOut)
+	while (isOpen() && read < size && !timedOut)
 	{	r = theSD->readBlock((char *)(buffer + read), size - read);
-		if(r <= 0)
-		{	if(theSD->waitForMore(timeOut, &timedOut) < 0)
-			{	if(MESSAGES) qDebug("Connection closed abruptly.");
+		if (r <= 0)
+		{	if (theSD->waitForMore(timeOut, &timedOut) < 0)
+			{	if (MESSAGES) qDebug("Connection closed abruptly.");
 				timedOut = true;
 				close();
 				break;
@@ -169,8 +169,8 @@ bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 	}
 	theSD->setBlocking(true);
 
-	if(timedOut)
-		if(MESSAGES) qWarning("*** INFO: Timeout on socket receive (given %d, read %d of %d).\n"
+	if (timedOut)
+		if (MESSAGES) qWarning("*** INFO: Timeout on socket receive (given %d, read %d of %d).\n"
 							  "          Not closing.", timeOut, read, size);
 	return !timedOut;
 }
@@ -178,25 +178,25 @@ bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 bool QSocketSession::waitForAck(uint timeOut, bool *ackType)
 {
 	uchar c = 0;
-	while(isOpen() && c != 1 && c != 2)
-		if(!receiveChunk(&c, 1, timeOut))
-		{	if(MESSAGES) qWarning("*** INFO: Connection error - Timeout while waiting for Ack.");
+	while (isOpen() && c != 1 && c != 2)
+		if (!receiveChunk(&c, 1, timeOut))
+		{	if (MESSAGES) qWarning("*** INFO: Connection error - Timeout while waiting for Ack.");
 			return false;
 		}
 
-	if(c != 1 && c != 2) return false;
-	if(ackType) *ackType = c;
+	if (c != 1 && c != 2) return false;
+	if (ackType) *ackType = c;
 	return true;
 }
 
 bool QSocketSession::waitForAck(bool *ackType)
 {
 	uchar c = 0;
-	while(isOpen() && c != 1 && c != 2)
+	while (isOpen() && c != 1 && c != 2)
 		receiveChunk(&c, 1);
 
-	if(c != 1 && c != 2) return false;
-	if(ackType) *ackType = c;
+	if (c != 1 && c != 2) return false;
+	if (ackType) *ackType = c;
 	return true;
 }
 
@@ -205,7 +205,7 @@ float QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; float t; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
-	if(!theSameByteOrder) d.i = bswap_32(d.i);
+	if (!theSameByteOrder) d.i = bswap_32(d.i);
 	return d.t;
 }
 
@@ -214,7 +214,7 @@ int32_t QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
-	if(!theSameByteOrder) d.i = bswap_32(d.i);
+	if (!theSameByteOrder) d.i = bswap_32(d.i);
 	return d.i;
 }
 
@@ -223,7 +223,7 @@ uint32_t QSocketSession::safeReceiveWord()
 {
 	union { int32_t i; uint32_t t; uchar c[4]; } d;
 	receiveChunk(d.c, 4);
-	if(!theSameByteOrder) d.i = bswap_32(d.i);
+	if (!theSameByteOrder) d.i = bswap_32(d.i);
 	return d.t;
 }
 
@@ -232,8 +232,8 @@ void QSocketSession::safeReceiveWordArray(float *t, uint32_t size)
 {
 	int32_t *array = (int32_t *)t;
 	receiveChunk((uchar *)array, 4 * size);
-	if(!theSameByteOrder)
-		for(uint32_t i = 0; i < size; i++)
+	if (!theSameByteOrder)
+		for (uint32_t i = 0; i < size; i++)
 			array[i] = bswap_32(array[i]);
 }
 
@@ -241,8 +241,8 @@ template<>
 void QSocketSession::safeReceiveWordArray(int32_t *t, uint32_t size)
 {
 	receiveChunk((uchar *)t, 4 * size);
-	if(!theSameByteOrder)
-		for(uint32_t i = 0; i < size; i++)
+	if (!theSameByteOrder)
+		for (uint32_t i = 0; i < size; i++)
 			t[i] = bswap_32(t[i]);
 }
 
@@ -251,8 +251,8 @@ void QSocketSession::safeReceiveWordArray(uint32_t *t, uint32_t size)
 {
 	int32_t *array = (int32_t *)t;
 	receiveChunk((uchar *)array, 4 * size);
-	if(!theSameByteOrder)
-		for(uint32_t i = 0; i < size; i++)
+	if (!theSameByteOrder)
+		for (uint32_t i = 0; i < size; i++)
 			array[i] = bswap_32(array[i]);
 }
 

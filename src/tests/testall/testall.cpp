@@ -32,11 +32,11 @@ int main(int argc, char **argv)
 {
 /*	QStringList procs = ProcessorFactory::available();
 	cout << "Processors:" << endl;
-	for(QStringList::iterator i = procs.begin(); i != procs.end(); i++)
+	for (QStringList::iterator i = procs.begin(); i != procs.end(); i++)
 		cout << "   " << *i << " (" << ProcessorFactory::version(*i) << ")" << endl;
 	procs = SubProcessorFactory::available();
 	cout << "SubProcessors:" << endl;
-	for(QStringList::iterator i = procs.begin(); i != procs.end(); i++)
+	for (QStringList::iterator i = procs.begin(); i != procs.end(); i++)
 		cout << "   " << *i << " (" << SubProcessorFactory::version(*i) << ")" << endl;
 */
 	ProcessorGroup objects;
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	SubProcessorFactory::createDom("FFT")->init("F", objects, Properties("Debug", true));
 	SubProcessorFactory::createDom("DownSample")->init("D", objects);
 
-//	for(int i = 0; i < 10; i++)
+//	for (int i = 0; i < 10; i++)
 	{
 		Monitor *I = (new Monitor);
 		I->init("I", objects);

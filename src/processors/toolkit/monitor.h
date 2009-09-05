@@ -122,7 +122,7 @@ public:
 	 * exit immediately. If you don't want this to happen, then call
 	 * resetPlungerMemory() first.
 	 * 
-	 * Typically used in a basic for() loop to count until the required number
+	 * Typically used in a basic for () loop to count until the required number
 	 * of plungers has passed through the network.
 	 * 
 	 * @sa resetPlungerMemory()

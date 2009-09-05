@@ -32,7 +32,7 @@ xSCoupling::~xSCoupling()
 
 void xSCoupling::stoppingR()
 {
-	if(MESSAGES) qDebug("xSCoupling::stopping(): Getting ready to stop. No more transactions allowed on %p.", theSubProc);
+	if (MESSAGES) qDebug("xSCoupling::stopping(): Getting ready to stop. No more transactions allowed on %p.", theSubProc);
 	{	QMutexLocker l(&theSubProc->theDataInUse);
 		theSubProc->theNoMoreTransactions = true;
 		theSubProc->theDataChanged.wakeAll();
@@ -70,7 +70,7 @@ void xSCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRef
 {
 	SignalTypeRefs dummyOutTypes(outTypes.count());
 
-	if(!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
+	if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
 	{	qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
 	}
 	theSubProc->theOutTypes = outTypes;

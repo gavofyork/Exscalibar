@@ -60,7 +60,7 @@ void MySubApp::main()
 	group["I"][0] >>= group["D"][0];
 	group["D"][0] >>= group["R"][0];
 
-	if(!group.go()) qFatal("Problem starting processors. Bailing.");
+	if (!group.go()) qFatal("Problem starting processors. Bailing.");
 	monitor.waitUntilDone();
 	
 	group.stop();

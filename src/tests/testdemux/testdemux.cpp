@@ -41,7 +41,7 @@ class PlungeGenerator : public Processor
 {
 	virtual void processor()
 	{
-		for(uint i = 0; i < 100; i++)
+		for (uint i = 0; i < 100; i++)
 		{	BufferData s = output(0).makeScratchSample();
 			s[0] = i;
 			output(0) << s;
@@ -59,7 +59,7 @@ class PlungeDetector : public Processor
 {
 	void processor()
 	{
-		while(thereIsInputForProcessing())
+		while (thereIsInputForProcessing())
 		{
 			BufferData s = input(0).readSample();
 			cout << s[0] << " " << flush;

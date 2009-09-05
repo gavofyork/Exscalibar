@@ -25,10 +25,10 @@ class MySource: public Processor
 {
 	virtual void processor()
 	{
-		for(int i = 0; i < 200000; i++)
+		for (int i = 0; i < 200000; i++)
 		{
 			{	BufferData s = output(0).makeScratchSamples(10);
-				for(int j = 0; j < 10; j++)
+				for (int j = 0; j < 10; j++)
 					s[j] = j;
 				output(0) << s;
 			}
@@ -46,10 +46,10 @@ class MySink: public Processor
 	virtual void processor()
 	{
 		float f;
-		while(thereIsInputForProcessing(10))
+		while (thereIsInputForProcessing(10))
 		{
 			{	const BufferData s = input(0).readSamples(10);
-				for(int j = 0; j < 10; j++)
+				for (int j = 0; j < 10; j++)
 					f = s[j];
 			}
 //	sched_yield();
@@ -65,7 +65,7 @@ class LatencySource: public Processor
 {
 	virtual void processor()
 	{
-		for(int i = 0; i < 200000; i++)
+		for (int i = 0; i < 200000; i++)
 		{
 			QTime *t = new QTime;
 			t->start();
@@ -84,7 +84,7 @@ class LatencySink: public Processor
 	virtual void processor()
 	{
 		theElapsedSum = theSamples = 0;
-		while(thereIsInputForProcessing(1))
+		while (thereIsInputForProcessing(1))
 		{
 			float f = input(0).readSample()[0];
 			QTime *t = *((QTime **)&f);
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 
 	int mode = argc > 1 ? QString(argv[1]).toInt() : 0;
 	
-	if(mode == 0)
+	if (mode == 0)
 	{
 		(new MySource)->init("o", g);
 		(new MySink)->init("i", g);
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 		g["i"].waitUntilDone();
 		g.stop();
 	}
-	else if(mode == 1)
+	else if (mode == 1)
 	{
 		(new MySource)->init("o", g);
 		(new MySource)->init("p", g);
@@ -143,25 +143,25 @@ int main(int argc, char **argv)
 		g["p"].waitUntilDone();
 		g.stop();
 	}
-	else if(mode == 2)
+	else if (mode == 2)
 	{
 		float weight = argc > 2 ? QString(argv[2]).toDouble() : 0.5;
 		int links = argc > 3 ? QString(argv[3]).toInt() : 1;
 		(new LatencySource)->init("o", g);
-		for(int i = 0; i < links; i++)
+		for (int i = 0; i < links; i++)
 			(new DomProcessor(new PassThrough))->init("p" + QString::number(i), g,
 				Properties("Latency/Throughput", weight));
 		LatencySink *sink = new LatencySink;
 		sink->init("i", g);
 		g["o"][0] >>= g[links > 0 ? "p0" : "i"][0];
-		for(int i = 0; i < links; i++)
+		for (int i = 0; i < links; i++)
 			g["p" + QString::number(i)][0] >>=
 				g[i == links - 1 ? "i" : ("p" + QString::number(i+1))][0];
 		
 		uint count = 3;
 		float times[count], ltimes[count];
 		
-		for(uint t = 0; t < count; t++)
+		for (uint t = 0; t < count; t++)
 		{
 			QTime clock;
 			g.go(true);
@@ -173,28 +173,28 @@ int main(int argc, char **argv)
 		}
 
 		float mean = 0., sd = 0., lmean = 0., lsd = 0.;
-		for(uint t = 0; t < count; t++) mean += float(times[t]) / float(count);
-		for(uint t = 0; t < count; t++) sd += ((float(times[t]) - mean) * (float(times[t]) - mean));
-		for(uint t = 0; t < count; t++) lmean += float(ltimes[t]) / float(count);
-		for(uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
+		for (uint t = 0; t < count; t++) mean += float(times[t]) / float(count);
+		for (uint t = 0; t < count; t++) sd += ((float(times[t]) - mean) * (float(times[t]) - mean));
+		for (uint t = 0; t < count; t++) lmean += float(ltimes[t]) / float(count);
+		for (uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
 		sd = sqrt(sd / float(count));
 		lsd = sqrt(lsd / float(count));
 		
 		cout << mean << " " << sd << " " << lmean << " " << lsd << endl;
 	}
-	else if(mode == 3)
+	else if (mode == 3)
 	{
 		float weight = argc > 2 ? QString(argv[2]).toDouble() : 0.5;
 		int links = argc > 3 ? QString(argv[3]).toInt() : 1;
 		(new LatencySource)->init("o", g);
 		SubProcessor *sub = 0;
-		for(int i = 0; i < links; i++)
-			if(!sub) sub = new PassThrough; else sub = new Combination(sub, new PassThrough);
+		for (int i = 0; i < links; i++)
+			if (!sub) sub = new PassThrough; else sub = new Combination(sub, new PassThrough);
 		LatencySink *sink = new LatencySink;
-		if(sub)
+		if (sub)
 			(new DomProcessor(sub))->init("p", g, Properties("Latency/Throughput", weight));
 		sink->init("i", g);
-		if(sub)
+		if (sub)
 		{
 			g["o"][0] >>= g["p"][0];
 			g["p"][0] >>= g["i"][0];
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 		uint count = 3;
 		float times[count], ltimes[count];
 		
-		for(uint t = 0; t < count; t++)
+		for (uint t = 0; t < count; t++)
 		{
 			QTime clock;
 			g.go(true);
@@ -216,10 +216,10 @@ int main(int argc, char **argv)
 		}
 
 		float mean = 0., sd = 0., lmean = 0., lsd = 0.;
-		for(uint t = 0; t < count; t++) mean += float(times[t]) / float(count);
-		for(uint t = 0; t < count; t++) sd += ((float(times[t]) - mean) * (float(times[t]) - mean));
-		for(uint t = 0; t < count; t++) lmean += float(ltimes[t]) / float(count);
-		for(uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
+		for (uint t = 0; t < count; t++) mean += float(times[t]) / float(count);
+		for (uint t = 0; t < count; t++) sd += ((float(times[t]) - mean) * (float(times[t]) - mean));
+		for (uint t = 0; t < count; t++) lmean += float(ltimes[t]) / float(count);
+		for (uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
 		sd = sqrt(sd / float(count));
 		lsd = sqrt(lsd / float(count));
 		

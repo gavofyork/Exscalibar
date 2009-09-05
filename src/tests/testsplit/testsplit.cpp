@@ -12,11 +12,11 @@ class PlungeGenerator : public Processor
 {
 	virtual void processor()
 	{
-//		while(true)
+//		while (true)
 		{
-			for(unsigned int i = 0; i < 5; i++)
+			for (unsigned int i = 0; i < 5; i++)
 			{	BufferData s = output(0).makeScratchSamples(10);
-				for(unsigned int j = 0; j < 10; j++)
+				for (unsigned int j = 0; j < 10; j++)
 					s[j] = i;
 				output(0) << s;
 				std::cout << "Generator " << qPrintable(name()) << ": Pushing plunger..." << std::endl;
@@ -35,7 +35,7 @@ class PlungeDetector : public Processor
 {
 	void processor()
 	{
-		while(true)
+		while (true)
 		{
 			BufferData s = input(0).readSamples(5);
 			output(0) << s;
@@ -69,7 +69,7 @@ class PlungeEater : public Processor
 {
 	void processor()
 	{
-		while(true)
+		while (true)
 		{
 			input(0).readSamples(1);
 		}
@@ -119,7 +119,7 @@ int main()
 	(*E)[0] >>= (*I)[0].setSize(10);
 
 	std::cout << "Checking network..." << std::endl;
-	if(!objects.confirmTypes())
+	if (!objects.confirmTypes())
 		qFatal("Couldn't confirm types.");
 
 	theCount = 0;
@@ -129,7 +129,7 @@ int main()
 	objects.go();
 
 	std::cout << "Waiting for 5 plungers..." << std::endl;
-	while(theCount < 5)
+	while (theCount < 5)
 		theCondition.wait(&theMutex);
 	theMutex.unlock();
 

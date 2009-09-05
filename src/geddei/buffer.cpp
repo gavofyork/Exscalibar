@@ -29,7 +29,7 @@ ostream &operator<<(ostream &out, Buffer &me)
 {
 	out << "[";
 	me.theDataFlux.lock();
-	for(uint i = 0; i < me.theSize; i++)
+	for (uint i = 0; i < me.theSize; i++)
 		out << (i==me.writePos?(i==me.readPos?'X':'>'):(i==me.readPos?'<':' ')) << me.theData[i];
 	me.theDataFlux.unlock();
 	return out << " ]";
@@ -40,15 +40,15 @@ void Buffer::debug()
 	QMutexLocker lock(&theDataFlux);
 	QString out = "[";
 
-	for(uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < theSize; i++)
 	{
 		char c = 'A';
-		for(Q3PtrList<BufferReader>::Iterator j = theReaders.begin(); j != theReaders.end(); j++, c++)
-			if(i == (*j)->readPos) out += c; else out += " ";
-		Q3ValueList<uint>::Iterator p; for(p = thePlungers.begin(); p != thePlungers.end(); p++)
-			if(*p == i) break;
+		for (Q3PtrList<BufferReader>::Iterator j = theReaders.begin(); j != theReaders.end(); j++, c++)
+			if (i == (*j)->readPos) out += c; else out += " ";
+		Q3ValueList<uint>::Iterator p; for (p = thePlungers.begin(); p != thePlungers.end(); p++)
+			if (*p == i) break;
 		out += (readPos == i) ? "R" : " ";
-		if(p == thePlungers.end()) out += " "; else out += "#";
+		if (p == thePlungers.end()) out += " "; else out += "#";
 		out += (writePos == i) ? "W" : " ";
 
 		out += ":" + QString::number(theData[i & theMask]) + ":";
@@ -60,20 +60,20 @@ void Buffer::debug()
 void Buffer::updateUNSAFE()
 {
 	// figure out how much theUsed will be moved on.
-	if(MESSAGES) qDebug("Updating position");
+	if (MESSAGES) qDebug("Updating position");
 	uint newUsed = 0;
-	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-		if(newUsed < (*i)->theUsed)
+	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
+		if (newUsed < (*i)->theUsed)
 			newUsed = (*i)->theUsed;
 
 	uint moveBy = theUsed - newUsed;
-	if(MESSAGES) qDebug("Moving by %d", moveBy);
+	if (MESSAGES) qDebug("Moving by %d", moveBy);
 
 	// clear old plunger (if any) - could be multiple due to potential for skipping
-	if(MESSAGES) qDebug("Next plunger is %d away", (nextPlungerUNSAFE() - readPos) & theMask);
-	while(1)
-		if(thePlungers.begin() != thePlungers.end())
-			if(((*thePlungers.begin() - readPos) & theMask) < moveBy)
+	if (MESSAGES) qDebug("Next plunger is %d away", (nextPlungerUNSAFE() - readPos) & theMask);
+	while (1)
+		if (thePlungers.begin() != thePlungers.end())
+			if (((*thePlungers.begin() - readPos) & theMask) < moveBy)
 				thePlungers.remove(thePlungers.begin());
 			else
 				break;
@@ -90,9 +90,9 @@ Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(false)
 	theDataFlux.lock();
 	theSize = 4;
 	theLogSize = 2;
-	while(theSize < size) { theSize <<= 1; theLogSize++; }
+	while (theSize < size) { theSize <<= 1; theLogSize++; }
 /*#ifdef EDEBUG
-	if(theSize != size)
+	if (theSize != size)
 		qDebug("*** Buffer increased from %d to %d in order that it be a power of 2.", size, theSize);
 #endif*/
 	theMask = theSize - 1;
@@ -100,10 +100,10 @@ Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(false)
 	writePos = 0;
 	theUsed = 0;
 	theData = new float[theSize];
-	for(uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
+	for (uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
 	theType = type ? type->copy() : 0;
 	lastScratch = new BufferInfo(theData, this, theMask, BufferInfo::Foreign, BufferInfo::Write);
-	if(MESSAGES) qDebug("Creating new scratch: %p", lastScratch);
+	if (MESSAGES) qDebug("Creating new scratch: %p", lastScratch);
 	lastScratch->thePlunger = false;
 
 	theTrapdoors.clear();
@@ -112,13 +112,13 @@ Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(false)
 
 Buffer::~Buffer()
 {
-	if(MESSAGES) qDebug("> ~Buffer");
+	if (MESSAGES) qDebug("> ~Buffer");
 	theDataFlux.lock();
 	delete [] theData;
 	delete theType;
 	theData = 0;
 	theDataFlux.unlock();
-	if(MESSAGES) qDebug("< ~Buffer");
+	if (MESSAGES) qDebug("< ~Buffer");
 }
 
 void Buffer::resize(uint size)
@@ -129,9 +129,9 @@ void Buffer::resize(uint size)
 
 	theSize = 4;
 	theLogSize = 2;
-	while(theSize < size) { theSize <<= 1; theLogSize++; }
+	while (theSize < size) { theSize <<= 1; theLogSize++; }
 /*#ifdef EDEBUG
-	if(theSize != size)
+	if (theSize != size)
 		qWarning("*** WARNING: Buffer increased from %d to %d in order that it be a power of 2.", size, theSize);
 #endif*/
 	theMask = theSize - 1;
@@ -139,16 +139,16 @@ void Buffer::resize(uint size)
 	writePos = 0;
 	theUsed = 0;
 	theData = new float[theSize];
-	for(uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
+	for (uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
 
-	if(lastScratch->isReferenced())
+	if (lastScratch->isReferenced())
 		qFatal("FATAL: Resizing buffer when scratch BufferData objects are still around.");
 	lastScratch->theData = theData;
 	lastScratch->theMask = theMask;
 	lastScratch->thePlunger = false;
 
 	theTrapdoors.clear();
-	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
+	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
 	{	(*i)->clearUNSAFE();
 		(*i)->lastRead->theData = theData;
 		(*i)->lastRead->theMask = theMask;
@@ -159,11 +159,11 @@ void Buffer::resize(uint size)
 
 void Buffer::appendPlunger()
 {
-	if(MESSAGES) qDebug("Appending plunger to position %d", writePos);
+	if (MESSAGES) qDebug("Appending plunger to position %d", writePos);
 	QMutexLocker lock(&theDataFlux);
 
 #ifdef EDEBUG
-	if(theSize - theUsed == 0 && !thePlungers.count())
+	if (theSize - theUsed == 0 && !thePlungers.count())
 		qWarning("*** WARNING: appendPlunger(): Size of buffer is critically low (size: %d).\n"
 				 "             There is not enough room for one plunger. Please\n"
 				 "             make use of Processor::specifyOutputSpace().", theSize);
@@ -174,72 +174,72 @@ void Buffer::appendPlunger()
 	// exit immediately.
 	waitForFreeUNSAFE(1);
 	thePlungers.push_back(writePos);
-	if(MESSAGES) qDebug("Waking readers...");
+	if (MESSAGES) qDebug("Waking readers...");
 	theDataIn.wakeAll();
 	theDataOut.wakeAll();
 }
 
 void Buffer::discardNextPlunger()
 {
-	if(MESSAGES) qDebug("> discardNextPlungerUNSAFE");
+	if (MESSAGES) qDebug("> discardNextPlungerUNSAFE");
 	QMutexLocker lock(&theDataFlux);
-	if(MESSAGES) qDebug("* discardNextPlungerUNSAFE");
+	if (MESSAGES) qDebug("* discardNextPlungerUNSAFE");
 	discardNextPlungerUNSAFE();
-	if(MESSAGES) qDebug("< discardNextPlungerUNSAFE");
+	if (MESSAGES) qDebug("< discardNextPlungerUNSAFE");
 }
 
 void Buffer::discardNextPlungerUNSAFE()
 {
-	if(MESSAGES) qDebug("* discardNextPlungerUNSAFE");
-	if(thePlungers.begin() != thePlungers.end())
+	if (MESSAGES) qDebug("* discardNextPlungerUNSAFE");
+	if (thePlungers.begin() != thePlungers.end())
 		thePlungers.remove(thePlungers.begin());
 }
 
 bool Buffer::trapdoorUNSAFE() const
 {
-	if(MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? Processor::getCallersProcessor()->name().latin1() : "[SubProcessor]");
+	if (MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? Processor::getCallersProcessor()->name().latin1() : "[SubProcessor]");
 	Q3ValueVector<const Processor *>::const_iterator i;
-	for(i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
-		if(*i == Processor::getCallersProcessor()) break;
+	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
+		if (*i == Processor::getCallersProcessor()) break;
 	return i != theTrapdoors.end();
 }
 
 void Buffer::openTrapdoor(const Processor *processor)
 {
-	if(MESSAGES) qDebug("> openTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
-	if(MESSAGES) qDebug("= openTrapdoor(%p): Going to lock mutex: %p (%d)", this, &theDataFlux, theDataFlux.locked());
+	if (MESSAGES) qDebug("> openTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
+	if (MESSAGES) qDebug("= openTrapdoor(%p): Going to lock mutex: %p (%d)", this, &theDataFlux, theDataFlux.locked());
 	theDataFlux.lock();
 	theTrapdoors.push_back(processor);
-	if(MESSAGES) qDebug("Size: %d", theTrapdoors.size());
+	if (MESSAGES) qDebug("Size: %d", theTrapdoors.size());
 	theDataIn.wakeAll();
 	theDataOut.wakeAll();
 	theDataFlux.unlock();
-	if(MESSAGES) qDebug("< openTrapdoor");
+	if (MESSAGES) qDebug("< openTrapdoor");
 }
 
 void Buffer::closeTrapdoor(const Processor *processor)
 {
-	if(MESSAGES) qDebug("> closeTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
+	if (MESSAGES) qDebug("> closeTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
 	theDataFlux.lock();
-	if(MESSAGES) qDebug("* closeTrapdoor");
-//	for(i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
+	if (MESSAGES) qDebug("* closeTrapdoor");
+//	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 //		qDebug("List: iterator %p", *i);
-	if(MESSAGES) qDebug("Size: %d", theTrapdoors.size());
+	if (MESSAGES) qDebug("Size: %d", theTrapdoors.size());
 
 	Q3ValueVector<const Processor *>::iterator i;
-	for(i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
-		if(*i == processor) break;
+	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
+		if (*i == processor) break;
 	assert(i != theTrapdoors.end());	// assert trapdoor is open.
 	theTrapdoors.erase(i);
 	theDataIn.wakeAll();
 	theDataOut.wakeAll();
 	theDataFlux.unlock();
-	if(MESSAGES) qDebug("< closeTrapdoor");
+	if (MESSAGES) qDebug("< closeTrapdoor");
 }
 
 int Buffer::nextPlungerUNSAFE() const
 {
-	if(thePlungers.begin() == thePlungers.end()) return -1;
+	if (thePlungers.begin() == thePlungers.end()) return -1;
 	return *thePlungers.begin();
 }
 
@@ -249,13 +249,13 @@ int Buffer::nextPlungerUNSAFE(uint pos, uint ignore) const
 	Q3ValueList<uint>::const_iterator ii = thePlungers.begin();
 
 	// First we skip down the plunger list until we find the first plunger at or past 'pos'
-	for(; ii != thePlungers.end() && ((*ii - readPos) & theMask) < ((pos - readPos) & theMask); ii++) {}
+	for (; ii != thePlungers.end() && ((*ii - readPos) & theMask) < ((pos - readPos) & theMask); ii++) {}
 
 	// Then we skip upto ignore plungers from the list while they are situated on 'pos'
-	for(uint i = 0; i < ignore && ii != thePlungers.end() && *ii == pos; i++, ii++) {}
+	for (uint i = 0; i < ignore && ii != thePlungers.end() && *ii == pos; i++, ii++) {}
 
 	// If we ran out of plungers, return -1
-	if(ii == thePlungers.end()) return -1;
+	if (ii == thePlungers.end()) return -1;
 
 	// Otherwise return the relative position of the next plunger
 	return (*ii - pos) & theMask;
@@ -269,16 +269,16 @@ int Buffer::nextPlungerUNSAFE(uint pos, uint ignore) const
  */
 uint Buffer::waitForUNSAFE(uint elements) const
 {
-	if(MESSAGES) qDebug("Waiting for %d elements...", elements);
+	if (MESSAGES) qDebug("Waiting for %d elements...", elements);
 	int nextPlunger = -1;
-	while(!trapdoorUNSAFE())
+	while (!trapdoorUNSAFE())
 	{
-		if(nextPlunger == -1) nextPlunger = nextPlungerUNSAFE();
-		if(nextPlunger < signed(elements) && nextPlunger != -1)
-		{	if(MESSAGES) qDebug("Too close. Exiting...");
+		if (nextPlunger == -1) nextPlunger = nextPlungerUNSAFE();
+		if (nextPlunger < signed(elements) && nextPlunger != -1)
+		{	if (MESSAGES) qDebug("Too close. Exiting...");
 			return nextPlunger;
 		}
-		if(theUsed >= elements) return elements;
+		if (theUsed >= elements) return elements;
 		theDataIn.wait(&theDataFlux);
 	}
 	return Undefined;
@@ -286,18 +286,18 @@ uint Buffer::waitForUNSAFE(uint elements) const
 
 uint Buffer::waitForUNSAFE(uint elements, const BufferReader *reader) const
 {
-	if(MESSAGES) qDebug("Waiting for %d elements...", elements);
+	if (MESSAGES) qDebug("Waiting for %d elements...", elements);
 	int nextPlunger = -1;
-	while(!trapdoorUNSAFE())
+	while (!trapdoorUNSAFE())
 	{
-		if(nextPlunger == -1)
+		if (nextPlunger == -1)
 			nextPlunger = nextPlungerUNSAFE(reader->readPos, reader->theAlreadyPlungedHere);
 
-		if(nextPlunger < signed(elements) && nextPlunger != -1)
-		{	if(MESSAGES) qDebug("Too close. Exiting...");
+		if (nextPlunger < signed(elements) && nextPlunger != -1)
+		{	if (MESSAGES) qDebug("Too close. Exiting...");
 			return nextPlunger;
 		}
-		if(reader->theUsed >= elements) return elements;
+		if (reader->theUsed >= elements) return elements;
 
 		theDataIn.wait(&theDataFlux);
 	}
@@ -306,9 +306,9 @@ uint Buffer::waitForUNSAFE(uint elements, const BufferReader *reader) const
 
 uint Buffer::waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *reader) const
 {
-	if(MESSAGES) qDebug("Waiting for %d elements, ignoring plungers...", elements);
-	while(!trapdoorUNSAFE())
-	{	if(reader->theUsed >= elements) return elements;
+	if (MESSAGES) qDebug("Waiting for %d elements, ignoring plungers...", elements);
+	while (!trapdoorUNSAFE())
+	{	if (reader->theUsed >= elements) return elements;
 		theDataIn.wait(&theDataFlux);
 	}
 	return Undefined;
@@ -316,87 +316,87 @@ uint Buffer::waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *read
 
 uint Buffer::elementsFree() const
 {
-	if(MESSAGES) qDebug("= elementsFree");
+	if (MESSAGES) qDebug("= elementsFree");
 	QMutexLocker lock(&theDataFlux);
 	return theSize - theUsed;
 }
 
 void Buffer::waitForFreeUNSAFE(uint elements) const
 {
-	if(MESSAGES) qDebug("> waitForFreeUNSAFE(%d): size: %d, used: %d", elements, theSize, theUsed);
-	while(theSize - theUsed < elements && !trapdoorUNSAFE())
+	if (MESSAGES) qDebug("> waitForFreeUNSAFE(%d): size: %d, used: %d", elements, theSize, theUsed);
+	while (theSize - theUsed < elements && !trapdoorUNSAFE())
 		theDataOut.wait(&theDataFlux);
-	if(MESSAGES) qDebug("< waitForFreeUNSAFE(%d)", elements);
+	if (MESSAGES) qDebug("< waitForFreeUNSAFE(%d)", elements);
 }
 
 void Buffer::waitForFreeElements(uint elements) const
 {
-	if(MESSAGES) qDebug("= waitForFreeElements");
+	if (MESSAGES) qDebug("= waitForFreeElements");
 	QMutexLocker lock(&theDataFlux);
 	return waitForFreeUNSAFE(elements);
 }
 
 BufferData Buffer::makeScratchElements(uint elements, bool autoPush)
 {
-	if(MESSAGES) qDebug("> makeScratchElements");
+	if (MESSAGES) qDebug("> makeScratchElements");
 	QMutexLocker lock(&theDataFlux);
-	if(MESSAGES) qDebug("* makeScratchElements (elements: %d)", elements);
+	if (MESSAGES) qDebug("* makeScratchElements (elements: %d)", elements);
 #ifdef EDEBUG
-	if(elements >= size())
+	if (elements >= size())
 		qWarning("*** WARNING: makeScratchElements(): Size of buffer is critically low (size: %d,\n"
 				 "             elements: %d). Make use of Processor::specifyOutputSpace().", theSize, elements);
 #endif
 	waitForFreeUNSAFE(elements);
-	if(trapdoorUNSAFE())
-	{	if(MESSAGES) qDebug("< makeScratchElements Q");
+	if (trapdoorUNSAFE())
+	{	if (MESSAGES) qDebug("< makeScratchElements Q");
 		return BufferData();
 	}
-	if(lastScratch->isReferenced())
+	if (lastScratch->isReferenced())
 	{	qWarning("*** WARNING: An old BufferData object for writing from this object still exists\n"
 				 "             on a further read. They should be nullified first with nullify().\n"
 				 "             Trying damage limitation, though this is dangerous. Assuming that you\n"
 				 "             want the write ignored.");
 		// There's still another BufferData floating around. We'll just jettison it.
-		if(MESSAGES) qDebug("Jettisoning old scratch: %p", lastScratch);
+		if (MESSAGES) qDebug("Jettisoning old scratch: %p", lastScratch);
 		lastScratch->jettison();
 		lastScratch = new BufferInfo(theData, this, theMask, BufferInfo::Foreign, BufferInfo::Write);
-		if(MESSAGES) qDebug("Creating new scratch due to jettison: %p", lastScratch);
+		if (MESSAGES) qDebug("Creating new scratch due to jettison: %p", lastScratch);
 		lastScratch->thePlunger = false;
 	}
-	if(MESSAGES) qDebug("Configuring BufferInfo (lastScratch)...");
+	if (MESSAGES) qDebug("Configuring BufferInfo (lastScratch)...");
 	lastScratch->theValid = true;
 	lastScratch->theAccessibleSize = elements;
 	lastScratch->theEndType = autoPush ? BufferInfo::Activate : BufferInfo::Forget;
 	lastScratch->theScope = theType->scope();
 	lastScratch->theValid = true;
 
-	if(MESSAGES) qDebug("< Creating BufferData...");
+	if (MESSAGES) qDebug("< Creating BufferData...");
 	return BufferData(lastScratch, writePos);
 }
 
 void Buffer::pushScratch(const BufferData &data)
 {
-	if(MESSAGES) qDebug("> pushScratch");
+	if (MESSAGES) qDebug("> pushScratch");
 	QMutexLocker lock(&theDataFlux);
-	if(MESSAGES) qDebug("* pushScratch");
+	if (MESSAGES) qDebug("* pushScratch");
 	//TODO: change to Fatal.
 	assert(data.info() == lastScratch);
 	lastScratch->invalidateAndIgnore();
 
 	writePos = (writePos + lastScratch->theAccessibleSize) & theMask;
 	theUsed += lastScratch->theAccessibleSize;
-	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
+	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
 		(*i)->theUsed += lastScratch->theAccessibleSize;
 
 	theDataIn.wakeAll();
-	if(MESSAGES) qDebug("< pushScratch");
+	if (MESSAGES) qDebug("< pushScratch");
 }
 
 void Buffer::forgetScratch(const BufferData &data)
 {
 	QMutexLocker lock(&theDataFlux);
 
-	if(data.info() != lastScratch)
+	if (data.info() != lastScratch)
 	{	qFatal("*** FATAL: forgetScratch called on object whose info is not owned by this.\n"
 			   "           We own %p, given %p. It's aux is %p. We are %p", lastScratch, data.info(), data.info()->theAux, this);
 	}
@@ -405,17 +405,17 @@ void Buffer::forgetScratch(const BufferData &data)
 
 void Buffer::pushData(const BufferData &data)
 {
-	if(MESSAGES) qDebug("> pushData");
+	if (MESSAGES) qDebug("> pushData");
 	QMutexLocker lock(&theDataFlux);
 #ifdef EDEBUG
-	if(data.theInfo->theAccessibleSize >= size())
+	if (data.theInfo->theAccessibleSize >= size())
 		qWarning("*** WARNING: pushData(): Size of buffer is critically low (size: %d,\n"
 				 "             data.size: %d). Make use of Processor::specifyOutputSpace().", theSize, data.theInfo->theAccessibleSize);
 #endif
-	if(MESSAGES) qDebug("* pushData");
+	if (MESSAGES) qDebug("* pushData");
 	waitForFreeUNSAFE(data.theVisibleSize);
-	if(trapdoorUNSAFE()) return;
-	if(lastScratch->isReferenced())
+	if (trapdoorUNSAFE()) return;
+	if (lastScratch->isReferenced())
 	{
 #ifdef EDEBUG
 		qWarning("*** WARNING: An old and unsafe BufferData scatch object is left having used\n"
@@ -429,11 +429,11 @@ void Buffer::pushData(const BufferData &data)
 		lastScratch->invalidateAndIgnore();
 	}
 
-	if(writePos + data.theVisibleSize > theSize)
+	if (writePos + data.theVisibleSize > theSize)
 	{	uint sizeFirstPart = theSize - writePos, sizeSecondPart = data.theVisibleSize - (theSize - writePos);
 		float *firstPart = theData + writePos, *secondPart = theData;
-		if(data.rollsOver())
-			if(sizeFirstPart > data.sizeFirstPart())
+		if (data.rollsOver())
+			if (sizeFirstPart > data.sizeFirstPart())
 			{	memcpy(firstPart, data.firstPart(), data.sizeFirstPart() * 4);
 				memcpy(firstPart + data.sizeFirstPart(), data.secondPart(), (sizeFirstPart - data.sizeFirstPart()) * 4);
 				memcpy(secondPart, data.secondPart() + sizeFirstPart - data.sizeFirstPart(), sizeSecondPart * 4);
@@ -449,7 +449,7 @@ void Buffer::pushData(const BufferData &data)
 		}
 	}
 	else
-		if(data.rollsOver())
+		if (data.rollsOver())
 		{	memcpy(theData + writePos, data.firstPart(), data.sizeFirstPart() * 4);
 			memcpy(theData + writePos + data.sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
 		}
@@ -457,16 +457,16 @@ void Buffer::pushData(const BufferData &data)
 			memcpy(theData + writePos, data.theInfo->theData + data.theOffset, data.theVisibleSize * 4);
 	writePos = (writePos + data.theVisibleSize) & theMask;
 	theUsed += data.theVisibleSize;
-	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
+	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
 		(*i)->theUsed += data.theVisibleSize;
 	theDataIn.wakeAll();
-	if(MESSAGES) qDebug("< pushData");
+	if (MESSAGES) qDebug("< pushData");
 }
 
 void Buffer::push(const BufferData &data)
 {
-	if(data.info()->theValid)
-		if(data.info() == lastScratch)
+	if (data.info()->theValid)
+		if (data.info() == lastScratch)
 			pushScratch(data);
 		else
 			pushData(data);
@@ -480,10 +480,10 @@ void Buffer::push(const BufferData &data)
 
 void Buffer::clear()
 {
-	if(MESSAGES) qDebug("> clear");
+	if (MESSAGES) qDebug("> clear");
 	QMutexLocker lock(&theDataFlux);
-	if(MESSAGES) qDebug("* clear");
-	if(lastScratch->isReferenced())
+	if (MESSAGES) qDebug("* clear");
+	if (lastScratch->isReferenced())
 	{
 #ifdef EDEBUG
 		qWarning("*** WARNING: An old and unsafe BufferData scatch object is left having cleared\n"
@@ -494,12 +494,12 @@ void Buffer::clear()
 	writePos = 0;
 	readPos = 0;
 	theUsed = 0;
-	for(uint i = 0; i < theSize; i++) theData[i] = i + 0.667;
-	for(Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
+	for (uint i = 0; i < theSize; i++) theData[i] = i + 0.667;
+	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
 		(*i)->clearUNSAFE();
 	thePlungers.clear();
 	theDataOut.wakeAll();
-	if(MESSAGES) qDebug("< clear");
+	if (MESSAGES) qDebug("< clear");
 }
 
 void Buffer::setType(const SignalType *type)

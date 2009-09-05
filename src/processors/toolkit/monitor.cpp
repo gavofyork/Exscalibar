@@ -37,7 +37,7 @@ void Monitor::processor()
 {
 	theTimer.start();
 	theTotalSamples = 0;
-	while(thereIsInputForProcessing(1))
+	while (thereIsInputForProcessing(1))
 	{
 		BufferData d = input(0).readSamples();
 		theTotalSamples += d.samples();
@@ -47,7 +47,7 @@ void Monitor::processor()
 
 void Monitor::receivedPlunger()
 {
-	if(MESSAGES) qDebug("Monitor::receivedPlunger()");
+	if (MESSAGES) qDebug("Monitor::receivedPlunger()");
 	QMutexLocker lock(&thePlunging);
 	thePlungersCaught++;
 	thePlunge.wakeAll();
@@ -57,16 +57,16 @@ void Monitor::receivedPlunger()
 void Monitor::resetPlungerMemory()
 {
 	QMutexLocker lock(&thePlunging);
-	if(MESSAGES) qDebug("Monitor::resetPlunger(): Reseting (from %d)...", thePlungersCaught);
+	if (MESSAGES) qDebug("Monitor::resetPlunger(): Reseting (from %d)...", thePlungersCaught);
 	thePlungersCaught = 0;
 }
 
 void Monitor::waitForPlunger()
 {
-	if(MESSAGES) qDebug("Monitor::waitForPlunger(): Waiting for plunger...");
+	if (MESSAGES) qDebug("Monitor::waitForPlunger(): Waiting for plunger...");
 	QMutexLocker lock(&thePlunging);
-	while(!thePlungersCaught) thePlunge.wait(&thePlunging);
-	if(MESSAGES) qDebug("Monitor::waitForPlunger(): Done. Caught: %d", thePlungersCaught);
+	while (!thePlungersCaught) thePlunge.wait(&thePlunging);
+	if (MESSAGES) qDebug("Monitor::waitForPlunger(): Done. Caught: %d", thePlungersCaught);
 	thePlungersCaught--;
 	thePlunge.wakeAll();
 }

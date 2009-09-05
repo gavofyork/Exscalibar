@@ -61,7 +61,7 @@ void FFT::initFromProperties(const Properties &p)
 	theOut = (float *)fftwf_malloc(sizeof(float) * theSize);
 	thePlan = fftwf_plan_r2r_1d(theSize, theIn, theOut, FFTW_R2HC, p["Optimise"].toBool() ? FFTW_MEASURE : FFTW_ESTIMATE);
 	theWindow = new float[theSize];
-	for(int i = 0; i < theSize; ++i)
+	for (int i = 0; i < theSize; ++i)
 	{
 		theWindow[i] = .5f * (1.f - cos(2.f * PI * float(i) / float(theSize - 1)));
 	}
@@ -77,14 +77,14 @@ FFT::~FFT()
 
 void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for(int i = 0; i < theSize; i++)
+	for (int i = 0; i < theSize; i++)
 	{	theIn[i] = in[0][i] * theWindow[i];
 	}
 	
 	fftwf_execute(thePlan);
 	
 	out[0][0] = theOut[0] / float(theSize / 2);
-	for(int i = 1; i < theSize / 2; i++)
+	for (int i = 1; i < theSize / 2; i++)
 	{
 		out[0][i] = sqrt(theOut[i] * theOut[i] + theOut[theSize - i] * theOut[theSize - i]) / float(theSize / 2);
 	}
@@ -116,7 +116,7 @@ public:
 int reverseBits(uint initial, uint logSize)
 {
 	uint reversed = 0;
-	for(uint loop = 0; loop < logSize; loop++)
+	for (uint loop = 0; loop < logSize; loop++)
 	{
 		reversed <<= 1;
 		reversed += (initial & 1);
@@ -143,21 +143,21 @@ FFT::~FFT()
 
 void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for(uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < theSize; i++)
 	{	real[i] = in[0][bitReverse[i] & theSizeMask];
 		imag[i] = 0;
 	}
 	uint exchanges = 1, factfact = theSize / 2;
 	float fact_real, fact_imag, tmp_real, tmp_imag;
 
-	for(uint i = theLogSize; i != 0; i--)
+	for (uint i = theLogSize; i != 0; i--)
 	{
-		for(uint j = 0; j != exchanges; j++)
+		for (uint j = 0; j != exchanges; j++)
 		{
 			fact_real = costable[j * factfact];
 			fact_imag = sintable[j * factfact];
 
-			for(uint k = j; k < theSize; k += exchanges << 1)
+			for (uint k = j; k < theSize; k += exchanges << 1)
 			{
 				int k1 = k + exchanges;
 				tmp_real = fact_real * real[k1] - fact_imag * imag[k1];
@@ -175,7 +175,7 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 	float theMagnitude = (theSize / 2);
 	theMagnitude *= theMagnitude;
 
-	for(uint i = 0; i < theSize / 2; i++)
+	for (uint i = 0; i < theSize / 2; i++)
 		out[0][i] = ((real[i] * real[i]) + (imag[i] * imag[i])) / theMagnitude;
 	out[0][0] /= 4;
 }
@@ -185,7 +185,7 @@ void FFT::initFromProperties(const Properties &properties)
 	theLogSize = int(floor(log(double(properties["Size"].toInt())) / log(2.0)));
 	theStep = properties["Step"].toInt();
 	theSize = 1 << theLogSize;
-	if(theSize != (uint)properties["Size"].toInt())
+	if (theSize != (uint)properties["Size"].toInt())
 		qDebug("*** WARNING: Using simple FFT as FFTW not found. Can only use FFT sizes that are\n"
 		       "             powers of 2. Size truncated from %d (=2^%f) to %d (=2^%d). Fix this\n"
 		       "             by installing libfftw and recompiling the FFT subprocessor.", properties["Size"].toInt(), log(double(properties["Size"].toInt())) / log(2.0), theSize, theLogSize);
@@ -198,12 +198,12 @@ void FFT::initFromProperties(const Properties &properties)
 	delete [] bitReverse;
 	sintable = new float[theSize / 2];
 	costable = new float[theSize / 2];
-	for(uint i = 0; i < theSize / 2; i++)
+	for (uint i = 0; i < theSize / 2; i++)
 	{	costable[i] = cos(2 * PI * i / theSize);
 		sintable[i] = sin(2 * PI * i / theSize);
 	}
 	bitReverse = new uint[theSize];
-	for(uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < theSize; i++)
 		bitReverse[i] = reverseBits(i, theLogSize);
 
 	real = new float[theSize];
@@ -214,7 +214,7 @@ void FFT::initFromProperties(const Properties &properties)
 
 bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Wave>()) return false;
+	if (!inTypes[0].isA<Wave>()) return false;
 	// TODO: should output a "stepped spectrum".
 	outTypes[0] = Spectrum(theSize / 2 + 1, inTypes[0].frequency() / float(theStep), inTypes[0].frequency() / float(theSize));
 	return true;

@@ -29,15 +29,15 @@ public:
 
 void Split::processor()
 {
-	while(thereIsInputForProcessing(1))
+	while (thereIsInputForProcessing(1))
 	{	// Get our maximum amount of samples to transfer that everyone can agree on
 		uint m = input(0).samplesReady();
-		for(uint i = 0; i < numOutputs(); i++) m = min(m, output(i).maximumScratchSamples());
+		for (uint i = 0; i < numOutputs(); i++) m = min(m, output(i).maximumScratchSamples());
 		// Read them
 		BufferData d = input(0).readSamples(m);
 		// Push them
 		// TODO: allow pushing of greater than buffer-size of elements (with foreign BDs), so no maxSS() call neccessary
-		for(uint i = 0; i < numOutputs(); i++)
+		for (uint i = 0; i < numOutputs(); i++)
 			output(i).push(d);
 	}
 }

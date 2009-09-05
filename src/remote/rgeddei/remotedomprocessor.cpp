@@ -26,7 +26,7 @@ namespace rGeddei
 
 RemoteDomProcessor::RemoteDomProcessor(RemoteSession &session, const QString &type) : RemoteProcessor(session)
 {
-	if(!theSession->newDomProcessor(type, theHandle))
+	if (!theSession->newDomProcessor(type, theHandle))
 	{	qWarning("*** WARNING: RemoteProcessor: Attempt to create DomProcessor of subtype %s failed.", type.latin1());
 		return;
 	}
@@ -45,8 +45,8 @@ RemoteDomProcessor::~RemoteDomProcessor()
 
 bool RemoteDomProcessor::spawnWorker(RemoteSession &session)
 {
-	if(MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Node)");
-	if(theSession == &session)
+	if (MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Node)");
+	if (theSession == &session)
 		return theSession->domProcessorCreateAndAdd(theHandle);
 	else
 		return theSession->domProcessorCreateAndAdd(theHandle, session.theHost, session.theKey);
@@ -54,7 +54,7 @@ bool RemoteDomProcessor::spawnWorker(RemoteSession &session)
 
 bool RemoteDomProcessor::spawnWorker(LocalSession &session)
 {
-	if(MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Local)");
+	if (MESSAGES) qDebug("RemoteDomProcessor::spawnWorker(Local)");
 	return theSession->domProcessorCreateAndAdd(theHandle, session.theHost, session.thePort);
 }
 

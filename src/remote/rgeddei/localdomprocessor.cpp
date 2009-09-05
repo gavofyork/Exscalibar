@@ -44,8 +44,8 @@ LocalDomProcessor::~LocalDomProcessor()
 
 bool LocalDomProcessor::spawnWorker(LocalSession &session)
 {
-	if(MESSAGES) qDebug("LocalDomProcessor::spawnWorker(Local?)");
-	if(theSession != &session)
+	if (MESSAGES) qDebug("LocalDomProcessor::spawnWorker(Local?)");
+	if (theSession != &session)
 		return dynamic_cast<DomProcessor *>(theProcessor)->createAndAddWorker(session.theHost, session.thePort);
 	else
 		return dynamic_cast<DomProcessor *>(theProcessor)->createAndAddWorker();
@@ -53,7 +53,7 @@ bool LocalDomProcessor::spawnWorker(LocalSession &session)
 
 bool LocalDomProcessor::spawnWorker(RemoteSession &session)
 {
-	if(MESSAGES) qDebug("LocalDomProcessor::spawnWorker(Node)");
+	if (MESSAGES) qDebug("LocalDomProcessor::spawnWorker(Node)");
 	return dynamic_cast<DomProcessor *>(theProcessor)->createAndAddWorker(session.theHost, session.theKey);
 }
 

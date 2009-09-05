@@ -37,10 +37,10 @@ public:
 
 void CrossSimilarity::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for(int i = 0; i < theCount; i++)
-		for(int ii = 0; ii < theCount; ii++)
+	for (int i = 0; i < theCount; i++)
+		for (int ii = 0; ii < theCount; ii++)
 		{	out[0][i * theCount + ii] = 0.;
-			for(int j = 0; j < theScope; j++)
+			for (int j = 0; j < theScope; j++)
 				out[0][i * theCount + ii] += (1. - abs(in[i][j] - in[ii][j])) / float(theScope);
 		}
 }

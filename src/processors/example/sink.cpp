@@ -30,7 +30,7 @@ public:
 
 void SignalSink::processor()
 {
-	while(thereIsInputForProcessing())
+	while (thereIsInputForProcessing())
 		input(0).readSamples();
 }
 

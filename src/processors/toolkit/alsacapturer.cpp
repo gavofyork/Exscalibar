@@ -88,7 +88,7 @@ void ALSACapturer::processor()
 		return;
 	}
 	exact_rate = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &rate, &dir);
-	if(exact_rate != rate)
+	if (exact_rate != rate)
 	{
 		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n"
 						"==> Using %d Hz instead.\n", rate, exact_rate);
@@ -115,13 +115,13 @@ void ALSACapturer::processor()
 	}
 
 	uint capdata[periodsize * 8];
-	while(true)
+	while (true)
 	{
 		int pcmreturn;
 		if ((pcmreturn = snd_pcm_readi(pcm_handle, capdata, periodsize << 2)) > 0)
 		{
 			BufferData d0 = output(0).makeScratchSamples(pcmreturn), d1 = output(1).makeScratchSamples(pcmreturn);
-			for(int i = 0; i < pcmreturn; i++)
+			for (int i = 0; i < pcmreturn; i++)
 			{	d0[i] = float(capdata[i]) / 32768.0;
 				d1[i] = float(capdata[i + pcmreturn]) / 32768.0;
 			}
@@ -135,4 +135,3 @@ void ALSACapturer::processor()
 EXPORT_CLASS(ALSACapturer, 0,1,0, Processor);
 
 #endif
-

@@ -42,15 +42,15 @@ void WaveGen::processor()
 {
 	float phase = 0;
 	int chunksLeft = 0, hadChunks = 0;
-	while(!theStopAfterChunks || theStopAfterChunks > hadChunks)
+	while (!theStopAfterChunks || theStopAfterChunks > hadChunks)
 	{
 		BufferData d = output(0).makeScratchSamples(theChunk);
-		for(int i = 0; i < theChunk; i++)
+		for (int i = 0; i < theChunk; i++)
 			d[i] = sin(2.0 * 3.14159265898 * (float(i) * theFrequency / theRate + phase));
 		output(0) << d;
 		phase += float(theChunk) * theFrequency / theRate;
-		if(phase > 1.0) phase -= 1.0;
-		if(theChunksPerPlunge && ++chunksLeft == theChunksPerPlunge)
+		if (phase > 1.0) phase -= 1.0;
+		if (theChunksPerPlunge && ++chunksLeft == theChunksPerPlunge)
 		{	plunge();
 			chunksLeft = 0;
 		}
@@ -76,11 +76,11 @@ void WaveGen::initFromProperties(const Properties &properties)
 	theRate = properties.get("Sample Rate").toDouble();
 	double pps = properties.get("PlungersPerSecond").toDouble();
 	int spc = properties.get("SamplesPerChunk").toInt();
-	if(pps > 0. && properties.get("ChunksPerPlunger").toInt())
+	if (pps > 0. && properties.get("ChunksPerPlunger").toInt())
 	{	theChunksPerPlunge = properties.get("ChunksPerPlunger").toInt();
 		theChunk = int(theRate / (pps * theChunksPerPlunge));
 	}
-	else if(spc)
+	else if (spc)
 		theChunk = spc;
 	else
 		theChunk = int(theRate / 2.);

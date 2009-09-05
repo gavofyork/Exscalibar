@@ -36,12 +36,12 @@ public:
 
 void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
-	for(uint c = 0; c < chunks; c++)
-		for(uint j = 0; j < theSize; j++)
+	for (uint c = 0; c < chunks; c++)
+		for (uint j = 0; j < theSize; j++)
 			outs[0](c, j) = 0.;
-	for(uint i = 0; i < multiplicity(); i++)
-		for(uint c = 0; c < chunks; c++)
-			for(uint j = 0; j < theSize; j++)
+	for (uint i = 0; i < multiplicity(); i++)
+		for (uint c = 0; c < chunks; c++)
+			for (uint j = 0; j < theSize; j++)
 				outs[0](c, j) += ins[i](c, j) / float(multiplicity());
 }
 

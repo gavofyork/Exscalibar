@@ -54,14 +54,14 @@ class NodeServerSession: public QThread
 public:
 	NodeServerSession(int socket, NodeServer *server, SessionServer *session): theSource(new Q3SocketDevice(socket, Q3SocketDevice::Stream)), theSession(session), theServer(server)
 	{
-		if(MESSAGES) qDebug("Creating session %p.", this);
+		if (MESSAGES) qDebug("Creating session %p.", this);
 		theSource.handshake(false);
 		start();
 	}
 	
 	~NodeServerSession()
 	{
-		if(MESSAGES) qDebug("Destroying session %p.", this);
+		if (MESSAGES) qDebug("Destroying session %p.", this);
 	}
 };
 
@@ -80,23 +80,23 @@ public:
 
 void NodeServerSession::run()
 {
-	if(MESSAGES) qDebug("> NSS::run(): isOpen() = %d", theSource.isOpen());
+	if (MESSAGES) qDebug("> NSS::run(): isOpen() = %d", theSource.isOpen());
 	
-	if(MESSAGES) qDebug("Sending key %d...", theSession->sessionKey());
+	if (MESSAGES) qDebug("Sending key %d...", theSession->sessionKey());
 	// Send the session id
 	theSource.safeSendWord(theSession->sessionKey());
 	
-	if(MESSAGES) qDebug("Started session.");
-	while(theSource.isOpen())
+	if (MESSAGES) qDebug("Started session.");
+	while (theSource.isOpen())
 	{
-		if(MESSAGES) qDebug("= NSS::run(): Receiving...");
+		if (MESSAGES) qDebug("= NSS::run(): Receiving...");
 		uchar command = theSource.receiveByte();
 	
-		if(MESSAGES) qDebug("= NSS::run(): Command attained. isOpen() = %d", theSource.isOpen());
-		if(!theSource.isOpen()) break;
+		if (MESSAGES) qDebug("= NSS::run(): Command attained. isOpen() = %d", theSource.isOpen());
+		if (!theSource.isOpen()) break;
 	
-		if(MESSAGES) qDebug("= NSS::run(): command = %d", (int)command);
-		switch(command)
+		if (MESSAGES) qDebug("= NSS::run(): command = %d", (int)command);
+		switch (command)
 		{
 		case Nop:
 			theSession->keepAlive();
@@ -106,7 +106,7 @@ void NodeServerSession::run()
 		{
 			QString type = theSource.receiveString();
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Creating Processor %s of type %s", name.latin1(), type.latin1());
+			if (MESSAGES) qDebug("Creating Processor %s of type %s", name.latin1(), type.latin1());
 			bool ret;
 			bool ack = theSession->newProcessor(type, name, ret);
 			theSource.ack(ret);
@@ -116,7 +116,7 @@ void NodeServerSession::run()
 		case DeleteProcessor:
 		{
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Deleting Processor %s", name.latin1());
+			if (MESSAGES) qDebug("Deleting Processor %s", name.latin1());
 			theSource.ack(theSession->deleteProcessor(name));
 			break;
 		}
@@ -124,7 +124,7 @@ void NodeServerSession::run()
 		{
 			QString type = theSource.receiveString();
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Creating DomProcessor %s of SubProcessor type %s", name.latin1(), type.latin1());
+			if (MESSAGES) qDebug("Creating DomProcessor %s of SubProcessor type %s", name.latin1(), type.latin1());
 			bool ret;
 			bool ack = theSession->newDomProcessor(type, name, ret);
 			theSource.ack(ret);
@@ -134,7 +134,7 @@ void NodeServerSession::run()
 		case DeleteDomProcessor:
 		{
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Destroying DomProcessor %s", name.latin1());
+			if (MESSAGES) qDebug("Destroying DomProcessor %s", name.latin1());
 			theSource.ack(theSession->deleteDomProcessor(name));
 			break;
 		}
@@ -150,7 +150,7 @@ void NodeServerSession::run()
 		case ProcessorGo:
 		{
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Starting Processor %s", name.latin1());
+			if (MESSAGES) qDebug("Starting Processor %s", name.latin1());
 			bool ret;
 			bool ack = theSession->processorGo(name, ret);
 			theSource.ack(ret);
@@ -188,12 +188,12 @@ void NodeServerSession::run()
 		case ProcessorConnectL:
 		{
 			QString name = theSource.receiveString();
-			if(MESSAGES) qDebug("Local Connecting Processor %s", name.latin1());
+			if (MESSAGES) qDebug("Local Connecting Processor %s", name.latin1());
 			int bufferSize = theSource.safeReceiveWord<int>();
 			int output = theSource.safeReceiveWord<int>();
 			QString destName = theSource.receiveString();
 			int destInput = theSource.safeReceiveWord<int>();
-			if(MESSAGES) qDebug("Connecting from %s:%d to %s:%d (size:%d)", name.latin1(), output, destName.latin1(), destInput, bufferSize);
+			if (MESSAGES) qDebug("Connecting from %s:%d to %s:%d (size:%d)", name.latin1(), output, destName.latin1(), destInput, bufferSize);
 			bool ret;
 			bool ack = theSession->processorConnectLocal(name, bufferSize, output, destName, destInput, ret);
 			theSource.ack(ret);
@@ -304,18 +304,18 @@ void NodeServerSession::run()
 			break;
 		}
 	}
-	if(MESSAGES) qDebug("Session closed. Exiting...");
+	if (MESSAGES) qDebug("Session closed. Exiting...");
 	SessionServer::safeDelete(theSession->sessionKey());
 	theCleaner.deleteObject(this);
 }
 
 void NodeServer::newConnection(int socket)
 {
-	if(MESSAGES) qDebug("Got new connection on socket %d - Creating server", socket);
+	if (MESSAGES) qDebug("Got new connection on socket %d - Creating server", socket);
 	SessionServer *s = new SessionServer;
-	if(MESSAGES) qDebug("OK. Putting it into object");
+	if (MESSAGES) qDebug("OK. Putting it into object");
 	new NodeServerSession(socket, this, s);
-	if(MESSAGES) qDebug("All sorted.");
+	if (MESSAGES) qDebug("All sorted.");
 }
 
 int main(int argc, char **argv)
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
 #ifdef Q_WS_X11
 	struct rlimit s;
 	getrlimit(RLIMIT_NOFILE, &s);
-	if(s.rlim_cur < 1024)
+	if (s.rlim_cur < 1024)
 		qWarning("*** WARNING: Your system resource limit for open files is low. This"
 				 "             means that class Geddei will only be able to have roughly %d network"
 				 "             connections in total (for all users). If more are needed, then"
@@ -332,10 +332,10 @@ int main(int argc, char **argv)
 #endif
 	uint rGPort = RGEDDEI_PORT, GPort = GEDDEI_PORT;
 	
-	for(int i = 1; i < argc; i++)
-		if((QString(argv[i]) == "--geddei-port" || QString(argv[i]) == "-p") && (i + 1) < argc)
+	for (int i = 1; i < argc; i++)
+		if ((QString(argv[i]) == "--geddei-port" || QString(argv[i]) == "-p") && (i + 1) < argc)
 			GPort = QString(argv[++i]).toInt();
-		else if((QString(argv[i]) == "--rgeddei-port" || QString(argv[i]) == "-P") && (i + 1) < argc)
+		else if ((QString(argv[i]) == "--rgeddei-port" || QString(argv[i]) == "-P") && (i + 1) < argc)
 			rGPort = QString(argv[++i]).toInt();
 		else
 		{	std::cout << "Usage: nodeserver [(-p|--geddei-port) <port>] [(-P|--rgeddei-port) <port>]" << std::endl;

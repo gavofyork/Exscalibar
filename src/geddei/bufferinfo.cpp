@@ -37,18 +37,18 @@ void BufferInfo::reference()
 
 void BufferInfo::unreference(BufferData &client)
 {
-	if(--theCounter == 0)
+	if (--theCounter == 0)
 		destruct(client);
 }
 
 void BufferInfo::retire(BufferData &client)
 {
-	if(theAux && theValid)
-	{	if(theEndType == Forget)
-		{	if(MESSAGES) qDebug("BufferInfo[%p]: Autoforgetting with %p.", this, theAux);
+	if (theAux && theValid)
+	{	if (theEndType == Forget)
+		{	if (MESSAGES) qDebug("BufferInfo[%p]: Autoforgetting with %p.", this, theAux);
 			theAux->forget(client);
 		}
-		else if(theEndType == Activate)
+		else if (theEndType == Activate)
 			theAux->activate(client);
 	}
 }
@@ -57,10 +57,10 @@ void BufferInfo::destruct(BufferData &client)
 {
 	retire(client);
 
-	if(theLife == Managed)
+	if (theLife == Managed)
 		delete [] theData;
 	
-	if(!theResident)
+	if (!theResident)
 		delete this;
 }
 

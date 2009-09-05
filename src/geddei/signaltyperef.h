@@ -111,7 +111,7 @@ public:
 	const T &asA() const
 	{
 #ifdef EDEBUG
-		if(!isA<T>())
+		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a SignalType %s from an object of type %s.\n"
 			       "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
 #endif
@@ -130,7 +130,7 @@ public:
 	T &asA()
 	{
 #ifdef EDEBUG
-		if(!isA<T>())
+		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a SignalType %s from an object of type %s.\n"
 			       "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
 #endif

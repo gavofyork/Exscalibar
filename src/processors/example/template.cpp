@@ -40,7 +40,7 @@ public:
 void Template::processor()
 {
 	// TODO: Initialisations.
-	while(guard())
+	while (guard())
 	{
 		// TODO: Main loop.
 	}

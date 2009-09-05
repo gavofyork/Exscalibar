@@ -17,13 +17,13 @@ namespace Geddei
 
 Properties::Properties(const PropertiesInfo &info)
 {
-	for(QMap<QString, QVariant>::ConstIterator i = info.theData.begin(); i != info.theData.end(); i++)
+	for (QMap<QString, QVariant>::ConstIterator i = info.theData.begin(); i != info.theData.end(); i++)
 		theData[i.key()] = i.data();
 }
 
 void Properties::set(const Properties &pairs)
 {
-	for(QMap<QString, QVariant>::ConstIterator i = pairs.theData.begin(); i != pairs.theData.end(); i++)
+	for (QMap<QString, QVariant>::ConstIterator i = pairs.theData.begin(); i != pairs.theData.end(); i++)
 		theData[i.key()] = i.data();
 }
 
@@ -58,7 +58,7 @@ void Properties::deserialise(QByteArray &data)
 
 const QString PropertiesInfo::description(const QString &key) const
 {
-	if(!theInfo.contains(key))
+	if (!theInfo.contains(key))
 		return "";
 	return theInfo[key].description;
 }

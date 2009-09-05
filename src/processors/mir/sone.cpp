@@ -35,7 +35,7 @@ public:
 
 void Terhardt::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < ins[0].elements(); i++)
+	for (uint i = 0; i < ins[0].elements(); i++)
 	{
 		outs[0][i] = ins[0][i] * theMult[i];
 	}
@@ -44,12 +44,12 @@ void Terhardt::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 bool Terhardt::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &in = inTypes[0].asA<Spectrum>();
 	outTypes = inTypes;
 	delete [] theMult;
 	theMult = new float[in.scope()];
-	for(uint i = 0; i < in.scope(); i++)
+	for (uint i = 0; i < in.scope(); i++)
 	{
 		float f = in.bandFrequency(i);
 		float Adb = -3.64f * pow(f * 0.001f, -0.8f) + 6.5f * exp(-0.6 * pow(0.001f * f - 3.3f, 2.f)) - .001f * pow(.001f * f, 4.f);
@@ -77,12 +77,12 @@ public:
 
 void Sone::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < ins[0].elements(); i++)
+	for (uint i = 0; i < ins[0].elements(); i++)
 	{
 		// outs[0][i] => dB below max.
 		// assume -90dB is SPL
 		float dBSPL = 10.f * log10(ins[0][i]) + 90.f;
-		if(dBSPL < 0.f) dBSPL = 0.f;
+		if (dBSPL < 0.f) dBSPL = 0.f;
 		outs[0][i] = dBSPL > 40.f ? pow(2.f, (dBSPL - 40.f) / 10.f) : pow(dBSPL / 40.f, 2.642f);
 	}
 }
@@ -90,7 +90,7 @@ void Sone::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 //	const Spectrum &in = inTypes[0].asA<Spectrum>();
 	outTypes = inTypes;
 	return true;
@@ -165,7 +165,7 @@ void Histogram::initFromProperties(const Properties &p)
 
 bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	theColumns = inTypes[0].scope();
 	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].frequency() / theStep, 0, 0);
 	theCount = uint(thePeriod * inTypes[0].frequency());
@@ -174,7 +174,7 @@ bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeR
 	
 	delete [] theWindow;
 	theWindow = new float[theCount];
-	for(uint i = 0; i < theCount; ++i)
+	for (uint i = 0; i < theCount; ++i)
 	{
 		theWindow[i] = 1.f;//.5f * (1.f - cos(2.f * M_PI * float(i) / float(theCount - 1)));
 	}
@@ -185,20 +185,20 @@ bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeR
 void Histogram::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
 	float mout = 0.f;
-	for(uint i = 0; i < theColumns * theRows; ++i)
+	for (uint i = 0; i < theColumns * theRows; ++i)
 		out[0][i] = 0.f;
-	for(uint s = 0; s < theCount; ++s)
-	{	for(uint c = 0; c < theColumns; ++c)
-		{	for(uint r = 0; float(r + 1) / float(theRows) < in[0](s, c) * theWindow[s]; ++r)
+	for (uint s = 0; s < theCount; ++s)
+	{	for (uint c = 0; c < theColumns; ++c)
+		{	for (uint r = 0; float(r + 1) / float(theRows) < in[0](s, c) * theWindow[s]; ++r)
 			{
 				out[0][r + c * theRows] += 1.f;
 				mout = max(mout, out[0][r + c * theRows]);
 			}
 		}
 	}
-	if(mout > 0.f)
-		for(uint c = 0; c < theColumns; ++c)
-			for(uint r = 0; r < theRows; ++r)
+	if (mout > 0.f)
+		for (uint c = 0; c < theColumns; ++c)
+			for (uint r = 0; r < theRows; ++r)
 				out[0][r + c * theRows] /= mout;
 }
 

@@ -73,12 +73,12 @@ void Normalise::processor()
 {
 	f.clear();
 	float last = 0.f;
-	while(thereIsInputForProcessing(1))
+	while (thereIsInputForProcessing(1))
 	{
 		const BufferData d = input(0).readSamples();
-		for(uint i = 0; i < d.elements(); i++)
+		for (uint i = 0; i < d.elements(); i++)
 		{
-			if(isinf(d[i]) || isnan(d[i]))
+			if (isinf(d[i]) || isnan(d[i]))
 			{	qDebug("ERROR: Cannot normalise stream with nan/inf in it.");
 				f.append(last);
 			}
@@ -90,28 +90,28 @@ void Normalise::processor()
 
 void Normalise::receivedPlunger()
 {
-	if(!f.size()) return;
+	if (!f.size()) return;
 	float mini = f[0], maxi = f[0], tu = 0., tb = 0., avgu = 0., avgb = 0., delta, avg = 0.;
-	for(uint i = 1; i < (uint)f.size(); i++)
-		if(f[i] > maxi) maxi = f[i];
-		else if(f[i] < mini) mini = f[i];
+	for (uint i = 1; i < (uint)f.size(); i++)
+		if (f[i] > maxi) maxi = f[i];
+		else if (f[i] < mini) mini = f[i];
 	int t = 0;
-	for(uint i = 0; i < (uint)f.size(); i++)
-		if(f[i] != mini && f[i] != maxi)
+	for (uint i = 0; i < (uint)f.size(); i++)
+		if (f[i] != mini && f[i] != maxi)
 		{ avg += f[i] / float(f.size()); t++; }
-	for(uint i = 0; i < (uint)f.size(); i++)
-		if(f[i] != mini && f[i] != maxi)
-		{	if(f[i] > avg) { avgu += f[i]; tu++; }
+	for (uint i = 0; i < (uint)f.size(); i++)
+		if (f[i] != mini && f[i] != maxi)
+		{	if (f[i] > avg) { avgu += f[i]; tu++; }
 			else { avgb += f[i]; tb++; }
 		}
 	avgu /= float(tu);
 	avgb /= float(tb);
 	float avguu = 0., avgbb = 0.;
 	tu = 0.; tb = 0.;
-	for(uint i = 0; i < (uint)f.size(); i++)
-		if(f[i] != mini && f[i] != maxi)
-		{	if(f[i] > avgu) { avguu += f[i]; tu++; }
-			else if(f[i] < avgb) { avgbb += f[i]; tb++; }
+	for (uint i = 0; i < (uint)f.size(); i++)
+		if (f[i] != mini && f[i] != maxi)
+		{	if (f[i] > avgu) { avguu += f[i]; tu++; }
+			else if (f[i] < avgb) { avgbb += f[i]; tb++; }
 		}
 	avguu /= float(tu);
 	avgbb /= float(tb);
@@ -119,14 +119,14 @@ void Normalise::receivedPlunger()
 	maxi = min(avg + (avgu - avg) * 2.f, avguu);
 //		mini = avgbb;
 //		maxi = avguu;
-/*		for(uint i = 1; i < f.size(); i++)
-			if(f[i] > maxi && f[i] < avg * 10.) maxi = f[i];
-			else if(f[i] < mini && f[i] > avg / 10.) mini = f[i];
+/*		for (uint i = 1; i < f.size(); i++)
+			if (f[i] > maxi && f[i] < avg * 10.) maxi = f[i];
+			else if (f[i] < mini && f[i] > avg / 10.) mini = f[i];
 */
 	delta = maxi - mini;
-	if(!delta) delta = 1.;
+	if (!delta) delta = 1.;
 	BufferData d(f.size(), theScope);
-	for(uint i = 0; i < (uint)f.size(); i++)
+	for (uint i = 0; i < (uint)f.size(); i++)
 		d[i] = finite(f[i]) ? std::min(1.f, std::max(0.f, (f[i] - mini) / delta)) : 0.;
 	output(0) << d;
 	f.clear();

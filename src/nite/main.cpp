@@ -21,11 +21,17 @@
 #define __GEDDEI_BUILD
 
 #include <qapplication.h>
+#include "exscalibar.h"
 #include "geddeinite.h"
 
 int main( int argc, char ** argv )
 {
 	QApplication a( argc, argv );
+	a.setApplicationName("Exscalibar");
+	a.setApplicationVersion(EXSCALIBAR_VERSION);
+	a.setOrganizationName("Exscalibar");
+	a.setOrganizationDomain("exscalibar.com");
+
 	GeddeiNite *mw = new GeddeiNite();
 	mw->show();
 	a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );

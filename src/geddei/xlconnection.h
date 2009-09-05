@@ -276,7 +276,7 @@ public:
 	 * @return A BufferData object containing the samples read. If samples > 0
 	 * then this is guaranteed to contain exactly @a samples samples.
 	 */
-	const BufferData readSamples(uint samples = 0, bool allowZero = false) { if(!allowZero && !samples) while(!samplesReady()) plungeSync(1); return readElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
+	const BufferData readSamples(uint samples = 0, bool allowZero = false) { if (!allowZero && !samples) while (!samplesReady()) plungeSync(1); return readElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
 
 	/**
 	 * Read a second's worth of signal data from the connection. This will block
@@ -339,7 +339,7 @@ public:
 	 * @return A BufferData object containing the samples read. If samples > 0
 	 * then this is guaranteed to contain exactly @a samples samples.
 	 */
-	const BufferData peekSamples(uint samples = 0, bool allowZero = false) { if(!allowZero && !samples) while(samplesReady() < 1) plungeSync(1); return peekElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
+	const BufferData peekSamples(uint samples = 0, bool allowZero = false) { if (!allowZero && !samples) while (samplesReady() < 1) plungeSync(1); return peekElements(theType->elementsFromSamples(samples ? samples : samplesReady())); }
 
 	/**
 	 * Read a second's worth of signal data from the connection. This will

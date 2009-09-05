@@ -34,7 +34,7 @@ class JustOnes: public Processor
   // Here we specify our types, we just want a Wave output.
   virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
   // Now we specify what this processor should output. We want it to infinitely produce 1s.
-  virtual void processor() { while(true) output(0).makeScratchSamples(1, true)[0] = 1.; }
+  virtual void processor() { while (true) output(0).makeScratchSamples(1, true)[0] = 1.; }
   // And a public constructor is necessary for use.
   public: JustOnes(): Processor("JustOnes") {}
 };
@@ -60,7 +60,7 @@ class Incremental: public Processor
   // f(0) = theFirst
   // f(i | i > 0) = f(i - 1) + [readElement]
   // This is implemented in the for loop.
-  virtual void processor() { for(float last = theFirst; true; last += input(0).readSample()[0]) output(0).makeScratchSamples(1, true)[0] = last; }
+  virtual void processor() { for (float last = theFirst; true; last += input(0).readSample()[0]) output(0).makeScratchSamples(1, true)[0] = last; }
   // And a public constructor to actually use it.
   public: Incremental(): Processor("Incremental") {}
 };
@@ -76,7 +76,7 @@ class Printer: public Processor
   virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
   // Here we define the operation of this processor. We just read a sample and
   // print off the (first) value. Easy.
-  virtual void processor() { for(int i = 1; true; i++) { cout << "[" << qPrintable(name()) << "] " << i << "th element: " << input(0).readSamples(1)[0] << endl; sleep(1); } }
+  virtual void processor() { for (int i = 1; true; i++) { cout << "[" << qPrintable(name()) << "] " << i << "th element: " << input(0).readSamples(1)[0] << endl; sleep(1); } }
   // And a public constructor, as with the others.
   public: Printer(): Processor("Printer") {}
 };
@@ -85,7 +85,7 @@ int main()
 {
 	ProcessorGroup g;
 	Processor *proc = ProcessorFactory::create("Player");
-	if( !proc )
+	if ( !proc )
 	{
 		g.deleteAll();
 		return false;
@@ -101,7 +101,7 @@ int main()
 	g["F"][0] >>= g["B"][0];
 	g["B"][0] >>= g["G"][0];
 	g["G"][0] >>= g["N"][0];
-	if(g.go())
+	if (g.go())
 	{
 		qDebug("Going!");
 		cin.get();
@@ -143,7 +143,7 @@ int main()
   group["I2"][0] >>= group["P3"][0];
   // All connected - we just start them now; we use group.go(), which starts
   // all processor objects in the group at once.
-  if(!group.go(true)) qFatal("Couldn't start processors.");
+  if (!group.go(true)) qFatal("Couldn't start processors.");
   // Now we wait for the user to press enter...
   cin.get();
   // Then we stop all the processors in the group...

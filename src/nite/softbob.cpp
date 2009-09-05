@@ -40,7 +40,7 @@ SoftBob::SoftBob(int x, int y, const QString &type, const QString &name, Q3Canva
 {
 	theType = type;
 
-	if(theName == "") theName = geddeiNite()->makeUniqueName(type);
+	if (theName == "") theName = geddeiNite()->makeUniqueName(type);
 	theProcessor = ProcessorFactory::create(type);
 
 	init(x, y);
@@ -59,7 +59,7 @@ SoftBob::~SoftBob()
 void SoftBob::saveYourself(QDomElement &element, QDomDocument &doc)
 {
 	element.setAttribute("type", theType);
-	for(uint i = 0; i < theProperties.size(); i++)
+	for (uint i = 0; i < theProperties.size(); i++)
 	{	QDomElement prop = doc.createElement("property");
 		element.appendChild(prop);
 		prop.setAttribute("name", theProperties.keys()[i]);
@@ -71,10 +71,10 @@ void SoftBob::saveYourself(QDomElement &element, QDomDocument &doc)
 void SoftBob::loadYourselfPre(QDomElement &element)
 {
 	Bob::loadYourselfPre(element);
-	for(QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
+	for (QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
 	{	QDomElement property = n.toElement();
-		if(property.isNull()) continue;
-		if(property.tagName() == "property")
+		if (property.isNull()) continue;
+		if (property.tagName() == "property")
 			theProperties.set(property.attribute("name"), property.attribute("value"));
 	}
 	propertiesChanged();

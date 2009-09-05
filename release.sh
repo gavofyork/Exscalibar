@@ -20,6 +20,9 @@ find . | grep \~ | xargs rm -f
 echo Cleaning others...
 rm release.sh
 
+echo Versioning...
+rm -rf .git .gitignore
+
 echo Switching to release mode...
 perl -i -p -e "s/debug/release/g" exscalibar.pri
 

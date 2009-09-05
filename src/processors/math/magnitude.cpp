@@ -47,7 +47,7 @@ void Magnitude::initFromProperties(const Properties &)
 
 bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 {
-	if(!in[0].isA<Spectrum>()) return false;
+	if (!in[0].isA<Spectrum>()) return false;
 	out = Value(in[0].frequency());
 	return true;
 }
@@ -55,7 +55,7 @@ bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &
 void Magnitude::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
 	out[0][0] = 0.;
-	for(uint i = 0; i < in[0].elements(); i++)
+	for (uint i = 0; i < in[0].elements(); i++)
 		out[0][0] += in[0][i] * in[0][i];
 	out[0][0] = sqrt(out[0][0]);
 }

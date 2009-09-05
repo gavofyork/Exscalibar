@@ -41,10 +41,10 @@ class DLLEXPORT QFactory : private QLibrary
 
 public:
 	/** Produces one instance of the opened plugin class. returns 0 if bad. */
-	Base *createInstance(const QString &name) { if(isOpen()) if(theIds.contains(name)) return theCreators[name](); return 0; }
+	Base *createInstance(const QString &name) { if (isOpen()) if (theIds.contains(name)) return theCreators[name](); return 0; }
 
 	/** Returns a class's version. */
-	int getVersion(const QString &name) { if(isOpen()) if(theIds.contains(name)) return theVersions[name]; return -1; }
+	int getVersion(const QString &name) { if (isOpen()) if (theIds.contains(name)) return theVersions[name]; return -1; }
 
 	/** Returns the list of available class names. */
 	const QStringList &getAvailable() { return theIds; }
@@ -62,25 +62,25 @@ QFactory<Base>::QFactory(const QString &libPath) : QLibrary(libPath)
 	load();
 	QStringList provIds;
 	theIds.clear();
-	if(MESSAGES) qDebug("Retrieving available classes derived from %s...", typeid(Base).name());
-	if(resolve("getAvailable"))
+	if (MESSAGES) qDebug("Retrieving available classes derived from %s...", typeid(Base).name());
+	if (resolve("getAvailable"))
 		provIds = ((const QStringList &(*)(const QString &))(resolve("getAvailable")))(typeid(Base).name());
-	if(MESSAGES) qDebug("Found %d candidates.", provIds.count());
-	for(QStringList::const_iterator i = provIds.begin(); i != provIds.end(); i++)
-	{	if(MESSAGES) qDebug("Loading class %s (derived from %s)...", (*i).latin1(), typeid(Base).name());
+	if (MESSAGES) qDebug("Found %d candidates.", provIds.count());
+	for (QStringList::const_iterator i = provIds.begin(); i != provIds.end(); i++)
+	{	if (MESSAGES) qDebug("Loading class %s (derived from %s)...", (*i).latin1(), typeid(Base).name());
 		Base *(*creator)();
 		int version = -1;
 		creator = (Base *(*)())(resolve("create" + *i));
-		if(resolve("version" + *i))
+		if (resolve("version" + *i))
 			version = ((int (*)())(resolve("version" + *i)))();
-		if(creator && version > -1)
+		if (creator && version > -1)
 		{	theIds += *i;
 			theCreators[*i] = creator;
 			theVersions[*i] = version;
-			if(MESSAGES) qDebug("Loaded OK (Version: %d)", version);
+			if (MESSAGES) qDebug("Loaded OK (Version: %d)", version);
 		}
 	}
-	if(!theIds.size())
+	if (!theIds.size())
 		unload();
 }
 

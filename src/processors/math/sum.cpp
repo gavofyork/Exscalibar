@@ -53,7 +53,7 @@ bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &o
 void Sum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
 	outs[0][0] = 0.;
-	for(uint i = 0; i < ins[0].elements(); i++)
+	for (uint i = 0; i < ins[0].elements(); i++)
 		outs[0][0] += ins[0][i];
 }
 

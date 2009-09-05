@@ -33,13 +33,13 @@ class Similarity : public Processor
 	{
 		double ret = 0., mx = 0., my = 0.;
 
-		for(uint i = 0; i < bandWidth; i++)
+		for (uint i = 0; i < bandWidth; i++)
 		{	ret += x[i] * y[i];
 			mx += x[i] * x[i];
 			my += y[i] * y[i];
 		}
 		float div = sqrt(mx) * sqrt(my);
-		if(!isnan(div)) if(!isnan(ret / div))
+		if (!isnan(div)) if (!isnan(ret / div))
 			return ret / div;
 		return 0;
 	}
@@ -64,14 +64,14 @@ void Similarity::processor()
 	// start off by invalidating the whole lot.
 	uint step = theSize;
 
-	while(true)
+	while (true)
 	{
-		if(step < theSize)
+		if (step < theSize)
 			memmove(theMatrix, theMatrix + (theSize * theStep) + theStep, (theSize * (theSize - theStep) - theStep) * sizeof(float));
 		{	const BufferData d0 = input(0).peekSamples(theSize), d1 = input(1).peekSamples(theSize);
-			for(uint i = theSize - step; i < theSize; i++)
+			for (uint i = theSize - step; i < theSize; i++)
 			{	const float *d0i = d0.sample(i).readPointer(), *d1i = d1.sample(i).readPointer();
-				for(uint j = 0; j < (i + 1); j++)
+				for (uint j = 0; j < (i + 1); j++)
 				{	theMatrix[j*theSize + i] = cosineDistance(d0.sample(j).readPointer(), d1i, bandWidth);
 					theMatrix[i*theSize + j] = cosineDistance(d0i, d1.sample(j).readPointer(), bandWidth);
 				}
@@ -88,7 +88,7 @@ void Similarity::processor()
 
 bool Similarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency() / theStep, inTypes[0].frequency());
 	return true;
 }

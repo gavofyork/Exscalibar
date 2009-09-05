@@ -42,7 +42,7 @@ HardBob::~HardBob()
 void HardBob::saveYourself(QDomElement &element, QDomDocument &doc)
 {
 	// TODO: move into respective classes with a virtual.
-	if(dynamic_cast<Player *>(theProcessor))
+	if (dynamic_cast<Player *>(theProcessor))
 	{	element.setAttribute("type", "Player");
 		element.setAttribute("path", dynamic_cast<Player *>(theProcessor)->thePath);
 	}

@@ -25,7 +25,7 @@ void ProcessorPort::connect(const ProcessorPort &input) const
 void ProcessorPort::connect(MultiProcessor &input) const
 {
 	share();
-	for(uint i = 0; i < input.multiplicity(); i++)
+	for (uint i = 0; i < input.multiplicity(); i++)
 		connect(input.sourcePort(i));
 }
 

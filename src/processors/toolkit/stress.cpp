@@ -39,11 +39,11 @@ public:
 
 void Stress::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < theSize; i++)
 	{
 		outs[0][i] = 1.;
 		uint v = static_cast<int>(round(ins[0][i]));
-		for(uint j = 2; j < min(v, (uint)70); j++)
+		for (uint j = 2; j < min(v, (uint)70); j++)
 			outs[0][i] *= v;
 	}
 }

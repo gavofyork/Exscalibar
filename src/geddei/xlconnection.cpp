@@ -34,9 +34,9 @@ xLConnection::~xLConnection()
 {
 	// If theSink has already been set to zero, it means that we have already reset the
 	// processor's port, and that there's no need to again.
-	if(theSink)
+	if (theSink)
 	{
-//		if(MESSAGES) qDebug("Deleting input link on %s...", theSink->name().latin1());
+//		if (MESSAGES) qDebug("Deleting input link on %s...", theSink->name().latin1());
 		theSink->undoRegisterIn(this, theSinkIndex);
 	}
 }

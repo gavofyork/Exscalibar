@@ -36,7 +36,7 @@ void Combination::processChunks(const BufferDatas &in, BufferDatas &out, const u
 	uint xc = (in[0].samples() - theX->theIn) / theX->theStep + 1;
 	uint samplesNeeded = xc * theX->theOut;
 	uint yc = (samplesNeeded - theY->theIn) / theY->theStep + 1;
-	if(!theResident || theResident->samples() < samplesNeeded)
+	if (!theResident || theResident->samples() < samplesNeeded)
 	{
 		delete theResident;
 		theResident = new BufferData(samplesNeeded * theInterScope, theInterScope);
@@ -58,10 +58,10 @@ void Combination::initFromProperties(const Properties &p)
 	// needs some way to deliver to either: namespaces/numeric ids?
 	theX->initFromProperties(p);
 	theY->initFromProperties(p);
-	if(theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
+	if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
 	{
 		setupIO(theX->theNumInputs, theY->theNumOutputs, theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);
-		if(MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
+		if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
 	}
 	else
 		qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", theX->theType.latin1(), theX->theIn, theX->theStep, theX->theOut, theY->theType.latin1(), theY->theIn, theY->theStep, theY->theOut);
@@ -70,7 +70,7 @@ void Combination::initFromProperties(const Properties &p)
 bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	SignalTypeRefs r(1);
-	if(theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
+	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
 	{	theInterScope = r[0].scope();
 		return theY->verifyAndSpecifyTypes(r, outTypes);
 	}

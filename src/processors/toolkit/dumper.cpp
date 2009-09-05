@@ -61,11 +61,11 @@ bool Dumper::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 void Dumper::processor()
 {
 	theOut.open(QIODevice::Truncate|QIODevice::WriteOnly);
-	while(thereIsInputForProcessing(1))
-		for(uint i = 0; i < numInputs(); i++)
+	while (thereIsInputForProcessing(1))
+		for (uint i = 0; i < numInputs(); i++)
 		{	const BufferData d = input(i).readSample();
-			for(uint j = 0; j < d.elements(); j++)
-				if(theFloats)
+			for (uint j = 0; j < d.elements(); j++)
+				if (theFloats)
 				{
 					unsigned char* dc = (unsigned char*)&(d[j]);
 					theOut.putch(dc[0]);

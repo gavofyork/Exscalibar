@@ -55,21 +55,21 @@ void Checkerboard::processor()
 	float halfSize = theSize / 2;
 	theBoard = new float[theSize * theSize];
 	float max = 0;
-	for(uint y = 0; y < theSize; y++)
-		for(uint x = 0; x < theSize; x++)
+	for (uint y = 0; y < theSize; y++)
+		for (uint x = 0; x < theSize; x++)
 		{	float xdist = (float(x) - halfSize) / (float(theSize) - halfSize), ydist = (float(y) - halfSize) / (float(theSize) - halfSize);
 			float sign = theSign == Check ? (xdist * ydist < 0 ? -1 : 1) : 1;
 			float distance = sqrt(sqr(xdist) + sqr(ydist)) / sqrt(2.0);
 			float a = 1.0, b = 1.0, c = 1.0;
 			theBoard[x*theSize + y] = sign * a * exp(-sqr(distance-b) / sqr(c));
-			if(sign > 0) max += theBoard[x*theSize + y];
+			if (sign > 0) max += theBoard[x*theSize + y];
 		}
-	while(true)
+	while (true)
 	{
 		const BufferData in = input(0).readSample();
 		BufferData out = output(0).makeScratchSamples(1);
 		out[0] = 0;
-		for(uint i = 0; i < theSize * theSize; i++)
+		for (uint i = 0; i < theSize * theSize; i++)
 			out[0] += theBoard[i] * in[i];
 		out[0] /= max;
 		output(0) << out;
@@ -83,7 +83,7 @@ void Checkerboard::processorStopped()
 
 bool Checkerboard::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<SquareMatrix>()) return false;
+	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();
 	outTypes[0] = Value(inTypes[0].frequency());
 	return true;

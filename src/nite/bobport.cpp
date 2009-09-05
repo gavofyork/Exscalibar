@@ -58,17 +58,17 @@ BobPort::BobPort(Bob *bob, bool isInput, int index, int x, int y): Q3CanvasEllip
 	theIndex = index;
 	theBob = bob;
 	setZ(100);
-//	if(theIsInput)
+//	if (theIsInput)
 //		theInfo = new Info(x, y, 4, 32, bob->canvas());
 	refresh();
 }
 
 BobPort::~BobPort()
 {
-//	if(theIsInput)
+//	if (theIsInput)
 //		delete theInfo;
 	Q3PtrList<BobLink> links = theLinks;
-	for(Q3PtrList<BobLink>::iterator i = links.begin(); i != links.end(); i++)
+	for (Q3PtrList<BobLink>::iterator i = links.begin(); i != links.end(); i++)
 		delete *i;
 }
 
@@ -76,11 +76,11 @@ void BobPort::loadYourself(QDomElement &element)
 {
 	setPos(QPoint(element.attribute("x").toInt(), element.attribute("y").toInt()));
 	refresh();
-	if(theIsInput) return;
-	for(QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
+	if (theIsInput) return;
+	for (QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
 	{	QDomElement link = n.toElement();
-		if(link.isNull()) continue;
-		if(link.tagName() == "link")
+		if (link.isNull()) continue;
+		if (link.tagName() == "link")
 		{	BobLink *l = new BobLink(this, geddeiNite()->getBob(link.attribute("name"))->inputPort(link.attribute("index").toInt()));
 			l->loadYourself(link);
 		}
@@ -92,8 +92,8 @@ void BobPort::saveYourself(QDomElement &element, QDomDocument &doc)
 	element.setAttribute("index", theIndex);
 	element.setAttribute("x", thePos.x() + theBob->x());
 	element.setAttribute("y", thePos.y() + theBob->y());
-	if(theIsInput) return;
-	for(Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
+	if (theIsInput) return;
+	for (Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
 	{	QDomElement link = doc.createElement("link");
 		element.appendChild(link);
 		link.setAttribute("name", (*i)->destination()->theBob->name());
@@ -105,42 +105,22 @@ void BobPort::saveYourself(QDomElement &element, QDomDocument &doc)
 bool BobPort::connectYourself()
 {
 	assert(!theIsInput);
-	if(!theLinks.count() && !isActive()) return true;
+	if (!theLinks.count() && !isActive()) return true;
 
 	Processor *source = processor();
 	uint sourceIndex = theIndex;
 
-	if(isActive())
-	{	assert(geddeiNite()->watch());
-		//TODO: actually figure out a second's worth of buffer and put it here instead if 65536
-		const Connection *c = source->connect(sourceIndex, geddeiNite()->watch(), 0);
-		source = geddeiNite()->watch();
-		sourceIndex = 0;
-		if(!c) return false;
-	}
+	if (theLinks.count() > 1) source->split(sourceIndex);
 
-	if(theLinks.count() > 1) source->split(sourceIndex);
-
-	for(Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
+	for (Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
 	{
 		Processor *Nsource = source;
 		uint NsourceIndex = sourceIndex;
 		const Connection *c = 0;
-		if((*i)->isActive())
-		{	assert(geddeiNite()->watch());
-			//TODO: actually figure out a second's worth of buffer and put it here instead if 65536
-			c = Nsource->connect(NsourceIndex, geddeiNite()->watch(), 0);
-			Nsource = geddeiNite()->watch();
-			NsourceIndex = 0;
-			if(!c)
-			{	disconnectYourself();
-				return false;
-			}
-		}
 		bool ret = Nsource->connect(NsourceIndex, (*i)->destination()->processor(), (*i)->destination()->theIndex, (*i)->theBufferSize);
 		(*i)->setConnected(ret);
-		if(!ret)
-		{	if((*i)->isActive()) delete c;
+		if (!ret)
+		{	if ((*i)->isActive()) delete c;
 			disconnectYourself();
 			return false;
 		}
@@ -153,25 +133,16 @@ bool BobPort::connectYourself()
 void BobPort::disconnectYourself()
 {
 	assert(!theIsInput);
-	if(theLinks.count() == 0 && !isActive()) return;
+	if (theLinks.count() == 0 && !isActive()) return;
 
-	for(Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
-		if((*i)->connected())
-		{	if((*i)->isActive())
-				geddeiNite()->watch()->Processor::disconnect(0);
+	for (Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
+		if ((*i)->connected())
 			(*i)->setConnected(false);
-		}
 
 	Processor *source = processor();
 	uint sourceIndex = theIndex;
 
-	if(isActive())
-	{	source->disconnect(sourceIndex);
-		source = geddeiNite()->watch();
-		sourceIndex = 0;
-	}
-
-	if(theLinks.count())
+	if (theLinks.count())
 		source->disconnect(sourceIndex);
 
 	refresh();
@@ -189,8 +160,8 @@ GeddeiNite *BobPort::geddeiNite()
 
 void BobPort::updateProfile()
 {
-	if(theIsInput)
-	{	if(geddeiNite()->connected())
+	if (theIsInput)
+	{	if (geddeiNite()->connected())
 		{	//theInfo->show();
 			/*theInfo->setFill*/
 			theFill = processor()->bufferCapacity(theIndex);
@@ -208,7 +179,7 @@ void BobPort::refresh()
 	setSize(isActive() ? 16 : 12, isActive() ? 16 : 12);
 	setX((int)theBob->x() + thePos.x());
 	setY((int)theBob->y() + thePos.y());
-//	if(theIsInput)
+//	if (theIsInput)
 //	{	theInfo->setX((int)theBob->x() + thePos.x());
 //		theInfo->setY((int)theBob->y() + thePos.y());
 //	}
@@ -220,7 +191,7 @@ void BobPort::drawShape(QPainter &p)
 {
 	int x = (int)BobPort::x(), y = (int)BobPort::y();
 	p.setPen(QColor(32, 32, 32));
-	if(theIsInput)
+	if (theIsInput)
 	{	p.setBrush(QColor(64, 64, 64));
 		p.drawEllipse(x - width() / 2, y - height() / 2, width(), height());
 		p.setPen(Qt::NoPen);
@@ -238,7 +209,7 @@ void BobPort::drawShape(QPainter &p)
 
 void BobPort::updateLinks()
 {
-	for(Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
+	for (Q3PtrList<BobLink>::iterator i = theLinks.begin(); i != theLinks.end(); i++)
 		(*i)->refresh();
 }
 
@@ -248,8 +219,8 @@ void BobPort::setPos(QPoint p)
 
 	float mx = float(p.x() - rope.left()) / float(rope.width()), my = float(p.y() - rope.top()) / float(rope.height());
 	int x, y;
-	if(mx > my)
-		if(1-mx > my) // top
+	if (mx > my)
+		if (1-mx > my) // top
 		{	y = rope.top();
 			x = rope.left() + int((qMax(0.f, (qMin(mx, 1.f)))) * rope.width());
 		}
@@ -258,7 +229,7 @@ void BobPort::setPos(QPoint p)
 			x = rope.left() + rope.width();
 		}
 	else
-		if(1-mx > my) // left
+		if (1-mx > my) // left
 		{	y = rope.top() + int((qMax(0.f, (qMin(my, 1.f)))) * rope.height());
 			x = rope.left();
 		}
@@ -273,7 +244,7 @@ void BobPort::setPos(QPoint p)
 	thePos.setX(x - int(theBob->x()));
 	thePos.setY(y - int(theBob->y()));
 	refresh();
-	if(theBob->portCollision(this))
+	if (theBob->portCollision(this))
 	{	thePos = oldPos;
 		refresh();
 	}

@@ -25,30 +25,30 @@ namespace Geddei
 
 void LxConnectionReal::push(const BufferData &data)
 {
-	if(MESSAGES) qDebug("LxConnectionReal::push(): (size=%d)", data.elements());
+	if (MESSAGES) qDebug("LxConnectionReal::push(): (size=%d)", data.elements());
 
-	if(theLastElementsFree > data.elements())
+	if (theLastElementsFree > data.elements())
 	{	theSource->checkExit();
 		transport(data);
 		theLastElementsFree -= data.elements();
 	}
 	else
-		for(uint i = 0; i < data.elements();)
+		for (uint i = 0; i < data.elements();)
 		{
 			theSource->checkExit();
 			bufferWaitForFree();
 			int elementsFree = bufferElementsFree();
 			int samplesToSend = theType->samples(elementsFree);
 			// TODO: will grind. fix: waitForFreeSample()
-			if(!samplesToSend) continue;
+			if (!samplesToSend) continue;
 			uint elementsToSend = theType->elementsFromSamples(samplesToSend);
-			if(elementsToSend > data.elements() - i) elementsToSend = data.elements() - i;
+			if (elementsToSend > data.elements() - i) elementsToSend = data.elements() - i;
 
 			transport(data.mid(i, elementsToSend));
 			i += elementsToSend;
 			theLastElementsFree = elementsFree - elementsToSend;
 		}
-	if(MESSAGES) qDebug("LxConnectionReal::push(): Pushed (size=%d).", data.elements());
+	if (MESSAGES) qDebug("LxConnectionReal::push(): Pushed (size=%d).", data.elements());
 }
 
 };

@@ -38,7 +38,7 @@ DomSoftBob::DomSoftBob(int x, int y, const QString &type, const QString &name, Q
 {
 	theType = type;
 
-	if(theName == "") theName = geddeiNite()->makeUniqueName(type);
+	if (theName == "") theName = geddeiNite()->makeUniqueName(type);
 	theDom = SubProcessorFactory::createDom(type);
 
 	init(x, y);

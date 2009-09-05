@@ -25,13 +25,13 @@ namespace rGeddei
 Processor *HostProcessorForwarder::lookup(uint key, const QString &name)
 {
 	SessionServer *session = SessionServer::session(key);
-	if(!session)
+	if (!session)
 	{	qWarning("*** ERROR: Session key %d is invalid.", key);
 		return NULL;
 	}
 
 	Processor *ret = session->getProcessor(name);
-	if(!ret)
+	if (!ret)
 	{	qWarning("*** ERROR: Processor name %s does not exist in session %d.", name.latin1(), key);
 		return NULL;
 	}

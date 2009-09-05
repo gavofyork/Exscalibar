@@ -54,8 +54,8 @@ class JackCapturer: public Processor
 		jack_default_audio_sample_t *in = (jack_default_audio_sample_t *)jack_port_get_buffer(theInputPort, nframes);
 		QMutexLocker lock(&theTransferLock);
 		theWantFrames = nframes;
-		while(theBuffer.isNull()) theTransfer.wait(&theTransferLock);
-		for(uint i = 0; i < nframes; i++)
+		while (theBuffer.isNull()) theTransfer.wait(&theTransferLock);
+		for (uint i = 0; i < nframes; i++)
 			theBuffer[i] = in[i];
 		theWantFrames = 0;
 		theDoneTransfer = true;
@@ -101,7 +101,7 @@ void JackCapturer::specifyOutputSpace(Q3ValueVector<uint> &samples)
 
 void JackCapturer::initFromProperties(const Properties &)
 {
-	if((theClient = jack_client_new(name())) == 0)
+	if ((theClient = jack_client_new(name())) == 0)
 		qWarning("*** WARNING: JACK server not running!");
 	else
 	{	setupIO(0, theClient ? 1 : 0);
@@ -118,11 +118,11 @@ bool JackCapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs 
 
 bool JackCapturer::processorStarted()
 {
-	if(!numOutputs()) return false;
+	if (!numOutputs()) return false;
 	theBuffer.nullify();
 	theKeepGoing = true;
 	theCount = 0;
-	if((theClient = jack_client_new(name())) == 0)
+	if ((theClient = jack_client_new(name())) == 0)
 	{
 		qWarning("*** ERROR: JACK server not running!");
 		return false;
@@ -130,7 +130,7 @@ bool JackCapturer::processorStarted()
 	jack_set_process_callback(theClient, JackCapturer::jackProcess, this);
 	jack_on_shutdown(theClient, JackCapturer::jackShutdown, this);
 	theInputPort = jack_port_register(theClient, "input", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-	if(jack_activate(theClient))
+	if (jack_activate(theClient))
 	{
 		qWarning("*** ERROR: Cannot activate JACK client!");
 		return false;
@@ -140,16 +140,16 @@ bool JackCapturer::processorStarted()
 
 void JackCapturer::processor()
 {
-	while(theKeepGoing)
+	while (theKeepGoing)
 	{
 		QMutexLocker lock(&theTransferLock);
-		while(!theWantFrames) theTransfer.wait(&theTransferLock);
+		while (!theWantFrames) theTransfer.wait(&theTransferLock);
 		theDoneTransfer = false;
 		theBuffer = output(0).makeScratchSamples(theWantFrames);
-		while(!theDoneTransfer) theTransfer.wait(&theTransferLock);
+		while (!theDoneTransfer) theTransfer.wait(&theTransferLock);
 		output(0) << theBuffer;
 		theBuffer.nullify();
-		if(++theCount == 80)
+		if (++theCount == 80)
 		{	plunge();
 			theCount = 0;
 		}

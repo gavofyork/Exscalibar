@@ -46,7 +46,7 @@ void SignalType::deserialise(QSocketSession &source)
 
 SignalType *SignalType::create(uint id)
 {
-	switch(id)
+	switch (id)
 	{
 		case 0: return new Value;
 		case 1: return new Wave;
@@ -59,10 +59,10 @@ SignalType *SignalType::create(uint id)
 
 /*ostream &operator<<(ostream &out, const SignalType &me)
 {
-	if(me == SignalType::null)
+	if (me == SignalType::null)
 		return out << "null";
 	out << "[ " << me.theScope << "x" << me.theFrequency << "Hz - ";
-	switch(me.theFormat)
+	switch (me.theFormat)
 	{	case SignalType::NoFormat: out << "NoFormat"; break;
 		case SignalType::Wave: out << "Wave"; break;
 		case SignalType::Spectrum: out << "Spectrum"; break;

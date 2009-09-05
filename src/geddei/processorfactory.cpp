@@ -25,7 +25,7 @@ QFactoryManager<Processor> *ProcessorFactory::theOne = 0;
 
 QFactoryManager<Processor> &ProcessorFactory::factory()
 {
-	if(!theOne)
+	if (!theOne)
 	{	theOne = new QFactoryManager<Processor>;
 		theOne->reloadAll(getPaths());
 	}
@@ -34,7 +34,7 @@ QFactoryManager<Processor> &ProcessorFactory::factory()
 
 Processor *ProcessorFactory::create(const QString &type)
 {
-	if(!available(type))
+	if (!available(type))
 		qWarning("*** ERROR: You are attempting to create a Processor type that is not\n"
 		         "           available (%s).", type.latin1());
 	return factory()[type];

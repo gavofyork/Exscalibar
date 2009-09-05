@@ -39,7 +39,7 @@ public:
 
 void Log::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < theSize; i++)
 		outs[0][i] = log(ins[0][i]);
 }
 

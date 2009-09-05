@@ -37,7 +37,7 @@ Splitter::~Splitter()
 
 void Splitter::enforceMinimum(uint elements)
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->enforceMinimum(elements);
 }
 
@@ -72,13 +72,13 @@ bool Splitter::confirmTypes()
 
 void Splitter::doRegisterOut(LxConnection *me, uint port)
 {
-	if(MESSAGES) qDebug("Registering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
+	if (MESSAGES) qDebug("Registering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
 	theConnections.append(me);
 }
 
 void Splitter::undoRegisterOut(LxConnection *me, uint port)
 {
-	if(MESSAGES) qDebug("Unregistering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
+	if (MESSAGES) qDebug("Unregistering splitter link from a splitter connected to %s (port %d).", dynamic_cast<Processor *>(theSource)->name().latin1(), port);
 	theConnections.setAutoDelete(false);
 	theConnections.remove(me);
 	theConnections.setAutoDelete(true);
@@ -86,8 +86,8 @@ void Splitter::undoRegisterOut(LxConnection *me, uint port)
 
 bool Splitter::waitUntilReady()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		if(!((*i)->waitUntilReady()))
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+		if (!((*i)->waitUntilReady()))
 			return false;
 	return true;
 }
@@ -96,7 +96,7 @@ void Splitter::setType(const SignalType *type)
 {
 	delete theType;
 	theType = type->copy();
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->setType(type);
 }
 
@@ -104,25 +104,25 @@ void Splitter::resetType()
 {
 	delete theType;
 	theType = 0;
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->resetType();
 }
 
 void Splitter::sourceStopping()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->sourceStopping();
 }
 
 void Splitter::sourceStopped()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->sourceStopped();
 }
 
 void Splitter::reset()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->reset();
 }
 
@@ -136,34 +136,34 @@ BufferData Splitter::makeScratchElements(uint elements, bool autoPush)
 void Splitter::push(const BufferData &data)
 {
 	Q3PtrList<LxConnection>::iterator i = theConnections.begin();
-	for(i++; i != theConnections.end(); i++)
+	for (i++; i != theConnections.end(); i++)
 		dynamic_cast<LxConnection *>(*i)->push(data);
 	dynamic_cast<LxConnection *>(theConnections.first())->push(data);
 }
 
 void Splitter::pushPlunger()
 {
-	if(MESSAGES) qDebug("> Splitter::pushPlunger()");
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	if (MESSAGES) qDebug("> Splitter::pushPlunger()");
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->pushPlunger();
-	if(MESSAGES) qDebug("< Splitter::pushPlunger()");
+	if (MESSAGES) qDebug("< Splitter::pushPlunger()");
 }
 
 void Splitter::startPlungers()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->startPlungers();
 }
 
 void Splitter::plungerSent()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->plungerSent();
 }
 
 void Splitter::noMorePlungers()
 {
-	for(Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<LxConnection>::iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->noMorePlungers();
 }
 
@@ -171,7 +171,7 @@ uint Splitter::maximumScratchElements(uint minimum)
 {
 	Q3PtrList<LxConnection>::iterator i = theConnections.begin();
 	uint ret = (*i)->maximumScratchElements(minimum);
-	for(i++; i != theConnections.end(); i++)
+	for (i++; i != theConnections.end(); i++)
 		ret = ::min(ret, (*i)->maximumScratchElements(minimum));
 	return ret;
 }
@@ -180,7 +180,7 @@ uint Splitter::maximumScratchElementsEver()
 {
 	Q3PtrList<LxConnection>::iterator i = theConnections.begin();
 	uint ret = (*i)->maximumScratchElementsEver();
-	for(i++; i != theConnections.end(); i++)
+	for (i++; i != theConnections.end(); i++)
 		ret = ::min(ret, (*i)->maximumScratchElementsEver());
 	return ret;
 }

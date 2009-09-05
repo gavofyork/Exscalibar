@@ -27,7 +27,7 @@ QFactoryManager<SubProcessor> *SubProcessorFactory::theOne = 0;
 
 QFactoryManager<SubProcessor> &SubProcessorFactory::factory()
 {
-	if(!theOne)
+	if (!theOne)
 	{	theOne = new QFactoryManager<SubProcessor>;
 		theOne->reloadAll(getPaths());
 	}
@@ -36,7 +36,7 @@ QFactoryManager<SubProcessor> &SubProcessorFactory::factory()
 
 bool SubProcessorFactory::available(const QString &type)
 {
-	if(type.contains("&"))
+	if (type.contains("&"))
 		return available(type.section("&", 0, 0)) && available(type.section("&", 1));
 	else
 		return factory().isAvailable(type);
@@ -44,7 +44,7 @@ bool SubProcessorFactory::available(const QString &type)
 
 int SubProcessorFactory::versionId(const QString &type)
 {
-	if(type.contains("&"))
+	if (type.contains("&"))
 		return min(versionId(type.section("&", 0, 0)), versionId(type.section("&", 1)));
 	else
 		return factory().getVersion(type);
@@ -53,10 +53,10 @@ int SubProcessorFactory::versionId(const QString &type)
 
 SubProcessor *SubProcessorFactory::create(const QString &type)
 {
-	if(!available(type))
+	if (!available(type))
 		qFatal("*** FATAL: You are attempting to create a SubProcessor type that is not\n"
 		       "           available (%s).", type.latin1());
-	if(type.contains("&"))
+	if (type.contains("&"))
 		return new Combination(create(type.section("&", 0, 0)), create(type.section("&", 1)));
 	else
 		return factory()[type];
@@ -64,7 +64,7 @@ SubProcessor *SubProcessorFactory::create(const QString &type)
 
 DomProcessor *SubProcessorFactory::createDom(const QString &type)
 {
-	if(!available(type))
+	if (!available(type))
 		qFatal("*** FATAL: You are attempting to create a SubProcessor type that is not\n"
 		       "           available (%s).", type.latin1());
 	return new DomProcessor(create(type));

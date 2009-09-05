@@ -24,10 +24,10 @@ namespace Geddei
 RSCoupling::RSCoupling(Q3SocketDevice *dev, SubProcessor *sub) : xSCoupling(sub), QThread(0), theSession(dev)
 {
 	theBeingDeleted = false;
-	if(MESSAGES) qDebug("RSC: Handshaking...");
+	if (MESSAGES) qDebug("RSC: Handshaking...");
 	theSession.handshake(false);
-	if(MESSAGES) qDebug("RSC: Handshaking finished.");
-	if(theSession.isOpen())
+	if (MESSAGES) qDebug("RSC: Handshaking finished.");
+	if (theSession.isOpen())
 		start(HighPriority);
 	else
 		qWarning("*** CRITICAL: RSCoupling failed. Remote side not handshaking.");
@@ -38,11 +38,11 @@ RSCoupling::~RSCoupling()
 	// This flag should never have to be used as the thread should be stopped before deletion, however
 	// this is here for a fail-safe.
 	theBeingDeleted = true;
-	if(running())
-	{	if(MESSAGES) qDebug("RSCoupling::~RSCoupling(): Thread still running on RSCoupling destruction. Safely stopping...");
+	if (running())
+	{	if (MESSAGES) qDebug("RSCoupling::~RSCoupling(): Thread still running on RSCoupling destruction. Safely stopping...");
 		theSession.close();
 		// Trapdoor opening needed?
-		if(!wait(2000))
+		if (!wait(2000))
 		{	qWarning("*** WARNING: Thread not responding. Terminating anyway.");
 			terminate();
 			wait(10000);
@@ -53,58 +53,58 @@ RSCoupling::~RSCoupling()
 
 void RSCoupling::run()
 {
-	if(MESSAGES) qDebug("> RSC::run(): isOpen() = %d", theSession.isOpen());
+	if (MESSAGES) qDebug("> RSC::run(): isOpen() = %d", theSession.isOpen());
 	bool breakOut = false;
-	while(theSession.isOpen())
+	while (theSession.isOpen())
 	{
-		if(MESSAGES) qDebug("= RSC::run(): Receiving...");
+		if (MESSAGES) qDebug("= RSC::run(): Receiving...");
 		uchar command;
-		while(theSession.isOpen() && !theSession.receiveChunk(&command, 1, 501)) {}
-		if(!theSession.isOpen()) break;
+		while (theSession.isOpen() && !theSession.receiveChunk(&command, 1, 501)) {}
+		if (!theSession.isOpen()) break;
 
-		if(MESSAGES) qDebug("= RSC::run(): command = %d", (int)command);
-		switch(command)
+		if (MESSAGES) qDebug("= RSC::run(): command = %d", (int)command);
+		switch (command)
 		{
 		case InitFromProperties:
 		{
-			if(MESSAGES) qDebug("RSC: InitFromProperties...");
+			if (MESSAGES) qDebug("RSC: InitFromProperties...");
 			int s = theSession.safeReceiveWord<int>();
 			QByteArray a(s);
 			theSession.receiveChunk((uchar *)a.data(), s);
 			initFromProperties(Properties(a));
-			if(MESSAGES) qDebug("RSC: InitFromProperties: Done.");
+			if (MESSAGES) qDebug("RSC: InitFromProperties: Done.");
 			break;
 		}
 		case SpecifyTypes:
 		{
-			if(MESSAGES) qDebug("RSC: SpecifyTypes...");
+			if (MESSAGES) qDebug("RSC: SpecifyTypes...");
 			SignalTypeRefs inTypes(theSession.safeReceiveWord<int>());
-			for(uint i = 0; i < inTypes.count(); i++)
+			for (uint i = 0; i < inTypes.count(); i++)
 				inTypes.mutablePtrAt(i) = SignalType::receive(theSession);
 			SignalTypeRefs outTypes(theSession.safeReceiveWord<int>());
-			for(uint i = 0; i < outTypes.count(); i++)
+			for (uint i = 0; i < outTypes.count(); i++)
 				outTypes.mutablePtrAt(i) = SignalType::receive(theSession);
 			specifyTypes(inTypes, outTypes);
-			if(MESSAGES) qDebug("RSC: SpecifyTypes: Done.");
+			if (MESSAGES) qDebug("RSC: SpecifyTypes: Done.");
 			break;
 		}
 		case Go:
-			if(MESSAGES) qDebug("RSC: Go: Setting off.");
+			if (MESSAGES) qDebug("RSC: Go: Setting off.");
 			go();
 			theSession.ack();
 			break;
 		case Stop:
-			if(MESSAGES) qDebug("RSC: Stop: Stopping.");
+			if (MESSAGES) qDebug("RSC: Stop: Stopping.");
 			stop();
 			theSession.ack();
 			break;
 		case Transact:
 		{
-			if(MESSAGES) qDebug("RSC: Transact...");
+			if (MESSAGES) qDebug("RSC: Transact...");
 			uint channels = theSession.safeReceiveWord<int>();
-			if(MESSAGES) qDebug("RSC: BufferDatas size = %d", channels);
+			if (MESSAGES) qDebug("RSC: BufferDatas size = %d", channels);
 			BufferDatas d(channels);
-			for(uint i = 0; i < d.size(); i++)
+			for (uint i = 0; i < d.size(); i++)
 			{	uint size = theSession.safeReceiveWord<int>();
 				uint scope = theSession.safeReceiveWord<int>();
 				BufferData *data = new BufferData(size, scope);
@@ -112,22 +112,22 @@ void RSCoupling::run()
 				d.setData(i, data);
 			}
 			uint chunks = theSession.safeReceiveWord<int>();
-			if(MESSAGES) qDebug("RSC: BufferDatas chunks = %d", chunks);
+			if (MESSAGES) qDebug("RSC: BufferDatas chunks = %d", chunks);
 			transact(d, chunks);
-			if(MESSAGES) qDebug("RSC: Transact: Done.");
+			if (MESSAGES) qDebug("RSC: Transact: Done.");
 			break;
 		}
 		case DeliverResults:
 		{
-			if(MESSAGES) qDebug("RSC: DeliverResults...");
+			if (MESSAGES) qDebug("RSC: DeliverResults...");
 			uint tt;
 			BufferDatas d = deliverResults(&tt);
 			theSession.safeSendWord(d.size());
-			for(uint i = 0; i < d.size(); i++)
+			for (uint i = 0; i < d.size(); i++)
 			{	// TODO: maybe take this into BufferData?
 				theSession.safeSendWord(d[i].elements());
 				theSession.safeSendWord(d[i].scope());
-				if(d[i].rollsOver())
+				if (d[i].rollsOver())
 				{	theSession.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeFirstPart());
 					theSession.safeSendWordArray((int *)d[i].secondPart(), d[i].sizeSecondPart());
 				}
@@ -135,7 +135,7 @@ void RSCoupling::run()
 					theSession.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeOnlyPart());
 			}
 			theSession.safeSendWord(tt);
-			if(MESSAGES) qDebug("RSC: DeliverResults: Done.");
+			if (MESSAGES) qDebug("RSC: DeliverResults: Done.");
 			break;
 		}
 		case DefineIO:
@@ -146,28 +146,28 @@ void RSCoupling::run()
 			break;
 		}
 		case Stopping:
-			if(MESSAGES) qDebug("RSC: Got stopping command...");
+			if (MESSAGES) qDebug("RSC: Got stopping command...");
 			stopping();
 			theSession.ack();
-			if(MESSAGES) qDebug("RSC: Relayed.");
+			if (MESSAGES) qDebug("RSC: Relayed.");
 			break;
 		case Stopped:
-			if(MESSAGES) qDebug("RSC: Got stopped command...");
+			if (MESSAGES) qDebug("RSC: Got stopped command...");
 			stopped();
 			theSession.ack();
-			if(MESSAGES) qDebug("RSC: Relayed.");
+			if (MESSAGES) qDebug("RSC: Relayed.");
 			break;
 		case Close:
-			if(MESSAGES) qDebug("RSC: Got close command. Exiting immediately...");
+			if (MESSAGES) qDebug("RSC: Got close command. Exiting immediately...");
 			breakOut = true;
 			break;
 		default:;
 		}
 
-		if(breakOut) break;
+		if (breakOut) break;
 	}
-	if(MESSAGES) qDebug("RSC: Exiting session (open=%d)...", theSession.isOpen());
-	if(theSession.isOpen()) theSession.close();
+	if (MESSAGES) qDebug("RSC: Exiting session (open=%d)...", theSession.isOpen());
+	if (theSession.isOpen()) theSession.close();
 }
 
 };

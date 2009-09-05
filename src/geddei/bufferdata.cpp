@@ -23,7 +23,7 @@ BufferData *BufferData::theFake = 0;
 
 BufferData &BufferData::fake()
 {
-	if(theFake) return *theFake;
+	if (theFake) return *theFake;
 	return *(theFake = new BufferData(true));
 }
 
@@ -86,16 +86,16 @@ BufferData::BufferData(const BufferData &source) : theWritePointer(0)
 
 BufferData::~BufferData()
 {
-	if(theWritePointer)
+	if (theWritePointer)
 		endWritePointer();
 	theInfo->unreference(*this);
 }
 
 BufferData &BufferData::operator=(const BufferData &source)
 {
-	if(source.theInfo != theInfo)
+	if (source.theInfo != theInfo)
 	{
-		if(theWritePointer)
+		if (theWritePointer)
 			endWritePointer();
 		theInfo->unreference(*this);
 		theInfo = source.theInfo;
@@ -109,13 +109,13 @@ BufferData &BufferData::operator=(const BufferData &source)
 ostream &operator<<(ostream &out, const BufferData &me)
 {
 	out << "[ ";
-	if(me.theInfo->theScope == 1)
-		for(uint i = 0; i < me.theVisibleSize; i++)
+	if (me.theInfo->theScope == 1)
+		for (uint i = 0; i < me.theVisibleSize; i++)
 			out << me[i] << " ";
 	else
-		for(uint i = 0; i < me.theVisibleSize; i += me.theInfo->theScope)
+		for (uint i = 0; i < me.theVisibleSize; i += me.theInfo->theScope)
 		{	out << "( ";
-			for(uint j = 0; j < me.theInfo->theScope; j++)
+			for (uint j = 0; j < me.theInfo->theScope; j++)
 				out << me[i + j] << " ";
 			out << ") ";
 		}
@@ -129,7 +129,7 @@ bool BufferData::plunger() const
 
 void BufferData::copyFrom(const float *source)
 {
-	if(rollsOver())
+	if (rollsOver())
 	{	memcpy(firstPart(), source, sizeFirstPart() * 4);
 		memcpy(secondPart(), source + sizeFirstPart(), sizeSecondPart() * 4);
 	}
@@ -139,7 +139,7 @@ void BufferData::copyFrom(const float *source)
 
 void BufferData::copyTo(float *destination) const
 {
-	if(rollsOver())
+	if (rollsOver())
 	{	memcpy(destination, firstPart(), sizeFirstPart() * 4);
 		memcpy(destination + sizeFirstPart(), secondPart(), sizeSecondPart() * 4);
 	}
@@ -149,10 +149,10 @@ void BufferData::copyTo(float *destination) const
 
 void BufferData::copyFrom(const BufferData &data)
 {
-	if(theVisibleSize == Undefined) return;
-	if(rollsOver())
-	{	if(data.rollsOver())
-			if(sizeFirstPart() > data.sizeFirstPart())
+	if (theVisibleSize == Undefined) return;
+	if (rollsOver())
+	{	if (data.rollsOver())
+			if (sizeFirstPart() > data.sizeFirstPart())
 			{	memcpy(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
 				memcpy(firstPart() + data.sizeFirstPart(), data.secondPart(), (sizeFirstPart() - data.sizeFirstPart()) * 4);
 				memcpy(secondPart(), data.secondPart() + sizeFirstPart() - data.sizeFirstPart(), sizeSecondPart() * 4);
@@ -168,7 +168,7 @@ void BufferData::copyFrom(const BufferData &data)
 		}
 	}
 	else
-		if(data.rollsOver())
+		if (data.rollsOver())
 		{	memcpy(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
 			memcpy(firstPart() + data.sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
 		}
@@ -178,22 +178,22 @@ void BufferData::copyFrom(const BufferData &data)
 
 BufferData &BufferData::dontRollOver(bool makeCopy)
 {
-	if(rollsOver())
+	if (rollsOver())
 	{	BufferData temp(*this);
 		BufferData *ret = this;
 		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
-		if(makeCopy) ret->copyFrom(temp);
+		if (makeCopy) ret->copyFrom(temp);
 	}
 	return *this;
 }
 
 const BufferData &BufferData::dontRollOver(bool makeCopy) const
 {
-	if(rollsOver())
+	if (rollsOver())
 	{	const BufferData temp(*this);
 		BufferData *ret = (BufferData *)this;
 		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
-		if(makeCopy) ret->copyFrom(temp);
+		if (makeCopy) ret->copyFrom(temp);
 	}
 	return *this;
 }
@@ -240,11 +240,11 @@ void BufferData::debugInfo() const
 	qDebug("Mask/Offset/Data: %d/%d/%p", theMask, theOffset, theData);
 	qDebug("Valid/EndType: %d/%d", *theValid, (int)*theEndType);
 	qDebug("Aux/Life/Type: %p/%d/%d", theAux, (int)theLife, (int)theType);
-//	for(uint i = 0; i < theSize; i++)
+//	for (uint i = 0; i < theSize; i++)
 //		qDebug("%d: %f", i, theData[(i + theOffset) & theMask]);
-	if(*theValid)
+	if (*theValid)
 	{	float min = theData[theOffset & theMask], max = theData[theOffset & theMask];
-		for(uint i = 1; i < theSize; i++)
+		for (uint i = 1; i < theSize; i++)
 		{	float nw = theData[(i + theOffset) & theMask];
 			min = ::min(min, nw);
 			max = ::max(max, nw);
@@ -257,7 +257,7 @@ void BufferData::debugInfo() const
 const BufferData BufferData::mid(uint start, uint length) const
 {
 	BufferData ret = *this;
-	if(theInfo->theMask == (uint)~0)
+	if (theInfo->theMask == (uint)~0)
 		// wrap around according to size as it's a custom buffer and mask is unavailable.
 		// NOTE: the buffer is theAccessibleSize big (it does not just refer to the
 		//       usable content (as it does with foreign Buffer theDatas)).
@@ -271,7 +271,7 @@ const BufferData BufferData::mid(uint start, uint length) const
 BufferData BufferData::mid(uint start, uint length)
 {
 	BufferData ret = *this;
-	if(theInfo->theMask == (uint)~0)
+	if (theInfo->theMask == (uint)~0)
 		ret.theOffset = (theOffset + start) % theInfo->theAccessibleSize;
 	else
 		ret.theOffset = (theOffset + start) & theInfo->theMask;

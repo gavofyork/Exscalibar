@@ -63,13 +63,13 @@ void BobLink::saveYourself(QDomElement &element, QDomDocument &)
 void BobLink::refresh()
 {
 	int size = 2;
-	if(isActive())
+	if (isActive())
 	{	size = 4;
 		setZ(500);
 	}
 	else
 		setZ(50);
-	if(theConnected)
+	if (theConnected)
 		setPen(QPen(QColor(192, 128, 128), size, Qt::SolidLine));
 	else
 		setPen(QPen(QColor(128, 128, 128), size, Qt::DashLine));

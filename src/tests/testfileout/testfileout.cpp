@@ -14,8 +14,8 @@ class Trivial: public Processor
 {
 	virtual void processor()
 	{
-		for(uint i = 0; i < 10; i++)
-		{	for(uint j = 0; j < 10; j++)
+		for (uint i = 0; i < 10; i++)
+		{	for (uint j = 0; j < 10; j++)
 			{	BufferData s = output(0).makeScratchSample();
 				s[0] = j + i*10;
 				output(0) << s;
@@ -32,7 +32,7 @@ class Trivial2: public Processor
 {
 	virtual void processor()
 	{
-		for(int i = 0;; i++)
+		for (int i = 0;; i++)
 			output(0).makeScratchSample(true)[0] = i;
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
@@ -82,7 +82,7 @@ int main()
 	E[0] >>= I[2];
 
 	std::cout << "Starting objects..." << std::endl;
-	if(!objects.go()) qFatal("Couldn't start!");
+	if (!objects.go()) qFatal("Couldn't start!");
 
 	std::cout << "Waiting till done..." << std::endl;
 	I.waitUntilDone();

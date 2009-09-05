@@ -46,7 +46,7 @@ class QLauncher : public QTimer
 {
 Q_OBJECT
 public slots:
-	void go() { if(QSubApp::theSubApp) QSubApp::theSubApp->start(); }
+	void go() { if (QSubApp::theSubApp) QSubApp::theSubApp->start(); }
 };
 
 QSubApp *QSubApp::theSubApp = 0;

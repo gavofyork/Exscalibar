@@ -12,6 +12,7 @@
 
 #include "multiplicative.h"
 
+#undef MESSAGES
 #define MESSAGES 0
 
 namespace Geddei
@@ -19,9 +20,9 @@ namespace Geddei
 
 void Multiplicative::setMultiplicity(uint multiplicity)
 {
-	if(MESSAGES) qDebug("Multiplicative::setMultiplicity(%d)", multiplicity);
-	if(theDeferredInit)
-	{	if(MESSAGES) qDebug("Deferred init - reinitialising...");
+	if (MESSAGES) qDebug("Multiplicative::setMultiplicity(%d)", multiplicity);
+	if (theDeferredInit)
+	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
 		theDeferredProperties["Multiplicity"] = multiplicity;
 		doInit(theDeferredName, theDeferredGroup, theDeferredProperties);
 	}

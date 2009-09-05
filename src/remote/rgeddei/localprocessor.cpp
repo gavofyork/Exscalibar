@@ -49,27 +49,27 @@ LocalProcessor::LocalProcessor(LocalSession &session, const QString &type)
 
 LocalProcessor::~LocalProcessor()
 {
-	if(MESSAGES) qDebug("> LocalProcessor::~LocalProcessor(): Setting no group...");
+	if (MESSAGES) qDebug("> LocalProcessor::~LocalProcessor(): Setting no group...");
 	setNoGroup();
-	if(MESSAGES) qDebug("= LocalProcessor::~LocalProcessor(): Checking if adopted...");
-	if(theAdopted)
+	if (MESSAGES) qDebug("= LocalProcessor::~LocalProcessor(): Checking if adopted...");
+	if (theAdopted)
 	{
-		if(MESSAGES) qDebug("= LocalProcessor::~LocalProcessor(): Deleting Processor object...");
+		if (MESSAGES) qDebug("= LocalProcessor::~LocalProcessor(): Deleting Processor object...");
 		delete theProcessor;
 	}
-	if(MESSAGES) qDebug("< LocalProcessor::~LocalProcessor()");
+	if (MESSAGES) qDebug("< LocalProcessor::~LocalProcessor()");
 }
 
 void LocalProcessor::doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p)
 {
 	theProcessor->init(name, *theSession, p);
-	if(g) setGroup(*g);
+	if (g) setGroup(*g);
 }
 
 bool LocalProcessor::connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize)
 {
-	if(MESSAGES) qDebug("LocalProcessor::connect(): port=%d, host=%s, processor=%s", sink->theSession->thePort, sink->theSession->theHost.latin1(), sink->theProcessor->name().latin1());
-	if(theSession != sink->theSession)
+	if (MESSAGES) qDebug("LocalProcessor::connect(): port=%d, host=%s, processor=%s", sink->theSession->thePort, sink->theSession->theHost.latin1(), sink->theProcessor->name().latin1());
+	if (theSession != sink->theSession)
 		return theProcessor->connect(sourceIndex, sink->theSession->theHost, sink->theSession->thePort, sink->theProcessor->name().latin1(), sinkIndex, bufferSize);
 	else
 		return theProcessor->connect(sourceIndex, sink->theProcessor, sinkIndex, bufferSize);
@@ -77,7 +77,7 @@ bool LocalProcessor::connect(uint sourceIndex, const LocalProcessor *sink, uint 
 
 bool LocalProcessor::connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize)
 {
-	if(MESSAGES) qDebug("LocalProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, sink->theSession->theHost.latin1(), sink->theName.latin1());
+	if (MESSAGES) qDebug("LocalProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, sink->theSession->theHost.latin1(), sink->theName.latin1());
 	return theProcessor->connect(sourceIndex, sink->theSession->theHost, sink->theSession->theKey, sink->theHandle, sinkIndex, bufferSize);
 }
 

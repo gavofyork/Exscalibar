@@ -36,35 +36,35 @@ public:
 
 void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
-	if(theCount <= 1)
-		if(theScope > 1)
-			for(uint i = 0; i < chunks; i++)
+	if (theCount <= 1)
+		if (theScope > 1)
+			for (uint i = 0; i < chunks; i++)
 				outs[0].sample(i).copyFrom(ins[0].sample(i * theStep));
 		else
-			for(uint i = 0; i < chunks; i++)
+			for (uint i = 0; i < chunks; i++)
 				outs[0][i] = ins[0][i * theStep];
 	else
-	{	for(uint j = 0; j < chunks; j++)
-			for(uint i = 0; i < theScope; i++)
+	{	for (uint j = 0; j < chunks; j++)
+			for (uint i = 0; i < theScope; i++)
 				outs[0](j, i) = 0;
-		for(uint j = 0; j < chunks; j++)
-		{	for(uint i = 0; i < theCount; i++)
+		for (uint j = 0; j < chunks; j++)
+		{	for (uint i = 0; i < theCount; i++)
 			{	BufferData d = ins[0].sample(i + j*theStep);
 				const float *inSample = d.readPointer();
-				if(theConsolidate == Mean)
-					for(uint k = 0; k < theScope; k++)
+				if (theConsolidate == Mean)
+					for (uint k = 0; k < theScope; k++)
 						outs[0](j, k) += inSample[k];
-				else if(theConsolidate == Max)
-					for(uint k = 0; k < theScope; k++)
-						if(outs[0](j, k) < inSample[k] || !k) outs[0](j, k) = inSample[k];
-				else if(theConsolidate == Min)
-					for(uint k = 0; k < theScope; k++)
-						if(outs[0](j, k) > inSample[k] || !k) outs[0](j, k) = inSample[k];
+				else if (theConsolidate == Max)
+					for (uint k = 0; k < theScope; k++)
+						if (outs[0](j, k) < inSample[k] || !k) outs[0](j, k) = inSample[k];
+				else if (theConsolidate == Min)
+					for (uint k = 0; k < theScope; k++)
+						if (outs[0](j, k) > inSample[k] || !k) outs[0](j, k) = inSample[k];
 			}
 		}
-		if(theConsolidate == Mean)
-			for(uint j = 0; j < chunks; j++)
-				for(uint i = 0; i < theScope; i++)
+		if (theConsolidate == Mean)
+			for (uint j = 0; j < chunks; j++)
+				for (uint i = 0; i < theScope; i++)
 					outs[0](j, i) /= theCount;
 	}
 }
@@ -74,8 +74,8 @@ bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalType
 	theScope = inTypes[0].scope();
 	outTypes = inTypes[0];
 	
-	if(thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].frequency());
-	if(theOverlap != 0.0) theStep = uint(theOverlap * inTypes[0].frequency());
+	if (thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].frequency());
+	if (theOverlap != 0.0) theStep = uint(theOverlap * inTypes[0].frequency());
 	
 	outTypes[0].asA<SignalType>().setFrequency(inTypes[0].frequency() / (float)theStep);
 	setupSamplesIO(max(theCount, theStep), theStep, 1);

@@ -60,11 +60,11 @@ void Player::paintProcessor(QPainter &p)
 	p.setBrush(QColor(232, 232, 232));
 	p.drawRect(2, 24, 146, 4);
 	bool seg = false;
-	for(uint i = 0; i < theLength; i += 60 * theRate)
+	for (uint i = 0; i < theLength; i += 60 * theRate)
 	{	seg = !seg;
 		uint ni = i + 60 * theRate;
-		if(ni > theLength) ni = theLength;
-		if(thePosition > i && thePosition < ni)
+		if (ni > theLength) ni = theLength;
+		if (thePosition > i && thePosition < ni)
 		{	p.fillRect(3 + int(144 * i / theLength), 25, int(144 * (thePosition - i) / theLength), 2, QColor(10, 64, seg ? 232 : 255, QColor::Hsv));
 			p.fillRect(3 + int(144 * thePosition / theLength), 25, int(144 * (ni - thePosition) / theLength), 2, QColor(60, 0, seg ? 232 : 255, QColor::Hsv));
 		}
@@ -81,7 +81,7 @@ bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTy
 
 void Player::specifyOutputSpace(Q3ValueVector<uint> &sizes)
 {
-	for(uint i = 0; i < theChannels; i++)
+	for (uint i = 0; i < theChannels; i++)
 		sizes[i] = theBlockSize * 2;
 }
 
@@ -99,16 +99,16 @@ void Player::processor()
 	int frames = theBlockSize;
 	float buffer[frames * theChannels];
 	int in = 0;
-	while(true)
-	{	if((in = sf_readf_float(theFile, buffer, frames)) > 0)
+	while (true)
+	{	if ((in = sf_readf_float(theFile, buffer, frames)) > 0)
 		{	thePosition += in;
-			for(uint i = 0; i < theChannels; i++)
+			for (uint i = 0; i < theChannels; i++)
 			{	BufferData d = output(i).makeScratchSamples(in);
-				for(int j = 0; j < in; j++) d[j] = buffer[j * theChannels + i];
+				for (int j = 0; j < in; j++) d[j] = buffer[j * theChannels + i];
 				output(i) << d;
 			}
 		}
-		else if(in == 0)
+		else if (in == 0)
 			return;
 		else
 			sf_perror(theFile);

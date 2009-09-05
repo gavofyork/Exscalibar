@@ -46,18 +46,18 @@ RemoteProcessor *AbstractProcessor::create(RemoteSession &session, const QString
 
 void AbstractProcessor::setGroup(AbstractProcessorGroup &g)
 {
-	if(theGroup == &g) return;
-	if(theGroup) theGroup->remove(this);
+	if (theGroup == &g) return;
+	if (theGroup) theGroup->remove(this);
 	theGroup = &g;
-	if(theGroup) theGroup->add(this);
+	if (theGroup) theGroup->add(this);
 }
 
 void AbstractProcessor::setNoGroup()
 {
-	if(!theGroup) return;
+	if (!theGroup) return;
 	AbstractProcessorGroup *d = theGroup;
 	theGroup = 0;
-	if(d) d->remove(this);
+	if (d) d->remove(this);
 }
 
 };

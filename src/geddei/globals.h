@@ -28,8 +28,8 @@ namespace Geddei
 	
 	inline uint ceillog2(uint i)
 	{
-		for(uint l = 0; ; l++)
-			if(i <= uint(1 << l))
+		for (uint l = 0; ; l++)
+			if (i <= uint(1 << l))
 				return l;
 	}
 	

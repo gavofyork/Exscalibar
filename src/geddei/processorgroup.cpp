@@ -14,8 +14,6 @@
 #include "processorgroup.h"
 using namespace Geddei;
 
-#define MESSAGES 0
-
 namespace Geddei
 {
 
@@ -26,7 +24,7 @@ ProcessorGroup::ProcessorGroup(bool adopt) : theAdopt(adopt)
 
 ProcessorGroup::~ProcessorGroup()
 {
-	if(theAdopt) deleteAll();
+	if (theAdopt) deleteAll();
 }
 
 bool ProcessorGroup::exists(const QString &name)
@@ -36,7 +34,7 @@ bool ProcessorGroup::exists(const QString &name)
 
 Processor &ProcessorGroup::get(const QString &name)
 {
-	if(theProcessors.count(name))
+	if (theProcessors.count(name))
 		return *(theProcessors[name]);
 	else
 	{	qFatal("*** FATAL: Attempting to attain a Processor object that does not exist.\n"
@@ -47,7 +45,7 @@ Processor &ProcessorGroup::get(const QString &name)
 
 DomProcessor &ProcessorGroup::dom(const QString &name)
 {
-	if(theProcessors.count(name))
+	if (theProcessors.count(name))
 		return *dynamic_cast<DomProcessor *>(theProcessors[name]);
 	else
 	{	qFatal("*** FATAL: Attempting to attain a Processor object that does not exist.\n"
@@ -58,9 +56,9 @@ DomProcessor &ProcessorGroup::dom(const QString &name)
 
 void ProcessorGroup::add(Processor *o)
 {
-	for(QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if(i.data() == o) return;
-		else if(i.key() == o->name())
+	for (QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+		if (i.data() == o) return;
+		else if (i.key() == o->name())
 			qDebug("*** ERROR: You are using the same name for multiple Processor objects.\n"
 				   "           You have to use a unique name for each object or grouping will not\n"
 				   "           work properly.");
@@ -70,8 +68,8 @@ void ProcessorGroup::add(Processor *o)
 
 void ProcessorGroup::remove(Processor *o)
 {
-	for(QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if(i.data() == o)
+	for (QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+		if (i.data() == o)
 		{	theProcessors.erase(i);
 			o->setNoGroup();
 			return;
@@ -81,10 +79,10 @@ void ProcessorGroup::remove(Processor *o)
 bool ProcessorGroup::confirmTypes() const
 {
 	bool ret = true;
-	if(MESSAGES) qDebug("ProcessorGroup::confirmTypes()");
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-	{	if(MESSAGES) qDebug("ProcessorGroup::confirmTypes(): Confirming %p...", i.data());
-		if(!i.data()->confirmTypes()) ret = false;
+	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes()");
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	{	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes(): Confirming %p...", i.data());
+		if (!i.data()->confirmTypes()) ret = false;
 	}
 	return ret;
 }
@@ -92,34 +90,34 @@ bool ProcessorGroup::confirmTypes() const
 void ProcessorGroup::deleteAll()
 {
 	QMap<QString, Processor *> theProcessorsBU = theProcessors;
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessorsBU.begin(); i != theProcessorsBU.end(); i++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessorsBU.begin(); i != theProcessorsBU.end(); i++)
 		delete i.data();
 	theProcessors.clear();
 }
 
 void ProcessorGroup::disconnectAll()
 {
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		i.data()->disconnectAll();
 }
 
 bool ProcessorGroup::go(bool waitUntilGoing) const
 {
 	bool ret = true;
-//	if(!confirmTypes()) return false;
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if(!i.data()->go()) ret = false;
-	if(ret && waitUntilGoing) return !ProcessorGroup::waitUntilGoing();
+//	if (!confirmTypes()) return false;
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+		if (!i.data()->go()) ret = false;
+	if (ret && waitUntilGoing) return !ProcessorGroup::waitUntilGoing();
 	return ret;
 }
 
 Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *errorData) const
 {
 	Processor::ErrorType ret;
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if((ret = i.data()->waitUntilGoing(errorData)) != Processor::NoError)
-		{	if(errorProc) *errorProc = i.data();
-			for(QMap<QString, Processor *>::ConstIterator j = theProcessors.begin(); j != i; j++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+		if ((ret = i.data()->waitUntilGoing(errorData)) != Processor::NoError)
+		{	if (errorProc) *errorProc = i.data();
+			for (QMap<QString, Processor *>::ConstIterator j = theProcessors.begin(); j != i; j++)
 				j.data()->stop();
 			return ret;
 		}
@@ -129,11 +127,11 @@ Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *
 const QString ProcessorGroup::error() const
 {
 	QString ret;
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 	{
 		Processor::ErrorType e = i.data()->errorType();
-		if(e != Processor::NoError && e != Processor::RecursiveFailure && e != Processor::Pending)
-		{	if(ret.isEmpty()) ret += "  ";
+		if (e != Processor::NoError && e != Processor::RecursiveFailure && e != Processor::Pending)
+		{	if (ret.isEmpty()) ret += "  ";
 			ret += i.data()->name() + ": " + i.data()->error();
 		}
 	}
@@ -142,14 +140,14 @@ const QString ProcessorGroup::error() const
 
 void ProcessorGroup::stop(bool resetToo) const
 {
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		i.data()->stop();
-	if(resetToo) reset();
+	if (resetToo) reset();
 }
 
 void ProcessorGroup::reset() const
 {
-	for(QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 		i.data()->reset();
 }
 

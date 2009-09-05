@@ -83,7 +83,7 @@ public:
 	{
 		bool ret = (theLife == Foreign);
 #ifdef EDEBUG
-		if(ret) assert(theValid);
+		if (ret) assert(theValid);
 #endif
 		return ret;
 	}
@@ -106,7 +106,7 @@ public:
 	{
 		bool ret = (theLife == Foreign && theCounter > 0);
 #ifdef EDEBUG
-		if(ret) assert(theValid);
+		if (ret) assert(theValid);
 #endif
 		return ret;
 	}

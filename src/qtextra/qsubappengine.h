@@ -88,7 +88,7 @@ class QLauncher : public QTimer
 {
 Q_OBJECT
 public slots:
-	void go() { if(QSubApp::theSubApp) QSubApp::theSubApp->start(); }
+	void go() { if (QSubApp::theSubApp) QSubApp::theSubApp->start(); }
 };
 
 // Basically, the main() of a normal Qt program, except we can't call it that

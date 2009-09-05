@@ -34,7 +34,7 @@ public:
 
 bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<SquareMatrix>()) return false;
+	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();
 	theBandwidth = theSize / 2;
 	outTypes[0] = Spectrum(theBandwidth, inTypes[0].frequency(), inTypes[0].asA<SquareMatrix>().pitch());
@@ -43,9 +43,9 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 
 void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for(uint offset = 0; offset < theBandwidth; offset++)
+	for (uint offset = 0; offset < theBandwidth; offset++)
 	{	out[0][offset] = 0;
-		for(uint xy = 0; xy < theSize; xy++)
+		for (uint xy = 0; xy < theSize; xy++)
 			out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
 		out[0][offset] /= theSize;
 	}

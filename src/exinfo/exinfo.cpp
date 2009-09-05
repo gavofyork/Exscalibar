@@ -29,7 +29,7 @@ using namespace Geddei;
 
 int main(int argc, char **argv)
 {
-	if(argc < 2 || (QString(argv[1]) != "list" && QString(argv[1]) != "version" && QString(argv[1]) != "paths"))
+	if (argc < 2 || (QString(argv[1]) != "list" && QString(argv[1]) != "version" && QString(argv[1]) != "paths"))
 	{	cout << "Usage: exinfo <command> [options]" << endl;
 		cout << "Where <command> is one of:" << endl
 			 << "   list      List all *Processor plugins found." << endl
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if(QString(argv[1]) == "version")
+	if (QString(argv[1]) == "version")
 	{
 		cout << "Exscalibar version: " << Geddei::getVersion() << endl;
 		cout << "Exscalibar built with features:"
@@ -53,28 +53,28 @@ int main(int argc, char **argv)
 			 << endl;
 		cout << "(as reported by Geddei)" << endl;
 	}
-	if(QString(argv[1]) == "paths")
+	if (QString(argv[1]) == "paths")
 	{
 		cout << "Plugin paths searched: " << endl << "   " << qPrintable(getPaths().join("\n   ")) << endl;
 	}
-	if(QString(argv[1]) == "list")
+	if (QString(argv[1]) == "list")
 	{
-		if(argc == 3 && QString(argv[2]) != "all" && QString(argv[2]) != "proc" && QString(argv[2]) != "sub")
+		if (argc == 3 && QString(argv[2]) != "all" && QString(argv[2]) != "proc" && QString(argv[2]) != "sub")
 		{	cout << "Usage: exinfo list [proc|sub|all]" << endl;
 			return 1;
 		}
-		if(argc < 3 || QString(argv[2]) == "all" || QString(argv[2]) == "proc")
+		if (argc < 3 || QString(argv[2]) == "all" || QString(argv[2]) == "proc")
 		{
 			QStringList procs = ProcessorFactory::available();
 			cout << procs.count() << " Processors available to Exscalibar:" << endl;
-			for(QStringList::iterator i = procs.begin(); i != procs.end(); i++)
+			for (QStringList::iterator i = procs.begin(); i != procs.end(); i++)
 				cout << "   " << qPrintable(*i) << " (" << qPrintable(ProcessorFactory::version(*i)) << ")" << endl;
 		}
-		if(argc < 3 || QString(argv[2]) == "all" || QString(argv[2]) == "sub")
+		if (argc < 3 || QString(argv[2]) == "all" || QString(argv[2]) == "sub")
 		{
 			QStringList procs = SubProcessorFactory::available();
 			cout << procs.count() << " SubProcessors available to Exscalibar:" << endl;
-			for(QStringList::iterator i = procs.begin(); i != procs.end(); i++)
+			for (QStringList::iterator i = procs.begin(); i != procs.end(); i++)
 				cout << "   " << qPrintable(*i) << " (" << qPrintable(SubProcessorFactory::version(*i)) << ")" << endl;
 		}
 	}

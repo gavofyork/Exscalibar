@@ -41,13 +41,13 @@ SimpleSplit::SimpleSplit(): SubProcessor("SimpleSplit", Out)
 
 void SimpleSplit::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for(uint i = 0; i < multiplicity(); i++)
+	for (uint i = 0; i < multiplicity(); i++)
 		out[i].copyFrom(in[0].mid(i * theWidth, theWidth));
 }
 
 bool SimpleSplit::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	Spectrum s = inTypes[0].asA<Spectrum>();
 	theWidth = s.scope() / multiplicity();
 	s.setScope(theWidth);

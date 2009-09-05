@@ -41,7 +41,7 @@ class DLLEXPORT QCleaner: public QThread, private QMutex
 
 	void run()
 	{
-		while(1)
+		while (1)
 		{	usleep(theInterval * 1000000);
 			purgeAll();
 		}

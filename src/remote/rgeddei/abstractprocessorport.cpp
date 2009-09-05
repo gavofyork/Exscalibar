@@ -35,9 +35,9 @@ bool AbstractProcessorPort::share()
 
 bool AbstractProcessorPort::connect(const AbstractProcessorPort &input)
 {
-	if(dynamic_cast<RemoteProcessor *>(input.theParent))
+	if (dynamic_cast<RemoteProcessor *>(input.theParent))
 		return theParent->connect(thePort, dynamic_cast<RemoteProcessor *>(input.theParent), input.thePort, input.theBufferSize);
-	else if(dynamic_cast<LocalProcessor *>(input.theParent))
+	else if (dynamic_cast<LocalProcessor *>(input.theParent))
 		return theParent->connect(thePort, dynamic_cast<LocalProcessor *>(input.theParent), input.thePort, input.theBufferSize);
 	else
 		return false;

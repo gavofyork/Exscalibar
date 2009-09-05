@@ -65,20 +65,20 @@ void Cepstrum::initFromProperties(const Properties &properties)
 
 Cepstrum::~Cepstrum()
 {
-	if(theIn) fftwf_free(theIn);
-	if(theOut) fftwf_free(theOut);
-	if(thePlan) fftwf_destroy_plan(thePlan);
+	if (theIn) fftwf_free(theIn);
+	if (theOut) fftwf_free(theOut);
+	if (thePlan) fftwf_destroy_plan(thePlan);
 }
 
 bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &s = inTypes[0].asA<Spectrum>();
 
 	theSize = s.size();
-	if(theIn) fftwf_free(theIn);
-	if(theOut) fftwf_free(theOut);
-	if(thePlan) fftwf_destroy_plan(thePlan);
+	if (theIn) fftwf_free(theIn);
+	if (theOut) fftwf_free(theOut);
+	if (thePlan) fftwf_destroy_plan(thePlan);
 	theIn = (float *)fftwf_malloc(sizeof(float) * theSize);
 	theOut = (float *)fftwf_malloc(sizeof(float) * theSize);
 	thePlan = fftwf_plan_r2r_1d(theSize, theIn, theOut, theType == 0 ? FFTW_REDFT00 : theType == 1 ? FFTW_REDFT10 : theType == 2 ? FFTW_REDFT01 : FFTW_REDFT11, theOptimise ? FFTW_MEASURE : FFTW_ESTIMATE);
@@ -92,7 +92,7 @@ void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 //	qDebug("PC: %f, %f, %f...", ins[0][0], ins[0][1], ins[0][2]);
 	ins[0].copyTo(theIn);
 	fftwf_execute(thePlan);
-	for(uint i = 0; i < theSize / 2; i++)
+	for (uint i = 0; i < theSize / 2; i++)
 		theOut[i] /= theSize;
 	outs[0].copyFrom(theOut);
 //	qDebug("PCx: %f, %f, %f...", outs[0][0], outs[0][1], outs[0][2]);
@@ -120,9 +120,9 @@ void Cepstrum::initFromProperties(const Properties &)
 
 void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < theSize / 2; i++)
+	for (uint i = 0; i < theSize / 2; i++)
 	{	float t = 0.0;
-		for(uint j = 0; j < theSize; j++)
+		for (uint j = 0; j < theSize; j++)
 			t += ins[0][j] * cos(M_PI / float(theSize / 2) * (i + 1.0) * (j + 0.5));
 		outs[0][i] = t / float(theSize);
 	}
@@ -130,7 +130,7 @@ void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 
 bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &s = inTypes[0].asA<Spectrum>();
 
 	theSize = s.scope();

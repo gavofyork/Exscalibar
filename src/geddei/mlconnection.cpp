@@ -60,7 +60,7 @@ void MLConnection::killReader()
 
 void MLConnection::resurectReader()
 {
-	if(!theReader)
+	if (!theReader)
 		theReader = new BufferReader(&(theConnection->theBuffer));
 }
 
@@ -77,7 +77,7 @@ void MLConnection::enforceMinimum(uint elements)
 uint MLConnection::elementsReady() const
 {
 #ifdef EDEBUG
-	if(!theReader)
+	if (!theReader)
 	{	qWarning("*** WARNING: elementsReady() cannot be called on an MLConnection object after\n"
 				 "             killReader() has been called. Ignoring this call.\n");
 		return 0;
@@ -91,7 +91,7 @@ uint MLConnection::elementsReady() const
 void MLConnection::waitForElements(uint elements) const
 {
 #ifdef EDEBUG
-	if(!theReader)
+	if (!theReader)
 	{	qWarning("*** WARNING: waitForElements() cannot be called on an MLConnection object after\n"
 				 "             killReader() has been called. Ignoring this call.\n");
 		return;
@@ -105,7 +105,7 @@ void MLConnection::waitForElements(uint elements) const
 bool MLConnection::plungeSync(uint samples) const
 {
 #ifdef EDEBUG
-	if(!theReader)
+	if (!theReader)
 	{	qWarning("*** WARNING: plungeSync() cannot be called on an MLConnection object after\n"
 				 "             killReader() has been called. Ignoring this call.\n");
 		return false;
@@ -114,7 +114,7 @@ bool MLConnection::plungeSync(uint samples) const
 	
 	BufferData ret = theReader->readElements(theType->scope() * samples, false);
 	theSink->checkExit();
-	if(ret.plunger())
+	if (ret.plunger())
 	{
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
@@ -126,17 +126,17 @@ bool MLConnection::plungeSync(uint samples) const
 const BufferData MLConnection::readElements(uint elements)
 {
 #ifdef EDEBUG
-	if(!theReader)
+	if (!theReader)
 	{	qWarning("*** WARNING: readElements() cannot be called on an MLConnection object after\n"
 				 "             killReader() has been called. Ignoring this call.\n");
 		return BufferData();
 	}
 #endif
 	
-	while(1)
+	while (1)
 	{	BufferData ret = theReader->readElements(elements, true);
 		theSink->checkExit();
-		if(!ret.plunger()) return ret;
+		if (!ret.plunger()) return ret;
 		// This is a workaround for a buggy gcc (3.2.2).
 		// If it wasn't here stuff wouldn't get freed up in the buffer.
 		// As it is, there are deallocation problems, since the last instance of ret
@@ -149,17 +149,17 @@ const BufferData MLConnection::readElements(uint elements)
 const BufferData MLConnection::peekElements(uint elements)
 {
 #ifdef EDEBUG
-	if(!theReader)
+	if (!theReader)
 	{	qWarning("*** WARNING: peekElements() cannot be called on an MLConnection object after\n"
 				 "             killReader() has been called. Ignoring this call.\n");
 		return BufferData();
 	}
 #endif
 	
-	while(1)
+	while (1)
 	{	BufferData ret = theReader->readElements(elements, false);
 		theSink->checkExit();
-		if(!ret.plunger()) return ret;
+		if (!ret.plunger()) return ret;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 	}
@@ -199,7 +199,7 @@ bool MLConnection::waitUntilReady()
 
 const SignalTypeRef MLConnection::type()
 {
-	if(!theType) theType = (theConnection->type().thePtr ? theConnection->type().thePtr->copy() : 0);
+	if (!theType) theType = (theConnection->type().thePtr ? theConnection->type().thePtr->copy() : 0);
 	return SignalTypeRef(theType);
 }
 

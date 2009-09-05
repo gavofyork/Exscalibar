@@ -38,14 +38,14 @@ LMConnection::~LMConnection()
 
 void LMConnection::enforceMinimum(uint elements)
 {
-	if(theBuffer.size() < elements)
+	if (theBuffer.size() < elements)
 		theBuffer.resize(elements);
 }
 
 bool LMConnection::waitUntilReady()
 {
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		if(!(*i)->waitUntilReady()) return false;
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+		if (!(*i)->waitUntilReady()) return false;
 	return true;
 }
 
@@ -56,7 +56,7 @@ void LMConnection::reset()
 
 const SignalTypeRef LMConnection::type()
 {
-	if(!theType) theSource->confirmTypes();
+	if (!theType) theSource->confirmTypes();
 	return SignalTypeRef(theType);
 }
 
@@ -64,7 +64,7 @@ void LMConnection::setType(const SignalType *type)
 {
 	delete theType;
 	theType = type->copy();
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->setType(type);
 	theBuffer.setType(theType);
 }
@@ -73,7 +73,7 @@ void LMConnection::resetType()
 {
 	delete theType;
 	theType = 0;
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->resetType();
 
 	// TODO: Reset the type in the buffer too really...
@@ -99,7 +99,7 @@ uint LMConnection::maximumScratchElementsEver()
 
 uint LMConnection::maximumScratchElements(uint minimum)
 {
-	while(bufferElementsFree() < minimum)
+	while (bufferElementsFree() < minimum)
 		bufferWaitForFree();
 	return bufferElementsFree();
 }
@@ -107,7 +107,7 @@ uint LMConnection::maximumScratchElements(uint minimum)
 BufferData LMConnection::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret;
-	if(theBuffer.size() >= elements)
+	if (theBuffer.size() >= elements)
 		ret = theBuffer.makeScratchElements(elements, autoPush);
 	else
 		ret = LxConnection::makeScratchElements(elements, autoPush);
@@ -118,28 +118,28 @@ BufferData LMConnection::makeScratchElements(uint elements, bool autoPush)
 
 void LMConnection::startPlungers()
 {
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->startPlungers();
 }
 
 void LMConnection::plungerSent()
 {
-	if(MESSAGES) qDebug("> LMConnection::plungerSent()");
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	if (MESSAGES) qDebug("> LMConnection::plungerSent()");
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->plungerSent();
-	if(MESSAGES) qDebug("< LMConnection::plungerSent()");
+	if (MESSAGES) qDebug("< LMConnection::plungerSent()");
 }
 
 void LMConnection::pushPlunger()
 {
-	if(MESSAGES) qDebug("> LMConnection::pushPlunger()");
+	if (MESSAGES) qDebug("> LMConnection::pushPlunger()");
 	theBuffer.appendPlunger();
-	if(MESSAGES) qDebug("< LMConnection::pushPlunger()");
+	if (MESSAGES) qDebug("< LMConnection::pushPlunger()");
 }
 
 void LMConnection::noMorePlungers()
 {
-	for(Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
+	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
 		(*i)->noMorePlungers();
 }
 

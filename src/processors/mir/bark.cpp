@@ -39,18 +39,18 @@ static uint barkBands[24] = { 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270
 
 void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for(uint i = 0; i < theUsedBins; i++)
+	for (uint i = 0; i < theUsedBins; i++)
 		outs[0][i] = 0.0;
 	uint bandCount = 0;
-	for(uint i = 0, o = 0; i < bandWidth; i++)
+	for (uint i = 0, o = 0; i < bandWidth; i++)
 	{
 		assert(o < theUsedBins);
-		if(i == theBins[o])
+		if (i == theBins[o])
 		{	
 			outs[0][o] /= max(float(bandCount), 1.f);
 			bandCount = 0;
 			++o;
-			if(o == theUsedBins) break;
+			if (o == theUsedBins) break;
 		}
 		outs[0][o] += ins[0][i];
 		bandCount++;
@@ -61,15 +61,15 @@ void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	// TODO: should only take a "stepped spectrum" in.
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &in = inTypes[0].asA<Spectrum>();
 	outTypes[0] = Spectrum(theUsedBins, in.frequency(), 1);
 
 	bandWidth = in.size();
 	uint o = 0;
 	float inc = in.step(), f = 0.;
-	for(uint i = 0; i < 24; i++)
-	{	while(f < barkBands[i])
+	for (uint i = 0; i < 24; i++)
+	{	while (f < barkBands[i])
 		{	f += inc;
 			o++;
 		}

@@ -61,7 +61,7 @@ void DomProcessor::paintProcessor(QPainter &p)
 bool DomProcessor::createAndAddWorker()
 {
 	SubProcessor *sub = SubProcessorFactory::create(thePrimary->theType);
-	if(!sub) return false;
+	if (!sub) return false;
 	addWorker(sub);
 	return true;
 }
@@ -73,40 +73,40 @@ bool DomProcessor::createAndAddWorker(const QString &host, uint key)
 
 void DomProcessor::wantToStopNow()
 {
-	if(MESSAGES) qDebug("DomProcessor[%s]: Initiating stop..", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Initiating stop..", theName.latin1());
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Unlocking queue...", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Unlocking queue...", theName.latin1());
 	{	QMutexLocker lock(&theQueueLock);
 		theQueueChanged.wakeAll();
 	}
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: %d workers.", theName.latin1(), theWorkers.count());
+	if (MESSAGES) qDebug("DomProcessor[%s]: %d workers.", theName.latin1(), theWorkers.count());
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Informing couplings...", theName.latin1());
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	if (MESSAGES) qDebug("DomProcessor[%s]: Informing couplings...", theName.latin1());
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 		(*w)->stopping();
-	if(MESSAGES) qDebug("DomProcessor[%s]: OK.", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: OK.", theName.latin1());
 }
 
 void DomProcessor::haveStoppedNow()
 {
-	if(MESSAGES) qDebug("DomProcessor[%s]: Stopped.", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Stopped.", theName.latin1());
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Waiting on eater...", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Waiting on eater...", theName.latin1());
 	theEaterThread.wait();
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Closing trapdoors...", theName.latin1());
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	if (MESSAGES) qDebug("DomProcessor[%s]: Closing trapdoors...", theName.latin1());
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 		(*w)->stopped();
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Stopping workers...", theName.latin1());
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	if (MESSAGES) qDebug("DomProcessor[%s]: Stopping workers...", theName.latin1());
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 		(*w)->stop();
 
-	if(MESSAGES) qDebug("DomProcessor[%s]: Deleting our readers and resurecting...", theName.latin1());
-	for(uint i = 0; i < numInputs(); i++)
-		if(theInputs[i])
-		{	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	if (MESSAGES) qDebug("DomProcessor[%s]: Deleting our readers and resurecting...", theName.latin1());
+	for (uint i = 0; i < numInputs(); i++)
+		if (theInputs[i])
+		{	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 				delete (*w)->theReaders[i];
 			theInputs[i]->resurectReader();
 		}
@@ -114,39 +114,39 @@ void DomProcessor::haveStoppedNow()
 
 bool DomProcessor::processorStarted()
 {
-	if(MESSAGES) qDebug("DomProcessor[%s]: Starting...", theName.latin1());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Starting...", theName.latin1());
 
 	// Sort out all the buffer readers.
-	for(uint i = 0; i < numInputs(); i++)
-		if(theInputs[i])
+	for (uint i = 0; i < numInputs(); i++)
+		if (theInputs[i])
 			theInputs[i]->killReader();
 			// In fact otherwise this would be a fatal error, but now it not the time to catch that.
 			// It will be caught in confirmTypes instead.
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 	{	(*w)->theReaders.resize(numInputs());
-		for(uint i = 0; i < numInputs(); i++)
-			if(theInputs[i])
+		for (uint i = 0; i < numInputs(); i++)
+			if (theInputs[i])
 				(*w)->theReaders[i] = theInputs[i]->newReader();
 	}
-	if(MESSAGES) qDebug("DomProcessor[%s]: Startup done (workers: %d)", theName.latin1(), theWorkers.count());
+	if (MESSAGES) qDebug("DomProcessor[%s]: Startup done (workers: %d)", theName.latin1(), theWorkers.count());
 	return true;
 }
 
 void DomProcessor::processor()
 {
-	if(MESSAGES && theDebug) qDebug("DomProcessor[%s]::processor(): Starting main loop...", theName.latin1());
+	if (MESSAGES && theDebug) qDebug("DomProcessor[%s]::processor(): Starting main loop...", theName.latin1());
 
 	// Figure out theNomChunks from the buffer capacities.
 	uint minInCap = Undefined;
-	for(uint i = 0; i < numInputs(); i++)
-		if(minInCap > (*theWorkers.begin())->theReaders[i]->size() / (*theWorkers.begin())->theReaders[i]->type()->scope())
+	for (uint i = 0; i < numInputs(); i++)
+		if (minInCap > (*theWorkers.begin())->theReaders[i]->size() / (*theWorkers.begin())->theReaders[i]->type()->scope())
 			minInCap = (*theWorkers.begin())->theReaders[i]->size() / (*theWorkers.begin())->theReaders[i]->type()->scope();
 	theNomChunks = ((minInCap - theSamplesIn) / theSamplesStep + 1) / theWorkers.count();
 	uint minOutCap = Undefined;
-	for(uint i = 0; i < numOutputs(); i++)
-		if(minOutCap > output(i).maximumScratchSamplesEver())
+	for (uint i = 0; i < numOutputs(); i++)
+		if (minOutCap > output(i).maximumScratchSamplesEver())
 			minOutCap = output(i).maximumScratchSamplesEver();
-	if(minOutCap != Undefined)
+	if (minOutCap != Undefined)
 		theNomChunks = min(theNomChunks, minOutCap / theSamplesOut / theWorkers.count());
 
 	// We set nom to halve of the maximum possible in order to behave normally when the output
@@ -156,10 +156,10 @@ void DomProcessor::processor()
 	// for halve the maximum possible chunks then we should be ok.
 	theNomChunks = (theNomChunks + 1 - theSamplesIn / theSamplesStep) / 2;
 
-	if(lMESSAGES && theDebug) qDebug("DomProcessor[%s]: tNC=%d, mIC=%d, mOC=%d)...", theName.latin1(), theNomChunks, minInCap, minOutCap);
+	if (lMESSAGES && theDebug) qDebug("DomProcessor[%s]: tNC=%d, mIC=%d, mOC=%d)...", theName.latin1(), theNomChunks, minInCap, minOutCap);
 
 	// Start all sub-processors
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 	{	(*w)->theLoad = theNomChunks;
 		(*w)->go();
 	}
@@ -169,20 +169,20 @@ void DomProcessor::processor()
 	theQueueLen = 0;
 	theLimbo = false;
 
-	if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Starting eater thread...", theName.latin1());
+	if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Starting eater thread...", theName.latin1());
 	theStopped = false;
 	theEaterThread.start();
 
 	bool wasPlunger = false;
 
 	Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin();
-	while(1)
+	while (1)
 	{
 
 		// Wait until there's room in the queue for another job, or the last iteration just pushed a plunger
 		// (which means the queue may look full, but the current worker is, in fact, not busy, since it only
 		// pushed a plunger).
-		while(theQueueLen == theWorkers.count() && !wasPlunger)
+		while (theQueueLen == theWorkers.count() && !wasPlunger)
 		{	checkExitDontLock();
 			theQueueChanged.wait(&theQueueLock);
 		}
@@ -197,22 +197,22 @@ void DomProcessor::processor()
 		uint willReadSamples, willReadChunks, discardFromOthers = 0;
 
 		// Wait for the data to be ready...
-		if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Waiting for a nominal (%d) or at least minimal (%d) amount of data...", theName.latin1(), wouldReadSamples, theSamplesIn);
+		if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Waiting for a nominal (%d) or at least minimal (%d) amount of data...", theName.latin1(), wouldReadSamples, theSamplesIn);
 		(*w)->theReaders[0]->waitForElements(wouldReadSamples * (*w)->theReaders[0]->type()->scope());
 
 		// Make sure that we don't have to exit now.
-		if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Checking exit status...", theName.latin1());
+		if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Checking exit status...", theName.latin1());
 		checkExit();
 
 		// Find out how much we will be reading
 		uint availableSamples = min(wouldReadSamples, (*w)->theReaders[0]->type()->samples((*w)->theReaders[0]->elementsReady()));
-		if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples ready for reading...", theName.latin1(), availableSamples);
+		if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples ready for reading...", theName.latin1(), availableSamples);
 
 		// If we don't get to read a useful amount (i.e. less than one single chunk)
-		if(availableSamples < theSamplesIn)
+		if (availableSamples < theSamplesIn)
 		{
 #ifdef EDEBUG
-			if((*w)->theReaders[0]->elementsReady() % (*w)->theReaders[0]->type()->scope())
+			if ((*w)->theReaders[0]->elementsReady() % (*w)->theReaders[0]->type()->scope())
 				qWarning("*** CRITICAL: A plunger is not on a sample boundary! The stream is corrupt.\n");
 #endif
 			// We don't actually read anything
@@ -225,7 +225,7 @@ void DomProcessor::processor()
 			// We must do us first, since another reader may be already at the plunger
 			//  and thus cannot read past it. Then must then send the plunger immediately,
 			//  since other readers may be ahead of us and unable to read past it.
-			if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Plunger after %d samples. Skipping samples and plunging on %p...", theName.latin1(), availableSamples, *w);
+			if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Plunger after %d samples. Skipping samples and plunging on %p...", theName.latin1(), availableSamples, *w);
 			(*w)->skipPlungeAndSend(availableSamples);
 			checkExit();
 		}
@@ -234,7 +234,7 @@ void DomProcessor::processor()
 			willReadSamples = theSamplesStep * (willReadChunks - 1) + theSamplesIn;
 			discardFromOthers = willReadChunks * theSamplesStep;
 
-			if(MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples (%d chunks) available. Reading & sending to %p...", theName.latin1(), willReadSamples, willReadChunks, *w);
+			if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples (%d chunks) available. Reading & sending to %p...", theName.latin1(), willReadSamples, willReadChunks, *w);
 			(*w)->peekAndSend(willReadSamples, willReadChunks);
 			(*w)->skip(discardFromOthers);
 			checkExit();
@@ -242,11 +242,11 @@ void DomProcessor::processor()
 
 		// If this is the first time we're pushing something to this SubProc, then we want the
 		// queue len to increase. It would be the first time if the last time was data.
-		if(MESSAGES && theDebug) qDebug("DomProcessor: Checking wasPlunger (%d).", wasPlunger);
+		if (MESSAGES && theDebug) qDebug("DomProcessor: Checking wasPlunger (%d).", wasPlunger);
 		theQueueLock.lock();
-		if(!wasPlunger)
+		if (!wasPlunger)
 		{
-			if(MESSAGES && theDebug) qDebug("DomProcessor: Incrementing queue length.");
+			if (MESSAGES && theDebug) qDebug("DomProcessor: Incrementing queue length.");
 			theQueueLen++;
 			theQueueChanged.wakeAll();
 		}
@@ -254,22 +254,22 @@ void DomProcessor::processor()
 		theQueueChanged.wakeAll();
 		theQueueLock.unlock();
 
-		if(hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
-		if(MESSAGES && theDebug) qDebug("DomProcessor: Skipping %d samples on others...", discardFromOthers);
-		for(Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end(); x++)
-			if(*x != *w) (*x)->skip(discardFromOthers);
+		if (hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
+		if (MESSAGES && theDebug) qDebug("DomProcessor: Skipping %d samples on others...", discardFromOthers);
+		for (Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end(); x++)
+			if (*x != *w) (*x)->skip(discardFromOthers);
 
-		if(hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
+		if (hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
 
 		// If we processed real data, then we want to go on.
 		// If we only processed a plunger, we want to stay still.
-		if(willReadChunks)
+		if (willReadChunks)
 		{	w++;
-			if(w == theWorkers.end()) w = theWorkers.begin();
-			if(MESSAGES && theDebug)
+			if (w == theWorkers.end()) w = theWorkers.begin();
+			if (MESSAGES && theDebug)
 			{	qDebug("\n---- NEXT WORKER ----");
 				char c = 'A';
-				for(Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end() && x != w; x++, c++) {}
+				for (Q3PtrList<DxCoupling>::Iterator x = theWorkers.begin(); x != theWorkers.end() && x != w; x++, c++) {}
 				qDebug("--------- %c ---------", c);
 			}
 		}
@@ -281,13 +281,13 @@ void DomProcessor::processor()
 		theQueueLock.lock();
 
 		// If we just pushed a plunger, wait until it has been processed (i.e. limbo has been acknowledged)
-		if(wasPlunger)
-		{	if(MESSAGES && theDebug) qDebug("DomProcessor: Waiting for limbo to be acked (or to be stopped)...");
-			while(!theLimbo)
+		if (wasPlunger)
+		{	if (MESSAGES && theDebug) qDebug("DomProcessor: Waiting for limbo to be acked (or to be stopped)...");
+			while (!theLimbo)
 			{	checkExitDontLock();
 				theQueueChanged.wait(&theQueueLock);
 			}
-			if(MESSAGES && theDebug) qDebug("DomProcessor: Limbo acked!");
+			if (MESSAGES && theDebug) qDebug("DomProcessor: Limbo acked!");
 		}
 	}
 }
@@ -298,80 +298,80 @@ void DomProcessor::eater()
 
 	uint lastPri = 0;
 
-	if(MESSAGES && theDebug) qDebug("Eater: Starting...");
+	if (MESSAGES && theDebug) qDebug("Eater: Starting...");
 	QTime clock;
 	clock.start();
 	bool balanceLoad = theBalanceLoad && theWorkers.count() > 1;
 	uint tc = theNomChunks * theWorkers.count();
 	float speeds[theWorkers.count()];
-	for(uint i = 0; i < theWorkers.count(); i++) speeds[i] = 0.;
+	for (uint i = 0; i < theWorkers.count(); i++) speeds[i] = 0.;
 	QMutexLocker lock(&theQueueLock);
-	while(1)
+	while (1)
 	{
-		if(MESSAGES && theDebug) qDebug("Eater: Waiting for a new producer...");
-		while(!theQueueLen)
-		{	//if(MESSAGES && theDebug) qDebug("Eater: None in queue yet...");
+		if (MESSAGES && theDebug) qDebug("Eater: Waiting for a new producer...");
+		while (!theQueueLen)
+		{	//if (MESSAGES && theDebug) qDebug("Eater: None in queue yet...");
 			checkExitDontLock();
 			theQueueChanged.wait(&theQueueLock);
 		}
 		DxCoupling *w = *theQueuePos;
 		theQueueLock.unlock();
-		if(MESSAGES && theDebug) qDebug("Eater: Waiting for producer %p to return results...", w);
+		if (MESSAGES && theDebug) qDebug("Eater: Waiting for producer %p to return results...", w);
 		bool justPlunger;
 		{	BufferDatas d = w->returnResults();
 
-			if(w == thePrimaryCoupling && lastPri && balanceLoad)
+			if (w == thePrimaryCoupling && lastPri && balanceLoad)
 			{
 				int i = 0;
-				for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
+				for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
 					speeds[i] = speeds[i] * .95 + float((*w)->theLoad) / float((*w)->theLastTimeTaken+1.) * .05;
-				if(uint(clock.elapsed()) > theBalanceInterval)
+				if (uint(clock.elapsed()) > theBalanceInterval)
 				{
 					// Sort out load balancing.
 					float ts = 0.;
 					int i = 0;
-					for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
+					for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
 						ts += speeds[i] * (dynamic_cast<DSCoupling *>(*w) ? theLocalFudge : 1.);
-					if(lMESSAGES && theDebug)
+					if (lMESSAGES && theDebug)
 					{
 						QString s;
 						qDebug("Total chunks: %d. Total speeds (after fudge): %f", tc, ts);
 						i = 0;
-						for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
+						for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
 							s += "   [" + QString::number((*w)->theLoad) + "/" + QString::number((*w)->theLastTimeTaken+1.) + "=" + QString::number(speeds[i]) + "]";
 						qDebug("Time/load:%s", s.latin1());
 						clock.start();
 					}
 					i = 0;
-					for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
+					for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++,i++)
 					{	float ratio = speeds[i] * (dynamic_cast<DSCoupling *>(*w) ? theLocalFudge : 1.) / ts;
 						(*w)->theLoad = uint(round(  /*round(ratio * 16.f) / 16.f*/ratio * float(tc)  ));
-						if(lMESSAGES && theDebug) qDebug("Adjusting load... speed = %f, tc = %d, ratio = %f, ratio16 = %f, ts = %f, res = %d", speeds[i], tc, ratio, round(ratio * 16.f) / 16.f, ts, (*w)->theLoad);
+						if (lMESSAGES && theDebug) qDebug("Adjusting load... speed = %f, tc = %d, ratio = %f, ratio16 = %f, ts = %f, res = %d", speeds[i], tc, ratio, round(ratio * 16.f) / 16.f, ts, (*w)->theLoad);
 					}
-					if(theDebug)
+					if (theDebug)
 					{
 						QString s;
-						for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+						for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 							s += "   " + QString::number((*w)->theLoad);
 						qDebug("New loads:%s", s.latin1());
 					}
 
-					//for(int i = 0; i < theWorkers.count(); i++) speeds[i] = 0.;
+					//for (int i = 0; i < theWorkers.count(); i++) speeds[i] = 0.;
 					clock.start();
 				}
 			}
 			lastPri = w->theLastTimeTaken;
 
-/*			else if(lastPri && w->theLastTimeTaken)
-			{	if(w->theLastTimeTaken > lastPri * 4 / 3 && w)
+/*			else if (lastPri && w->theLastTimeTaken)
+			{	if (w->theLastTimeTaken > lastPri * 4 / 3 && w)
 				{	// TODO: use relative increments, not just 1
-					if(
+					if (
 					w->theLoad = min(theMaxChunks, (uint)max(1, w->theLoad - 1));
-					if(MESSAGES && theDebug) qDebug("Eater: SubProc %p has been decreased to %d due to %d ms lateness (Primary=%d)", w, w->theLoad, w->theLastTimeTaken, lastPri);
+					if (MESSAGES && theDebug) qDebug("Eater: SubProc %p has been decreased to %d due to %d ms lateness (Primary=%d)", w, w->theLoad, w->theLastTimeTaken, lastPri);
 				}
-				else if(w->theLastTimeTaken < lastPri * 3 / 4)
+				else if (w->theLastTimeTaken < lastPri * 3 / 4)
 				{	w->theLoad = min(theMaxChunks, (uint)max(1, w->theLoad + 1));
-					if(MESSAGES && theDebug) qDebug("Eater: SubProc %p has been increased to %d due to %d ms speed (Primary=%d)", w, w->theLoad, w->theLastTimeTaken, lastPri);
+					if (MESSAGES && theDebug) qDebug("Eater: SubProc %p has been increased to %d due to %d ms speed (Primary=%d)", w, w->theLoad, w->theLastTimeTaken, lastPri);
 				}
 			}
 */
@@ -380,54 +380,54 @@ void DomProcessor::eater()
 			// be unreliable in valgrind. we can, however, assume (for now) that
 			// plunged == (d.size() == 0), since we only ever send a plunger with no data.
 			justPlunger = (d.size() == 0) && numOutputs();
-			//if(MESSAGES) qDebug("Eater: Got results (plunger: %d)...", plu);
+			//if (MESSAGES) qDebug("Eater: Got results (plunger: %d)...", plu);
 
-			if(!justPlunger)
-				for(uint i = 0; i < numOutputs(); i++)
+			if (!justPlunger)
+				for (uint i = 0; i < numOutputs(); i++)
 				{
-					for(uint e = 0; e < d[i].elements(); e++)
+					for (uint e = 0; e < d[i].elements(); e++)
 					{
-						if(isnan(d[i][e]) || isinf(d[i][e]))
+						if (isnan(d[i][e]) || isinf(d[i][e]))
 						{
 							qDebug("%s: Contains non-finite value on output %d, element %d", name().latin1(), i, e);
 						}
 					}
 				}
 
-			if(MESSAGES && theDebug)
-			{	if(justPlunger)
+			if (MESSAGES && theDebug)
+			{	if (justPlunger)
 					qDebug("Eater: Pushing plunger...");
 				else
 					qDebug("Eater: Pushing data (samples=%d)", numOutputs() ? d[0].samples() : 0);
 			}
-			for(uint i = 0; i < numOutputs(); i++)
-				if(justPlunger)
+			for (uint i = 0; i < numOutputs(); i++)
+				if (justPlunger)
 					output(i).pushPlunger();
 				else
 					output(i).push(d[i]);
-			if(MESSAGES && theDebug) qDebug("Eater: Results returned.");
+			if (MESSAGES && theDebug) qDebug("Eater: Results returned.");
 		}
 		theQueueLock.lock();
 
-		if(!justPlunger)
+		if (!justPlunger)
 		{
-			if(MESSAGES && theDebug) qDebug("Eater: Removing producer %p...", w);
+			if (MESSAGES && theDebug) qDebug("Eater: Removing producer %p...", w);
 			theQueueLen--;
 			theQueuePos++;
-			if(theQueuePos == theWorkers.end())
+			if (theQueuePos == theWorkers.end())
 				theQueuePos = theWorkers.begin();
 			theQueueChanged.wakeAll();
 		}
 		else
-		{	if(MESSAGES && theDebug) qDebug("Eater: Acking limbo...");
+		{	if (MESSAGES && theDebug) qDebug("Eater: Acking limbo...");
 			theLimbo = true;
 			theQueueChanged.wakeAll();
-			if(MESSAGES && theDebug) qDebug("Eater: Waiting for limbo to be reset, so I can continue (or stopping)...");
-			while(theLimbo)
+			if (MESSAGES && theDebug) qDebug("Eater: Waiting for limbo to be reset, so I can continue (or stopping)...");
+			while (theLimbo)
 			{	checkExitDontLock();
 				theQueueChanged.wait(&theQueueLock);
 			}
-			if(MESSAGES && theDebug) qDebug("Eater: Continuing.");
+			if (MESSAGES && theDebug) qDebug("Eater: Continuing.");
 		}
 	}
 }
@@ -439,7 +439,7 @@ void DomProcessor::addWorker(SubProcessor *worker)
 
 void DomProcessor::ratify(DxCoupling *c)
 {
-	if(theIsInitialised)
+	if (theIsInitialised)
 	{
 		c->initFromProperties(theProperties);
 		c->defineIO(numInputs(), numOutputs());
@@ -453,31 +453,31 @@ void DomProcessor::EaterThread::run()
 		theDomProcessor->eater();
 	}
 	catch(const BailException &) {}
-	if(MESSAGES) qDebug("Eater: Exiting...");
+	if (MESSAGES) qDebug("Eater: Exiting...");
 }
 
 void DomProcessor::checkExitDontLock()
 {
-	if(MESSAGES&&0) qDebug("DomProcessor [%p]: Checking exit (not locking)...", this);
+	if (MESSAGES&&0) qDebug("DomProcessor [%p]: Checking exit (not locking)...", this);
 	bool doThrow = false;
 	theStop.lock();
-	if(theStopping) doThrow = true;
+	if (theStopping) doThrow = true;
 	theStop.unlock();
-	if(MESSAGES&&0) qDebug("DomProcessor [%p]: doThrow = %d.", this, doThrow);
+	if (MESSAGES&&0) qDebug("DomProcessor [%p]: doThrow = %d.", this, doThrow);
 
-	if(doThrow) bail();
+	if (doThrow) bail();
 }
 
 void DomProcessor::checkExit()
 {
-	if(MESSAGES&&0) qDebug("DomProcessor [%p]: Checking exit (will lock)...", this);
+	if (MESSAGES&&0) qDebug("DomProcessor [%p]: Checking exit (will lock)...", this);
 	bool doThrow = false;
 	theStop.lock();
-	if(theStopping) doThrow = true;
+	if (theStopping) doThrow = true;
 	theStop.unlock();
-	if(MESSAGES&&0) qDebug("DomProcessor [%p]: doThrow = %d.", this, doThrow);
+	if (MESSAGES&&0) qDebug("DomProcessor [%p]: doThrow = %d.", this, doThrow);
 
-	if(doThrow)
+	if (doThrow)
 	{	theQueueLock.lock();
 		bail();
 	}
@@ -494,11 +494,11 @@ bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 	theSamplesOut = thePrimary->theOut;
 
 	// Now we need a quick hack here since if we're a MultiOut, all outTypes==outTypes[0]:
-	if(theMulti&Out && outTypes.count() && outTypes.populated(0))
+	if (theMulti&Out && outTypes.count() && outTypes.populated(0))
 		outTypes.setFill(outTypes.ptrAt(0), false);
 
-	if(ret)
-		for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	if (ret)
+		for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 			(*w)->specifyTypes(inTypes, outTypes);
 	return ret;
 }
@@ -524,11 +524,11 @@ void DomProcessor::initFromProperties(const Properties &properties)
 	theBalanceLoad = properties["Balance Load"].toBool();
 	theBalanceInterval = properties["Balance Interval"].toInt();
 	theLocalFudge = properties["Local Fudge"].toDouble();
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 		(*w)->initFromProperties(properties);
 	theProperties = properties;
 	setupIO(thePrimary->theNumInputs, thePrimary->theNumOutputs);
-	for(Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
+	for (Q3PtrList<DxCoupling>::Iterator w = theWorkers.begin(); w != theWorkers.end(); w++)
 		(*w)->defineIO(numInputs(), numOutputs());
 }
 
@@ -536,19 +536,19 @@ void DomProcessor::specifyInputSpace(Q3ValueVector<uint> &samples)
 {
 	uint minimumSize = (theSamplesIn + theSamplesStep * (theWorkers.count() - 1));
 	uint optimalSize = Undefined;
-	for(uint i = 0; i < (uint)samples.count(); i++)
-		if(optimalSize > max(theOptimalThroughput / input(i).type().scope(), minimumSize))
+	for (uint i = 0; i < (uint)samples.count(); i++)
+		if (optimalSize > max(theOptimalThroughput / input(i).type().scope(), minimumSize))
 			optimalSize = max(theOptimalThroughput / input(i).type().scope(), minimumSize);
 	theWantSize = uint(ceil(exp((log(double(optimalSize)) - log(double(minimumSize))) * theWeighting + log(double(minimumSize)))));
-	for(uint i = 0; i < (uint)samples.count(); i++)
+	for (uint i = 0; i < (uint)samples.count(); i++)
 		samples[i] = theAlterBuffer ? theWantSize : minimumSize;
 
-	if(theDebug && lMESSAGES) qDebug("sIS (%s): minimum=%d, workers=%d, optimal=%d, want=%d, alter=%d", name().latin1(), minimumSize, theWorkers.count(), optimalSize, theWantSize, theAlterBuffer);
+	if (theDebug && lMESSAGES) qDebug("sIS (%s): minimum=%d, workers=%d, optimal=%d, want=%d, alter=%d", name().latin1(), minimumSize, theWorkers.count(), optimalSize, theWantSize, theAlterBuffer);
 }
 
 void DomProcessor::specifyOutputSpace(Q3ValueVector<uint> &samples)
 {
-	for(uint i = 0; i < (uint)samples.count(); i++)
+	for (uint i = 0; i < (uint)samples.count(); i++)
 		samples[i] = theAlterBuffer ? ((theWantSize - theSamplesIn) / theSamplesStep + 1) * theSamplesOut : theSamplesOut * theWorkers.count();
 }
 

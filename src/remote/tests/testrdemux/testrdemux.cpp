@@ -72,7 +72,7 @@ void MySubApp::main()
 	g["X"][0] >>= /*g["D"][0];
 	g["D"][0] >>= */g["I"][0];
 
-	if(!g.go()) qFatal("Problem starting processors. Bailing.");
+	if (!g.go()) qFatal("Problem starting processors. Bailing.");
 	monitor.waitForPlunger();
 	g.stop();
 

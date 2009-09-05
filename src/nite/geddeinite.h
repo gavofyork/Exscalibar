@@ -48,51 +48,16 @@ class WatchProcessor;
 class ProcessorView;
 
 /** @internal
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  */
 class GeddeiNite: public QMainWindow, public Ui::GeddeiNiteBase
 {
 	Q_OBJECT
 
-	QString theFilename;
-
-	QPrinter *printer;
-	QString filename;
-	Q3Canvas *theCanvas;
-	Q3CanvasItem *theActive;
-	QDockWidget *theDockSelector, *theDockProperties;
-	Q3Table *theProperties;
-	ProcessorView *theSelector;
-	WatchProcessor *theWatch;
-	Q3PtrList<Bob> theBobs;
-	ProcessorGroup theGroup;
-	bool theRunning, theTested, theConnected, theIgnoreNext, theModified;
-	int theDefaultBufferSize;
-
-	void updateItems();
-	void doSave(const QString &filename);
-	void doLoad(const QString &filename);
-	bool connectAll();
-	void disconnectAll();
-
-	void updateProperties();
-
-private slots:
-	void slotPropertyChanged(int row, int column);
-
-	void on_modeRun_toggled(bool testing);
-	void on_fileOpen_activated();
-	void on_fileSave_activated();
-	void on_fileSaveAs_activated();
-	void on_filePrint_activated();
-	void on_editRemove_activated();
-	void on_toolsDeployPlayer_activated();
-	void on_modeTest_activated();
-
-protected:
-	void closeEvent(QCloseEvent *);
-
 public:
+	GeddeiNite();
+	~GeddeiNite();
+
 	const QString makeUniqueName(const QString &type);
 	void setActive(Q3CanvasItem *item = NULL);
 	void setModified(bool modified = true);
@@ -102,15 +67,56 @@ public:
 	bool connected() const { return theConnected; }
 
 	ProcessorGroup &group() { return theGroup; }
-	WatchProcessor *watch() { return theWatch; }
 
 	bool bobCollision(Bob *b);
 	void addBob(Bob *b);
 	void removeBob(Bob *b);
 	Bob *getBob(const QString &name);
 
-	GeddeiNite();
-	~GeddeiNite();
+protected:
+	void closeEvent(QCloseEvent *);
+
+private slots:
+	void slotPropertyChanged(int row, int column);
+
+	void on_modeRun_toggled(bool testing);
+	void on_fileOpen_activated();
+	void on_fileSave_activated();
+	void on_fileSaveAs_activated();
+	void on_filePrint_activated();
+	void on_fileExit_activated() { qApp->exit(); }
+	void on_editRemove_activated();
+	void on_toolsDeployPlayer_activated();
+	void on_modeTest_activated();
+
+private:
+	void updateItems();
+	void doSave(const QString &filename);
+	void doLoad(const QString &filename);
+	bool connectAll();
+	void disconnectAll();
+
+	void updateProperties();
+
+	QDockWidget *theDockSelector;
+	QDockWidget *theDockProperties;
+
+	Q3Canvas *theCanvas;
+	Q3CanvasItem *theActive;
+	Q3Table *theProperties;
+	Q3PtrList<Bob> theBobs;
+	ProcessorView *theSelector;
+
+	ProcessorGroup theGroup;
+
+	QString theFilename;
+
+	bool theRunning;
+	bool theTested;
+	bool theConnected;
+	bool theIgnoreNext;
+	bool theModified;
+	int theDefaultBufferSize;
 };
 
 #endif

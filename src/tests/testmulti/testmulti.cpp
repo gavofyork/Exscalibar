@@ -51,34 +51,34 @@ public:
 
 void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
-	if(theCount <= 1)
-		if(theScope > 1)
-			for(uint i = 0; i < chunks; i++)
+	if (theCount <= 1)
+		if (theScope > 1)
+			for (uint i = 0; i < chunks; i++)
 				outs[0].sample(i).copyFrom(ins[0].sample(i * theStep));
 		else
-			for(uint i = 0; i < chunks; i++)
+			for (uint i = 0; i < chunks; i++)
 				outs[0][i] = ins[0][i * theStep];
 	else
-	{	for(uint j = 0; j < chunks; j++)
-			for(uint i = 0; i < theScope; i++)
+	{	for (uint j = 0; j < chunks; j++)
+			for (uint i = 0; i < theScope; i++)
 				outs[0](j, i) = 0;
-		for(uint j = 0; j < chunks; j++)
-		{	for(uint i = 0; i < theCount; i++)
+		for (uint j = 0; j < chunks; j++)
+		{	for (uint i = 0; i < theCount; i++)
 			{	BufferData d = ins[0].sample(i + j*theStep);
 				const float *inSample = d.readPointer();
-				if(theConsolidate == Mean)
-					for(uint k = 0; k < theScope; k++)
+				if (theConsolidate == Mean)
+					for (uint k = 0; k < theScope; k++)
 						outs[0](j, k) += inSample[k];
-				else if(theConsolidate == Max)
-					for(uint k = 0; k < theScope; k++)
-						if(outs[0](j, k) < inSample[k] || !k) outs[0](j, k) = inSample[k];
-				else if(theConsolidate == Min)
-					for(uint k = 0; k < theScope; k++)
-						if(outs[0](j, k) > inSample[k] || !k) outs[0](j, k) = inSample[k];
+				else if (theConsolidate == Max)
+					for (uint k = 0; k < theScope; k++)
+						if (outs[0](j, k) < inSample[k] || !k) outs[0](j, k) = inSample[k];
+				else if (theConsolidate == Min)
+					for (uint k = 0; k < theScope; k++)
+						if (outs[0](j, k) > inSample[k] || !k) outs[0](j, k) = inSample[k];
 			}
 		}
-		for(uint j = 0; j < chunks; j++)
-			for(uint i = 0; i < theScope; i++)
+		for (uint j = 0; j < chunks; j++)
+			for (uint i = 0; i < theScope; i++)
 				outs[0](j, i) /= theCount;
 	}
 }
@@ -114,11 +114,11 @@ class SpectrumSource: public Processor
 	virtual void processor()
 	{
 		qDebug("O>");
-		for(int j = 0; j < 18; j++)
+		for (int j = 0; j < 18; j++)
 		{
 			BufferData d = output(0).makeScratchSamples(1);
-			for(int i = 0; i < theWidth; i++)
-				if(i < theWidth / 2)
+			for (int i = 0; i < theWidth; i++)
+				if (i < theWidth / 2)
 					d[i] = 1.0 / (j + 1.0);
 				else
 					d[i] = .5;
@@ -160,8 +160,8 @@ public:
 int main(int argc, char **argv)
 {
 	int w = 0, c = 16;
-	if(argc > 1) w = QString(argv[1]).toInt();
-	if(argc > 2) c = QString(argv[2]).toInt();
+	if (argc > 1) w = QString(argv[1]).toInt();
+	if (argc > 2) c = QString(argv[2]).toInt();
 
 	ProcessorGroup g;
 
@@ -187,8 +187,8 @@ int main(int argc, char **argv)
 	V[0] >>= W[0];
 
 	qDebug("Verifying types...");
-	if(!g.confirmTypes()) qDebug("Problem confirming types.");
-	if(!g.go()) qDebug("Problem starting.");
+	if (!g.confirmTypes()) qDebug("Problem confirming types.");
+	if (!g.go()) qDebug("Problem starting.");
 	W.waitForPlunger();
 	qDebug("Stopping...");
 	g.stop();

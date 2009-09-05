@@ -33,7 +33,7 @@ LxConnection::LxConnection(Source *source, uint sourceIndex) : theSource(source)
 
 LxConnection::~LxConnection()
 {
-	if(theScratch) delete [] theScratch;
+	if (theScratch) delete [] theScratch;
 
 	theSource->undoRegisterOut(this, theSourceIndex);
 }
@@ -50,8 +50,8 @@ BufferData LxConnection::makeScratchSeconds(float seconds, bool autoPush)
 
 BufferData LxConnection::makeScratchElements(uint elements, bool autoPush)
 {
-	if(theScratchSize != elements)
-	{	if(theScratch) delete [] theScratch;
+	if (theScratchSize != elements)
+	{	if (theScratch) delete [] theScratch;
 		theScratch = new float[elements];
 		theScratchSize = elements;
 	}

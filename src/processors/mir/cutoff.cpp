@@ -42,13 +42,13 @@ public:
 
 void CutOff::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
-	for(uint i = 0; i < chunks; i++)
+	for (uint i = 0; i < chunks; i++)
 		outs[0].sample(i).copyFrom(ins[0].mid(i * theSize + theFrom, theTo - theFrom));
 }
 
 bool CutOff::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if(!inTypes[0].isA<Spectrum>()) return false;
+	if (!inTypes[0].isA<Spectrum>()) return false;
 	const Spectrum &s = inTypes[0].asA<Spectrum>();
 
 	float base = 0;

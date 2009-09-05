@@ -52,7 +52,7 @@ class DLLEXPORT QFactoryManager
 
 	void clear()
 	{
-//		for(QMapIterator<QString, QFactory<Base> *> i = theFactories.begin(); i != theFactories.end(); i++)
+//		for (QMapIterator<QString, QFactory<Base> *> i = theFactories.begin(); i != theFactories.end(); i++)
 //			delete i.data();
 		theFactories.clear();
 		theIds.clear();
@@ -68,7 +68,7 @@ public:
 	void reloadAll(const QStringList &thePaths)
 	{
 		clear();
-		for(uint i = 0; i < (uint)thePaths.size(); i++)
+		for (uint i = 0; i < (uint)thePaths.size(); i++)
 			loadLibraries(thePaths[i]);
 	}
 
@@ -77,12 +77,12 @@ public:
 
 	int getVersion(const QString &id)
 	{
-		if(!isAvailable(id)) return -1;
+		if (!isAvailable(id)) return -1;
 		return theMappings[id]->getVersion(id);
 	}
 	Base *createInstance(const QString &id)
 	{
-		if(!isAvailable(id)) return 0;
+		if (!isAvailable(id)) return 0;
 		return theMappings[id]->createInstance(id);
 	}
 	Base *operator[](const QString &id) { return createInstance(id); }
@@ -93,24 +93,24 @@ public:
 template<class Base>
 void QFactoryManager<Base>::loadLibrary(const QString &theFile)
 {
-	if(MESSAGES) qDebug("Loading library %s...", theFile.latin1());
+	if (MESSAGES) qDebug("Loading library %s...", theFile.latin1());
 	QFactory<Base> *newFactory = new QFactory<Base>(theFile);
-	if(!newFactory->isOpen()) { delete newFactory; return; }
+	if (!newFactory->isOpen()) { delete newFactory; return; }
 
 	bool used = false;
 	const QStringList &ids = newFactory->getAvailable();
-	for(QStringList::const_iterator i = ids.begin(); i != ids.end(); i++)
+	for (QStringList::const_iterator i = ids.begin(); i != ids.end(); i++)
 	{
-		if(MESSAGES) qDebug("Found processor %s...", (*i).latin1());
-		if(!theIds.contains(*i))
+		if (MESSAGES) qDebug("Found processor %s...", (*i).latin1());
+		if (!theIds.contains(*i))
 			theIds += *i;
-		else if(newFactory->getVersion(*i) <= getVersion(*i))
+		else if (newFactory->getVersion(*i) <= getVersion(*i))
 			continue;
-		if(MESSAGES) qDebug("Using it (new version: %d)", newFactory->getVersion(*i));
+		if (MESSAGES) qDebug("Using it (new version: %d)", newFactory->getVersion(*i));
 		theMappings[*i] = newFactory;
 		used = true;
 	}
-	if(used)
+	if (used)
 		theFactories.append(newFactory);
 	else
 		delete newFactory;
@@ -119,12 +119,12 @@ void QFactoryManager<Base>::loadLibrary(const QString &theFile)
 template<class Base>
 void QFactoryManager<Base>::loadLibraries(const QString &thePath)
 {
-	if(MESSAGES) qDebug("Scanning path: %s...", thePath.latin1());
+	if (MESSAGES) qDebug("Scanning path: %s...", thePath.latin1());
 	QDir d(thePath);
 	d.setFilter(QDir::Readable | QDir::Executable | QDir::Files | QDir::NoSymLinks);
 	QStringList l = d.entryList();
-	for(uint i = 0; i < (uint)l.count(); i++)
-	{	if(MESSAGES) qDebug("Loading library %s...", l[i].latin1());
+	for (uint i = 0; i < (uint)l.count(); i++)
+	{	if (MESSAGES) qDebug("Loading library %s...", l[i].latin1());
 		loadLibrary(thePath + "/" + l[i]);
 	}
 }

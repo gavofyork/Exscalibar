@@ -61,9 +61,9 @@ void BobsView::dropEvent(QDropEvent *e)
 	QString type;
 	QString subType;
 	Q3TextDrag::decode(ms, type, subType);
-	if(subType == "processor")
+	if (subType == "processor")
 		new SoftBob(pos.x(), pos.y(), type, "", canvas());
-	else if(subType == "subprocessor")
+	else if (subType == "subprocessor")
 		new DomSoftBob(pos.x(), pos.y(), type, "", canvas());
 	canvas()->update();
 	geddeiNite()->setModified();
@@ -90,20 +90,20 @@ void BobsView::contentsMousePressEvent(QMouseEvent *e)
 			}
 		}
 		else if (dynamic_cast<BobLink *>(*it))
-		{	if(geddeiNite()->modeStop->isOn())
+		{	if (geddeiNite()->modeStop->isOn())
 			{	theActivating = *it;
 				break;
 			}
 		}
 		else if (dynamic_cast<BobPort *>(*it))
-		{	if(geddeiNite()->modeStop->isOn())
+		{	if (geddeiNite()->modeStop->isOn())
 			{	theDragging = dynamic_cast<BobPort *>(*it);
 				theDragOffset = QPoint(0, 0);
 				theActivating = *it;
 				break;
 			}
-			else if(geddeiNite()->modeMakeLink->isOn())
-			{	if(dynamic_cast<BobPort *>(*it)->isInput())
+			else if (geddeiNite()->modeMakeLink->isOn())
+			{	if (dynamic_cast<BobPort *>(*it)->isInput())
 				{	geddeiNite()->statusBar()->message("Cannot create link from this: Port must be an output.", 2000);
 					break;
 				}
@@ -115,8 +115,8 @@ void BobsView::contentsMousePressEvent(QMouseEvent *e)
 			}
 		}
 
-	if(!l.count())
-		if(geddeiNite()->modeStop->isOn())
+	if (!l.count())
+		if (geddeiNite()->modeStop->isOn())
 			geddeiNite()->setActive();
 
 	canvas()->update();
@@ -124,25 +124,25 @@ void BobsView::contentsMousePressEvent(QMouseEvent *e)
 
 void BobsView::contentsMouseReleaseEvent(QMouseEvent *e)
 {
-	if(theActivating)
+	if (theActivating)
 	{
 		Q3CanvasItemList l = canvas()->collisions(e->pos());
 		bool reset = true;
 		for (Q3CanvasItemList::Iterator it = l.begin(); it != l.end(); it++)
-			if(*it == theActivating)
+			if (*it == theActivating)
 			{	geddeiNite()->setActive(*it);
 				reset = false;
 				break;
 			}
-		if(reset)
+		if (reset)
 			geddeiNite()->setActive();
 	}
-	else if(thePausing)
+	else if (thePausing)
 	{
 		Q3CanvasItemList l = canvas()->collisions(e->pos());
 		for (Q3CanvasItemList::Iterator it = l.begin(); it != l.end(); it++)
-			if(*it == thePausing)
-			{	if(thePausing->processor()->paused())
+			if (*it == thePausing)
+			{	if (thePausing->processor()->paused())
 					thePausing->processor()->unpause();
 				else
 					thePausing->processor()->pause();
@@ -150,21 +150,21 @@ void BobsView::contentsMouseReleaseEvent(QMouseEvent *e)
 				break;
 			}
 	}
-	else if(theLinking)
+	else if (theLinking)
 	{
 		Q3CanvasItemList l = canvas()->collisions(e->pos());
 		for (Q3CanvasItemList::Iterator it = l.begin(); it != l.end(); it++)
 		{	if (dynamic_cast<BobPort *>(*it))
 			{	BobPort *bobPort = dynamic_cast<BobPort *>(*it);
-				if(!bobPort->isInput())
+				if (!bobPort->isInput())
 				{	geddeiNite()->statusBar()->message("Cannot link to this: Port must be an input.", 2000);
 					break;
 				}
-				if(bobPort->numLinks())
+				if (bobPort->numLinks())
 				{	geddeiNite()->statusBar()->message("Cannot link to this: Port is already connected.", 2000);
 					break;
 				}
-				if(bobPort->isSiblingOf(theLinking))
+				if (bobPort->isSiblingOf(theLinking))
 				{	geddeiNite()->statusBar()->message("Cannot link to this: They share the same processor!", 2000);
 					break;
 				}
@@ -193,16 +193,16 @@ GeddeiNite *BobsView::geddeiNite()
 void BobsView::contentsMouseMoveEvent(QMouseEvent *e)
 {
 	QPoint p = QPoint(e->pos().x() + theDragOffset.x(), e->pos().y() + theDragOffset.y());
-	if(theSnapToGrid) p = p / 10 * 10;
+	if (theSnapToGrid) p = p / 10 * 10;
 
-	if(theDragging)
-	{	if(dynamic_cast<Bob *>(theDragging))
+	if (theDragging)
+	{	if (dynamic_cast<Bob *>(theDragging))
 			dynamic_cast<Bob *>(theDragging)->setPos(p);
-		else if(dynamic_cast<BobPort *>(theDragging))
+		else if (dynamic_cast<BobPort *>(theDragging))
 			dynamic_cast<BobPort *>(theDragging)->setPos(p + QPoint(5, 5));
 		geddeiNite()->setModified();
 	}
-	else if(theLinking)
+	else if (theLinking)
 	{
 		//TODO: nice grpahics for this...
 		theFloatingLink->setTo(e->pos());

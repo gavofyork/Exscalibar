@@ -42,7 +42,7 @@ void LLConnection::setType(const SignalType *type)
 
 void LLConnection::resetType()
 {
-	if(MESSAGES) qDebug("LLConnection: Resetting type...");
+	if (MESSAGES) qDebug("LLConnection: Resetting type...");
 	delete theType;
 	theType = 0;
 
@@ -65,7 +65,7 @@ uint LLConnection::bufferElementsFree()
 BufferData LLConnection::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret;
-	if(theBuffer.size() >= elements)
+	if (theBuffer.size() >= elements)
 		ret = theBuffer.makeScratchElements(elements, autoPush);
 	else
 		ret = LxConnection::makeScratchElements(elements, autoPush);
@@ -83,9 +83,9 @@ bool LLConnection::waitUntilReady()
 
 void LLConnection::pushPlunger()
 {
-	if(MESSAGES) qDebug("> LLConnection::pushPlunger(): Appending plunger to buffer");
+	if (MESSAGES) qDebug("> LLConnection::pushPlunger(): Appending plunger to buffer");
 	theBuffer.appendPlunger();
-	if(MESSAGES) qDebug("< LLConnection::pushPlunger()");
+	if (MESSAGES) qDebug("< LLConnection::pushPlunger()");
 }
 
 void LLConnection::plungerSent()

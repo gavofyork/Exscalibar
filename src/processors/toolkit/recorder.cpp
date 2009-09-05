@@ -35,71 +35,71 @@ using namespace Geddei;
 
 void Recorder::processor()
 {
-	if(MESSAGES) qDebug("> Recorder::processor(): Starting...");
+	if (MESSAGES) qDebug("> Recorder::processor(): Starting...");
 	// Open file
-	if(!theOutput.open(QIODevice::WriteOnly)) return;
+	if (!theOutput.open(QIODevice::WriteOnly)) return;
 	stream.setDevice(&theOutput);
 	theCurrentSample = 0;
 	theCurrentSection = 0;
-	if(MESSAGES) qDebug("= Recorder::processor(): Enterring main loop...");
-	while(thereIsInputForProcessing(1))
+	if (MESSAGES) qDebug("= Recorder::processor(): Enterring main loop...");
+	while (thereIsInputForProcessing(1))
 	{
-		if(MESSAGES) qDebug("= Recorder::processor(): Priming row...");
-		if(theCurrentSample == 0)
-			for(; theCurrentSample < thePadBefore; theCurrentSample++)
+		if (MESSAGES) qDebug("= Recorder::processor(): Priming row...");
+		if (theCurrentSample == 0)
+			for (; theCurrentSample < thePadBefore; theCurrentSample++)
 			{
-				if(theCurrentSample || theCurrentSection)
+				if (theCurrentSample || theCurrentSection)
 					stream << theRecordDelimiter;
-				if(thePrintSection)
+				if (thePrintSection)
 					stream << theCurrentSection << theFieldDelimiter;
-				if(thePrintSample)
+				if (thePrintSample)
 					stream << theCurrentSample << theFieldDelimiter;
-				if(thePrintTime)
+				if (thePrintTime)
 					stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
-				for(uint j = 0; j < numInputs(); j++)
-					for(uint i = 0; i < input(i).type().scope(); i++)
+				for (uint j = 0; j < numInputs(); j++)
+					for (uint i = 0; i < input(i).type().scope(); i++)
 						stream << "0" << theFieldDelimiter;
 			}
-		if(theCurrentSample || theCurrentSection)
+		if (theCurrentSample || theCurrentSection)
 			stream << theRecordDelimiter;
-		if(thePrintSection)
+		if (thePrintSection)
 			stream << theCurrentSection << theFieldDelimiter;
-		if(thePrintSample)
+		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
-		if(thePrintTime)
+		if (thePrintTime)
 			stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
-		for(uint i = 0; i < numInputs(); i++)
+		for (uint i = 0; i < numInputs(); i++)
 		{
-			if(MESSAGES) qDebug("= Recorder::processor(): Reading from input %d...", i);
+			if (MESSAGES) qDebug("= Recorder::processor(): Reading from input %d...", i);
 			const BufferData d = input(i).readSample();
-			for(uint j = 0; j < d.elements(); j++)
-			{	if(j || i) stream << theFieldDelimiter;
+			for (uint j = 0; j < d.elements(); j++)
+			{	if (j || i) stream << theFieldDelimiter;
 				stream << d[j];
 			}
 		}
 		stream << flush;
-		if(MESSAGES) qDebug("= Recorder::processor(): Done reading.");
+		if (MESSAGES) qDebug("= Recorder::processor(): Done reading.");
 		theCurrentSample++;
 	}
 	
-	if(MESSAGES) qDebug("= Recorder::processor(): All done.");
+	if (MESSAGES) qDebug("= Recorder::processor(): All done.");
 	theOutput.close();
 }
 
 void Recorder::receivedPlunger()
 {
 	uint until = theCurrentSample + thePadAfter;
-	for(; theCurrentSample < until; theCurrentSample++)
+	for (; theCurrentSample < until; theCurrentSample++)
 	{
 		stream << theRecordDelimiter;
-		if(thePrintSection)
+		if (thePrintSection)
 			stream << theCurrentSection << theFieldDelimiter;
-		if(thePrintSample)
+		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
-		if(thePrintTime)
+		if (thePrintTime)
 			stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
-		for(uint j = 0; j < numInputs(); j++)
-			for(uint i = 0; i < input(i).type().scope(); i++)
+		for (uint j = 0; j < numInputs(); j++)
+			for (uint i = 0; i < input(i).type().scope(); i++)
 				stream << "0" << theFieldDelimiter;
 	}
 	theCurrentSection++;

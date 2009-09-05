@@ -63,8 +63,8 @@ void Bob::init(int x, int y)
 Bob::~Bob()
 {
 	geddeiNite()->removeBob(this);
-	for(Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++) delete *i;
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++) delete *i;
+	for (Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++) delete *i;
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++) delete *i;
 }
 
 const QString Bob::name()
@@ -79,11 +79,11 @@ GeddeiNite *Bob::geddeiNite()
 
 bool Bob::portCollision(BobPort *p)
 {
-	for(Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
-		if(p->collidesWith(*i) && p != *i)
+	for (Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
+		if (p->collidesWith(*i) && p != *i)
 			return true;
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
-		if(p->collidesWith(*i) && p != *i)
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
+		if (p->collidesWith(*i) && p != *i)
 			return true;
  	return false;
 }
@@ -95,9 +95,9 @@ QRect Bob::rope()
 
 void Bob::updatePorts()
 {
-	for(Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
 		(*i)->refresh();
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
 		(*i)->refresh();
 }
 
@@ -114,7 +114,7 @@ void Bob::drawShape(QPainter &p)
 
 	p.translate(x(), y());
 	// draw selection rectangle
-	if(isActive())
+	if (isActive())
 	{	drawRect(p, width, height, 0, 240);
 		drawRect(p, width, height, 1, 232);
 		drawRect(p, width, height, 2, 216);
@@ -151,7 +151,7 @@ void Bob::drawShape(QPainter &p)
 
 	p.restore();
 
-	if(theProcessor->paused())
+	if (theProcessor->paused())
 	{
 		p.setPen(QColor(212, 170, 150));
 		p.setBrush(QColor(232, 202, 182));
@@ -167,7 +167,7 @@ void Bob::setPos(QPoint p)
 {
 	double oldX = x(), oldY = y();
 	move(p.x(), p.y());
-	if(dynamic_cast<GeddeiNite *>(canvas()->parent())->bobCollision(this))
+	if (dynamic_cast<GeddeiNite *>(canvas()->parent())->bobCollision(this))
 		move(oldX, oldY);
 	refresh();
 }
@@ -178,12 +178,12 @@ void Bob::saveYourself(QDomElement &element, QDomDocument &doc)
 	element.setAttribute("x", x());
 	element.setAttribute("y", y());
 
-	for(Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
 	{	QDomElement out = doc.createElement("input");
 		element.appendChild(out);
 		(*i)->saveYourself(out, doc);
 	}
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
 	{	QDomElement out = doc.createElement("output");
 		element.appendChild(out);
 		(*i)->saveYourself(out, doc);
@@ -198,12 +198,12 @@ void Bob::loadYourselfPre(QDomElement &element)
 
 void Bob::loadYourselfPost(QDomElement &element)
 {
-	for(QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
+	for (QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling())
 	{	QDomElement port = n.toElement();
-		if(port.isNull()) continue;
-		if(port.tagName() == "output")
+		if (port.isNull()) continue;
+		if (port.tagName() == "output")
 			theOutputs.at(port.attribute("index").toInt())->loadYourself(port);
-		else if(port.tagName() == "input")
+		else if (port.tagName() == "input")
 			theInputs.at(port.attribute("index").toInt())->loadYourself(port);
 	}
 }
@@ -211,23 +211,23 @@ void Bob::loadYourselfPost(QDomElement &element)
 void Bob::redoPorts()
 {
 	int inputs = theProcessor->numInputs(), outputs = theProcessor->numOutputs();
-	for(int i = theInputs.count(); i < inputs; i++)
+	for (int i = theInputs.count(); i < inputs; i++)
 	{	BobPort *p = new BobPort(this, true, i, rope().left() + i * 4, rope().top());
 		p->show();
 		theInputs.append(p);
 	}
-	for(int i = theInputs.count(); i > inputs; i--)
+	for (int i = theInputs.count(); i > inputs; i--)
 	{	theInputs.last()->hide();
 		delete theInputs.last();
 		theInputs.removeLast();
 	}
 
-	for(int i = theOutputs.count(); i < outputs; i++)
+	for (int i = theOutputs.count(); i < outputs; i++)
 	{	BobPort *p = new BobPort(this, false, i, rope().left() + rope().width() - i * 4, rope().top() + rope().height());
 		p->show();
 		theOutputs.append(p);
 	}
-	for(int i = theOutputs.count(); i > outputs; i--)
+	for (int i = theOutputs.count(); i > outputs; i--)
 	{	theOutputs.last()->hide();
 		delete theOutputs.last();
 		theOutputs.removeLast();
@@ -244,17 +244,17 @@ void Bob::slotRedraw()
 
 bool Bob::connectYourself()
 {
-	if(theProcessor->redrawPeriod())
+	if (theProcessor->redrawPeriod())
 	{	theRedrawTimer = new QTimer();
 		QObject::connect(theRedrawTimer, SIGNAL(timeout()), this, SLOT(slotRedraw()));
 		theRedrawTimer->start(theProcessor->redrawPeriod());
 	}
 
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
-		if(!(*i)->connectYourself()) return false;
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
+		if (!(*i)->connectYourself()) return false;
 
 	theProfileTimer = new QTimer();
-	for(Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theInputs.begin(); i != theInputs.end(); i++)
 		QObject::connect(theProfileTimer, SIGNAL(timeout()), *i, SLOT(updateProfile()));
 
 	refresh();
@@ -270,7 +270,7 @@ void Bob::disconnectYourself()
 	delete theRedrawTimer;
 	theRedrawTimer = 0;
 
-	for(Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
+	for (Q3PtrList<BobPort>::iterator i = theOutputs.begin(); i != theOutputs.end(); i++)
 		(*i)->disconnectYourself();
 	refresh();
 	slotRedraw();

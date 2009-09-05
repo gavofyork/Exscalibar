@@ -164,7 +164,7 @@ class DLLEXPORT SignalTypeRefs
 	const SignalType *ptrAt(uint i) const
 	{
 #ifdef EDEBUG
-		if(i >= theCount)
+		if (i >= theCount)
 		{	qDebug("Asked for %d th element when count=%d", i, theCount);
 			return (((SignalType **)theData)[0]);
 		}
@@ -202,11 +202,11 @@ class DLLEXPORT SignalTypeRefs
 	SignalType *&mutablePtrAt(uint i)
 	{
 #ifdef EDEBUG
-		if(i >= theCount)
+		if (i >= theCount)
 		{	qDebug("Asked for %d th element when count=%d", i, theCount);
 			return (((SignalType **)theData)[0]);
 		}
-		if(theData[i])
+		if (theData[i])
 			qWarning("*** WARNING: You're probably attempting to write over an existing SignalType *.\n"
 			         "             Doing so will likely cause a memory leak. Delete this entry first.");
 #endif

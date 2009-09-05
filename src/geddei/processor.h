@@ -463,7 +463,7 @@ protected:
 	 * Reimplement to control execution to do processing.
 	 * Use Buffer's waitFor methods to control flow for theInputs/theOutputs.
 	 * This doesn't ever have to return explicitly - typically a
-	 * @code while(thereIsInputForProcessing()) {} @endcode
+	 * @code while (thereIsInputForProcessing()) {} @endcode
 	 * loop will do the job fine, though you're free to implement anything you like.
 	 * If there is a main loop, you should add thereIsInputForProcessing() as a guard upon it (it will,
 	 * however, always return true).

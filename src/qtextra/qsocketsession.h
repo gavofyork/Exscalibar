@@ -62,7 +62,7 @@ public:
 	 */
 	bool isOpen()
 	{
-		if(!theSD->isValid())
+		if (!theSD->isValid())
 			theClosed = true;
 		return !theClosed;
 	}
@@ -92,7 +92,7 @@ public:
 	 */
 	void sendByte(uchar c)
 	{
-		if(theSD->writeBlock((char *)&c, 1) == 1)
+		if (theSD->writeBlock((char *)&c, 1) == 1)
 			return;
 		qWarning("*** ERROR: Socket send error. Unable to send a byte.");
 		close();
@@ -123,7 +123,7 @@ public:
 	uchar receiveByte()
 	{
 		uchar c;
-		if(theSD->readBlock((char *)&c, 1) == 1)
+		if (theSD->readBlock((char *)&c, 1) == 1)
 			return c;
 		qWarning("***  ERROR: Socket receive error. Unable to read a byte.");
 		close();

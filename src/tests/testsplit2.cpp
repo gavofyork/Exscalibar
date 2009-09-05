@@ -20,7 +20,7 @@ int main()
 	A->init("A", objects);
 	W->init("W", objects);
 
-	while(1)
+	while (1)
 	{
 		std::cout << "Connecting..." << std::endl;
 		(*O).share(0, 131072);

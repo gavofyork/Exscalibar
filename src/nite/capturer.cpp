@@ -102,7 +102,7 @@ void Capturer::processor()
 	}
 
 	uint capdata[periodsize];
-	while(true)
+	while (true)
 	{
 		int pcmreturn;
 		while ((pcmreturn = snd_pcm_readi(pcm_handle, capdata, periodsize << 2)) < 0)
@@ -111,7 +111,7 @@ void Capturer::processor()
 		}
 		BufferData d0 = output(0).makeScratchSamples(pcmreturn);
 		BufferData d1 = output(1).makeScratchSamples(pcmreturn);
-		for(int i = 0; i < pcmreturn; i++)
+		for (int i = 0; i < pcmreturn; i++)
 		{	usleep(100);
 			d0[i] = float(capdata[i]) / 32768.0;
 			d1[i] = float(capdata[i + pcmreturn]) / 32768.0;

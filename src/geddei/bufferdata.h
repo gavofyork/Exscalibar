@@ -535,10 +535,10 @@ public:
 		assert(theInfo->theValid);
 		assert(i * theInfo->theScope + j < theVisibleSize);
 		assert(j < theInfo->theScope || !theInfo->theScope);
-		if(theInfo->theType == BufferInfo::Read)
+		if (theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all reads, or you\n"
 					 "             might accidentally taint the data.\n");
-		if(theWritePointer)
+		if (theWritePointer)
 			qWarning("*** WARNING: You still have a borrowed array active. Changing any data before\n"
 					 "             that has been returned will not do anything.\n");
 #endif
@@ -564,10 +564,10 @@ public:
 #ifdef EDEBUG
 		assert(i < theVisibleSize);
 		assert(theInfo->theValid);
-		if(theInfo->theType == BufferInfo::Read)
+		if (theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all reads, or you\n"
 					 "             might accidentally taint the data.\n");
-		if(theWritePointer)
+		if (theWritePointer)
 			qWarning("*** WARNING: You still have a borrowed array active. Changing any data before\n"
 					 "             that has been returned will not do anything.\n");
 #endif
@@ -625,7 +625,7 @@ public:
 #ifdef EDEBUG
 		assert(theInfo->theValid);
 #endif
-		if(theInfo->theAccessibleSize == Undefined) return 0;
+		if (theInfo->theAccessibleSize == Undefined) return 0;
 		dontRollOver(true);
 		return &(theInfo->theData[theOffset]);
 	}
@@ -683,14 +683,14 @@ public:
 	{
 #ifdef EDEBUG
 		assert(theInfo->theValid);
-		if(theInfo->theType == BufferInfo::Read)
+		if (theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all read, or you\n"
 					 "             might accidentally taint the data.\n");
 #endif
-		if(theInfo->theAccessibleSize == Undefined) return 0;
-		if(!rollsOver()) return theInfo->theData + theOffset;
+		if (theInfo->theAccessibleSize == Undefined) return 0;
+		if (!rollsOver()) return theInfo->theData + theOffset;
 
-		if(!theWritePointer)
+		if (!theWritePointer)
 			theWritePointer = new float[theVisibleSize];
 		return theWritePointer;
 	}
@@ -703,7 +703,7 @@ public:
 	 */
 	void endWritePointer()
 	{
-		if(theWritePointer)
+		if (theWritePointer)
 			copyFrom(theWritePointer);
 		delete theWritePointer;
 		theWritePointer = 0;

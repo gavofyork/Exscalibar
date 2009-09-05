@@ -44,15 +44,15 @@ bool MultiPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &
 
 bool MultiPlayer::openFile()
 {
-	if(theFile) sf_close(theFile);
+	if (theFile) sf_close(theFile);
 	SF_INFO sfinfo;
-	for(; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
+	for (; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
 	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
-		if(theChannels == sfinfo.channels && theRate == sfinfo.samplerate) break;
-		if(theFile) sf_close(theFile);
+		if (theChannels == sfinfo.channels && theRate == sfinfo.samplerate) break;
+		if (theFile) sf_close(theFile);
 		theFile = 0;
 	}
-	if(theFile) theLength = sfinfo.frames;
+	if (theFile) theLength = sfinfo.frames;
 	thePosition = 0;
 	return theFile != 0;
 }
@@ -66,9 +66,9 @@ void MultiPlayer::initFromProperties(const Properties &p)
 	theChannels = 0;
 	// A quick openFile(), that doesn't check the channels/rate, in fact it gets them.
 	SF_INFO sfinfo;
-	for(; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
+	for (; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
 	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
-		if(theFile)
+		if (theFile)
 		{	theChannels = sfinfo.channels;
 			theRate = sfinfo.samplerate;
 			break;
@@ -86,7 +86,7 @@ PropertiesInfo MultiPlayer::specifyProperties() const
 
 void MultiPlayer::specifyOutputSpace(Q3ValueVector<uint> &samples)
 {
-	for(int i = 0; i < theChannels; i++)
+	for (int i = 0; i < theChannels; i++)
 		samples[i] = theFrames;
 }
 
@@ -95,19 +95,19 @@ void MultiPlayer::processor()
 	float buffer[theFrames * theChannels];
 
 	int in = 0;
-	while(true)
-	{	if((in = sf_readf_float(theFile, buffer, theFrames)) > 0)
+	while (true)
+	{	if ((in = sf_readf_float(theFile, buffer, theFrames)) > 0)
 		{	thePosition += in;
-			for(int i = 0; i < theChannels; i++)
+			for (int i = 0; i < theChannels; i++)
 			{	BufferData d = output(i).makeScratchSamples(in);
-				for(int j = 0; j < in; j++) d[j] = buffer[j * theChannels + i];
+				for (int j = 0; j < in; j++) d[j] = buffer[j * theChannels + i];
 				output(i) << d;
 			}
 		}
-		else if(in == 0)
+		else if (in == 0)
 		{	plunge();
 			theIndex++;
-			if(!openFile()) return;
+			if (!openFile()) return;
 		}
 		else
 			sf_perror(theFile);
@@ -116,7 +116,7 @@ void MultiPlayer::processor()
 
 void MultiPlayer::processorStopped()
 {
-	if(theFile) sf_close(theFile);
+	if (theFile) sf_close(theFile);
 	thePosition = 0;
 }
 

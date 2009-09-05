@@ -40,13 +40,13 @@ int main(int argc, char **argv)
 {
 	int w = 0;
 	double c = .5;
-	if(argc > 1) w = QString(argv[1]).toInt();
-	if(argc > 2) c = QString(argv[2]).toDouble();
+	if (argc > 1) w = QString(argv[1]).toInt();
+	if (argc > 2) c = QString(argv[2]).toDouble();
 	ProcessorGroup g;
 	Player P;
 	P.init("P", g, Properties("Filename", "/tmp/test.wav"));
 	DomProcessor &F = *(SubProcessorFactory::createDom("FFT"));
-	for(int i = 0; i < w; i++) F.addWorker(SubProcessorFactory::create("FFT"));
+	for (int i = 0; i < w; i++) F.addWorker(SubProcessorFactory::create("FFT"));
 	F.init("F", g, Properties("Size", 4096)("Step", 512)("Latency/Throughput", c));
 	Monitor M;
 	M.init("M", g);
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	P[0] >>= F[0];
 	F[0] >>= M[0];
 
-	for(int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		g.go();
 		M.waitForPlunger();
