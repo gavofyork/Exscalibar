@@ -70,8 +70,7 @@ GeddeiNite::GeddeiNite():
 	theTested				(false),
 	theConnected			(false),
 	theIgnoreNext			(false),
-	theModified				(false),
-	theDefaultBufferSize	(262144)
+	theModified				(false)
 {
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
@@ -445,30 +444,35 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 	if (!theTested)
 		return;
 
-	if (running == theRunning) { theIgnoreNext = true; return; }
-	if (theIgnoreNext) { theIgnoreNext = false; return; }
+	if (theIgnoreNext)
+	{
+		theIgnoreNext = false;
+		return;
+	}
+
 	assert(theTested);
 
-	theRunning = running;
-	if (theRunning)
-	{	connectAll();
+	if (running && !theRunning)
+	{
+		connectAll();
 		bool successful = theGroup.go();
-		if (!successful)
+		if (successful)
+		{
+			theProperties->setEnabled(false);
+			theRunning = true;
+		}
+		else
 		{
 			// some sort of cool depiction of the error.
 			// restore to stable state.
-			statusBar()->message("Problem starting processors.");
-			theCanvas->update();
-			theRunning = false;
-			theIgnoreNext = true;
-			modeStop->setChecked(true);
 			disconnectAll();
-			return;
+			modeStop->setChecked(true);
+			statusBar()->message("Problem starting processors.");
 		}
-		theProperties->setEnabled(false);
 	}
-	else if (!running)
+	else if (!running && theRunning)
 	{
+		theRunning = false;
 		theGroup.stop(false);
 		theGroup.reset();
 		disconnectAll();

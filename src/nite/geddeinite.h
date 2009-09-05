@@ -62,7 +62,6 @@ public:
 	void setActive(Q3CanvasItem *item = NULL);
 	void setModified(bool modified = true);
 
-	int defaultBufferSize() const { return theDefaultBufferSize; }
 	bool tested() const { return theTested; }
 	bool connected() const { return theConnected; }
 
@@ -116,7 +115,6 @@ private:
 	bool theConnected;
 	bool theIgnoreNext;
 	bool theModified;
-	int theDefaultBufferSize;
 };
 
 #endif
