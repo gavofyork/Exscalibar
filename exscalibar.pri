@@ -3,6 +3,9 @@ warn_on \
 qt \
 thread \
 exceptions
+
+COMPOSE = $$PWD/compose.sh
+
 QT *= qt3support
 
 BUILD_ROOT = $$PWD

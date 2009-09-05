@@ -8,6 +8,8 @@
  *   License, or (at your option) any later version.                       *
  ***************************************************************************/
 
+#pragma once
+
 enum Command
 {
 	NOP = 0,

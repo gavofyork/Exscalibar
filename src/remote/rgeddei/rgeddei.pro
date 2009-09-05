@@ -8,7 +8,7 @@ INSTALLS += headers \
 target.path = $$PREFIX/lib
 headers.files += *.h
 headers.path = $$PREFIX/include/rgeddei
-TEMPLATE = lib
+
 HEADERS += abstractprocessor.h \
            abstractprocessorgroup.h \
            hostprocessorforwarder.h \
@@ -35,4 +35,12 @@ SOURCES += abstractprocessor.cpp \
            sessionserver.cpp \
            abstractdomprocessor.cpp \
            abstractprocessorport.cpp
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/rgeddei
+}
+
+TEMPLATE = lib
 

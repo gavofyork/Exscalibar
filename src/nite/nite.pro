@@ -16,7 +16,6 @@ LIBS += -lqtextra \
 	-lgeddei
 INCLUDEPATH += ../../src/geddei \
                ../../src/qtextra
-TEMPLATE = app
 FORMS += geddeinitebase.ui
 IMAGES += memory.xpm
 HEADERS += geddeinite.h \
@@ -48,3 +47,12 @@ SOURCES += geddeinite.cpp \
            hardbob.cpp \
            domsoftbob.cpp \
            softbob.cpp
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/nite
+}
+
+TEMPLATE = app
+

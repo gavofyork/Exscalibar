@@ -6,6 +6,10 @@ target.path = $$PREFIX/lib
 headers.files += *.h 
 headers.path = $$PREFIX/include/qtextra/ 
 
+SOURCES += qsubapp.cpp \
+           qtextra.cpp \
+           qsocketsession.cpp
+
 HEADERS += qcleaner.h \
            qfactory.h \
            qfactoryexporter.h \
@@ -15,11 +19,14 @@ HEADERS += qcleaner.h \
            qfastwaitcondition.h \
            qcounter.h \
            qtextra.h
-SOURCES += qsubapp.cpp \
-           qtextra.cpp \
-           qsocketsession.cpp
 
 newmat:SOURCES += qpca.cpp qkohonennet.cpp
 newmat:HEADERS += qpca.h qkohonennet.h
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/qtextra
+}
 
 TEMPLATE = lib
