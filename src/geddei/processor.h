@@ -333,7 +333,7 @@ private:
 	virtual void checkExit();
 	//@}
 
-protected:
+public:
 	/**
 	 * @name Derived Methods for use in derived classes.
 	 * These methods are protected to allow only new (derived) types of Processor
@@ -377,6 +377,7 @@ protected:
 		return *(theOutputs[index]);
 	}
 
+protected:
 	/**
 	 * Insert a plunger into all output connections immediately.
 	 *

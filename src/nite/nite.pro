@@ -2,56 +2,35 @@
 # -------------------------------------------
 # Subdir relative project main directory: ./src/nite
 # Target is an application:
-
-PACKAGES = "sndfile:1.0.0" "alsa:0.9"
+PACKAGES = "sndfile:1.0.0" \
+    "alsa:0.9"
 include(../../exscalibar.pri)
-
 QT += xml
-
 INSTALLS += target
 target.path = $$PREFIX/bin
 TARGETDEPS += $$DESTDIR/libqtextra.so \
-              $$DESTDIR/libgeddei.so 
+    $$DESTDIR/libgeddei.so
 LIBS += -lqtextra \
-	-lgeddei
+    -lgeddei
 INCLUDEPATH += ../../src/geddei \
-               ../../src/qtextra
+    ../../src/qtextra
 FORMS += geddeinitebase.ui
 HEADERS += geddeinite.h \
-           bobsview.h \
-           watchprocessor.h \
-           refresher.h \
-           bob.h \
-           bobport.h \
-           boblink.h \
-           processorview.h \
-           floatinglink.h \
-           player.h \
-           hardbob.h \
-           domsoftbob.h \
-           softbob.h \
-           capturer.h
+    watchprocessor.h \
+    refresher.h \
+    processorview.h \
+    player.h \
+    processorsview.h
 SOURCES += geddeinite.cpp \
-           main.cpp \
-           bobsview.cpp \
-           watchprocessor.cpp \
-           refresher.cpp \
-           bob.cpp \
-           bobport.cpp \
-           boblink.cpp \
-           processorview.cpp \
-           floatinglink.cpp \
-           capturer.cpp \
-           player.cpp \
-           hardbob.cpp \
-           domsoftbob.cpp \
-           softbob.cpp
-
-!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
-	DEPLOYMENT += $$SOURCES
-	SOURCES = .composed.cpp
-	OBJECTS_DIR = $$OBJECTS_DIR/nite
+    main.cpp \
+    watchprocessor.cpp \
+    refresher.cpp \
+    processorview.cpp \
+    player.cpp \
+    processorsview.cpp
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
+    DEPLOYMENT += $$SOURCES
+    SOURCES = .composed.cpp
+    OBJECTS_DIR = $$OBJECTS_DIR/nite
 }
-
 TEMPLATE = app
-

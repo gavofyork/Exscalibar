@@ -20,20 +20,15 @@
 
 #define __GEDDEI_BUILD
 
+#include <QtGui>
+
 #include "processorview.h"
 
-#include <q3header.h>
-#include <q3dragobject.h>
-
-ProcessorView::ProcessorView(QWidget *parent, const char *name, Qt::WFlags f): Q3ListView(parent, name, f)
+QMimeData* ProcessorView::mimeData(const QList<QListWidgetItem *> _items) const
 {
-	addColumn("Name");
-	header()->hide();
-}
-
-Q3DragObject *ProcessorView::dragObject()
-{
-	Q3TextDrag *r = new Q3TextDrag(currentItem()->text(0), this);
-	r->setSubtype(currentItem()->text(1).latin1());
+	if (!_items.size())
+		return 0;
+	QMimeData* r = new QMimeData;
+	r->setText(_items[0]->text());
 	return r;
 }

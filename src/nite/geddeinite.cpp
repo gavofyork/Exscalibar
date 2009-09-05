@@ -34,38 +34,14 @@ using namespace std;
 using namespace Geddei;
 
 #include <QtXml>
-#include <qpixmap.h>
-#include <qfile.h>
-#include <q3filedialog.h>
-#include <qstatusbar.h>
-#include <qmessagebox.h>
-#include <qapplication.h>
-#include <q3textstream.h>
-#include <qpainter.h>
-#include <q3paintdevicemetrics.h>
-#include <q3canvas.h>
-#include <q3dockwindow.h>
-#include <q3table.h>
-#include <qaction.h>
-#include <qdom.h>
-//Added by qt3to4:
-#include <QCloseEvent>
-#include <Q3PtrList>
+#include <QtGui>
 
-#include "bobport.h"
-#include "boblink.h"
-#include "bobsview.h"
-#include "watchprocessor.h"
 #include "processorview.h"
-#include "floatinglink.h"
+#include "processorsview.h"
 #include "player.h"
-#include "softbob.h"
-#include "domsoftbob.h"
-#include "hardbob.h"
 
 GeddeiNite::GeddeiNite():
 	QMainWindow				(0, "GeddeiNite", Qt::WDestructiveClose),
-	theActive				(0),
 	theRunning				(false),
 	theTested				(false),
 	theConnected			(false),
@@ -74,20 +50,10 @@ GeddeiNite::GeddeiNite():
 {
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
-
-	theDockSelector = new QDockWidget("Available Processors", this);
-	addDockWidget(Qt::RightDockWidgetArea, theDockSelector);
-	theSelector = new ProcessorView(theDockSelector);
-	theDockSelector->setWidget(theSelector);
-	theDockSelector->show();
-
 	updateItems();
 
-	theCanvas = new Q3Canvas(this);
-	theCanvas->resize(1600, 1200);
-	theView->setCanvas(theCanvas);
-	theView->setBackgroundColor(QColor(255, 255, 255));
 	theView->setAcceptDrops(true);
+	theView->setScene(&theScene);
 
 	setModified(false);
 
@@ -96,7 +62,7 @@ GeddeiNite::GeddeiNite():
 	restoreGeometry(s.value("mainwindow/geometry").toByteArray());
 
 	if (QFile::exists(s.value("mainwindow/lastproject").toString()))
-		doLoad(theFilename = s.value("mainwindow/lastproject").toString());
+		doLoad(s.value("mainwindow/lastproject").toString());
 	statusBar()->message(tr("Ready"), 2000);
 
 	updateProperties();
@@ -111,15 +77,6 @@ GeddeiNite::~GeddeiNite()
 	s.setValue("mainwindow/state", saveState());
 	s.setValue("mainwindow/geometry", saveGeometry());
 	s.setValue("mainwindow/lastproject", theFilename);
-
-	Q3PtrList<Bob> bobs = theBobs;	// need copy as ~Bob() will alter theBobs.
-	for (Q3PtrList<Bob>::iterator i = bobs.begin(); i != bobs.end(); i++) delete *i;
-}
-
-void GeddeiNite::on_filePrint_activated()
-{
-	updateItems();
-
 }
 
 const QString GeddeiNite::makeUniqueName(const QString &type)
@@ -129,54 +86,144 @@ const QString GeddeiNite::makeUniqueName(const QString &type)
 	return ret;
 }
 
-bool GeddeiNite::bobCollision(Bob *b)
+static const double cornerSize = 20.0;
+static const double portSize = 20.0;
+static const double portInnerSize = 10.0;
+static const double portLateralMargin = 10.0;
+static const double portFrontMargin = 5.0;
+
+class ProcessorItem;
+
+class InputItem: public QGraphicsItem
 {
-	for (Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
-		if (b->collidesWith(*i) && b != *i)
-			return true;
-	return false;
+public:
+	InputItem(int _i, ProcessorItem* _p);
+
+	inline ProcessorItem* processorItem() const;
+
+	virtual QRectF boundingRect() const
+	{
+		return QRectF(QPointF(0.0, 0.0), m_size);
+	}
+
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
+	{
+		_p->setPen(Qt::blue);
+		_p->setBrush(QColor(0, 128, 128, 32));
+		_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
+	}
+
+	void saveYourself(QDomElement& _parent, QDomDocument& _doc) const
+	{
+		QDomElement out = _doc.createElement("input");
+		out.setAttribute("index", m_index);
+		_parent.appendChild(out);
+	}
+
+	enum { Type = UserType + 2 };
+	virtual int type() const { return Type; }
+
+private:
+	int			m_index;
+	QSizeF		m_size;
+};
+
+class ProcessorItem: public QGraphicsItem
+{
+	friend class InputItem;
+public:
+	ProcessorItem(Processor* _p): QGraphicsItem(), m_processor(_p)
+	{
+		m_processor->init(QString::number(uint(this)), m_properties);
+		m_size = QSizeF(100, 100);
+		for (uint i = 0; i < m_processor->numInputs(); i++)
+			new InputItem(i, this);
+	}
+	~ProcessorItem()
+	{
+		delete m_processor;
+	}
+
+	bool connectYourself()
+	{
+		return false;
+	}
+	void disconnectYourself()
+	{
+	}
+	void saveYourself(QDomElement& _root, QDomDocument& _doc)
+	{
+		QDomElement proc = _doc.createElement("processor");
+		proc.setAttribute("type", m_processor->type());
+
+		foreach (QString k, m_properties.keys())
+		{
+			QDomElement prop = _doc.createElement("property");
+			proc.appendChild(prop);
+			prop.setAttribute("name", k);
+			prop.setAttribute("value", m_properties[k].toString());
+		}
+
+		proc.setAttribute("name", m_processor->name());
+		proc.setAttribute("x", pos().x());
+		proc.setAttribute("y", pos().y());
+		proc.setAttribute("w", m_size.width());
+		proc.setAttribute("h", m_size.height());
+
+		foreach (QGraphicsItem* i, childItems())
+			if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
+				ii->saveYourself(proc, _doc);
+		_root.appendChild(proc);
+	}
+	void loadYourself()
+	{
+	}
+
+	virtual QRectF boundingRect() const
+	{
+		return QRectF(QPointF(0.0, 0.0), m_size);
+	}
+
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
+	{
+		_p->setPen(Qt::black);
+		_p->setBrush(QColor(255, 0, 0, 32));
+		_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
+	}
+
+	enum { Type = UserType + 1 };
+	virtual int type() const { return Type; }
+
+private:
+	Processor*	m_processor;
+	Properties	m_properties;
+	QSizeF		m_size;
+};
+
+InputItem::InputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i)
+{
+	m_size = QSizeF(_p->m_processor->input(m_index).capacity() / _p->m_processor->input(m_index).type().frequency() * 100 + cornerSize, portSize);
+	setPos(-m_size.width() - cornerSize, cornerSize + portLateralMargin + (portLateralMargin + portSize) * m_index);
 }
 
-void GeddeiNite::addBob(Bob *b)
-{
-	theBobs.append(b);
-}
+inline ProcessorItem* InputItem::processorItem() const { return qgraphicsitem_cast<ProcessorItem*>(parentItem()); }
 
-void GeddeiNite::removeBob(Bob *b)
-{
-	theBobs.remove(b);
-}
 
-Bob *GeddeiNite::getBob(const QString &name)
-{
-	for (Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
-		if ((*i)->name() == name) return *i;
-	return 0;
-}
-
-void GeddeiNite::doSave(const QString &filename)
+void GeddeiNite::doSave(const QString& _filename)
 {
 	QDomDocument doc;
 	QDomElement root = doc.createElement("network");
 	doc.appendChild(root);
-	for (Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
-	{	QDomElement proc;
-		if (dynamic_cast<DomSoftBob *>(*i))
-			proc = doc.createElement("subprocessor");
-		else if (dynamic_cast<SoftBob *>(*i))
-			proc = doc.createElement("processor");
-		else
-			proc = doc.createElement("builtin");
-		root.appendChild(proc);
-		(*i)->saveYourself(proc, doc);
-	}
+	foreach (QGraphicsItem* i, theScene.items())
+		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			pi->saveYourself(root, doc);
 
-	QFile f(filename);
+	QFile f(_filename);
 	if (!f.open(QIODevice::WriteOnly))
-	{	statusBar()->message("Couldn't write to " + filename, 2000);
+	{	statusBar()->message("Couldn't write to " + _filename, 2000);
 		return;
 	}
-	Q3TextStream out(&f);
+	QTextStream out(&f);
 	out << doc.toString();
 	statusBar()->message("Saved.", 2000);
 	setModified(false);
@@ -191,6 +238,8 @@ void GeddeiNite::doLoad(const QString &filename)
 	}
 	QDomDocument doc;
 	doc.setContent(&f, false);
+
+	theFilename = filename;
 
 	QDomElement root = doc.documentElement();
 	for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling())
@@ -225,32 +274,19 @@ void GeddeiNite::setModified(bool modified)
 	setCaption((theFilename.isEmpty() ? "Untitled" : theFilename) + (modified ? " [ Modified ]" : "") + " - Geddei Nite");
 }
 
-void GeddeiNite::setActive(Q3CanvasItem *active)
-{
-	//TODO: need to check item type and update() it if neccessary
-	if (active == theActive) return;
-	if (theActive) { theActive->setActive(false); dynamic_cast<Refresher *>(theActive)->refresh(); }
-	theActive = active;
-	if (theActive) { theActive->setActive(true); dynamic_cast<Refresher *>(theActive)->refresh(); }
-	update();
-	updateProperties();
-}
-
 void GeddeiNite::updateItems()
 {
-	theSelector->clear();
+	theProcessors->clear();
 	{	QStringList classes = ProcessorFactory::available();
 		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
-		{	Q3ListViewItem *item = new Q3ListViewItem(theSelector, *i, "processor");
-			//item->setPixmap(0, QPixmap((const char **)processor));
-			item->setDragEnabled(true);
+		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType);
+			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		}
 	}
 	{	QStringList classes = SubProcessorFactory::available();
 		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
-		{	Q3ListViewItem *item = new Q3ListViewItem(theSelector, *i, "subprocessor");
-			//item->setPixmap(0, QPixmap((const char **)subprocessor));
-			item->setDragEnabled(true);
+		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType + 1);
+			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		}
 	}
 }
@@ -258,8 +294,7 @@ void GeddeiNite::updateItems()
 void GeddeiNite::updateProperties()
 {
 	theUpdatingProperties = true;
-	for (int i = 0; i < 2; i++)
-	if (theActive && dynamic_cast<SoftBob *>(theActive))
+/*	if (theActive && dynamic_cast<SoftBob *>(theActive))
 	{
 		Properties p(dynamic_cast<SoftBob *>(theActive)->theProperties);
 		theProperties->setRowCount(p.size() + 1);
@@ -289,7 +324,7 @@ void GeddeiNite::updateProperties()
 		theProperties->clear();
 		theProperties->setRowCount(1);
 		theProperties->setEnabled(false);
-	}
+	}*/
 	theUpdatingProperties = false;
 	theProperties->update();
 }
@@ -307,16 +342,13 @@ void GeddeiNite::on_fileSave_activated()
 
 void GeddeiNite::on_fileOpen_activated()
 {
-	QString filename = Q3FileDialog::getOpenFileName(QString::null, QString::null, this);
+	QString filename = QFileDialog::getOpenFileName(this, "Open Processor Network", "/tmp", "XML (*.xml);;All files (*)");
 	if (!filename.isEmpty())
 	{	if (theFilename.isEmpty() && !theModified)
-		{	theFilename = filename;
-			doLoad(theFilename);
-		}
+			doLoad(filename);
 		else
 		{	GeddeiNite *g = new GeddeiNite;
-			g->theFilename = filename;
-			g->doLoad(g->theFilename);
+			g->doLoad(filename);
 			g->show();
 		}
 	}
@@ -324,8 +356,7 @@ void GeddeiNite::on_fileOpen_activated()
 
 void GeddeiNite::on_fileSaveAs_activated()
 {
-	QString filename = Q3FileDialog::getSaveFileName(QString::null, QString::null, this);
-
+	QString filename = QFileDialog::getSaveFileName(this, "Save Processor Network", "/tmp", "XML (*.xml);;All files (*)");
 	if (!filename.isEmpty())
 	{	theFilename = filename;
 		on_fileSave_activated();
@@ -336,35 +367,13 @@ void GeddeiNite::on_fileSaveAs_activated()
 
 void GeddeiNite::on_editRemove_activated()
 {
-	if (!theActive) return;
-	Q3CanvasItem *theActive = GeddeiNite::theActive;
-	setActive();
-	if (dynamic_cast<BobLink *>(theActive))
-	{	delete dynamic_cast<BobLink *>(theActive);
-		theCanvas->update();
-		setModified(true);
-	}
-	else if (dynamic_cast<SoftBob *>(theActive))
-	{
-		delete dynamic_cast<SoftBob *>(theActive);
-		theCanvas->update();
-		setModified(true);
-	}
-	else if (dynamic_cast<HardBob *>(theActive))
-	{
-		delete dynamic_cast<HardBob *>(theActive);
-		theCanvas->update();
-		setModified(true);
-	}
-	else
-		statusBar()->message("Cannot delete this object: You didn't create it.", 2000);
 }
 
-void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
+void GeddeiNite::slotPropertyChanged(QTableWidgetItem*)
 {
 	if (theUpdatingProperties)
 		return;
-	assert(!theRunning);
+/*	assert(!theRunning);
 	assert(theActive);
 	if (dynamic_cast<SoftBob *>(theActive) && theProperties->verticalHeaderItem(_i->row()))
 	{	Properties &p(dynamic_cast<SoftBob *>(theActive)->theProperties);
@@ -386,7 +395,7 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 			case 1: link->setProximity(_i->text().toUInt()); break;
 			default: ;
 		}
-	}
+	}*/
 	setModified(true);
 }
 
@@ -400,23 +409,18 @@ void GeddeiNite::on_modeTest_activated()
 
 bool GeddeiNite::connectAll()
 {
-	bool successful = true;
+	foreach (QGraphicsItem* i, theScene.items())
+		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			if (!pi->connectYourself())
+			{
+				statusBar()->message("Problem creating connections.");
+				disconnectAll();
+				return false;
+			}
 
-	for (Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
-		if (!(*i)->connectYourself()) { successful = false; break; }
-
-	if (!successful)
-	{	// error message, restore to stable state.
-		statusBar()->message("Problem creating connections.");
-		theCanvas->update();
-		disconnectAll();
-		return false;
-	}
-	successful = theGroup.confirmTypes();
-	if (!successful)
-	{	// error message, restore to stable state.
+	if (!theGroup.confirmTypes())
+	{
 		statusBar()->message("Problem confirming types.");
-		theCanvas->update();
 		disconnectAll();
 		return false;
 	}
@@ -426,16 +430,17 @@ bool GeddeiNite::connectAll()
 
 void GeddeiNite::disconnectAll()
 {
+	foreach (QGraphicsItem* i, theScene.items())
+		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			pi->disconnectYourself();
 	theConnected = false;
-	for (Q3PtrList<Bob>::iterator i = theBobs.begin(); i != theBobs.end(); i++)
-		(*i)->disconnectYourself();
 }
 
 void GeddeiNite::on_toolsDeployPlayer_activated()
 {
-	QString filename = Q3FileDialog::getOpenFileName("/tmp", "Uncompressed audio (*.wav);;All files (*)", this);
+	QString filename = QFileDialog::getOpenFileName(this, "Open audio file", "/tmp", "Uncompressed audio (*.wav);;Ogg Vorbis (*.ogg);;FLAC audio (*.flac);;MP3 audio (*.mp3);;All files (*)");
 	if (!filename.isEmpty())
-		new HardBob(100, 60, filename, theCanvas, new Player(filename));
+		theScene.addItem(new ProcessorItem(new Player(filename)));
 }
 
 void GeddeiNite::on_modeRun_toggled(bool running)
@@ -478,7 +483,6 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		disconnectAll();
 		theProperties->setEnabled(true);
 	}
-	theCanvas->update();
 }
 
 void GeddeiNite::closeEvent(QCloseEvent *e)

@@ -58,63 +58,48 @@ public:
 	GeddeiNite();
 	~GeddeiNite();
 
-	const QString makeUniqueName(const QString &type);
-	void setActive(Q3CanvasItem *item = NULL);
-	void setModified(bool modified = true);
+	const QString	makeUniqueName(const QString &type);
+	void			setModified(bool modified = true);
 
-	bool tested() const { return theTested; }
-	bool connected() const { return theConnected; }
+	bool			tested() const { return theTested; }
+	bool			connected() const { return theConnected; }
 
-	ProcessorGroup &group() { return theGroup; }
-
-	bool bobCollision(Bob *b);
-	void addBob(Bob *b);
-	void removeBob(Bob *b);
-	Bob *getBob(const QString &name);
+	ProcessorGroup&	group() { return theGroup; }
 
 protected:
-	void closeEvent(QCloseEvent *);
+	void			closeEvent(QCloseEvent *);
 
 private slots:
-	void slotPropertyChanged(QTableWidgetItem* _i);
+	void			slotPropertyChanged(QTableWidgetItem* _i);
 
-	void on_modeRun_toggled(bool testing);
-	void on_fileOpen_activated();
-	void on_fileSave_activated();
-	void on_fileSaveAs_activated();
-	void on_filePrint_activated();
-	void on_fileExit_activated() { qApp->exit(); }
-	void on_editRemove_activated();
-	void on_toolsDeployPlayer_activated();
-	void on_modeTest_activated();
+	void			on_modeRun_toggled(bool testing);
+	void			on_fileOpen_activated();
+	void			on_fileSave_activated();
+	void			on_fileSaveAs_activated();
+	void			on_fileExit_activated() { qApp->exit(); }
+	void			on_editRemove_activated();
+	void			on_toolsDeployPlayer_activated();
+	void			on_modeTest_activated();
 
 private:
-	void updateItems();
-	void doSave(const QString &filename);
-	void doLoad(const QString &filename);
-	bool connectAll();
-	void disconnectAll();
+	void			doSave(const QString &filename);
+	void			doLoad(const QString &filename);
+	bool			connectAll();
+	void			disconnectAll();
+	void			updateItems();
+	void			updateProperties();
 
-	void updateProperties();
+	QGraphicsScene	theScene;
+	ProcessorGroup	theGroup;
 
-	QDockWidget *theDockSelector;
+	QString			theFilename;
 
-	Q3Canvas *theCanvas;
-	Q3CanvasItem *theActive;
-	Q3PtrList<Bob> theBobs;
-	ProcessorView *theSelector;
-
-	ProcessorGroup theGroup;
-
-	QString theFilename;
-
-	bool theUpdatingProperties;
-
-	bool theRunning;
-	bool theTested;
-	bool theConnected;
-	bool theIgnoreNext;
-	bool theModified;
+	bool			theUpdatingProperties;
+	bool			theRunning;
+	bool			theTested;
+	bool			theConnected;
+	bool			theIgnoreNext;
+	bool			theModified;
 };
 
 #endif

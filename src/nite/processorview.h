@@ -17,25 +17,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PROCESSORVIEW_H
-#define PROCESSORVIEW_H
+
+#pragma once
 
 #define __GEDDEI_BUILD
 
-#include <q3listview.h>
-
-class Q3DragObject;
+#include <QListWidget>
 
 /** @internal
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  */
-class ProcessorView: public Q3ListView
+class ProcessorView: public QListWidget
 {
 public:
-	Q3DragObject *dragObject();
+	ProcessorView(QWidget *_parent = 0): QListWidget(_parent) {}
 
-	ProcessorView(QWidget *parent = 0, const char *name = 0, Qt::WFlags f = 0);
+	virtual QMimeData* mimeData(const QList<QListWidgetItem *> _items) const;
 };
-
-
-#endif
