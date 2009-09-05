@@ -1,8 +1,3 @@
-Move over to git.
-Get configure script and .pro files working nicely.
-- Use qmake's pkgconfig support.
-- Get .o files in an objects dir.
-- Get plugins in a plugins dir.
 CRASH on escape.
 Audio (ALSA) output.
 Watch should work and output to main display ala CLAM.
