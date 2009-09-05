@@ -29,6 +29,21 @@ class Similarity : public Processor
 {
 	uint theSize, theStep;
 
+	static inline float cosineDistance(const float *x, const float *y, uint bandWidth)
+	{
+		double ret = 0., mx = 0., my = 0.;
+
+		for(uint i = 0; i < bandWidth; i++)
+		{	ret += x[i] * y[i];
+			mx += x[i] * x[i];
+			my += y[i] * y[i];
+		}
+		float div = sqrt(mx) * sqrt(my);
+		if(!isnan(div)) if(!isnan(ret / div))
+			return ret / div;
+		return 0;
+	}
+
 protected:
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
@@ -39,21 +54,6 @@ protected:
 public:
 	Similarity() : Processor("Similarity") {}
 };
-
-inline float cosineDistance(const float *x, const float *y, uint bandWidth)
-{
-	double ret = 0., mx = 0., my = 0.;
-
-	for(uint i = 0; i < bandWidth; i++)
-	{	ret += x[i] * y[i];
-		mx += x[i] * x[i];
-		my += y[i] * y[i];
-	}
-	float div = sqrt(mx) * sqrt(my);
-	if(!isnan(div)) if(!isnan(ret / div))
-		return ret / div;
-	return 0;
-}
 
 void Similarity::processor()
 {
@@ -103,7 +103,7 @@ void Similarity::initFromProperties(const Properties &properties)
 PropertiesInfo Similarity::specifyProperties() const
 {
 	return PropertiesInfo("Size", 64, "The size of the block (in samples) from which to create a similarity matrix.")
-	                     ("Step", 16, "The number of samples between consequent sampling blocks.");
+						 ("Step", 16, "The number of samples between consequent sampling blocks.");
 }
 
 EXPORT_CLASS(Similarity, 0,1,0, Processor);

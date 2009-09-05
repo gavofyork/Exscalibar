@@ -46,7 +46,7 @@ bool MultiPlayer::openFile()
 {
 	if(theFile) sf_close(theFile);
 	SF_INFO sfinfo;
-	for(; theIndex < thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
+	for(; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
 	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
 		if(theChannels == sfinfo.channels && theRate == sfinfo.samplerate) break;
 		if(theFile) sf_close(theFile);
@@ -66,7 +66,7 @@ void MultiPlayer::initFromProperties(const Properties &p)
 	theChannels = 0;
 	// A quick openFile(), that doesn't check the channels/rate, in fact it gets them.
 	SF_INFO sfinfo;
-	for(; theIndex < thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
+	for(; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
 	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
 		if(theFile)
 		{	theChannels = sfinfo.channels;
@@ -81,7 +81,7 @@ void MultiPlayer::initFromProperties(const Properties &p)
 PropertiesInfo MultiPlayer::specifyProperties() const
 {
 	return PropertiesInfo("Filenames", QStringList(), "The names of the files to be played through the outputs. They must all have the same number of channels.")
-	                     ("Frames", 8192, "The number of samples to output in each chunk.");
+						 ("Frames", 8192, "The number of samples to output in each chunk.");
 }
 
 void MultiPlayer::specifyOutputSpace(Q3ValueVector<uint> &samples)

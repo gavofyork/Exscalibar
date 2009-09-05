@@ -5,16 +5,22 @@
 
 include(../../../exscalibar.pri)
 
+TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
+LIBS += -lqtextra -lgeddei
+INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
+
 SOURCES += add.cpp \
            example.cpp \
            multiply.cpp \
            sink.cpp \
            split.cpp
-TARGETDEPS += $$DESTDIR/libqtextra.so \
-              $$DESTDIR/libgeddei.so 
-LIBS += -lqtextra \
-	-lgeddei
-INCLUDEPATH += ../../../src/qtextra \
-		../../../src/geddei
-TEMPLATE = lib
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/math
+}
+
+TEMPLATE = lib 
 CONFIG += plugin
+

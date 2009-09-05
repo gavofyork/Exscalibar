@@ -86,13 +86,13 @@ public:
 	 * @return The type of error that occured (if existant), coded as a
 	 * Geddei::Processor::ErrorType enumeration.
 	 */
-	const Processor::ErrorType waitUntilGoing(AbstractProcessor **errorProc = 0, int *errorData = 0) const;
+	Processor::ErrorType waitUntilGoing(AbstractProcessor **errorProc = 0, int *errorData = 0) const;
 
 	/**
 	 * Stop all represented Processor objects immediately. See
 	 * Geddei::Processor::stop() and AbstractProcessor::stop() for more
 	 * information.
-	 * 
+	 *
 	 * @param resetToo Conduct a reset of all processors as well. Leave as true
 	 * unless you know what you're doing.
 	 */
@@ -106,7 +106,7 @@ public:
 	 * @sa stop()
 	 */
 	void reset() const;
-	
+
 	/**
 	 * Disconnect all represented Processor objects immediately. See
 	 * Geddei::Processor::disconnectAll() for more information.
@@ -139,7 +139,7 @@ public:
 	 * @sa operator[]()
 	 */
 	AbstractProcessor &get(const QString &name);
-	
+
 	/**
 	 * Retreive the AbstractDomProcessor object of name @a name.
 	 *

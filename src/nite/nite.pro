@@ -17,7 +17,6 @@ LIBS += -lqtextra \
 INCLUDEPATH += ../../src/geddei \
                ../../src/qtextra
 FORMS += geddeinitebase.ui
-IMAGES += memory.xpm
 HEADERS += geddeinite.h \
            bobsview.h \
            watchprocessor.h \

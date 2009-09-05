@@ -92,25 +92,27 @@ void Normalise::receivedPlunger()
 {
 	if(!f.size()) return;
 	float mini = f[0], maxi = f[0], tu = 0., tb = 0., avgu = 0., avgb = 0., delta, avg = 0.;
-	for(uint i = 1; i < f.size(); i++)
+	for(uint i = 1; i < (uint)f.size(); i++)
 		if(f[i] > maxi) maxi = f[i];
 		else if(f[i] < mini) mini = f[i];
 	int t = 0;
-	for(uint i = 0; i < f.size(); i++)
+	for(uint i = 0; i < (uint)f.size(); i++)
 		if(f[i] != mini && f[i] != maxi)
 		{ avg += f[i] / float(f.size()); t++; }
-	for(uint i = 0; i < f.size(); i++)
+	for(uint i = 0; i < (uint)f.size(); i++)
 		if(f[i] != mini && f[i] != maxi)
-			if(f[i] > avg) { avgu += f[i]; tu++; }
+		{	if(f[i] > avg) { avgu += f[i]; tu++; }
 			else { avgb += f[i]; tb++; }
+		}
 	avgu /= float(tu);
 	avgb /= float(tb);
 	float avguu = 0., avgbb = 0.;
 	tu = 0.; tb = 0.;
-	for(uint i = 0; i < f.size(); i++)
+	for(uint i = 0; i < (uint)f.size(); i++)
 		if(f[i] != mini && f[i] != maxi)
-			if(f[i] > avgu) { avguu += f[i]; tu++; }
+		{	if(f[i] > avgu) { avguu += f[i]; tu++; }
 			else if(f[i] < avgb) { avgbb += f[i]; tb++; }
+		}
 	avguu /= float(tu);
 	avgbb /= float(tb);
 	mini = max(avg + (avgb - avg) * 2.f, avgbb);
@@ -124,7 +126,7 @@ void Normalise::receivedPlunger()
 	delta = maxi - mini;
 	if(!delta) delta = 1.;
 	BufferData d(f.size(), theScope);
-	for(uint i = 0; i < f.size(); i++)
+	for(uint i = 0; i < (uint)f.size(); i++)
 		d[i] = finite(f[i]) ? std::min(1.f, std::max(0.f, (f[i] - mini) / delta)) : 0.;
 	output(0) << d;
 	f.clear();

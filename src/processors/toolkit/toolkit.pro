@@ -5,11 +5,16 @@
 
 PACKAGES = "sndfile:1.0.0" "vorbisfile:1.0.0" "mad:0.15" "jack:0.90.0" "alsa:0.9"
 include(../../../exscalibar.pri)
-INSTALLS += headers \
-            target 
+
+INSTALLS += headers target 
 target.path = $$PREFIX/plugins/geddei 
 headers.files += *.h 
 headers.path = $$PREFIX/include/geddeiprocessors 
+
+TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
+LIBS += -lqtextra -lgeddei
+INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
+
 HEADERS += monitor.h \
            multiplayer.h \
            player.h \
@@ -24,13 +29,13 @@ SOURCES += monitor.cpp \
 	   fan.cpp \
 	   stress.cpp \
            recorder.cpp 
-TARGETDEPS += $$DESTDIR/libqtextra.so \
-              $$DESTDIR/libgeddei.so 
 
-LIBS += -lgeddei \
-	-lqtextra
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/toolkit
+}
 
-INCLUDEPATH += ../../../src/geddei \
-../../../src/qtextra
 TEMPLATE = lib
 CONFIG += plugin
+

@@ -63,9 +63,6 @@ using namespace Geddei;
 #include "domsoftbob.h"
 #include "hardbob.h"
 
-#include "processor.xpm"
-#include "subprocessor.xpm"
-
 GeddeiNite::GeddeiNite(): QMainWindow(0, "GeddeiNite", Qt::WDestructiveClose), theConnected(false)
 {
 	setupUi(this);
@@ -133,7 +130,7 @@ void GeddeiNite::on_filePrint_activated()
 const QString GeddeiNite::makeUniqueName(const QString &type)
 {
 	QString ret = "";
-	for(int i = 1; theGroup.exists(ret = type + QString().setNum(i)); i++);
+	for(int i = 1; theGroup.exists(ret = type + QString().setNum(i)); i++) {}
 	return ret;
 }
 
@@ -250,14 +247,14 @@ void GeddeiNite::updateItems()
 	{	QStringList classes = ProcessorFactory::available();
 		for(QStringList::iterator i = classes.begin(); i != classes.end(); i++)
 		{	Q3ListViewItem *item = new Q3ListViewItem(theSelector, *i, "processor");
-			item->setPixmap(0, QPixmap((const char **)processor));
+			//item->setPixmap(0, QPixmap((const char **)processor));
 			item->setDragEnabled(true);
 		}
 	}
 	{	QStringList classes = SubProcessorFactory::available();
 		for(QStringList::iterator i = classes.begin(); i != classes.end(); i++)
 		{	Q3ListViewItem *item = new Q3ListViewItem(theSelector, *i, "subprocessor");
-			item->setPixmap(0, QPixmap((const char **)subprocessor));
+			//item->setPixmap(0, QPixmap((const char **)subprocessor));
 			item->setDragEnabled(true);
 		}
 	}
@@ -489,6 +486,6 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 void GeddeiNite::closeEvent(QCloseEvent *e)
 {
 	if(theModified)
-	;	// TODO: ask if want to save
+	{}	// TODO: ask if want to save
 	e->accept();
 }

@@ -253,7 +253,7 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	}
 
 	/* If the user request was not yet fulfilled we then read from the
-     * file the remaining data requested by the user.
+	 * file the remaining data requested by the user.
 	 */
 	if(FeededSize<RequestSize)
 	{
@@ -305,7 +305,7 @@ size_t BstdRead(void *UserBuffer, size_t ElementSize, size_t ElementsCount, bstd
 	}
 
 	/* Eventually return the number ob bytes feeded to the user
-     * buffer.
+	 * buffer.
 	 */
 	return(FeededSize);
 }

@@ -28,7 +28,7 @@
 using namespace Geddei;
 using namespace rGeddei;
 
-class Geddei::SubProcessor;
+namespace Geddei { class SubProcessor; }
 
 namespace rGeddei
 {

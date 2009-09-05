@@ -6,15 +6,12 @@
 include(../../../exscalibar.pri)
 
 INSTALLS += target 
-target.path = $$PREFIX/plugins/geddei 
-TARGETDEPS += $$DESTDIR/libqtextra.so \
-              $$DESTDIR/libgeddei.so 
-LIBS += -lgeddei \
-        -lqtextra 
-INCLUDEPATH += ../../../src/geddei \
-               ../../../src/qtextra 
-TEMPLATE = lib 
-CONFIG += plugin
+target.path = $$PREFIX/plugins/geddei
+
+TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
+LIBS += -lqtextra -lgeddei
+INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
+
 SOURCES += exp.cpp \
            mean.cpp \
            normalise.cpp \
@@ -22,3 +19,13 @@ SOURCES += exp.cpp \
            sum.cpp \
            log.cpp \
            math.cpp 
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/math
+}
+
+TEMPLATE = lib 
+CONFIG += plugin
+

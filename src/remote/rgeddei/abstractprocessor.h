@@ -69,7 +69,7 @@ protected:
 	 * is used by the front-end (non-virtual) methods.
 	 *
 	 * @param name The name for the Processor object.
- 	 * @param g The AbstractProcessorGroup (if any) it is to be a member of.
+	 * @param g The AbstractProcessorGroup (if any) it is to be a member of.
 	 * @param p The Properties is it to be initialised with.
 	 */
 	virtual void doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p) = 0;
@@ -131,7 +131,7 @@ public:
 	 *
 	 * @sa Geddei::Processor::waitUntilGoing()
 	 */
-	virtual const Processor::ErrorType waitUntilGoing(int *errorData = 0) = 0;
+	virtual Processor::ErrorType waitUntilGoing(int *errorData = 0) = 0;
 
 	/**
 	 * Sends a message to the Processor object that this represents, telling it
@@ -310,7 +310,7 @@ public:
 	 *
 	 * // Wrong:
 	 * //p.init();
-	 * 
+	 *
 	 * delete a;
 	 * @endcode
 	 *
@@ -320,7 +320,7 @@ public:
 	 * object will...
 	 */
 	static LocalProcessor *create(LocalSession &session, Processor &processor);
-	
+
 	/**
 	 * Constructs a LocalProcessor object that adopts the
 	 * given Processor object.
@@ -341,7 +341,7 @@ public:
 	 * object will take ownership.
 	 */
 	static LocalProcessor *create(LocalSession &session, Processor *processor);
-	
+
 	/** @overload
 	 * Constructs a LocalProcessor object together with its
 	 * associated (and owned) Processor object.
@@ -353,7 +353,7 @@ public:
 	 * derived subclass must be available as a plugin.
 	 */
 	static LocalProcessor *create(LocalSession &session, const QString &type);
-	
+
 	/**
 	 * Constructs a RemoteProcessor object together with a
 	 * Processor object in the RemoteSession (i.e. on that object's host).
@@ -365,8 +365,8 @@ public:
 	 * construction.
 	 */
 	static RemoteProcessor *create(RemoteSession &session, const QString &type);
-	
-	virtual ~AbstractProcessor() {}	
+
+	virtual ~AbstractProcessor() {}
 };
 
 };

@@ -8,14 +8,11 @@ include(../../../exscalibar.pri)
 
 INSTALLS += target 
 target.path = $$PREFIX/plugins/geddei 
-TARGETDEPS += $$DESTDIR/libqtextra.so \
-              $$DESTDIR/libgeddei.so 
-LIBS += -lgeddei \
-        -lqtextra
-INCLUDEPATH += ../../../src/geddei \
-               ../../../src/qtextra 
-TEMPLATE = lib
-CONFIG += plugin
+
+TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
+LIBS += -lqtextra -lgeddei
+INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
+
 SOURCES += bark.cpp \
            cepstrum.cpp \
            checkerboard.cpp \
@@ -31,3 +28,13 @@ SOURCES += bark.cpp \
            similarity.cpp \
            simplesplit.cpp \
            wavegen.cpp 
+
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
+	DEPLOYMENT += $$SOURCES
+	SOURCES = .composed.cpp
+	OBJECTS_DIR = $$OBJECTS_DIR/mir
+}
+
+TEMPLATE = lib
+CONFIG += plugin
+

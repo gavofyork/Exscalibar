@@ -97,7 +97,7 @@ private:
 	virtual void doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p);
 public:
 	virtual bool go() { return theSession->processorGo(theHandle); }
-	virtual const Processor::ErrorType waitUntilGoing(int *errorData = 0) { int ed; return (Processor::ErrorType)theSession->processorWaitUntilGoing(theHandle, errorData ? *errorData : ed); }
+	virtual Processor::ErrorType waitUntilGoing(int *errorData = 0) { int ed; return (Processor::ErrorType)theSession->processorWaitUntilGoing(theHandle, errorData ? *errorData : ed); }
 	virtual void waitUntilDone() { theSession->processorWaitUntilDone(theHandle); }
 	virtual void stop() { theSession->processorStop(theHandle); }
 	virtual void reset() { theSession->processorReset(theHandle); }

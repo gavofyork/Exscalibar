@@ -118,7 +118,7 @@ bool AbstractProcessorGroup::go(bool waitUntilGoing) const
 	return true;
 }
 
-const Processor::ErrorType AbstractProcessorGroup::waitUntilGoing(AbstractProcessor **errorProc, int *errorData) const
+Processor::ErrorType AbstractProcessorGroup::waitUntilGoing(AbstractProcessor **errorProc, int *errorData) const
 {
 	Processor::ErrorType ret;
 	for(QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)

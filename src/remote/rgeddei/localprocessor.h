@@ -128,7 +128,7 @@ private:
 	virtual void doInit(const QString &name, AbstractProcessorGroup *g, const Properties &p);
 public:
 	virtual bool go() { return theProcessor->go(); }
-	virtual const Processor::ErrorType waitUntilGoing(int *errorData = 0) { return theProcessor->waitUntilGoing(errorData); }
+	virtual Processor::ErrorType waitUntilGoing(int *errorData = 0) { return theProcessor->waitUntilGoing(errorData); }
 	virtual void waitUntilDone() { theProcessor->waitUntilDone(); }
 	virtual void stop() { theProcessor->stop(); }
 	virtual void reset() { theProcessor->reset(); }

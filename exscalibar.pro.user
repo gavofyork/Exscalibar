@@ -70,11 +70,11 @@
  </data>
  <data>
   <variable>RunConfiguration10-ProFile</variable>
-  <value type="QString" >src/tests/testdemux/testdemux.pro</value>
+  <value type="QString" >src/tests/testspeed/testspeed.pro</value>
  </data>
  <data>
   <variable>RunConfiguration10-RunConfiguration.name</variable>
-  <value type="QString" >testdemux</value>
+  <value type="QString" >testspeed</value>
  </data>
  <data>
   <variable>RunConfiguration10-UseDyldImageSuffix</variable>
@@ -102,11 +102,11 @@
  </data>
  <data>
   <variable>RunConfiguration11-ProFile</variable>
-  <value type="QString" >src/tests/testfileout/testfileout.pro</value>
+  <value type="QString" >src/tests/testsplit/testsplit.pro</value>
  </data>
  <data>
   <variable>RunConfiguration11-RunConfiguration.name</variable>
-  <value type="QString" >testfileout</value>
+  <value type="QString" >testsplit</value>
  </data>
  <data>
   <variable>RunConfiguration11-UseDyldImageSuffix</variable>
@@ -126,198 +126,6 @@
  </data>
  <data>
   <variable>RunConfiguration11-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration12-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration12-ProFile</variable>
-  <value type="QString" >src/tests/testflow/testflow.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration12-RunConfiguration.name</variable>
-  <value type="QString" >testflow</value>
- </data>
- <data>
-  <variable>RunConfiguration12-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration12-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration12-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration12-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration12-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration13-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration13-ProFile</variable>
-  <value type="QString" >src/tests/testgat/testgat.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration13-RunConfiguration.name</variable>
-  <value type="QString" >testgat</value>
- </data>
- <data>
-  <variable>RunConfiguration13-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration13-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration13-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration13-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration13-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration14-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration14-ProFile</variable>
-  <value type="QString" >src/tests/testmulti/testmulti.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration14-RunConfiguration.name</variable>
-  <value type="QString" >testmulti</value>
- </data>
- <data>
-  <variable>RunConfiguration14-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration14-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration14-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration14-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration14-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration15-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration15-ProFile</variable>
-  <value type="QString" >src/tests/testproperties/testproperties.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration15-RunConfiguration.name</variable>
-  <value type="QString" >testproperties</value>
- </data>
- <data>
-  <variable>RunConfiguration15-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration15-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration15-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration15-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration15-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration16-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration16-ProFile</variable>
-  <value type="QString" >src/tests/testspeed/testspeed.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration16-RunConfiguration.name</variable>
-  <value type="QString" >testspeed</value>
- </data>
- <data>
-  <variable>RunConfiguration16-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration16-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration16-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration16-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration16-type</variable>
-  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
- </data>
- <data>
-  <variable>RunConfiguration17-CommandLineArguments</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration17-ProFile</variable>
-  <value type="QString" >src/tests/testsplit/testsplit.pro</value>
- </data>
- <data>
-  <variable>RunConfiguration17-RunConfiguration.name</variable>
-  <value type="QString" >testsplit</value>
- </data>
- <data>
-  <variable>RunConfiguration17-UseDyldImageSuffix</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration17-UseTerminal</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration17-UserEnvironmentChanges</variable>
-  <valuelist type="QVariantList" />
- </data>
- <data>
-  <variable>RunConfiguration17-UserSetName</variable>
-  <value type="bool" >false</value>
- </data>
- <data>
-  <variable>RunConfiguration17-type</variable>
   <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
  </data>
  <data>
@@ -358,11 +166,11 @@
  </data>
  <data>
   <variable>RunConfiguration3-ProFile</variable>
-  <value type="QString" >src/remote/nodecontroller/nodecontroller.pro</value>
+  <value type="QString" >src/tests/testall/testall.pro</value>
  </data>
  <data>
   <variable>RunConfiguration3-RunConfiguration.name</variable>
-  <value type="QString" >nodecontroller</value>
+  <value type="QString" >testall</value>
  </data>
  <data>
   <variable>RunConfiguration3-UseDyldImageSuffix</variable>
@@ -390,11 +198,11 @@
  </data>
  <data>
   <variable>RunConfiguration4-ProFile</variable>
-  <value type="QString" >src/remote/nodeserver/nodeserver.pro</value>
+  <value type="QString" >src/tests/testbuffer/testbuffer.pro</value>
  </data>
  <data>
   <variable>RunConfiguration4-RunConfiguration.name</variable>
-  <value type="QString" >nodeserver</value>
+  <value type="QString" >testbuffer</value>
  </data>
  <data>
   <variable>RunConfiguration4-UseDyldImageSuffix</variable>
@@ -422,11 +230,11 @@
  </data>
  <data>
   <variable>RunConfiguration5-ProFile</variable>
-  <value type="QString" >src/remote/tests/testnodeclient/testnodeclient.pro</value>
+  <value type="QString" >src/tests/testdemux/testdemux.pro</value>
  </data>
  <data>
   <variable>RunConfiguration5-RunConfiguration.name</variable>
-  <value type="QString" >testnodeclient</value>
+  <value type="QString" >testdemux</value>
  </data>
  <data>
   <variable>RunConfiguration5-UseDyldImageSuffix</variable>
@@ -454,11 +262,11 @@
  </data>
  <data>
   <variable>RunConfiguration6-ProFile</variable>
-  <value type="QString" >src/remote/tests/testrdemux/testrdemux.pro</value>
+  <value type="QString" >src/tests/testfileout/testfileout.pro</value>
  </data>
  <data>
   <variable>RunConfiguration6-RunConfiguration.name</variable>
-  <value type="QString" >testrdemux</value>
+  <value type="QString" >testfileout</value>
  </data>
  <data>
   <variable>RunConfiguration6-UseDyldImageSuffix</variable>
@@ -486,11 +294,11 @@
  </data>
  <data>
   <variable>RunConfiguration7-ProFile</variable>
-  <value type="QString" >src/remote/tests/testspeed/testspeed.pro</value>
+  <value type="QString" >src/tests/testflow/testflow.pro</value>
  </data>
  <data>
   <variable>RunConfiguration7-RunConfiguration.name</variable>
-  <value type="QString" >testspeed</value>
+  <value type="QString" >testflow</value>
  </data>
  <data>
   <variable>RunConfiguration7-UseDyldImageSuffix</variable>
@@ -518,11 +326,11 @@
  </data>
  <data>
   <variable>RunConfiguration8-ProFile</variable>
-  <value type="QString" >src/tests/testall/testall.pro</value>
+  <value type="QString" >src/tests/testmulti/testmulti.pro</value>
  </data>
  <data>
   <variable>RunConfiguration8-RunConfiguration.name</variable>
-  <value type="QString" >testall</value>
+  <value type="QString" >testmulti</value>
  </data>
  <data>
   <variable>RunConfiguration8-UseDyldImageSuffix</variable>
@@ -550,11 +358,11 @@
  </data>
  <data>
   <variable>RunConfiguration9-ProFile</variable>
-  <value type="QString" >src/tests/testbuffer/testbuffer.pro</value>
+  <value type="QString" >src/tests/testproperties/testproperties.pro</value>
  </data>
  <data>
   <variable>RunConfiguration9-RunConfiguration.name</variable>
-  <value type="QString" >testbuffer</value>
+  <value type="QString" >testproperties</value>
  </data>
  <data>
   <variable>RunConfiguration9-UseDyldImageSuffix</variable>
@@ -589,6 +397,7 @@
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
    <value key="QtVersionId" type="int" >2</value>
+   <value key="addQDumper" type="" ></value>
   </valuemap>
  </data>
  <data>

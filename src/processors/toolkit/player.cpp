@@ -24,6 +24,7 @@
 #endif
 
 #ifdef HAVE_MAD
+#undef SHRT_MAX
 #include "madhelp.cpp"
 #endif
 
@@ -62,7 +63,7 @@ void Player::initFromProperties(const Properties &p)
 	thePath = p["Filename"].toString();
 	theMode = NoMode;
 	theChannels = 0;
-	
+
 	qDebug("Opening file %s...", thePath.latin1());
 #ifdef HAVE_VORBISFILE
 	if(thePath.lower().contains(".ogg"))
@@ -141,7 +142,9 @@ void Player::initFromProperties(const Properties &p)
 		}
 
 		if(mad_frame_decode(&Frame, &Stream))
+		{
 			if(MAD_RECOVERABLE(Stream.error) || Stream.error==MAD_ERROR_BUFLEN) continue; else break;
+		}
 		theChannels = MAD_NCHANNELS(&Frame.header);
 		theRate = Frame.header.samplerate;
 		theLength = 1;
@@ -162,7 +165,7 @@ void Player::initFromProperties(const Properties &p)
 PropertiesInfo Player::specifyProperties() const
 {
 	return PropertiesInfo("Filename", "/tmp/cdda.wav", "The name of the file to be played through the output(s)")
-	                     ("Frames", 8192, "The number of samples to output in each chunk.");
+						 ("Frames", 8192, "The number of samples to output in each chunk.");
 }
 
 void Player::processor()
@@ -212,10 +215,10 @@ void Player::processor()
 			else
 			{
 				thePosition += in;
-				for(uint i = 0; i < theChannels; i++)
+				for(uint i = 0; i < (uint)theChannels; i++)
 				{	BufferData d = output(i).makeScratchSamples(in/* / theChannels*/);
 					if(!d.isNull())
-						for(uint j = 0; j < in/* / theChannels*/; j++)
+						for(uint j = 0; j < (uint)in/* / theChannels*/; j++)
 							d[j] = buffer[i][j];
 					output(i).push(d);
 				}
