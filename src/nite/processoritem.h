@@ -23,6 +23,8 @@ public:
 		delete m_processor;
 	}
 
+	Properties const& properties() const { return m_properties; }
+
 	bool connectYourself()
 	{
 		return false;
@@ -39,8 +41,8 @@ public:
 	{
 		return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f));
 	}
-	virtual void focusInEvent(QFocusEvent* _e) { update(); QGraphicsItem::focusInEvent(_e); }
-	virtual void focusOutEvent(QFocusEvent*) { update(); }
+	virtual void focusInEvent(QFocusEvent* _e);
+	virtual void focusOutEvent(QFocusEvent* _e);
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 

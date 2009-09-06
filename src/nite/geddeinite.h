@@ -53,6 +53,7 @@ protected:
 
 private slots:
 	void			slotPropertyChanged(QTableWidgetItem* _i);
+	void			slotUpdateProperties(QGraphicsItem* _i);
 
 	void			on_modeRun_toggled(bool testing);
 	void			on_fileOpen_activated();
@@ -69,7 +70,6 @@ private:
 	bool			connectAll();
 	void			disconnectAll();
 	void			updateItems();
-	void			updateProperties();
 
 	ProcessorsScene	theScene;
 	ProcessorGroup	theGroup;

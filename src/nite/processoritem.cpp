@@ -1,3 +1,4 @@
+#include "processorsview.h"
 #include "processoritem.h"
 
 ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr)
@@ -19,6 +20,20 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 	m_processor->init(_name, m_properties);
 	m_size = QSizeF(100, 100);
 	qDebug() << m_processor->numInputs() << m_processor->numOutputs();
+}
+
+void ProcessorItem::focusInEvent(QFocusEvent* _e)
+{
+	update();
+	QGraphicsItem::focusInEvent(_e);
+	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
+}
+
+void ProcessorItem::focusOutEvent(QFocusEvent* _e)
+{
+	update();
+	QGraphicsItem::focusOutEvent(_e);
+	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
 }
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)

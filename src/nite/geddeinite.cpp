@@ -39,6 +39,7 @@ GeddeiNite::GeddeiNite():
 {
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
+	connect(&theScene, SIGNAL(focusChanged(QGraphicsItem*)), this, SLOT(slotUpdateProperties(QGraphicsItem*)));
 	updateItems();
 
 	theView->setAcceptDrops(true);
@@ -54,7 +55,7 @@ GeddeiNite::GeddeiNite():
 		doLoad(s.value("mainwindow/lastproject").toString());
 	statusBar()->message(tr("Ready"), 2000);
 
-	updateProperties();
+	slotUpdateProperties(0);
 }
 
 GeddeiNite::~GeddeiNite()
@@ -146,15 +147,14 @@ void GeddeiNite::updateItems()
 	}
 }
 
-void GeddeiNite::updateProperties()
+void GeddeiNite::slotUpdateProperties(QGraphicsItem* _i)
 {
 	theUpdatingProperties = true;
-/*	if (theActive && dynamic_cast<SoftBob *>(theActive))
+	if (_i && qgraphicsitem_cast<ProcessorItem*>(_i))
 	{
-		Properties p(dynamic_cast<SoftBob *>(theActive)->theProperties);
-		theProperties->setRowCount(p.size() + 1);
-		theProperties->setVerticalHeaderItem(0, new QTableWidgetItem("Name"));
-		theProperties->setItem(0, 0, new QTableWidgetItem(dynamic_cast<Bob *>(theActive)->name()));
+		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(_i);
+		Properties const& p(pi->properties());
+		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
 		{
 			theProperties->setVerticalHeaderItem(i + 1, new QTableWidgetItem(p.keys()[i]));
@@ -163,7 +163,7 @@ void GeddeiNite::updateProperties()
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
 	}
-	else if (theActive && dynamic_cast<BobLink *>(theActive))
+/*	else if (_i && qgraphicsitem_cast<ConnectionItem*>(_i))
 	{
 		BobLink *link = dynamic_cast<BobLink *>(theActive);
 		theProperties->setRowCount(2);
@@ -173,13 +173,13 @@ void GeddeiNite::updateProperties()
 		theProperties->setVerticalHeaderItem(1, new QTableWidgetItem("Proximity"));
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
-	}
+	}*/
 	else
 	{
 		theProperties->clear();
 		theProperties->setRowCount(1);
 		theProperties->setEnabled(false);
-	}*/
+	}
 	theUpdatingProperties = false;
 	theProperties->update();
 }
