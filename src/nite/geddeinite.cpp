@@ -254,7 +254,7 @@ bool GeddeiNite::connectAll()
 {
 	foreach (QGraphicsItem* i, theScene.items())
 		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
-			if (!pi->connectYourself())
+			if (!pi->connectYourself(theGroup))
 			{
 				statusBar()->message("Problem creating connections.");
 				disconnectAll();

@@ -23,17 +23,12 @@ public:
 		delete m_processor;
 	}
 
-
 	Properties const& properties() const { return m_properties; }
 	void setProperty(QString const& _key, QVariant const& _value);
 
-	bool connectYourself()
-	{
-		return false;
-	}
-	void disconnectYourself()
-	{
-	}
+	bool connectYourself(ProcessorGroup& _group);
+	void disconnectYourself();
+
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	void loadYourself(QDomElement& _element);
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
@@ -44,7 +39,6 @@ public:
 		return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f));
 	}
 	virtual void focusInEvent(QFocusEvent* _e);
-	virtual void focusOutEvent(QFocusEvent* _e);
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 

@@ -14,6 +14,8 @@ public:
 	enum { Type = UserType + 4 };
 	virtual int type() const { return Type; }
 
+	OutputItem* from() const { return m_from; }
+
 private:
 	OutputItem* m_from;
 };

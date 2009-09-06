@@ -1,3 +1,4 @@
+#include "connectionitem.h"
 #include "processorsview.h"
 #include "processoritem.h"
 
@@ -63,12 +64,23 @@ void ProcessorItem::focusInEvent(QFocusEvent* _e)
 	assert(isSelected());
 	update();
 	QGraphicsItem::focusInEvent(_e);
-//	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
 }
 
-void ProcessorItem::focusOutEvent(QFocusEvent* _e)
+bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 {
-	QGraphicsItem::focusOutEvent(_e);
+	m_processor->setGroup(_g);
+	foreach (QGraphicsItem* i, childItems())
+		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
+			foreach (QGraphicsItem* j, ii->childItems())
+				if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(j))
+					if (!ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
+						return false;
+	return true;
+}
+
+void ProcessorItem::disconnectYourself()
+{
+	m_processor->disconnectAll();
 }
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
