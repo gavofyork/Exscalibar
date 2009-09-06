@@ -223,35 +223,22 @@ void GeddeiNite::on_fileSaveAs_activated()
 
 void GeddeiNite::on_editRemove_activated()
 {
+	if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+	{
+		delete qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
+		theScene.update();
+	}
 }
 
-void GeddeiNite::slotPropertyChanged(QTableWidgetItem*)
+void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 {
-	if (theUpdatingProperties)
+	if (theUpdatingProperties || theRunning || !theScene.selectedItems().size())
 		return;
-/*	assert(!theRunning);
-	assert(theActive);
-	if (dynamic_cast<SoftBob *>(theActive) && theProperties->verticalHeaderItem(_i->row()))
-	{	Properties &p(dynamic_cast<SoftBob *>(theActive)->theProperties);
-		if (_i->row() > 0)
-		{	p.set(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
-			dynamic_cast<SoftBob *>(theActive)->propertiesChanged();
-		}
-		else if (theGroup.exists(_i->text()))
-		{	statusBar()->message("This name is already in use. Try another.", 2000);
-			_i->setText(dynamic_cast<Bob *>(theActive)->name());
-		}
-		else
-			dynamic_cast<Bob *>(theActive)->setName(_i->text());
+	if (qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
+	{
+		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
+		pi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
-	else if (dynamic_cast<BobLink *>(theActive))
-	{	BobLink *link = dynamic_cast<BobLink *>(theActive);
-		switch (_i->row())
-		{	case 0: link->setBufferSize(_i->text().toUInt()); break;
-			case 1: link->setProximity(_i->text().toUInt()); break;
-			default: ;
-		}
-	}*/
 	setModified(true);
 }
 
