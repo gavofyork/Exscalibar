@@ -14,7 +14,6 @@ public:
 	inline uint index() const { return m_index; }
 
 	virtual QRectF boundingRect() const;
-
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
 	static void fromDom(QDomElement _element, ProcessorItem* _parent)

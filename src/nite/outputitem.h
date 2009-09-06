@@ -4,7 +4,7 @@
 
 class ProcessorItem;
 
-class OutputItem: public QGraphicsPolygonItem
+class OutputItem: public QGraphicsItem
 {
 public:
 	OutputItem(int _i, ProcessorItem* _p);
@@ -16,6 +16,13 @@ public:
 	virtual int type() const { return Type; }
 
 private:
+	QPolygonF polygon() const;
+
+	virtual QRectF boundingRect() const { return polygon().boundingRect(); }
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
+	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
+
 	uint			m_index;
-	QSizeF			m_size;
+	bool			m_hover;
 };
