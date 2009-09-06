@@ -1,3 +1,4 @@
+#include "processorsview.h"
 #include "processoritem.h"
 #include "outputitem.h"
 
@@ -21,6 +22,13 @@ QPolygonF OutputItem::polygon() const
 	return p;
 }
 
+QPointF OutputItem::tip() const
+{
+	double psot = portSize / 2 * (m_hover ? 2 : 1);
+	double cs = cornerSize * (m_hover ? 2 : 1);
+	return QPointF(cs + psot, 0);
+}
+
 void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	_p->setPen(QPen(Qt::black, 0));
@@ -40,6 +48,11 @@ void OutputItem::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
 	prepareGeometryChange();
 	m_hover = false;
 	update();
+}
+
+void OutputItem::mousePressEvent(QGraphicsSceneMouseEvent*)
+{
+	qobject_cast<ProcessorsScene*>(scene())->beginConnect(this);
 }
 
 ProcessorItem* OutputItem::processorItem() const

@@ -1,5 +1,6 @@
 #include <Geddei>
 
+#include "connectionitem.h"
 #include "processoritem.h"
 #include "inputitem.h"
 
@@ -23,6 +24,11 @@ ProcessorItem* InputItem::processorItem() const
 QRectF InputItem::boundingRect() const
 {
 	return QRectF(QPointF(0.0, 0.0), m_size);
+}
+
+QPointF InputItem::tip() const
+{
+	return QPointF(portSize / 2, portSize / 2);
 }
 
 void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)

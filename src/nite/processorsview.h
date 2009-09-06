@@ -15,18 +15,27 @@ public:
 	ProcessorsView(QWidget* _parent);
 };
 
+class IncompleteConnectionItem;
+class OutputItem;
+
 class ProcessorsScene: public QGraphicsScene
 {
 	Q_OBJECT
 
 public:
+	ProcessorsScene();
+
+	void beginConnect(OutputItem* _from);
+	IncompleteConnectionItem* incompleteConnectionItem() const { return m_currentConnect; }
+
+private:
 	virtual void dragEnterEvent(QGraphicsSceneDragDropEvent* _event);
 	virtual void dragMoveEvent(QGraphicsSceneDragDropEvent* _event) { dragEnterEvent(_event); }
 	virtual void dropEvent(QGraphicsSceneDragDropEvent* _event);
 
-	void notifyOfFocusChange() { emit focusChanged(focusItem()); }
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
 
-signals:
-	void focusChanged(QGraphicsItem* _focus);
+	IncompleteConnectionItem* m_currentConnect;
 };
 

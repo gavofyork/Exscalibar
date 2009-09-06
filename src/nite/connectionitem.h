@@ -3,15 +3,17 @@
 #include <QtGui>
 #include <QtXml>
 
+class InputItem;
+class OutputItem;
+
 class ConnectionItem : public QGraphicsLineItem
 {
 public:
-	ConnectionItem(Processor* _from, Processor* _to);
+	ConnectionItem(InputItem* _to, OutputItem* _from);
 
 	enum { Type = UserType + 4 };
 	virtual int type() const { return Type; }
 
 private:
-	Processor* m_from;
-	Processor* m_to;
+	OutputItem* m_from;
 };

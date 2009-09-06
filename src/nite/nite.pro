@@ -23,7 +23,8 @@ HEADERS += geddeinite.h \
 	processoritem.h \
 	inputitem.h \
 	connectionitem.h \
-	outputitem.h
+	outputitem.h \
+	incompleteconnectionitem.h
 SOURCES += geddeinite.cpp \
 	main.cpp \
 	watchprocessor.cpp \
@@ -33,7 +34,8 @@ SOURCES += geddeinite.cpp \
 	processoritem.cpp \
 	inputitem.cpp \
 	connectionitem.cpp \
-	outputitem.cpp
+	outputitem.cpp \
+	incompleteconnectionitem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

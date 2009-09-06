@@ -15,6 +15,7 @@ public:
 
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	QPointF tip() const;
 
 	static void fromDom(QDomElement _element, ProcessorItem* _parent)
 	{

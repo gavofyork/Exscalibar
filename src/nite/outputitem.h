@@ -12,6 +12,8 @@ public:
 	ProcessorItem* processorItem() const;
 	inline uint index() const { return m_index; }
 
+	QPointF tip() const;
+
 	enum { Type = UserType + 3 };
 	virtual int type() const { return Type; }
 
@@ -22,7 +24,7 @@ private:
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
-
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 	uint			m_index;
 	bool			m_hover;
 };
