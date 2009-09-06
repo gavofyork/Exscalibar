@@ -102,12 +102,12 @@ bool SubProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		qWarning("WARNING: paintProcessor called on a non-primary Sub!");
 		return false;
 	}
-	QRectF area(QPointF(0, 0), _s);
-	_p.setPen(QColor(132, 132, 132));
-	_p.setBrush(QColor(224, 224, 224));
-	_p.drawRect(area);
+	QRectF area(QPointF(0, 0), _s - QSizeF(1, 1));
+	_p.setFont(QFont("Helvetica", _s.height() *4/5, QFont::Black, false));
 	_p.setPen(Qt::black);
-	_p.setFont(QFont("sans", _s.height(), 900, false));
+	_p.drawText(area, Qt::AlignCenter, "?");
+	area.setTopLeft(QPointF(1, 1));
+	_p.setPen(Qt::white);
 	_p.drawText(area, Qt::AlignCenter, "?");
 	return true;
 }
