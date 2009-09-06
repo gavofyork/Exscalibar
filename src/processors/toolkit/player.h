@@ -55,13 +55,13 @@ typedef struct bstdfile bstdfile_t;
 /** @ingroup Toolkit
  * @author Gav Wood <gav@cs.york.ac.uk>
  * @brief Wav-file playing source Processor object.
- * 
+ *
  * This just plays a single file given by the property "Filename" into the the
  * output port(s). The number of ports on the object will be equivalent to the
  * number of channel the wav-file has.
- * 
+ *
  * A plunger will be placed at the stream end.
- * 
+ *
  * A further property, "Frames" determines how many samples of the file are
  * pushed to the output port per iteration. A higher value will typically
  * result in higher throughput, but will increase the minimum buffer size and
@@ -88,6 +88,7 @@ class DLLEXPORT Player: public Processor
 #endif
 	uint theChannels, theRate, theLength, thePosition, theReadFrames;
 
+	virtual void paintProcessor(QPainter &p);
 	virtual void processor();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
@@ -99,7 +100,7 @@ public:
 	/**
 	 * Basic constructor.
 	 */
-	Player();
+	Player(QString const& _filename = QString::null);
 };
 
 #endif

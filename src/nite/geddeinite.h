@@ -23,29 +23,11 @@
 
 #define __GEDDEI_BUILD
 
-//Added by qt3to4:
-#include <QCloseEvent>
-#include <QMainWindow>
-#include <QDockWidget>
-
-#include "processorgroup.h"
+#include <QtGui>
+#include <Geddei>
 using namespace Geddei;
 
-#include <q3valuelist.h>
-#include <q3ptrlist.h>
-#include <qpoint.h>
-
 #include "ui_geddeinitebase.h"
-
-class Q3DockWindow;
-class Q3Table;
-class Q3Canvas;
-class Q3CanvasItem;
-
-class BobsView;
-class Bob;
-class WatchProcessor;
-class ProcessorView;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -89,7 +71,7 @@ private:
 	void			updateItems();
 	void			updateProperties();
 
-	QGraphicsScene	theScene;
+	ProcessorsScene	theScene;
 	ProcessorGroup	theGroup;
 
 	QString			theFilename;

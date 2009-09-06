@@ -912,6 +912,15 @@ public:
 	bool paused() const { QMutexLocker lock(&thePause); return thePaused; }
 
 	/**
+	 * Get the pause state of the Processor.
+	 *
+	 * @return true is the processor is currently paused, false if not.
+	 *
+	 * @sa pause() unpause()
+	 */
+	bool isRunning() const { return QThread::isRunning(); }
+
+	/**
 	 * Make the thing stop doing stuff. i.e. Cancels processor thread.
 	 *
 	 * @sa go() reset()

@@ -4,10 +4,10 @@
  <widget class="QMainWindow" name="GeddeiNiteBase">
   <property name="geometry">
    <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>644</width>
-    <height>557</height>
+	<x>0</x>
+	<y>0</y>
+	<width>644</width>
+	<height>557</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,75 +15,82 @@
   </property>
   <widget class="QWidget" name="widget">
    <layout class="QGridLayout">
-    <property name="margin">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
-     <widget class="ProcessorsView" name="theView"/>
-    </item>
+	<property name="margin">
+	 <number>0</number>
+	</property>
+	<item row="0" column="0">
+	 <widget class="ProcessorsView" name="theView">
+	  <property name="renderHints">
+	   <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+	  </property>
+	  <property name="dragMode">
+	   <enum>QGraphicsView::ScrollHandDrag</enum>
+	  </property>
+	 </widget>
+	</item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="MenuBar">
    <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>644</width>
-     <height>23</height>
-    </rect>
+	<rect>
+	 <x>0</x>
+	 <y>0</y>
+	 <width>644</width>
+	 <height>23</height>
+	</rect>
    </property>
    <widget class="QMenu" name="fileMenu">
-    <property name="title">
-     <string>&amp;File</string>
-    </property>
-    <addaction name="fileNew"/>
-    <addaction name="fileOpen"/>
-    <addaction name="fileSave"/>
-    <addaction name="fileSaveAs"/>
-    <addaction name="separator"/>
-    <addaction name="filePrint"/>
-    <addaction name="separator"/>
-    <addaction name="fileExit"/>
+	<property name="title">
+	 <string>&amp;File</string>
+	</property>
+	<addaction name="fileNew"/>
+	<addaction name="fileOpen"/>
+	<addaction name="fileSave"/>
+	<addaction name="fileSaveAs"/>
+	<addaction name="separator"/>
+	<addaction name="filePrint"/>
+	<addaction name="separator"/>
+	<addaction name="fileExit"/>
    </widget>
    <widget class="QMenu" name="editMenu">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="editUndo"/>
-    <addaction name="editRedo"/>
-    <addaction name="separator"/>
-    <addaction name="editCut"/>
-    <addaction name="editCopy"/>
-    <addaction name="editPaste"/>
-    <addaction name="editRemove"/>
-    <addaction name="separator"/>
-    <addaction name="editFind"/>
-    <addaction name="separator"/>
-    <addaction name="editPreferences"/>
+	<property name="title">
+	 <string>&amp;Edit</string>
+	</property>
+	<addaction name="editUndo"/>
+	<addaction name="editRedo"/>
+	<addaction name="separator"/>
+	<addaction name="editCut"/>
+	<addaction name="editCopy"/>
+	<addaction name="editPaste"/>
+	<addaction name="editRemove"/>
+	<addaction name="separator"/>
+	<addaction name="editFind"/>
+	<addaction name="separator"/>
+	<addaction name="editPreferences"/>
    </widget>
    <widget class="QMenu" name="modeMenu">
-    <property name="title">
-     <string>&amp;Mode</string>
-    </property>
-    <addaction name="modeStop"/>
-    <addaction name="modeMakeLink"/>
-    <addaction name="modeRun"/>
-    <addaction name="modeDistribute"/>
-    <addaction name="separator"/>
-    <addaction name="modeTest"/>
-    <addaction name="modeTestRun"/>
+	<property name="title">
+	 <string>&amp;Mode</string>
+	</property>
+	<addaction name="modeStop"/>
+	<addaction name="modeMakeLink"/>
+	<addaction name="modeRun"/>
+	<addaction name="modeDistribute"/>
+	<addaction name="separator"/>
+	<addaction name="modeTest"/>
+	<addaction name="modeTestRun"/>
    </widget>
    <widget class="QMenu" name="toolsMenu">
-    <property name="title">
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="toolsDeployPlayer"/>
+	<property name="title">
+	 <string>&amp;Tools</string>
+	</property>
+	<addaction name="toolsDeployPlayer"/>
    </widget>
    <widget class="QMenu" name="viewMenu">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <addaction name="viewSnapToGrid"/>
+	<property name="title">
+	 <string>&amp;View</string>
+	</property>
+	<addaction name="viewSnapToGrid"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="editMenu"/>
@@ -93,16 +100,16 @@
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+	<string>toolBar</string>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextOnly</enum>
+	<enum>Qt::ToolButtonTextOnly</enum>
    </property>
    <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
+	<enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+	<bool>false</bool>
    </attribute>
    <addaction name="fileNew"/>
    <addaction name="fileOpen"/>
@@ -114,536 +121,536 @@
   </widget>
   <widget class="QDockWidget" name="theDockProperties">
    <property name="windowTitle">
-    <string>Properties</string>
+	<string>Properties</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+	<number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QTableWidget" name="theProperties">
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="gridStyle">
-        <enum>Qt::DotLine</enum>
-       </property>
-       <property name="cornerButtonEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="rowCount">
-        <number>2</number>
-       </property>
-       <property name="columnCount">
-        <number>1</number>
-       </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="horizontalHeaderDefaultSectionSize">
-        <number>100</number>
-       </attribute>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>100</number>
-       </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>19</number>
-       </attribute>
-       <attribute name="verticalHeaderMinimumSectionSize">
-        <number>19</number>
-       </attribute>
-       <row>
-        <property name="text">
-         <string>New Row</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>New Row</string>
-        </property>
-       </row>
-       <column>
-        <property name="text">
-         <string>New Column</string>
-        </property>
-       </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>dwqdwqdwqdwqdqdqdq</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
+	<layout class="QHBoxLayout" name="horizontalLayout">
+	 <property name="margin">
+	  <number>0</number>
+	 </property>
+	 <item>
+	  <widget class="QTableWidget" name="theProperties">
+	   <property name="alternatingRowColors">
+		<bool>true</bool>
+	   </property>
+	   <property name="gridStyle">
+		<enum>Qt::DotLine</enum>
+	   </property>
+	   <property name="cornerButtonEnabled">
+		<bool>false</bool>
+	   </property>
+	   <property name="rowCount">
+		<number>2</number>
+	   </property>
+	   <property name="columnCount">
+		<number>1</number>
+	   </property>
+	   <attribute name="horizontalHeaderVisible">
+		<bool>false</bool>
+	   </attribute>
+	   <attribute name="horizontalHeaderDefaultSectionSize">
+		<number>100</number>
+	   </attribute>
+	   <attribute name="horizontalHeaderMinimumSectionSize">
+		<number>100</number>
+	   </attribute>
+	   <attribute name="horizontalHeaderStretchLastSection">
+		<bool>true</bool>
+	   </attribute>
+	   <attribute name="verticalHeaderDefaultSectionSize">
+		<number>19</number>
+	   </attribute>
+	   <attribute name="verticalHeaderMinimumSectionSize">
+		<number>19</number>
+	   </attribute>
+	   <row>
+		<property name="text">
+		 <string>New Row</string>
+		</property>
+	   </row>
+	   <row>
+		<property name="text">
+		 <string>New Row</string>
+		</property>
+	   </row>
+	   <column>
+		<property name="text">
+		 <string>New Column</string>
+		</property>
+	   </column>
+	   <item row="0" column="0">
+		<property name="text">
+		 <string>dwqdwqdwqdwqdqdqdq</string>
+		</property>
+	   </item>
+	  </widget>
+	 </item>
+	</layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="theDockProcessors">
    <property name="windowTitle">
-    <string>Processors</string>
+	<string>Processors</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+	<number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="ProcessorView" name="theProcessors">
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragOnly</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="uniformItemSizes">
-        <bool>true</bool>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+	<layout class="QHBoxLayout" name="horizontalLayout_2">
+	 <property name="margin">
+	  <number>0</number>
+	 </property>
+	 <item>
+	  <widget class="ProcessorView" name="theProcessors">
+	   <property name="editTriggers">
+		<set>QAbstractItemView::NoEditTriggers</set>
+	   </property>
+	   <property name="dragEnabled">
+		<bool>true</bool>
+	   </property>
+	   <property name="dragDropMode">
+		<enum>QAbstractItemView::DragOnly</enum>
+	   </property>
+	   <property name="alternatingRowColors">
+		<bool>true</bool>
+	   </property>
+	   <property name="selectionBehavior">
+		<enum>QAbstractItemView::SelectRows</enum>
+	   </property>
+	   <property name="uniformItemSizes">
+		<bool>true</bool>
+	   </property>
+	   <property name="sortingEnabled">
+		<bool>true</bool>
+	   </property>
+	  </widget>
+	 </item>
+	</layout>
    </widget>
   </widget>
   <action name="fileNew">
    <property name="icon">
-    <iconset>
-     <normaloff>image1</normaloff>image1</iconset>
+	<iconset>
+	 <normaloff>image1</normaloff>image1</iconset>
    </property>
    <property name="text">
-    <string>&amp;New</string>
+	<string>&amp;New</string>
    </property>
    <property name="iconText">
-    <string>New</string>
+	<string>New</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+N</string>
+	<string>Ctrl+N</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>fileNewAction</cstring>
+	<cstring>fileNewAction</cstring>
    </property>
   </action>
   <action name="fileOpen">
    <property name="icon">
-    <iconset>
-     <normaloff>image2</normaloff>image2</iconset>
+	<iconset>
+	 <normaloff>image2</normaloff>image2</iconset>
    </property>
    <property name="text">
-    <string>&amp;Open...</string>
+	<string>&amp;Open...</string>
    </property>
    <property name="iconText">
-    <string>Open</string>
+	<string>Open</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+	<string>Ctrl+O</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>fileOpenAction</cstring>
+	<cstring>fileOpenAction</cstring>
    </property>
   </action>
   <action name="fileSave">
    <property name="icon">
-    <iconset>
-     <normaloff>image3</normaloff>image3</iconset>
+	<iconset>
+	 <normaloff>image3</normaloff>image3</iconset>
    </property>
    <property name="text">
-    <string>&amp;Save</string>
+	<string>&amp;Save</string>
    </property>
    <property name="iconText">
-    <string>Save</string>
+	<string>Save</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+	<string>Ctrl+S</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>fileSaveAction</cstring>
+	<cstring>fileSaveAction</cstring>
    </property>
   </action>
   <action name="fileSaveAs">
    <property name="icon">
-    <iconset>
-     <normaloff>image4</normaloff>image4</iconset>
+	<iconset>
+	 <normaloff>image4</normaloff>image4</iconset>
    </property>
    <property name="text">
-    <string>Save &amp;As...</string>
+	<string>Save &amp;As...</string>
    </property>
    <property name="iconText">
-    <string>Save &amp;As...</string>
+	<string>Save &amp;As...</string>
    </property>
    <property name="shortcut">
-    <string/>
+	<string/>
    </property>
    <property name="name" stdset="0">
-    <cstring>fileSaveAsAction</cstring>
+	<cstring>fileSaveAsAction</cstring>
    </property>
   </action>
   <action name="filePrint">
    <property name="icon">
-    <iconset>
-     <normaloff>image5</normaloff>image5</iconset>
+	<iconset>
+	 <normaloff>image5</normaloff>image5</iconset>
    </property>
    <property name="text">
-    <string>&amp;Print...</string>
+	<string>&amp;Print...</string>
    </property>
    <property name="iconText">
-    <string>Print</string>
+	<string>Print</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+	<string>Ctrl+P</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>filePrintAction</cstring>
+	<cstring>filePrintAction</cstring>
    </property>
   </action>
   <action name="fileExit">
    <property name="icon">
-    <iconset>
-     <normaloff>image6</normaloff>image6</iconset>
+	<iconset>
+	 <normaloff>image6</normaloff>image6</iconset>
    </property>
    <property name="text">
-    <string>E&amp;xit</string>
+	<string>E&amp;xit</string>
    </property>
    <property name="iconText">
-    <string>E&amp;xit</string>
+	<string>E&amp;xit</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Q</string>
+	<string>Ctrl+Q</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>fileExitAction</cstring>
+	<cstring>fileExitAction</cstring>
    </property>
   </action>
   <action name="editUndo">
    <property name="icon">
-    <iconset>
-     <normaloff>image7</normaloff>image7</iconset>
+	<iconset>
+	 <normaloff>image7</normaloff>image7</iconset>
    </property>
    <property name="text">
-    <string>&amp;Undo</string>
+	<string>&amp;Undo</string>
    </property>
    <property name="iconText">
-    <string>Undo</string>
+	<string>Undo</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Z</string>
+	<string>Ctrl+Z</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editUndoAction</cstring>
+	<cstring>editUndoAction</cstring>
    </property>
   </action>
   <action name="editRedo">
    <property name="icon">
-    <iconset>
-     <normaloff>image8</normaloff>image8</iconset>
+	<iconset>
+	 <normaloff>image8</normaloff>image8</iconset>
    </property>
    <property name="text">
-    <string>&amp;Redo</string>
+	<string>&amp;Redo</string>
    </property>
    <property name="iconText">
-    <string>Redo</string>
+	<string>Redo</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Y</string>
+	<string>Ctrl+Y</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editRedoAction</cstring>
+	<cstring>editRedoAction</cstring>
    </property>
   </action>
   <action name="editCut">
    <property name="icon">
-    <iconset>
-     <normaloff>image9</normaloff>image9</iconset>
+	<iconset>
+	 <normaloff>image9</normaloff>image9</iconset>
    </property>
    <property name="text">
-    <string>&amp;Cut</string>
+	<string>&amp;Cut</string>
    </property>
    <property name="iconText">
-    <string>Cut</string>
+	<string>Cut</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+X</string>
+	<string>Ctrl+X</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editCutAction</cstring>
+	<cstring>editCutAction</cstring>
    </property>
   </action>
   <action name="editCopy">
    <property name="icon">
-    <iconset>
-     <normaloff>image10</normaloff>image10</iconset>
+	<iconset>
+	 <normaloff>image10</normaloff>image10</iconset>
    </property>
    <property name="text">
-    <string>C&amp;opy</string>
+	<string>C&amp;opy</string>
    </property>
    <property name="iconText">
-    <string>Copy</string>
+	<string>Copy</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+	<string>Ctrl+C</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editCopyAction</cstring>
+	<cstring>editCopyAction</cstring>
    </property>
   </action>
   <action name="editPaste">
    <property name="icon">
-    <iconset>
-     <normaloff>image11</normaloff>image11</iconset>
+	<iconset>
+	 <normaloff>image11</normaloff>image11</iconset>
    </property>
    <property name="text">
-    <string>&amp;Paste</string>
+	<string>&amp;Paste</string>
    </property>
    <property name="iconText">
-    <string>Paste</string>
+	<string>Paste</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+V</string>
+	<string>Ctrl+V</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editPasteAction</cstring>
+	<cstring>editPasteAction</cstring>
    </property>
   </action>
   <action name="editFind">
    <property name="icon">
-    <iconset>
-     <normaloff>image12</normaloff>image12</iconset>
+	<iconset>
+	 <normaloff>image12</normaloff>image12</iconset>
    </property>
    <property name="text">
-    <string>&amp;Find...</string>
+	<string>&amp;Find...</string>
    </property>
    <property name="iconText">
-    <string>Find</string>
+	<string>Find</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+F</string>
+	<string>Ctrl+F</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editFindAction</cstring>
+	<cstring>editFindAction</cstring>
    </property>
   </action>
   <action name="viewSnapToGrid">
    <property name="checkable">
-    <bool>true</bool>
+	<bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+	<bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normaloff>image17</normaloff>image17</iconset>
+	<iconset>
+	 <normaloff>image17</normaloff>image17</iconset>
    </property>
    <property name="text">
-    <string>&amp;Snap To Grid</string>
+	<string>&amp;Snap To Grid</string>
    </property>
    <property name="iconText">
-    <string>Snap To Grid</string>
+	<string>Snap To Grid</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>viewSnapToGridAction</cstring>
+	<cstring>viewSnapToGridAction</cstring>
    </property>
   </action>
   <action name="editRemove">
    <property name="icon">
-    <iconset>
-     <normaloff>image18</normaloff>image18</iconset>
+	<iconset>
+	 <normaloff>image18</normaloff>image18</iconset>
    </property>
    <property name="text">
-    <string>R&amp;emove</string>
+	<string>R&amp;emove</string>
    </property>
    <property name="iconText">
-    <string>Remove</string>
+	<string>Remove</string>
    </property>
    <property name="shortcut">
-    <string>Del</string>
+	<string>Del</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editRemoveAction</cstring>
+	<cstring>editRemoveAction</cstring>
    </property>
   </action>
   <action name="toolsDeployPlayer">
    <property name="icon">
-    <iconset>
-     <normaloff>image19</normaloff>image19</iconset>
+	<iconset>
+	 <normaloff>image19</normaloff>image19</iconset>
    </property>
    <property name="text">
-    <string>&amp;Deply File Player</string>
+	<string>&amp;Deply File Player</string>
    </property>
    <property name="iconText">
-    <string>Deply File Player</string>
+	<string>Deply File Player</string>
    </property>
    <property name="name" stdset="0">
-    <cstring></cstring>
+	<cstring></cstring>
    </property>
   </action>
   <action name="modeTest">
    <property name="icon">
-    <iconset>
-     <normaloff>image20</normaloff>image20</iconset>
+	<iconset>
+	 <normaloff>image20</normaloff>image20</iconset>
    </property>
    <property name="text">
-    <string>&amp;Test</string>
+	<string>&amp;Test</string>
    </property>
    <property name="iconText">
-    <string>Test</string>
+	<string>Test</string>
    </property>
    <property name="shortcut">
-    <string>F4</string>
+	<string>F4</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>modeTestAction</cstring>
+	<cstring>modeTestAction</cstring>
    </property>
   </action>
   <action name="modeTestRun">
    <property name="enabled">
-    <bool>false</bool>
+	<bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normaloff>image15</normaloff>image15</iconset>
+	<iconset>
+	 <normaloff>image15</normaloff>image15</iconset>
    </property>
    <property name="text">
-    <string>T&amp;est &amp;&amp; Run</string>
+	<string>T&amp;est &amp;&amp; Run</string>
    </property>
    <property name="iconText">
-    <string>Test &amp; Run</string>
+	<string>Test &amp; Run</string>
    </property>
    <property name="shortcut">
-    <string>F5</string>
+	<string>F5</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>modeTestRunAction</cstring>
+	<cstring>modeTestRunAction</cstring>
    </property>
   </action>
   <action name="editPreferences">
    <property name="icon">
-    <iconset>
-     <normaloff>image21</normaloff>image21</iconset>
+	<iconset>
+	 <normaloff>image21</normaloff>image21</iconset>
    </property>
    <property name="text">
-    <string>&amp;Preferences</string>
+	<string>&amp;Preferences</string>
    </property>
    <property name="iconText">
-    <string>Preferences</string>
+	<string>Preferences</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>editPreferencesAction</cstring>
+	<cstring>editPreferencesAction</cstring>
    </property>
   </action>
   <actiongroup name="modeActionGroup">
    <action name="modeStop">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>image13</normaloff>image13</iconset>
-    </property>
-    <property name="text">
-     <string>&amp;Edit</string>
-    </property>
-    <property name="iconText">
-     <string>Edit</string>
-    </property>
-    <property name="shortcut">
-     <string>Esc</string>
-    </property>
-    <property name="name" stdset="0">
-     <cstring></cstring>
-    </property>
+	<property name="checkable">
+	 <bool>true</bool>
+	</property>
+	<property name="checked">
+	 <bool>true</bool>
+	</property>
+	<property name="icon">
+	 <iconset>
+	  <normaloff>image13</normaloff>image13</iconset>
+	</property>
+	<property name="text">
+	 <string>&amp;Edit</string>
+	</property>
+	<property name="iconText">
+	 <string>Edit</string>
+	</property>
+	<property name="shortcut">
+	 <string>Esc</string>
+	</property>
+	<property name="name" stdset="0">
+	 <cstring></cstring>
+	</property>
    </action>
    <action name="modeDistribute">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>image14</normaloff>image14</iconset>
-    </property>
-    <property name="text">
-     <string>&amp;Distribute</string>
-    </property>
-    <property name="iconText">
-     <string>&amp;Distribute</string>
-    </property>
-    <property name="shortcut">
-     <string>Shift+F9</string>
-    </property>
-    <property name="name" stdset="0">
-     <cstring>modeDistributeAction</cstring>
-    </property>
+	<property name="checkable">
+	 <bool>true</bool>
+	</property>
+	<property name="enabled">
+	 <bool>false</bool>
+	</property>
+	<property name="icon">
+	 <iconset>
+	  <normaloff>image14</normaloff>image14</iconset>
+	</property>
+	<property name="text">
+	 <string>&amp;Distribute</string>
+	</property>
+	<property name="iconText">
+	 <string>&amp;Distribute</string>
+	</property>
+	<property name="shortcut">
+	 <string>Shift+F9</string>
+	</property>
+	<property name="name" stdset="0">
+	 <cstring>modeDistributeAction</cstring>
+	</property>
    </action>
    <action name="modeRun">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>image15</normaloff>image15</iconset>
-    </property>
-    <property name="text">
-     <string>&amp;Run</string>
-    </property>
-    <property name="iconText">
-     <string>Run</string>
-    </property>
-    <property name="shortcut">
-     <string>F9</string>
-    </property>
-    <property name="name" stdset="0">
-     <cstring>modeRunAction</cstring>
-    </property>
+	<property name="checkable">
+	 <bool>true</bool>
+	</property>
+	<property name="enabled">
+	 <bool>false</bool>
+	</property>
+	<property name="icon">
+	 <iconset>
+	  <normaloff>image15</normaloff>image15</iconset>
+	</property>
+	<property name="text">
+	 <string>&amp;Run</string>
+	</property>
+	<property name="iconText">
+	 <string>Run</string>
+	</property>
+	<property name="shortcut">
+	 <string>F9</string>
+	</property>
+	<property name="name" stdset="0">
+	 <cstring>modeRunAction</cstring>
+	</property>
    </action>
    <action name="modeMakeLink">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>image16</normaloff>image16</iconset>
-    </property>
-    <property name="text">
-     <string>&amp;Make Link</string>
-    </property>
-    <property name="iconText">
-     <string>Link</string>
-    </property>
-    <property name="shortcut">
-     <string>L</string>
-    </property>
-    <property name="name" stdset="0">
-     <cstring>modeMakeLinkAction</cstring>
-    </property>
+	<property name="checkable">
+	 <bool>true</bool>
+	</property>
+	<property name="icon">
+	 <iconset>
+	  <normaloff>image16</normaloff>image16</iconset>
+	</property>
+	<property name="text">
+	 <string>&amp;Make Link</string>
+	</property>
+	<property name="iconText">
+	 <string>Link</string>
+	</property>
+	<property name="shortcut">
+	 <string>L</string>
+	</property>
+	<property name="name" stdset="0">
+	 <cstring>modeMakeLinkAction</cstring>
+	</property>
    </action>
    <property name="name" stdset="0">
-    <cstring>modeActionGroup</cstring>
+	<cstring>modeActionGroup</cstring>
    </property>
   </actiongroup>
  </widget>
@@ -660,9 +667,6 @@
    <header>processorsview.h</header>
   </customwidget>
  </customwidgets>
- <includes>
-  <include location="local">bobsview.h</include>
- </includes>
  <resources/>
  <connections/>
 </ui>

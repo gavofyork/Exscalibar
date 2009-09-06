@@ -20,25 +20,14 @@
 
 #define __GEDDEI_BUILD
 
-#include "geddeinite.h"
-
 #include <cassert>
 #include <iostream>
 using namespace std;
 
-#include "processor.h"
-#include "processorfactory.h"
-#include "subprocessorfactory.h"
-#include "buffer.h"
-#include "bufferdata.h"
-using namespace Geddei;
-
-#include <QtXml>
-#include <QtGui>
-
+#include "processoritem.h"
 #include "processorview.h"
 #include "processorsview.h"
-#include "player.h"
+#include "geddeinite.h"
 
 GeddeiNite::GeddeiNite():
 	QMainWindow				(0, "GeddeiNite", Qt::WDestructiveClose),
@@ -85,159 +74,6 @@ const QString GeddeiNite::makeUniqueName(const QString &type)
 	for (int i = 1; theGroup.exists(ret = type + QString().setNum(i)); i++) {}
 	return ret;
 }
-
-static const double cornerSize = 20.0;
-static const double portSize = 20.0;
-static const double portInnerSize = 10.0;
-static const double portLateralMargin = 10.0;
-static const double portFrontMargin = 5.0;
-
-class ProcessorItem;
-
-class InputItem: public QGraphicsItem
-{
-public:
-	InputItem(int _i, ProcessorItem* _p);
-
-	inline ProcessorItem* processorItem() const;
-
-	virtual QRectF boundingRect() const
-	{
-		return QRectF(QPointF(0.0, 0.0), m_size);
-	}
-
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
-	{
-		_p->setPen(Qt::blue);
-		_p->setBrush(QColor(0, 128, 128, 32));
-		_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
-	}
-
-	static void fromDom(QDomElement _element, ProcessorItem* _parent)
-	{
-		new InputItem(_element.attribute("index").toInt(), _parent);
-	}
-
-	void saveYourself(QDomElement& _parent, QDomDocument& _doc) const
-	{
-		QDomElement out = _doc.createElement("input");
-		out.setAttribute("index", m_index);
-		_parent.appendChild(out);
-	}
-
-	enum { Type = UserType + 2 };
-	virtual int type() const { return Type; }
-
-private:
-	int			m_index;
-	QSizeF		m_size;
-};
-
-class ProcessorItem: public QGraphicsItem
-{
-	friend class InputItem;
-
-public:
-	ProcessorItem(Processor* _p): QGraphicsItem(), m_processor(_p)
-	{
-		m_processor->init(QString::number(uint(this)), m_properties);
-		m_size = QSizeF(100, 100);
-		for (uint i = 0; i < m_processor->numInputs(); i++)
-			new InputItem(i, this);
-	}
-	~ProcessorItem()
-	{
-		delete m_processor;
-	}
-
-	bool connectYourself()
-	{
-		return false;
-	}
-	void disconnectYourself()
-	{
-	}
-	static void fromDom(QDomElement& _element, QGraphicsScene* _scene)
-	{
-		Properties p;
-		for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-			if (n.toElement().tagName() == "property")
-				p[n.toElement().attribute("name")] = n.toElement().attribute("value");
-		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create(_element.attribute("type")), p, _element.attribute("name"));
-		pi->loadYourself(_element);
-		_scene->addItem(pi);
-	}
-	void loadYourself(QDomElement& _element)
-	{
-		setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
-		m_size = QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble());
-		for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-			if (n.toElement().tagName() == "input")
-				InputItem::fromDom(n.toElement(), this);
-	}
-	void saveYourself(QDomElement& _root, QDomDocument& _doc) const
-	{
-		QDomElement proc = _doc.createElement("processor");
-		proc.setAttribute("type", m_processor->type());
-
-		proc.setAttribute("name", m_processor->name());
-		proc.setAttribute("x", pos().x());
-		proc.setAttribute("y", pos().y());
-		proc.setAttribute("w", m_size.width());
-		proc.setAttribute("h", m_size.height());
-
-		foreach (QString k, m_properties.keys())
-		{
-			QDomElement prop = _doc.createElement("property");
-			proc.appendChild(prop);
-			prop.setAttribute("name", k);
-			prop.setAttribute("value", m_properties[k].toString());
-		}
-		foreach (QGraphicsItem* i, childItems())
-			if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
-				ii->saveYourself(proc, _doc);
-		_root.appendChild(proc);
-	}
-	void postLoad()
-	{
-	}
-
-	virtual QRectF boundingRect() const
-	{
-		return QRectF(QPointF(0.0, 0.0), m_size);
-	}
-
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
-	{
-		_p->setPen(Qt::black);
-		_p->setBrush(QColor(255, 0, 0, 32));
-		_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
-	}
-
-	enum { Type = UserType + 1 };
-	virtual int type() const { return Type; }
-
-private:
-	ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr)
-	{
-		m_processor->init(_name, m_properties);
-		m_size = QSizeF(100, 100);
-		qDebug() << m_processor->numInputs() << m_processor->numOutputs();
-	}
-
-	Processor*	m_processor;
-	Properties	m_properties;
-	QSizeF		m_size;
-};
-
-InputItem::InputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i)
-{
-	double secs = 0.1;//_p->m_processor->input(m_index).capacity() / _p->m_processor->input(m_index).type().frequency();
-	m_size = QSizeF(secs * 100 + cornerSize, portSize);
-	setPos(-m_size.width() - cornerSize, cornerSize + portLateralMargin + (portLateralMargin + portSize) * m_index);
-}
-
-inline ProcessorItem* InputItem::processorItem() const { return qgraphicsitem_cast<ProcessorItem*>(parentItem()); }
 
 void GeddeiNite::doSave(const QString& _filename)
 {
@@ -459,7 +295,10 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Open audio file", "/tmp", "Uncompressed audio (*.wav);;Ogg Vorbis (*.ogg);;FLAC audio (*.flac);;MP3 audio (*.mp3);;All files (*)");
 	if (!filename.isEmpty())
-		theScene.addItem(new ProcessorItem(new Player(filename)));
+	{
+		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create("Player"), Properties("filename", filename));
+		theScene.addItem(pi);
+	}
 }
 
 void GeddeiNite::on_modeRun_toggled(bool running)

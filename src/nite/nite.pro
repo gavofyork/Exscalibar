@@ -19,15 +19,21 @@ HEADERS += geddeinite.h \
     watchprocessor.h \
     refresher.h \
     processorview.h \
-    player.h \
-    processorsview.h
+    processorsview.h \
+    processoritem.h \
+    inputitem.h \
+    connectionitem.h \
+    outputitem.h
 SOURCES += geddeinite.cpp \
     main.cpp \
     watchprocessor.cpp \
     refresher.cpp \
     processorview.cpp \
-    player.cpp \
-    processorsview.cpp
+    processorsview.cpp \
+    processoritem.cpp \
+    inputitem.cpp \
+    connectionitem.cpp \
+    outputitem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp
