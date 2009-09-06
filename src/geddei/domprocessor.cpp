@@ -53,9 +53,9 @@ DomProcessor::~DomProcessor()
 	assert(theWorkers.isEmpty());
 }
 
-void DomProcessor::paintProcessor(QPainter &p)
+bool DomProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	thePrimary->paintProcessor(p);
+	return thePrimary->paintProcessor(_p, _s);
 }
 
 bool DomProcessor::createAndAddWorker()
@@ -552,4 +552,6 @@ void DomProcessor::specifyOutputSpace(Q3ValueVector<uint> &samples)
 		samples[i] = theAlterBuffer ? ((theWantSize - theSamplesIn) / theSamplesStep + 1) * theSamplesOut : theSamplesOut * theWorkers.count();
 }
 
-};
+}
+
+#undef MESSAGES

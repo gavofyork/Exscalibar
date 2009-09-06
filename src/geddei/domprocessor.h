@@ -96,15 +96,15 @@ class DLLEXPORT DomProcessor: public Processor
 
 	//* A flag to tell us if we've been stopped.
 	bool theStopped;
-	
+
 	//* A flag to tell us if we should debug our action.
 	bool theDebug;
-	
+
 	//* Settings for the load sharing stuff.
 	bool theBalanceLoad;
 	uint theBalanceInterval;
 	float theLocalFudge;
-	
+
 	//* A cache of our properties, since we may need it after init.
 	Properties theProperties;
 
@@ -174,7 +174,7 @@ class DLLEXPORT DomProcessor: public Processor
 	virtual void initFromProperties(const Properties &properties);
 	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
 	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
-	virtual void paintProcessor(QPainter &p);
+	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 	/**
 	 * Note this will assume the stack has a QMutexLocker for theQueueLock in
@@ -200,12 +200,12 @@ public:
 	 * To be called from the constructor of a mixin-ed coupling. This ratifies
 	 * the coupling ready for use and does any required post-initialisation on
 	 * it.
-	 * 
+	 *
 	 * This really belongs in DxCoupling, but it has to be called after the
 	 * left side is constructed, since it uses said methods.
 	 */
 	void ratify(DxCoupling *c);
-	
+
 	/**
 	 * Creates and adds a local SubProcessor to this Processor's list of
 	 * workers. Uses SubProcessorFactory for the creation, and the primary for

@@ -85,4 +85,7 @@ void BufferDatas::nullify()
 	}
 }
 
-};
+}
+
+#undef MESSAGES
+

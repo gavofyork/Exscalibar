@@ -22,4 +22,7 @@ namespace Geddei
 {
 
 
-};
+}
+
+#undef MESSAGES
+

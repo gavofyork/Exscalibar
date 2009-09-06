@@ -28,7 +28,7 @@ using namespace std;
 #include "splitter.h"
 using namespace Geddei;
 
-#define MESSAGES 1
+#define MESSAGES 0
 #define pMESSAGES 0
 
 namespace Geddei
@@ -37,7 +37,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, const MultiplicityType multi, uint flags): QThread(0), theName(""), theType(type), theFlags(flags),
-	theWidth(50), theHeight(30), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), thePaused(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -457,18 +457,21 @@ const PropertiesInfo Processor::properties() const
 	return specifyProperties();
 }
 
-void Processor::draw(QPainter &p)
+bool Processor::draw(QPainter& _p, QSizeF const& _s) const
 {
-	paintProcessor(p);
+	return paintProcessor(_p, _s);
 }
 
-void Processor::paintProcessor(QPainter &p)
+bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	p.setPen(QColor(132, 132, 132));
-	p.setBrush(QColor(224, 224, 224));
-	p.drawRect(0, 0, width(), height());
-	p.setPen(QColor(64, 64, 64));
-	p.drawText(4, height() / 2 + 4, theName);
+	QRectF area(QPointF(0, 0), _s - QSizeF(1, 1));
+	_p.setFont(QFont("Helvetica", height() *4/5, QFont::Black, false));
+	_p.setPen(Qt::black);
+	_p.drawText(area, Qt::AlignCenter, "?");
+	area.setTopLeft(QPointF(1, 1));
+	_p.setPen(Qt::white);
+	_p.drawText(area, Qt::AlignCenter, "?");
+	return true;
 }
 
 void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
@@ -1076,3 +1079,5 @@ void Processor::setupIO(uint inputs, uint outputs)
 }
 
 }
+
+#undef MESSAGES

@@ -14,6 +14,8 @@
 #include "processor.h"
 #include "multiprocessor.h"
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -52,4 +54,6 @@ void MultiProcessor::doInit(const QString &name, ProcessorGroup *g, const Proper
 	theDeferredInit = false;
 }
 
-};
+}
+
+#undef MESSAGES

@@ -26,6 +26,8 @@ using namespace Geddei;
 
 #include "processorforwarder.h"
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -233,4 +235,6 @@ void ProcessorForwarder::clearGraveyard()
 	theGraveyard.clear();
 }
 
-};
+}
+
+#undef MESSAGES

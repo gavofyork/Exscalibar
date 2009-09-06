@@ -170,4 +170,6 @@ void RSCoupling::run()
 	if (theSession.isOpen()) theSession.close();
 }
 
-};
+}
+
+#undef MESSAGES

@@ -25,4 +25,4 @@ void MultiSink::setSinkMultiplicity(uint multiplicity)
 		(*i)->setMultiplicity(multiplicity);
 }
 
-};
+}

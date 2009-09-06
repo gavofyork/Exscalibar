@@ -59,9 +59,11 @@ void BufferInfo::destruct(BufferData &client)
 
 	if (theLife == Managed)
 		delete [] theData;
-	
+
 	if (!theResident)
 		delete this;
 }
 
-};
+}
+
+#undef MESSAGES

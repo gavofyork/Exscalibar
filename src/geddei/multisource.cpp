@@ -17,6 +17,8 @@ using namespace std;
 #include "multisource.h"
 #include "processor.h"
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -86,4 +88,6 @@ void MultiSource::connect(MultiSink *sink, uint bufferSize)
 	sink->removeDeferral(this);
 }
 
-};
+}
+
+#undef MESSAGES

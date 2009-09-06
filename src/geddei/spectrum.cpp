@@ -33,4 +33,4 @@ void Spectrum::deserialise(QSocketSession &source)
 	theStep = source.safeReceiveWord<float>();
 }
 
-};
+}

@@ -14,6 +14,8 @@
 #include "processorgroup.h"
 using namespace Geddei;
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -152,3 +154,5 @@ void ProcessorGroup::reset() const
 }
 
 }
+
+#undef MESSAGES

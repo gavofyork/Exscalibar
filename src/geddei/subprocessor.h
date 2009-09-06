@@ -215,7 +215,7 @@ class DLLEXPORT SubProcessor: public QThread
 	void defineIO(uint numInputs, uint numOutputs);
 
 protected:
-    /**
+	/**
 	 * Reimplement to specify how to process a chunk of data.
 	 *
 	 * Either this *or* processChunks() *must* be reimplemented.
@@ -347,7 +347,7 @@ protected:
 	void setupIO(uint numInputs = 1, uint numOutputs = 1, uint samplesIn = 1, uint samplesStep = 1, uint samplesOut = 1);
 
 	void setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut);
-	
+
 	/**
 	 * Call this from initFromProperties to initialise the visual properties of
 	 * the SubProcessor.
@@ -361,7 +361,7 @@ protected:
 	 *
 	 * @sa setupIO() paintProcessor()
 	 */
-	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0);
+	void setupVisual(uint width = 32, uint height = 32, uint redrawPeriod = 0);
 
 	/**
 	 * Reimplement for to define how the SubProcessor should be drawn visually.
@@ -369,7 +369,7 @@ protected:
 	 *
 	 * @sa setupVisual()
 	 */
-	virtual void paintProcessor(QPainter &p);
+	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 	/**
 	 * SubProcessor constructor - use this when subclassing.

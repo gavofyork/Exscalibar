@@ -82,7 +82,7 @@ void SubProcessor::stop()
 		for (uint i = 0; i < theCurrentOut.size(); i++)
 			if (theCurrentOut.theData[i]) qDebug("%p", theCurrentOut[i].identity());
 	}
-	
+
 	theCurrentIn.nullify();
 	theCurrentIn.resize(0);
 	theCurrentOut.nullify();
@@ -95,18 +95,21 @@ void SubProcessor::setupVisual(uint width, uint height, uint redrawPeriod)
 		thePrimaryOf->setupVisual(width, height, redrawPeriod);
 }
 
-void SubProcessor::paintProcessor(QPainter &p)
+bool SubProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	if (!thePrimaryOf)
 	{
 		qWarning("WARNING: paintProcessor called on a non-primary Sub!");
-		return;
+		return false;
 	}
-	p.setPen(QColor(132, 132, 132));
-	p.setBrush(QColor(224, 224, 224));
-	p.drawRect(0, 0, thePrimaryOf->width(), thePrimaryOf->height());
-	p.setPen(QColor(64, 64, 64));
-	p.drawText(4, thePrimaryOf->height() / 2 + 4, thePrimaryOf->name());
+	QRectF area(QPointF(0, 0), _s);
+	_p.setPen(QColor(132, 132, 132));
+	_p.setBrush(QColor(224, 224, 224));
+	_p.drawRect(area);
+	_p.setPen(Qt::black);
+	_p.setFont(QFont("sans", _s.height(), 900, false));
+	_p.drawText(area, Qt::AlignCenter, "?");
+	return true;
 }
 
 PropertiesInfo SubProcessor::specifyProperties() const
@@ -167,7 +170,7 @@ void SubProcessor::run()
 		}
 		if (MESSAGES) qDebug("SubProc[%p]: Nullifying our input to free the data...", theCoupling);
 		theCurrentIn.nullify();
-		
+
 		if (MESSAGES) qDebug("SubProc[%p]: Nullified. Changing state and iterating...", theCoupling);
 		theLoaded = false;
 		theReturned = false;
@@ -232,3 +235,5 @@ BufferDatas SubProcessor::deliverResults(uint *timeTaken)
 }
 
 }
+
+#undef MESSAGES

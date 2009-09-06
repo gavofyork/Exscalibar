@@ -41,3 +41,4 @@ SOURCES += monitor.cpp \
 }
 TEMPLATE = lib
 CONFIG += plugin
+VERSION = $$OURVERSION

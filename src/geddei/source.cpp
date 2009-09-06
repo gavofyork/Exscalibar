@@ -21,4 +21,4 @@ const Processor *Source::processor() const
 	return dynamic_cast<const Processor *>(this);
 }
 
-};
+}

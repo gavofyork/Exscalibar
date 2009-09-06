@@ -55,7 +55,7 @@ SubProcessor *SubProcessorFactory::create(const QString &type)
 {
 	if (!available(type))
 		qFatal("*** FATAL: You are attempting to create a SubProcessor type that is not\n"
-		       "           available (%s).", type.latin1());
+			   "           available (%s).", type.latin1());
 	if (type.contains("&"))
 		return new Combination(create(type.section("&", 0, 0)), create(type.section("&", 1)));
 	else
@@ -66,8 +66,8 @@ DomProcessor *SubProcessorFactory::createDom(const QString &type)
 {
 	if (!available(type))
 		qFatal("*** FATAL: You are attempting to create a SubProcessor type that is not\n"
-		       "           available (%s).", type.latin1());
+			   "           available (%s).", type.latin1());
 	return new DomProcessor(create(type));
 }
 
-};
+}

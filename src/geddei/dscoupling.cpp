@@ -13,6 +13,8 @@
 #include "domprocessor.h"
 #include "dscoupling.h"
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -21,4 +23,6 @@ DSCoupling::DSCoupling(DomProcessor *dom, SubProcessor *subProc) : DxCoupling(do
 	dom->ratify(this);
 }
 
-};
+}
+
+#undef MESSAGES

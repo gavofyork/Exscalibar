@@ -23,7 +23,9 @@ public:
 		delete m_processor;
 	}
 
+
 	Properties const& properties() const { return m_properties; }
+	void setProperty(QString const& _key, QVariant const& _value);
 
 	bool connectYourself()
 	{
@@ -51,6 +53,8 @@ public:
 
 private:
 	ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name);
+
+	void propertiesChanged();
 
 	Processor*	m_processor;
 	Properties	m_properties;

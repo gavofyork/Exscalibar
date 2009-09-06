@@ -110,4 +110,6 @@ BufferDatas DxCoupling::returnResults()
 	return deliverResults(&theLastTimeTaken);
 }
 
-};
+}
+
+#undef MESSAGES

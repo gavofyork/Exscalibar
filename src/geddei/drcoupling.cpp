@@ -176,4 +176,6 @@ void DRCoupling::defineIO(uint inputs, uint outputs)
 	theRemote.safeSendWord(outputs);
 }
 
-};
+}
+
+#undef MESSAGES

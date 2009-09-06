@@ -176,4 +176,7 @@ void LRConnection::transport(const BufferData &data)
 	if (MESSAGES) qDebug("< LRC::transport()");
 }
 
-};
+}
+
+#undef MESSAGES
+

@@ -56,7 +56,7 @@ uint xLConnectionReal::elementsReady() const
 		return 0;
 	}
 #endif
-	
+
 	uint ret = theReader->elementsReady();
 	return ret;
 }
@@ -70,7 +70,7 @@ void xLConnectionReal::waitForElements(uint elements) const
 		return;
 	}
 #endif
-	
+
 	theReader->waitForElements(elements);
 /*	while (theReader->elementsReady() < elements)
 	{
@@ -78,7 +78,7 @@ void xLConnectionReal::waitForElements(uint elements) const
 		theReader->skipElements(elementsReady());
 		theReader->skipPlunger();
 		theSink->plunged(theSinkIndex);
-		
+
 		// And wait for some more
 		theReader->waitForElements(elements);
 	}
@@ -125,7 +125,7 @@ const BufferData xLConnectionReal::readElements(uint elements)
 		return BufferData();
 	}
 #endif
-	
+
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, true);
 		theSink->checkExit();
@@ -148,7 +148,7 @@ const BufferData xLConnectionReal::peekElements(uint elements)
 		return BufferData();
 	}
 #endif
-	
+
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, false);
 		theSink->checkExit();
@@ -176,4 +176,6 @@ const SignalTypeRef xLConnectionReal::type()
 	return SignalTypeRef(theType);
 }
 
-};
+}
+
+#undef MESSAGES

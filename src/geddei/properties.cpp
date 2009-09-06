@@ -63,4 +63,4 @@ const QString PropertiesInfo::description(const QString &key) const
 	return theInfo[key].description;
 }
 
-};
+}

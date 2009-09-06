@@ -36,8 +36,8 @@ Processor *ProcessorFactory::create(const QString &type)
 {
 	if (!available(type))
 		qWarning("*** ERROR: You are attempting to create a Processor type that is not\n"
-		         "           available (%s).", type.latin1());
+				 "           available (%s).", type.latin1());
 	return factory()[type];
 }
 
-};
+}

@@ -160,5 +160,6 @@ void LMConnection::sourceStopped()
 	theBuffer.closeTrapdoor(theSource->processor());
 }
 
-};
+}
 
+#undef MESSAGES

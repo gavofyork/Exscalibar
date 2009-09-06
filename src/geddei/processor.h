@@ -456,9 +456,13 @@ protected:
 	/**
 	 * Reimplement for to define how the processor should be drawn visually.
 	 *
-	 * @param p The painting canvas onto which the visual may be drawn.
+	 * @param _p The painting canvas onto which the visual may be drawn.
+	 * @param _s The size of the area to draw onto. This may be different
+	 * from the size specified in setupVisual(). You need not honour this
+	 * paramater - if you elect to honour it, return true.
+	 * @return true if @a _s was honoured. false if setupVisual() was honoured.
 	 */
-	virtual void paintProcessor(QPainter &p);
+	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 	/**
 	 * Reimplement to control execution to do processing.
@@ -975,9 +979,12 @@ public:
 	 * Front-end routing for drawing the Processor to a canvas. Used by the Nite
 	 * for drawing.
 	 *
-	 * @param p The painting canvas onto which the drawing should take place.
+	 * @param _p The painting canvas onto which the drawing should take place.
+	 * @param _s The size to draw if possible.
+	 * @returns true if it draws according to the supplied size. false if it draws
+	 * according to width()/height().
 	 */
-	void draw(QPainter &p);
+	bool draw(QPainter& _p, QSizeF const& _s) const;
 
 	/**
 	 * Determine how full the buffer at input @a index is. Used by the Nite for

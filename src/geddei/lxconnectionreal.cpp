@@ -51,4 +51,6 @@ void LxConnectionReal::push(const BufferData &data)
 	if (MESSAGES) qDebug("LxConnectionReal::push(): Pushed (size=%d).", data.elements());
 }
 
-};
+}
+
+#undef MESSAGES

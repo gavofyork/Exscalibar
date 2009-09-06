@@ -28,4 +28,4 @@ Processor *SubFactoryCreator::newProcessor() const
 	return SubProcessorFactory::createDom(theType);
 }
 
-};
+}

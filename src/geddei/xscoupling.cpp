@@ -87,4 +87,6 @@ void xSCoupling::defineIO(uint inputs, uint outputs)
 	theSubProc->defineIO(inputs, outputs);
 }
 
-};
+}
+
+#undef MESSAGES

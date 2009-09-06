@@ -75,4 +75,6 @@ void LxConnection::pushScratch(const BufferData &data)
 	data.invalidate();
 }
 
-};
+}
+
+#undef MESSAGES

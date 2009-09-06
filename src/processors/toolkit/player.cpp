@@ -47,29 +47,33 @@ Player::Player(QString const& _filename) : Processor("Player", OutConst, Guarded
 {
 }
 
-void Player::paintProcessor(QPainter &p)
+bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	p.setPen(QColor(200, 200, 200));
-	p.setBrush(QColor(232, 232, 232));
-	p.drawRect(2, 2, 146, 12);
-	p.setPen(QColor(128, 128, 128));
-	p.drawText(4, 12, thePath);
+	QRectF textArea(2, 2, _s.width() - 4, 14);
+	_p.setPen(Qt::black);
+	_p.drawText(textArea, thePath);
+	textArea.translate(1, 1);
+	_p.setPen(Qt::white);
+	_p.drawText(textArea, thePath);
 
-	p.setPen(QColor(160, 160, 160));
-	p.setBrush(QColor(232, 232, 232));
-	p.drawRect(2, 24, 146, 4);
+	_p.setPen(QColor(160, 160, 160));
+	_p.setBrush(QColor(232, 232, 232));
+	QRectF progressArea(2, 20, _s.width() - 4, 10);
+	_p.drawRect(progressArea);
+	progressArea.adjust(1, 1, -1, -1);
 	bool seg = false;
 	for (uint i = 0; i < theLength; i += 60 * theRate)
 	{	seg = !seg;
 		uint ni = i + 60 * theRate;
 		if (ni > theLength) ni = theLength;
 		if (thePosition > i && thePosition < ni)
-		{	p.fillRect(3 + int(144 * i / theLength), 25, int(144 * (thePosition - i) / theLength), 2, QColor(10, 64, seg ? 232 : 255, QColor::Hsv));
-			p.fillRect(3 + int(144 * thePosition / theLength), 25, int(144 * (ni - thePosition) / theLength), 2, QColor(60, 0, seg ? 232 : 255, QColor::Hsv));
+		{	_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (thePosition - i) / theLength), progressArea.height(), QColor(10, 64, seg ? 232 : 255, QColor::Hsv));
+			_p.fillRect(progressArea.x() + int(progressArea.width() * thePosition / theLength), progressArea.y(), int(progressArea.width() * (ni - thePosition) / theLength), progressArea.height(), QColor(60, 0, seg ? 232 : 255, QColor::Hsv));
 		}
 		else
-			p.fillRect(3 + int(144 * i / theLength), 25, int(144 * (ni - i) / theLength), 2, QColor(10, thePosition > i ? 64 : 0, seg ? 232 : 255, QColor::Hsv));
+			_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (ni - i) / theLength), progressArea.height(), QColor(10, thePosition > i ? 64 : 0, seg ? 232 : 255, QColor::Hsv));
 	}
+	return true;
 }
 
 bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)

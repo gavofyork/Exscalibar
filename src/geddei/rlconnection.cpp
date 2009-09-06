@@ -201,4 +201,7 @@ bool RLConnection::pullType()
 	return theType;
 }
 
-};
+}
+
+#undef MESSAGES
+

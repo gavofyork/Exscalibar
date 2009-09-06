@@ -32,4 +32,6 @@ Connection::~Connection()
 	theType = 0;
 }
 
-};
+}
+
+#undef MESSAGES

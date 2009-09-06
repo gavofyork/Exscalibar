@@ -1,44 +1,79 @@
 #include "processorsview.h"
 #include "processoritem.h"
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0)
 {
-	m_processor->init(QString::number(uint(this)), m_properties);
-	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
-	minHeight = max(minHeight, cornerSize * 2 + m_processor->height());
-	double minWidth = cornerSize * 3 + m_processor->width();
-	m_size = QSizeF(minWidth, minHeight);
-	for (uint i = 0; i < m_processor->numInputs(); i++)
-		new InputItem(i, this);
-	for (uint i = 0; i < m_processor->numOutputs(); i++)
-		new OutputItem(i, this);
-	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsMovable);
+	foreach (QString s, m_processor->properties().keys())
+		if (!m_properties.keys().contains(s))
+			m_properties[s] = m_processor->properties().defaultValue(s);
+	propertiesChanged();
+	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
 }
 
 ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr)
 {
 	m_processor->init(_name, m_properties);
 	m_size = QSizeF(100, 100);
-	qDebug() << m_processor->numInputs() << m_processor->numOutputs();
+}
+
+void ProcessorItem::propertiesChanged()
+{
+	if (m_processor->isRunning())
+		return;
+	Processor* old = m_processor;
+	m_processor = ProcessorFactory::create(old->type());
+	if (!m_processor)
+	{
+		m_processor = old;
+		return;
+	}
+
+	m_processor->init(QString::number(uint(this)), m_properties);
+
+	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
+	minHeight = max(minHeight, cornerSize * 2 + m_processor->height());
+	double minWidth = cornerSize * 2 + m_processor->width();
+	m_size = QSizeF(max(m_size.width(), minWidth), max(m_size.height(), minHeight));
+
+	foreach (QGraphicsItem* i, childItems())
+		if ((qgraphicsitem_cast<InputItem*>(i) && qgraphicsitem_cast<InputItem*>(i)->index() >= m_processor->numInputs()) ||
+			(qgraphicsitem_cast<OutputItem*>(i) && qgraphicsitem_cast<OutputItem*>(i)->index() >= m_processor->numOutputs()))
+			delete i;
+	for (uint i = old->numInputs(); i < m_processor->numInputs(); i++)
+		new InputItem(i, this);
+	for (uint i = old->numOutputs(); i < m_processor->numOutputs(); i++)
+		new OutputItem(i, this);
+
+	delete old;
+	update();
+}
+
+void ProcessorItem::setProperty(QString const& _key, QVariant const& _value)
+{
+	m_properties[_key] = _value;
+	propertiesChanged();
 }
 
 void ProcessorItem::focusInEvent(QFocusEvent* _e)
 {
+	foreach (QGraphicsItem* i, scene()->selectedItems())
+		if (i != this)
+			i->setSelected(false);
+	setSelected(true);
+	assert(isSelected());
 	update();
 	QGraphicsItem::focusInEvent(_e);
-	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
+//	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
 }
 
 void ProcessorItem::focusOutEvent(QFocusEvent* _e)
 {
-	update();
 	QGraphicsItem::focusOutEvent(_e);
-	qobject_cast<ProcessorsScene*>(scene())->notifyOfFocusChange();
 }
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	if (hasFocus())
+	if (isSelected())
 	{
 		_p->setPen(QPen(QColor::fromHsv(220, 220, 200), 0));
 		_p->setBrush(QBrush(QColor::fromHsv(220, 220, 200, 64)));
@@ -60,9 +95,14 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 		_p->drawLine(m_size.width(), m_size.height() - mp, m_size.width() - mp, m_size.height());
 	}
 
+	QRectF clientArea = QRectF(QPointF(cornerSize, cornerSize), m_size - QSizeF(2, 2) * cornerSize);
 	_p->setPen(Qt::NoPen);
 	_p->setBrush(QColor(0, 0, 0, 128));
 	_p->drawRect(QRectF(QPointF(cornerSize, cornerSize), m_size - QSizeF(2, 2) * cornerSize));
+
+	_p->setClipRect(clientArea);
+	_p->translate(clientArea.topLeft());
+	m_processor->draw(*_p, clientArea.size());
 }
 
 void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

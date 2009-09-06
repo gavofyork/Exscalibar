@@ -78,3 +78,5 @@ bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 }
 
 }
+
+#undef MESSAGES

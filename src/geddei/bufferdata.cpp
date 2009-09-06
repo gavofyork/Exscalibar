@@ -279,4 +279,6 @@ BufferData BufferData::mid(uint start, uint length)
 	return ret;
 }
 
-};
+}
+
+#undef MESSAGES

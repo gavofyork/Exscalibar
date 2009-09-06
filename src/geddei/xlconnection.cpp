@@ -41,4 +41,6 @@ xLConnection::~xLConnection()
 	}
 }
 
-};
+}
+
+#undef MESSAGES

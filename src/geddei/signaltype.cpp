@@ -72,4 +72,4 @@ SignalType *SignalType::create(uint id)
 	return out << " ]";
 }*/
 
-};
+}

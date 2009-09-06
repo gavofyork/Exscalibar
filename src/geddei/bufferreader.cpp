@@ -25,7 +25,7 @@ namespace Geddei
 BufferReader::BufferReader(Buffer *buffer)
 {
 	theBuffer = buffer;
-	
+
 	lastReadSize = 0;
 	QMutexLocker lock(&theBuffer->theDataFlux);
 	readPos = theBuffer->readPos;
@@ -33,14 +33,14 @@ BufferReader::BufferReader(Buffer *buffer)
 	theToBeSkipped = 0;
 	theAlreadyPlungedHere = 0;
 	theBuffer->theReaders.append(this);
-	
+
 	lastRead = new BufferInfo(theBuffer->theData, this, theBuffer->theMask, BufferInfo::Foreign, BufferInfo::Read);
 }
 
 BufferReader::~BufferReader()
 {
 	if (MESSAGES) qDebug("> [%p] ~BufferData()", this);
-	
+
 	QMutexLocker lock(&theBuffer->theDataFlux);
 	clearUNSAFE();
 	delete lastRead;
@@ -94,7 +94,7 @@ void BufferReader::skipElements(uint elements)
 #ifdef EDEBUG
 	if (elements >= theBuffer->size())
 		qWarning("*** WARNING: skipElements(): Size of buffer is critically low (size: %d,\n"
-		         "             elements: %d). Make use of Processor::specifyInputSpace().", theBuffer->theSize, elements);
+				 "             elements: %d). Make use of Processor::specifyInputSpace().", theBuffer->theSize, elements);
 #endif
 	if (MESSAGES) qDebug("* skipElements (elements: %d)", elements);
 	skipElementsUNSAFE(elements);
@@ -104,14 +104,14 @@ void BufferReader::skipElements(uint elements)
 void BufferReader::skipElementsUNSAFE(uint elements)
 {
 	if (qMESSAGES) qDebug("> skipElementsUNSAFE (%d)", elements);
-	
+
 	if (!elements)
 	{	if (qMESSAGES) qDebug("< skipElementsUNSAFE: zero!");
 		return;
 	}
-	
+
 	uint toBeRead = elements;
-	
+
 	// If we have a plunger in our way, wait until the pending read (if there is one)
 	// has finished, so we can actually advance past the elements "immediately".
 	// TODO: currently this freaks if it just sees a plunger. would be better to freak only if plunger is actually within affecting distance
@@ -127,7 +127,7 @@ void BufferReader::skipElementsUNSAFE(uint elements)
 			theBuffer->theDataOut.wait(&theBuffer->theDataFlux);
 		if (qMESSAGES) qDebug("= skipElementsUNSAFE: Last read done (%p)...", lastRead);
 	}
-	
+
 	if (qMESSAGES) qDebug("= skipElementsUNSAFE: Waiting until we have enough space, ignoring plungers...");
 	while (toBeRead > 0 && !theBuffer->trapdoorUNSAFE())
 		toBeRead -= theBuffer->waitForIgnorePlungersUNSAFE(toBeRead, this);
@@ -136,7 +136,7 @@ void BufferReader::skipElementsUNSAFE(uint elements)
 	{	if (qMESSAGES) qDebug("< skipElementsUNSAFE Q");
 		return;
 	}
-	
+
 	if (lastRead->isActive())
 	{	if (qMESSAGES) qDebug("= skipElementsUNSAFE: Noting amount to be skipped...");
 		theToBeSkipped += elements;
@@ -162,7 +162,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 #ifdef EDEBUG
 	if (elements > theBuffer->size())
 		qWarning("*** WARNING: readElements(): Size of buffer is critically low (size: %d,\n"
-		         "             elements: %d). Make use of Processor::specifyInputSpace().", theBuffer->theSize, elements);
+				 "             elements: %d). Make use of Processor::specifyInputSpace().", theBuffer->theSize, elements);
 #endif
 	if (MESSAGES) qDebug("* readElements");
 	uint ready = theBuffer->waitForUNSAFE(elements, this);
@@ -183,7 +183,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 		lastRead = new BufferInfo(theBuffer->theData, this, theBuffer->theMask, BufferInfo::Foreign, BufferInfo::Read);
 	}
 
-#ifdef EDEBUG	
+#ifdef EDEBUG
 	if (lastRead->theLife == BufferInfo::Managed)
 	{	qDebug("Our BufferData's theLife is managed!");
 		assert(0);
@@ -195,7 +195,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 	lastRead->theScope = theBuffer->theType->scope();
 	lastRead->theValid = true;
 	lastRead->thePlunger = (ready < elements);
-	
+
 	BufferData ret = BufferData(lastRead, readPos);
 
 	lastReadSize = elements;
@@ -278,4 +278,6 @@ void BufferReader::closeTrapdoor(const Processor *processor)
 	theBuffer->closeTrapdoor(processor);
 }
 
-};
+}
+
+#undef MESSAGES

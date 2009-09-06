@@ -9,12 +9,13 @@ class OutputItem: public QGraphicsPolygonItem
 public:
 	OutputItem(int _i, ProcessorItem* _p);
 
-	inline ProcessorItem* processorItem() const;
+	ProcessorItem* processorItem() const;
+	inline uint index() const { return m_index; }
 
 	enum { Type = UserType + 3 };
 	virtual int type() const { return Type; }
 
 private:
-	int			m_index;
-	QSizeF		m_size;
+	uint			m_index;
+	QSizeF			m_size;
 };

@@ -39,7 +39,7 @@ GeddeiNite::GeddeiNite():
 {
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
-	connect(&theScene, SIGNAL(focusChanged(QGraphicsItem*)), this, SLOT(slotUpdateProperties(QGraphicsItem*)));
+	connect(&theScene, SIGNAL(selectionChanged()), this, SLOT(slotUpdateProperties()));
 	updateItems();
 
 	theView->setAcceptDrops(true);
@@ -55,7 +55,7 @@ GeddeiNite::GeddeiNite():
 		doLoad(s.value("mainwindow/lastproject").toString());
 	statusBar()->message(tr("Ready"), 2000);
 
-	slotUpdateProperties(0);
+	slotUpdateProperties();
 }
 
 GeddeiNite::~GeddeiNite()
@@ -147,23 +147,24 @@ void GeddeiNite::updateItems()
 	}
 }
 
-void GeddeiNite::slotUpdateProperties(QGraphicsItem* _i)
+void GeddeiNite::slotUpdateProperties()
 {
 	theUpdatingProperties = true;
-	if (_i && qgraphicsitem_cast<ProcessorItem*>(_i))
+	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
+	if (i && qgraphicsitem_cast<ProcessorItem*>(i))
 	{
-		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(_i);
+		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i);
 		Properties const& p(pi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
 		{
-			theProperties->setVerticalHeaderItem(i + 1, new QTableWidgetItem(p.keys()[i]));
-			theProperties->setItem(i + 1, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
+			theProperties->setVerticalHeaderItem(i, new QTableWidgetItem(p.keys()[i]));
+			theProperties->setItem(i, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
 		}
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
 	}
-/*	else if (_i && qgraphicsitem_cast<ConnectionItem*>(_i))
+/*	else if (i && qgraphicsitem_cast<ConnectionItem*>(i))
 	{
 		BobLink *link = dynamic_cast<BobLink *>(theActive);
 		theProperties->setRowCount(2);
@@ -296,7 +297,7 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 	QString filename = QFileDialog::getOpenFileName(this, "Open audio file", "/tmp", "Uncompressed audio (*.wav);;Ogg Vorbis (*.ogg);;FLAC audio (*.flac);;MP3 audio (*.mp3);;All files (*)");
 	if (!filename.isEmpty())
 	{
-		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create("Player"), Properties("filename", filename));
+		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create("Player"), Properties("Filename", filename));
 		theScene.addItem(pi);
 	}
 }

@@ -144,4 +144,4 @@ void SignalTypeRefs::copyInto(Q3PtrList<SignalType> &dest)
 		dest.append(theData[i]->copy());
 }
 
-};
+}

@@ -10,7 +10,8 @@ class InputItem: public QGraphicsItem
 public:
 	InputItem(int _i, ProcessorItem* _p);
 
-	inline ProcessorItem* processorItem() const;
+	ProcessorItem* processorItem() const;
+	inline uint index() const { return m_index; }
 
 	virtual QRectF boundingRect() const;
 
@@ -32,6 +33,6 @@ public:
 	virtual int type() const { return Type; }
 
 private:
-	int			m_index;
+	uint		m_index;
 	QSizeF		m_size;
 };

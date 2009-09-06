@@ -50,4 +50,4 @@ ProcessorPort &ProcessorPort::setSize(uint bufferSize)
 	return *this;
 }
 
-};
+}

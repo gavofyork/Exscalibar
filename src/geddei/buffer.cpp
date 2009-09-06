@@ -510,3 +510,5 @@ void Buffer::setType(const SignalType *type)
 }
 
 }
+
+#undef MESSAGES

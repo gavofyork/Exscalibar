@@ -185,4 +185,6 @@ uint Splitter::maximumScratchElementsEver()
 	return ret;
 }
 
-};
+}
+
+#undef MESSAGES

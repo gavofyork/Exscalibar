@@ -12,7 +12,6 @@
 
 #include "multiplicative.h"
 
-#undef MESSAGES
 #define MESSAGES 0
 
 namespace Geddei
@@ -30,4 +29,6 @@ void Multiplicative::setMultiplicity(uint multiplicity)
 	setSinkMultiplicity(multiplicity);
 }
 
-};
+}
+
+#undef MESSAGES
