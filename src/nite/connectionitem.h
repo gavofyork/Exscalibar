@@ -5,8 +5,9 @@
 
 class InputItem;
 class OutputItem;
+class ProcessorItem;
 
-class ConnectionItem : public QGraphicsLineItem
+class ConnectionItem: public QGraphicsLineItem
 {
 public:
 	ConnectionItem(InputItem* _to, OutputItem* _from);
@@ -15,6 +16,11 @@ public:
 	virtual int type() const { return Type; }
 
 	OutputItem* from() const { return m_from; }
+
+	ProcessorItem* toProcessor() const;
+	ProcessorItem* fromProcessor() const;
+
+	void rejigEndPoints();
 
 private:
 	OutputItem* m_from;

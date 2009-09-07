@@ -39,8 +39,9 @@ public:
 		return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f));
 	}
 	virtual void focusInEvent(QFocusEvent* _e);
-
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual bool sceneEvent(QEvent* _e) { return QGraphicsItem::sceneEvent(_e); }
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 
 	enum { Type = UserType + 1 };
 	virtual int type() const { return Type; }

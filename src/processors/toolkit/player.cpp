@@ -49,7 +49,7 @@ Player::Player(QString const& _filename) : Processor("Player", OutConst, Guarded
 
 bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	QRectF textArea(2, 2, _s.width() - 4, 14);
+	QRectF textArea(2, 0, _s.width() - 4, 20);
 	_p.setPen(Qt::black);
 	_p.drawText(textArea, thePath);
 	textArea.translate(1, 1);

@@ -25,6 +25,7 @@ private:
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
+
 	uint			m_index;
 	bool			m_hover;
 };

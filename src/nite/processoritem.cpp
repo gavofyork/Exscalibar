@@ -17,6 +17,15 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 	m_size = QSizeF(100, 100);
 }
 
+void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
+{
+	QGraphicsItem::mouseMoveEvent(_e);
+	foreach (QGraphicsItem* i, scene()->items())
+		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
+			if (ci->toProcessor() == this || ci->fromProcessor() == this)
+				ci->rejigEndPoints();
+}
+
 void ProcessorItem::propertiesChanged()
 {
 	if (m_processor->isRunning())
