@@ -28,6 +28,9 @@ public:
 	void beginConnect(OutputItem* _from);
 	IncompleteConnectionItem* incompleteConnectionItem() const { return m_currentConnect; }
 
+signals:
+	void changed();
+
 private:
 	virtual void dragEnterEvent(QGraphicsSceneDragDropEvent* _event);
 	virtual void dragMoveEvent(QGraphicsSceneDragDropEvent* _event) { dragEnterEvent(_event); }

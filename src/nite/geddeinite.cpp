@@ -40,6 +40,7 @@ GeddeiNite::GeddeiNite():
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
 	connect(&theScene, SIGNAL(selectionChanged()), this, SLOT(slotUpdateProperties()));
+	connect(&theScene, SIGNAL(changed()), this, SLOT(slotChanged()));
 	updateItems();
 
 	theView->setAcceptDrops(true);
@@ -124,8 +125,9 @@ void GeddeiNite::setModified(bool modified)
 {
 	theModified = modified;
 	if (modified)
-	{	theTested = false;
-		modeRun->setEnabled(false);
+	{
+		modeRun->setEnabled(connectAll());
+		disconnectAll();
 	}
 	setCaption((theFilename.isEmpty() ? "Untitled" : theFilename) + (modified ? " [ Modified ]" : "") + " - Geddei Nite");
 }
@@ -226,6 +228,7 @@ void GeddeiNite::on_editRemove_activated()
 	if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
 	{
 		delete qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
+		setModified(true);
 		theScene.update();
 	}
 }
@@ -240,14 +243,6 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 		pi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
 	setModified(true);
-}
-
-void GeddeiNite::on_modeTest_activated()
-{
-	setFocus();
-	theTested = connectAll();
-	disconnectAll();
-	modeRun->setEnabled(theTested);
 }
 
 bool GeddeiNite::connectAll()
@@ -286,6 +281,7 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 	{
 		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create("Player"), Properties("Filename", filename));
 		theScene.addItem(pi);
+		setModified(true);
 	}
 }
 

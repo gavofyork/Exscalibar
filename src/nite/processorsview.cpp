@@ -27,6 +27,7 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 	ProcessorItem* i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text()));
 	i->setPos(_event->scenePos());
 	addItem(i);
+	changed();
 }
 
 void ProcessorsScene::beginConnect(OutputItem* _from)
@@ -43,14 +44,21 @@ void ProcessorsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 
 void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
+	ConnectionItem* ci = 0;
 	if (m_currentConnect)
 	{
 		if (InputItem* i = qgraphicsitem_cast<InputItem*>(itemAt(_e->scenePos())))
-			new ConnectionItem(i, m_currentConnect->from());
+		{
+			ci = new ConnectionItem(i, m_currentConnect->from());
+			changed();
+		}
 
 		delete m_currentConnect;
 		m_currentConnect = 0;
 	}
-	update();
 	QGraphicsScene::mouseReleaseEvent(_e);
+
+	if (ci)
+		ci->rejigEndPoints();
+	update();
 }

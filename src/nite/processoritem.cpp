@@ -90,6 +90,7 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 void ProcessorItem::disconnectYourself()
 {
 	m_processor->disconnectAll();
+	m_processor->setNoGroup();
 }
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)

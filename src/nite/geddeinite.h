@@ -54,6 +54,7 @@ protected:
 private slots:
 	void			slotPropertyChanged(QTableWidgetItem* _i);
 	void			slotUpdateProperties();
+	void			slotChanged() { setModified(true); }
 
 	void			on_modeRun_toggled(bool testing);
 	void			on_fileOpen_activated();
@@ -62,7 +63,6 @@ private slots:
 	void			on_fileExit_activated() { qApp->exit(); }
 	void			on_editRemove_activated();
 	void			on_toolsDeployPlayer_activated();
-	void			on_modeTest_activated();
 
 private:
 	void			doSave(const QString &filename);
