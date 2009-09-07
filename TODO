@@ -1,4 +1,8 @@
-CRASH on escape.
-Audio (ALSA) output.
+Can't handle 48K rate.
+Lines in display of Player.
+Resizable.
+Processor information - paused, cycles, CPU, samples read, ticker.
+Buffer information.
+Connection information.
 Watch should work and output to main display ala CLAM.
 

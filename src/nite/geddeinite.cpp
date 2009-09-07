@@ -320,6 +320,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		disconnectAll();
 		theProperties->setEnabled(true);
 	}
+	theScene.update();
 }
 
 void GeddeiNite::closeEvent(QCloseEvent *e)
