@@ -47,6 +47,7 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 	ConnectionItem* ci = 0;
 	if (m_currentConnect)
 	{
+		qDebug() << itemAt(_e->scenePos()) << dynamic_cast<InputItem*>(itemAt(_e->scenePos())) << itemAt(_e->scenePos())->type();
 		if (InputItem* i = qgraphicsitem_cast<InputItem*>(itemAt(_e->scenePos())))
 		{
 			ci = new ConnectionItem(i, m_currentConnect->from());

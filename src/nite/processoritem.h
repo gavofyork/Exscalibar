@@ -1,5 +1,7 @@
 #pragma once
 
+#define __GEDDEI_BUILD
+
 #include <QtXml>
 #include <QtGui>
 #include <Geddei>
@@ -11,8 +13,10 @@ static const double cornerSize = 4.0;
 static const double portSize = 8.0;
 static const double portLateralMargin = 4.0;
 
-class ProcessorItem: public QGraphicsItem
+class ProcessorItem: public QObject, public QGraphicsItem
 {
+	Q_OBJECT
+
 	friend class InputItem;
 	friend class OutputItem;
 
@@ -49,10 +53,13 @@ public:
 private:
 	ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name);
 
+	virtual void timerEvent(QTimerEvent*);
+
 	void propertiesChanged();
 
 	Processor*	m_processor;
 	Properties	m_properties;
 	QSizeF		m_size;
+	int			m_timerId;
 };
 

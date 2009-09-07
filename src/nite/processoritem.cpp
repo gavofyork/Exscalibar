@@ -2,7 +2,7 @@
 #include "processorsview.h"
 #include "processoritem.h"
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1)
 {
 	foreach (QString s, m_processor->properties().keys())
 		if (!m_properties.keys().contains(s))
@@ -11,7 +11,7 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsIte
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
 }
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_timerId(-1)
 {
 	m_processor->init(_name, m_properties);
 	m_size = QSizeF(100, 100);
@@ -24,6 +24,11 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
 			if (ci->toProcessor() == this || ci->fromProcessor() == this)
 				ci->rejigEndPoints();
+}
+
+void ProcessorItem::timerEvent(QTimerEvent*)
+{
+	update();
 }
 
 void ProcessorItem::propertiesChanged()
@@ -84,6 +89,8 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 				if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(j))
 					if (!ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
 						return false;
+	if (uint i = m_processor->redrawPeriod())
+		m_timerId = startTimer(i);
 	return true;
 }
 
@@ -91,6 +98,8 @@ void ProcessorItem::disconnectYourself()
 {
 	m_processor->disconnectAll();
 	m_processor->setNoGroup();
+	if (m_timerId > -1)
+		this->killTimer(m_timerId);
 }
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)

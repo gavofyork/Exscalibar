@@ -32,7 +32,6 @@ using namespace std;
 GeddeiNite::GeddeiNite():
 	QMainWindow				(0, "GeddeiNite", Qt::WDestructiveClose),
 	theRunning				(false),
-	theTested				(false),
 	theConnected			(false),
 	theIgnoreNext			(false),
 	theModified				(false)
@@ -288,16 +287,12 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 void GeddeiNite::on_modeRun_toggled(bool running)
 {
 	setFocus();
-	if (!theTested)
-		return;
 
 	if (theIgnoreNext)
 	{
 		theIgnoreNext = false;
 		return;
 	}
-
-	assert(theTested);
 
 	if (running && !theRunning)
 	{
