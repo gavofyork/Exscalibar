@@ -3,15 +3,24 @@
 #include "connectionitem.h"
 
 ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
-	QGraphicsLineItem	(_to),
+	QGraphicsPathItem	(_to),
 	m_from				(_from)
 {
-	setLine(QLineF(mapFromItem(_from, _from->tip()), _to->tip()));
+//	setPen(QPen(Qt::black, 2));
+	rejigEndPoints();
 }
 
 void ConnectionItem::rejigEndPoints()
 {
-	setLine(QLineF(mapFromItem(m_from, m_from->tip()), line().p2()));
+	QPainterPath p;
+	QPointF to = qgraphicsitem_cast<InputItem*>(parentItem())->tip();
+	QPointF from = mapFromItem(m_from, m_from->tip());
+	p.moveTo(from);
+	QPointF c1((to.x() + from.x()) / 2.0, from.y());
+	QPointF c2((to.x() + from.x()) / 2.0, to.y());
+	p.cubicTo(c1, c2, to);
+	setPath(p);
+//	setLine(QLineF(mapFromItem(m_from, m_from->tip()), qgraphicsitem_cast<InputItem*>(parentItem())->tip()));
 }
 
 ProcessorItem* ConnectionItem::fromProcessor() const

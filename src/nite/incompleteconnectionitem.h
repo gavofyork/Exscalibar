@@ -5,7 +5,7 @@
 
 class OutputItem;
 
-class IncompleteConnectionItem: public QGraphicsLineItem
+class IncompleteConnectionItem: public QGraphicsPathItem
 {
 public:
 	IncompleteConnectionItem(OutputItem* _from);

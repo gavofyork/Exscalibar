@@ -7,7 +7,7 @@ class InputItem;
 class OutputItem;
 class ProcessorItem;
 
-class ConnectionItem: public QGraphicsLineItem
+class ConnectionItem: public QGraphicsPathItem
 {
 public:
 	ConnectionItem(InputItem* _to, OutputItem* _from);
