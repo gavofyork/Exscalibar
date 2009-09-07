@@ -191,7 +191,7 @@ void Player::initFromProperties(const Properties &p)
 	qDebug("Mode: %s, Length: %d, Channels: %d, Sampling: %d Hz", theMode==ModeSF ? "Soundfile" : theMode==ModeVF ? "Ogg/Vorbis" : theMode==ModeMAD ? "MP3" : "None", theLength, theChannels, theRate);
 	thePosition = 0;
 	if (theChannels) setupIO(0, theChannels);
-	setupVisual(150, 30, 1000);
+	setupVisual(160, 32, 1000);
 }
 
 PropertiesInfo Player::specifyProperties() const
