@@ -12,7 +12,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "subprocessor.h"
 #include "qfactorymanager.h"
 #else
@@ -82,7 +81,7 @@ public:
 	 * @return A complete list of names of SubProcessor-derived classes that
 	 * will cause available to return true when each is used as the parameter.
 	 */
-	static const QStringList available() { return factory().getAvailable(); }
+	static const QStringList& available() { return factory().getAvailable(); }
 
 	/**
 	 * Creates a SubProcessor object of type @a type.
@@ -102,6 +101,6 @@ public:
 	static DomProcessor *createDom(const QString &type);
 };
 
-};
+}
 
 #endif

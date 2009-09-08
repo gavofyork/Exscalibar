@@ -21,10 +21,11 @@
 #ifndef _QT_FACTORYMANAGER_H
 #define _QT_FACTORYMANAGER_H
 
-#include <qmap.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qdir.h>
+#include <QMap>
+#include <QString>
+#include <QStringList>
+#include <QDir>
+#include <QDebug>
 
 #include <exscalibar.h>
 
@@ -64,11 +65,11 @@ public:
 		loadLibraries(thePath);
 	}
 
-	void reloadAll(const QStringList &thePaths)
+	void reloadAll(QStringList const& thePaths)
 	{
 		clear();
-		for (uint i = 0; i < (uint)thePaths.size(); i++)
-			loadLibraries(thePaths[i]);
+		foreach (QString i, thePaths)
+			loadLibraries(i);
 	}
 
 	const QStringList &getAvailable() { return theIds; }
@@ -86,7 +87,7 @@ public:
 	}
 	Base *operator[](const QString &id) { return createInstance(id); }
 
-	QFactoryManager() { }
+	~QFactoryManager() { clear(); }
 };
 
 template<class Base>

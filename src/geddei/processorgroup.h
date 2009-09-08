@@ -10,12 +10,11 @@
 #ifndef _GEDDEI_PROCESSORGROUP_H
 #define _GEDDEI_PROCESSORGROUP_H
 
-#include <qstring.h>
-#include <qmap.h>
+#include <QString>
+#include <QMap>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "processor.h"
 #else
 #include <geddei/processor.h>

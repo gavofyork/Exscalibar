@@ -78,8 +78,9 @@
 #define _QT_FACTORYEXPORTER_H
 
 #include <typeinfo>
-#include <qstringlist.h>
-#include <qmap.h>
+
+#include <QStringList.h>
+#include <QMap.h>
 
 #include <exscalibar.h>
 

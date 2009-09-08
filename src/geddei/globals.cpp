@@ -69,7 +69,7 @@ uint getConfig()
 	;
 }
 
-const QStringList getPaths()
+QStringList getPaths()
 {
 	QStringList ret;
 #ifdef DEBUG

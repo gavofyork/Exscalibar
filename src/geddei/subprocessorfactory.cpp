@@ -12,8 +12,8 @@
 
 #include <cstdlib>
 
-#include <qstringlist.h>
-#include <qapplication.h>
+#include <QStringList>
+#include <QApplication>
 
 #include "globals.h"
 #include "domprocessor.h"
@@ -28,7 +28,8 @@ QFactoryManager<SubProcessor> *SubProcessorFactory::theOne = 0;
 QFactoryManager<SubProcessor> &SubProcessorFactory::factory()
 {
 	if (!theOne)
-	{	theOne = new QFactoryManager<SubProcessor>;
+	{
+		theOne = new QFactoryManager<SubProcessor>;
 		theOne->reloadAll(getPaths());
 	}
 	return *theOne;
@@ -49,7 +50,6 @@ int SubProcessorFactory::versionId(const QString &type)
 	else
 		return factory().getVersion(type);
 }
-
 
 SubProcessor *SubProcessorFactory::create(const QString &type)
 {

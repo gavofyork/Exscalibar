@@ -137,15 +137,15 @@ void GeddeiNite::setModified(bool modified)
 void GeddeiNite::updateItems()
 {
 	theProcessors->clear();
-	{	QStringList classes = ProcessorFactory::available();
-		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
-		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType);
-			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-		}
-	}
 	{	QStringList classes = SubProcessorFactory::available();
 		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
 		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType + 1);
+			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+		}
+	}
+	{	QStringList classes = ProcessorFactory::available();
+		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
+		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType);
 			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		}
 	}

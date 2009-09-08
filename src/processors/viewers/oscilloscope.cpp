@@ -73,13 +73,13 @@ bool Oscilloscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 void Oscilloscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	this->setupVisual(32, 20, 10);
+	this->setupVisual(32, 20, 1000 / ((uint)_p["Refresh Frequency"].toInt() + 1));
 	m_last.resize(_p["Size"].toInt());
 }
 
 PropertiesInfo Oscilloscope::specifyProperties() const
 {
-	return PropertiesInfo("Size", 1024, "The size of the window's width in samples.");
+	return PropertiesInfo("Size", 1024, "The size of the window's width in samples.")("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).");
 }
 
 EXPORT_CLASS(Oscilloscope, 0,1,0, Processor);

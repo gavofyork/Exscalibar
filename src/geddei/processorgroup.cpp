@@ -21,7 +21,6 @@ namespace Geddei
 
 ProcessorGroup::ProcessorGroup(bool adopt) : theAdopt(adopt)
 {
-	theProcessors.clear();
 }
 
 ProcessorGroup::~ProcessorGroup()
