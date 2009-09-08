@@ -66,13 +66,9 @@ bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	{	seg = !seg;
 		uint ni = i + 60 * theRate;
 		if (ni > theLength) ni = theLength;
-		if (thePosition > i && thePosition < ni)
-		{	_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (thePosition - i) / theLength), progressArea.height(), QColor(10, 64, seg ? 232 : 255, QColor::Hsv));
-			_p.fillRect(progressArea.x() + int(progressArea.width() * thePosition / theLength), progressArea.y(), int(progressArea.width() * (ni - thePosition) / theLength), progressArea.height(), QColor(60, 0, seg ? 232 : 255, QColor::Hsv));
-		}
-		else
-			_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (ni - i) / theLength), progressArea.height(), QColor(10, thePosition > i ? 64 : 0, seg ? 232 : 255, QColor::Hsv));
+		_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (ni - i) / theLength), progressArea.height(), QColor::fromHsv(0, 0, seg ? 232 : 255));
 	}
+	_p.fillRect(progressArea.x(), progressArea.y(), progressArea.width() * thePosition / theLength, progressArea.height(), QColor(255, 0, 0, 64));
 	return true;
 }
 
