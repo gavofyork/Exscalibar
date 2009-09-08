@@ -58,12 +58,13 @@ class ALSAPlayer: public Processor
 		thePeriods = _p["periods"].toInt();
 		setupIO(theChannels, 0);
 	}
+	virtual void specifyInputSpace(Q3ValueVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("device", "hw:0,0", "The ALSA hardware device to open.")
 								("channels", 2, "The number of channels to use.")
-								("periodsize", 4096, "The number of frames in each period.")
-								("periods", 2, "The number of periods in the outgoing buffer.");
+								("periodsize", 1024, "The number of frames in each period.")
+								("periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
 	ALSAPlayer() : Processor("ALSAPlayer"), thePcmHandle(0) {}

@@ -32,7 +32,7 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 
 void ProcessorsScene::onStarted()
 {
-	m_timerId = startTimer(100);
+	m_timerId = startTimer(110);
 }
 
 void ProcessorsScene::onStopped()

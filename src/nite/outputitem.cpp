@@ -2,9 +2,8 @@
 #include "processoritem.h"
 #include "outputitem.h"
 
-OutputItem::OutputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i), m_hover(false)
+OutputItem::OutputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i), m_hover(false), m_inputItem(0)
 {
-	setPos(_p->m_size.width() - cornerSize, cornerSize * 3 / 2 + portLateralMargin / 2 + (portLateralMargin + portSize) * (m_index + 0.5));
 	setCursor(Qt::CrossCursor);
 	setAcceptHoverEvents(true);
 }

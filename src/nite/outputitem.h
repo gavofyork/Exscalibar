@@ -12,6 +12,9 @@ public:
 	ProcessorItem* processorItem() const;
 	inline uint index() const { return m_index; }
 
+	inline InputItem* inputItem() const { return m_inputItem; }
+	inline void setInputItem(InputItem* _ii = 0) { m_inputItem = _ii; }
+
 	QPointF tip() const;
 
 	enum { Type = UserType + 3 };
@@ -28,4 +31,5 @@ private:
 
 	uint			m_index;
 	bool			m_hover;
+	InputItem*		m_inputItem;
 };

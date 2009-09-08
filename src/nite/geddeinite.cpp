@@ -24,6 +24,7 @@
 #include <iostream>
 using namespace std;
 
+#include "connectionitem.h"
 #include "processoritem.h"
 #include "processorview.h"
 #include "processorsview.h"
@@ -226,6 +227,9 @@ void GeddeiNite::on_editRemove_activated()
 {
 	if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
 	{
+		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
+			if (i->fromProcessor() == qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+				delete i;
 		delete qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
 		setModified(true);
 		theScene.update();
@@ -309,6 +313,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		}
 		else
 		{
+			theGroup.stop(true);
 			// some sort of cool depiction of the error.
 			// restore to stable state.
 			disconnectAll();

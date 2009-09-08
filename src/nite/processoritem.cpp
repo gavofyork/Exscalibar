@@ -2,28 +2,31 @@
 #include "processorsview.h"
 #include "processoritem.h"
 
-class PauseItem: public QGraphicsRectItem
+class PauseItem: public QGraphicsEllipseItem
 {
 public:
-	PauseItem(ProcessorItem* _p): QGraphicsRectItem(_p->statusBar()), m_ticker(0)
+	PauseItem(ProcessorItem* _p): QGraphicsEllipseItem(_p->statusBar())
 	{
-		setPen(QPen(Qt::black));
-		setBrush(Qt::green);
+		setPen(Qt::NoPen);
+		setBrush(Qt::NoBrush);
 		setRect(QRectF(0, 0, statusHeight, statusHeight));
 	}
 
 	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w)
 	{
 		_p->save();
-		QGraphicsRectItem::paint(_p, _o, _w);
+		QGraphicsEllipseItem::paint(_p, _o, _w);
 		_p->restore();
-		_p->setPen(QPen(QColor(0, 0, 0, 32), 2));
-		_p->translate(QPointF(statusHeight / 2, statusHeight / 2));
-		_p->rotate(m_ticker * 360.0 / 12);
-		_p->drawPoint(QPointF(statusHeight * 3 / 8, 0));
-		_p->setPen(QPen(QColor(0, 0, 0, 64), 2));
-		_p->rotate(360.0 / 12);
-		_p->drawPoint(QPointF(statusHeight * 3 / 8, 0));
+		if (processor()->isRunning())
+		{
+			_p->setPen(QPen(QColor(0, 0, 0, 32), 2));
+			_p->translate(QPointF(statusHeight / 2, statusHeight / 2));
+			_p->rotate((processor()->guardsCrossed() % 36) * 360.0 / 36);
+			_p->drawPoint(QPointF(statusHeight / 2, 0));
+			_p->setPen(QPen(QColor(0, 0, 0, 64), 2));
+			_p->rotate(360.0 / 12);
+			_p->drawPoint(QPointF(statusHeight / 2, 0));
+		}
 	}
 	Processor* processor() const { return qgraphicsitem_cast<ProcessorItem*>(parentItem()->parentItem())->processor(); }
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*)
@@ -31,7 +34,7 @@ public:
 		Processor* p = processor();
 		if (p->paused())
 		{
-			setBrush(Qt::green);
+			setBrush(Qt::NoBrush);
 			p->unpause();
 		}
 		else
@@ -44,18 +47,14 @@ public:
 
 	void tick()
 	{
-		m_ticker = (m_ticker += processor()->guardsCrossed()) % 12;
 		update();
 	}
 
 	enum { Type = UserType + 6 };
 	virtual int type() const { return Type; }
-
-private:
-	int m_ticker;
 };
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1), m_resizing(true)
 {
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
@@ -68,12 +67,45 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 		if (!m_properties.keys().contains(s))
 			m_properties[s] = m_processor->properties().defaultValue(s);
 	m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
-	rejig();
+	rejig(0, true);
+	setAcceptHoverEvents(true);
+	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
+}
+
+void ProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
+{
+	m_resizing = QRectF(m_size.width(), m_size.height(), -cornerSize * 2, -cornerSize * 2).contains(_e->pos());
+	if (m_resizing)
+		m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
+	QGraphicsItem::mousePressEvent(_e);
+}
+
+void ProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
+{
+	m_resizing = false;
+	QGraphicsItem::mouseReleaseEvent(_e);
+}
+
+void ProcessorItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
+{
+	if (QRectF(m_size.width(), m_size.height(), -cornerSize * 2, -cornerSize * 2).contains(_e->pos()))
+		setCursor(Qt::SizeFDiagCursor);
+	else
+		setCursor(Qt::ArrowCursor);
 }
 
 void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
-	QGraphicsItem::mouseMoveEvent(_e);
+	if (m_resizing)
+	{
+		QPointF d = _e->pos() + m_origPosition;
+		prepareGeometryChange();
+		m_size = QSizeF(d.x(), d.y());
+		rejig();
+	}
+	else
+		QGraphicsItem::mouseMoveEvent(_e);
+
 	foreach (QGraphicsItem* i, scene()->items())
 		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
 			if (ci->toProcessor() == this || ci->fromProcessor() == this)
@@ -117,28 +149,34 @@ void ProcessorItem::propertiesChanged()
 	delete old;
 }
 
-void ProcessorItem::rejig(Processor* _old)
+void ProcessorItem::rejig(Processor* _old, bool _bootStrap)
 {
-	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
-
 	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
 	minHeight = max(minHeight, cornerSize + m_processor->height() + statusHeight + statusMargin * 2);
 	double minWidth = cornerSize * 2 + m_processor->width();
+	prepareGeometryChange();
 	m_size = QSizeF(max(m_size.width(), minWidth), max(m_size.height(), minHeight));
-
-	foreach (QGraphicsItem* i, childItems())
-		if ((qgraphicsitem_cast<InputItem*>(i) && qgraphicsitem_cast<InputItem*>(i)->index() >= m_processor->numInputs()) ||
-			(qgraphicsitem_cast<OutputItem*>(i) && qgraphicsitem_cast<OutputItem*>(i)->index() >= m_processor->numOutputs()))
-			delete i;
-	for (uint i = _old ? _old->numInputs() : 0; i < m_processor->numInputs(); i++)
-		new InputItem(i, this);
-	for (uint i = _old ? _old->numOutputs() : 0; i < m_processor->numOutputs(); i++)
-		new OutputItem(i, this);
-
 	update();
 
+	if (_old)
+		foreach (QGraphicsItem* i, childItems())
+			if ((qgraphicsitem_cast<InputItem*>(i) && qgraphicsitem_cast<InputItem*>(i)->index() >= m_processor->numInputs()) ||
+				(qgraphicsitem_cast<OutputItem*>(i) && qgraphicsitem_cast<OutputItem*>(i)->index() >= m_processor->numOutputs()))
+				delete i;
+
+	if (_old || _bootStrap)
+	{
+		for (uint i = _old ? _old->numInputs() : 0; i < m_processor->numInputs(); i++)
+			new InputItem(i, this);
+		for (uint i = _old ? _old->numOutputs() : 0; i < m_processor->numOutputs(); i++)
+			new OutputItem(i, this);
+	}
+
+	foreach (OutputItem* i, filter<OutputItem>(childItems()))
+		i->setPos(m_size.width() - cornerSize, cornerSize * 3 / 2 + portLateralMargin / 2 + (portLateralMargin + portSize) * (i->index() + 0.5));
 	m_statusBar->setPos(cornerSize * 2, m_size.height() - statusHeight - statusMargin);
 	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 4, statusHeight));
+	update();
 }
 
 void ProcessorItem::setProperty(QString const& _key, QVariant const& _value)
@@ -165,8 +203,18 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
 			foreach (QGraphicsItem* j, ii->childItems())
 				if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(j))
+				{	if (ci->from()->inputItem())
+					{
+						ci->from()->processorItem()->m_processor->disconnect(ci->from()->index());
+						ci->from()->processorItem()->m_processor->split(ci->from()->index());
+						ci->from()->processorItem()->m_processor->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->processor(), ci->from()->inputItem()->index());
+						ci->from()->setInputItem(0);
+					}
+					else if (!ci->from()->processorItem()->m_processor->isConnected(ci->from()->index()))
+						ci->from()->setInputItem(ii);
 					if (!ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
 						return false;
+				}
 	if (uint i = m_processor->redrawPeriod())
 		m_timerId = startTimer(i);
 	return true;
@@ -174,6 +222,9 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 
 void ProcessorItem::disconnectYourself()
 {
+	foreach (QGraphicsItem* i, childItems())
+		if (OutputItem* ii = qgraphicsitem_cast<OutputItem*>(i))
+			ii->setInputItem();
 	m_processor->disconnectAll();
 	m_processor->setNoGroup();
 	if (m_timerId > -1)

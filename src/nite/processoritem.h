@@ -35,6 +35,8 @@ public:
 	QGraphicsItem* statusBar() const { return m_statusBar; }
 	QRectF clientArea() const;
 
+	void adjustSize(QSizeF const& _a);
+
 	Properties const& properties() const { return m_properties; }
 	void setProperty(QString const& _key, QVariant const& _value);
 
@@ -57,6 +59,9 @@ public:
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual bool sceneEvent(QEvent* _e) { return QGraphicsItem::sceneEvent(_e); }
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* _e);
 
 	enum { Type = UserType + 1 };
 	virtual int type() const { return Type; }
@@ -65,7 +70,7 @@ private:
 	virtual void timerEvent(QTimerEvent*);
 
 	void propertiesChanged();
-	void rejig(Processor* _old = 0);
+	void rejig(Processor* _old = 0, bool _bootStrap = false);
 
 	Processor*			m_processor;
 	QGraphicsRectItem*	m_statusBar;
@@ -73,5 +78,7 @@ private:
 	Properties			m_properties;
 	QSizeF				m_size;
 	int					m_timerId;
+	bool				m_resizing;
+	QPointF				m_origPosition;
 };
 

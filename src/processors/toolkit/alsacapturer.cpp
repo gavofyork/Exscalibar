@@ -23,7 +23,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_ALSA
+#if defined(HAVE_ALSA) || 1
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 
@@ -40,96 +40,108 @@ using namespace SignalTypes;
 
 class ALSACapturer: public Processor
 {
+	QString theDevice;
+	uint theChannels;
+	uint thePeriodSize;
+	uint thePeriods;
+	uint theFrequency;
+	snd_pcm_t *thePcmHandle;
+
+	virtual bool processorStarted();
+	virtual void processorStopped();
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &) { setupIO(0, 2); }
+	virtual void initFromProperties(const Properties &_p)
+	{
+		theDevice = _p["Device"].toString();
+		theChannels = _p["Channels"].toInt();
+		theFrequency = _p["Frequency"].toInt();
+		thePeriodSize = _p["Period Size"].toInt();
+		thePeriods = _p["Periods"].toInt();
+		setupIO(0, theChannels);
+	}
+	virtual void specifyOutputSpace(Q3ValueVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
+	virtual PropertiesInfo specifyProperties() const
+	{
+		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
+								("Channels", 2, "The number of channels to capture.")
+								("Frequency", 44100, "The frequency with which to sample at [in Hz].")
+								("Period Size", 1024, "The number of frames in each period.")
+								("Periods", 4, "The number of periods in the outgoing buffer.");
+	}
 public:
-	ALSACapturer() : Processor("ALSACapturer") {}
+	ALSACapturer() : Processor("ALSACapturer"), thePcmHandle(0) {}
 };
 
 bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
-	outTypes[0] = Wave(44100.0);
-	outTypes[1] = Wave(44100.0);
+	for (uint i = 0; i < theChannels; i++)
+		outTypes[i] = Wave(theFrequency);
 	return true;
+}
+
+bool ALSACapturer::processorStarted()
+{
+	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_hw_params_alloca(&hwparams);
+	thePcmHandle = 0;
+	if (snd_pcm_open(&thePcmHandle, theDevice.toLatin1(), SND_PCM_STREAM_CAPTURE, thePeriodSize * thePeriods) < 0)
+		fprintf(stderr, "Error opening PCM device %s\n", qPrintable(theDevice));
+	else if (snd_pcm_hw_params_any(thePcmHandle, hwparams) < 0)
+		fprintf(stderr, "Can not configure this PCM device.\n");
+	else if (snd_pcm_hw_params_set_access(thePcmHandle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
+		fprintf(stderr, "Error setting access.\n");
+	else if (snd_pcm_hw_params_set_format(thePcmHandle, hwparams, SND_PCM_FORMAT_S16_LE) < 0)
+		fprintf(stderr, "Error setting format.\n");
+	else if (snd_pcm_hw_params_set_rate_resample(thePcmHandle, hwparams, theFrequency))
+		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n", theFrequency);
+	else if (snd_pcm_hw_params_set_channels(thePcmHandle, hwparams, theChannels) < 0)
+		fprintf(stderr, "Error setting channels.\n");
+	else if (snd_pcm_hw_params_set_periods(thePcmHandle, hwparams, thePeriods, 0) < 0)
+		fprintf(stderr, "Error setting periods.\n");
+	else if (snd_pcm_hw_params_set_buffer_size(thePcmHandle, hwparams, (thePeriodSize * thePeriods)) < 0)
+		fprintf(stderr, "Error setting buffersize.\n");
+	else if (snd_pcm_hw_params(thePcmHandle, hwparams) < 0)
+		fprintf(stderr, "Error setting HW params.\n");
+	else
+	{
+		uint f;
+		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
+		qDebug() << "Using rate " << f;
+		return true;
+	}
+	if (thePcmHandle)
+		snd_pcm_close(thePcmHandle);
+	thePcmHandle = 0;
+	return false;
 }
 
 void ALSACapturer::processor()
 {
-	snd_pcm_t *pcm_handle;
-	snd_pcm_stream_t stream = SND_PCM_STREAM_CAPTURE;
-	snd_pcm_hw_params_t *hwparams;
-	char *pcm_name;
-	pcm_name = strdup("hw:0,1");
-	snd_pcm_hw_params_alloca(&hwparams);
-	if (snd_pcm_open(&pcm_handle, pcm_name, stream, 0) < 0)
+	short indata[thePeriodSize * theChannels];
+	while (guard())
 	{
-		fprintf(stderr, "Error opening PCM device %s\n", pcm_name);
-		return;
-	}
-	if (snd_pcm_hw_params_any(pcm_handle, hwparams) < 0)
-	{
-		fprintf(stderr, "Can not configure this PCM device.\n");
-		return;
-	}
-	uint rate = 44100;
-	uint exact_rate;
-	int dir;
-	int periods = 2;
-	int periodsize = 8192;
-	if (snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
-	{
-		fprintf(stderr, "Error setting access.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_format(pcm_handle, hwparams, SND_PCM_FORMAT_S16_LE) < 0)
-	{
-		fprintf(stderr, "Error setting format.\n");
-		return;
-	}
-	exact_rate = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &rate, &dir);
-	if (exact_rate != rate)
-	{
-		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n"
-						"==> Using %d Hz instead.\n", rate, exact_rate);
-	}
-	if (snd_pcm_hw_params_set_channels(pcm_handle, hwparams, 1) < 0)
-	{
-		fprintf(stderr, "Error setting channels.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_periods(pcm_handle, hwparams, periods, 0) < 0)
-	{
-		fprintf(stderr, "Error setting periods.\n");
-		return;
-	}
-	if (snd_pcm_hw_params_set_buffer_size(pcm_handle, hwparams, (periodsize * periods)>>2) < 0)
-	{
-		fprintf(stderr, "Error setting buffersize.\n");
-		return;
-	}
-	if (snd_pcm_hw_params(pcm_handle, hwparams) < 0)
-	{
-		fprintf(stderr, "Error setting HW params.\n");
-		return;
-	}
-
-	uint capdata[periodsize * 8];
-	while (true)
-	{
-		int pcmreturn;
-		if ((pcmreturn = snd_pcm_readi(pcm_handle, capdata, periodsize << 2)) > 0)
+		int count;
+		if ((count = snd_pcm_readi(thePcmHandle, indata, thePeriodSize)) > 0)
 		{
-			BufferData d0 = output(0).makeScratchSamples(pcmreturn), d1 = output(1).makeScratchSamples(pcmreturn);
-			for (int i = 0; i < pcmreturn; i++)
-			{	d0[i] = float(capdata[i]) / 32768.0;
-				d1[i] = float(capdata[i + pcmreturn]) / 32768.0;
-			}
+			BufferData d[theChannels];
+			for (uint c = 0; c < theChannels; c++)
+				d[c] = output(c).makeScratchSamples(count);
+			for (int i = 0; i < count; i++)
+				for (uint c = 0; c < theChannels; c++)
+					d[c][i] = float(indata[i * theChannels + c]) / 32768.f;
+			for (uint c = 0; c < theChannels; c++)
+				output(c) << d[c];
 		}
 		else
-			snd_pcm_prepare(pcm_handle);
+			snd_pcm_prepare(thePcmHandle);
 	}
+}
 
+void ALSACapturer::processorStopped()
+{
+	snd_pcm_close(thePcmHandle);
+	thePcmHandle = 0;
 }
 
 EXPORT_CLASS(ALSACapturer, 0,1,0, Processor);

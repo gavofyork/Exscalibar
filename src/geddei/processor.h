@@ -238,7 +238,7 @@ private:
 protected:
 	bool guard();
 public:
-	uint guardsCrossed() const { uint ret = theGuardsCrossed; theGuardsCrossed = 0; return ret; }
+	uint guardsCrossed() const { return theGuardsCrossed; }
 private:
 	//@}
 
@@ -783,6 +783,8 @@ public:
 	 * otherwise 0.
 	 */
 	const Connection *connect(uint sourceIndex, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex, uint bufferSize = 1);
+
+	bool isConnected(uint _sourceIndex) const { return theOutputs[_sourceIndex]; }
 
 	/*
 	const Connection *connect(uint sourceIndex, Endpoint sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex, uint bufferSize = 1);

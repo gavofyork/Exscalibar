@@ -2,3 +2,4 @@ Makefile
 build/
 .objects/
 .composed.cpp
+*~

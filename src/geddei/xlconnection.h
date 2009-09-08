@@ -89,21 +89,21 @@ protected:
 
 	/** @internal
 	 * Blocks until either:
-	 * 
+	 *
 	 * a) It discards up to @a samples from the input stream and it then reads
 	 * a plunger. In this case, it returns false.
-	 * 
+	 *
 	 * b) It discards nothing, but guarantees that at least @a samples can be
 	 * read from the input stream immediately and without interruption. In this
 	 * case, it returns true.
-	 * 
+	 *
 	 * On exit it guarantees either a specific number of samples can be read
 	 * (like waitUntilReady()), or that it has gotten rid of at least one
 	 * plunger. If neither plunger nor enough data are forthcoming in the input
 	 * stream, it will block indefinately.
 	 */
 	virtual bool plungeSync(uint samples) const = 0;
-	
+
 	/** @internal
 	 * Returns the number of elements currently available to be read without
 	 * blocking.
@@ -201,11 +201,11 @@ protected:
 public:
 	/**
 	 * Retrieves the type of signal this connection transfers.
-	 * 
+	 *
 	 * @return A SignalTypeRef of this conection's SignalType.
 	 */
 	virtual const SignalTypeRef type() { return SignalTypeRef(theType); }
-	
+
 	/**
 	 * Blocks until at least @a samples are ready to be read (or peeked) on the
 	 * connection.

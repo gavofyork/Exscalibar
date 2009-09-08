@@ -3,6 +3,16 @@
 #define __GEDDEI_BUILD
 
 #include <QGraphicsView>
+#include <QGraphicsItem>
+
+template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
+{
+	QList<T*> ret;
+	foreach (QGraphicsItem* i, _l)
+		if (T* t = qgraphicsitem_cast<T*>(i))
+			ret << t;
+	return ret;
+}
 
 /** @internal
  * @author Gav Wood <gav@kde.org>

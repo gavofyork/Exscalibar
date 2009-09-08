@@ -407,6 +407,7 @@ void Processor::pause()
 void Processor::unpause()
 {
 	thePause.lock();
+	theGuardsCrossed = 0;
 	thePaused = false;
 	theUnpaused.wakeAll();
 	thePause.unlock();

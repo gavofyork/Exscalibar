@@ -193,7 +193,7 @@ void Player::initFromProperties(const Properties &p)
 PropertiesInfo Player::specifyProperties() const
 {
 	return PropertiesInfo("Filename", "/tmp/cdda.wav", "The name of the file to be played through the output(s)")
-						 ("Frames", 8192, "The number of samples to output in each chunk.");
+						 ("Frames", 1024, "The number of samples to output in each chunk.");
 }
 
 void Player::processor()
