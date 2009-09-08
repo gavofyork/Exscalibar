@@ -210,7 +210,7 @@ void Player::processor()
 		if (!theSndFile) return;
 		float buffer[theReadFrames * theChannels];
 		int in = 0;
-		while (true)
+		while (guard())
 		{
 			if ((in = sf_readf_float(theSndFile, buffer, theReadFrames)) > 0)
 			{	thePosition += in;
@@ -237,7 +237,7 @@ void Player::processor()
 		if (ov_open(fdopen(qfile.handle(), "r"), &theVorbisFile, NULL, 0) < 0) return;
 		float **buffer;
 		int in = 0, current_section = 0;
-		while (true)
+		while (guard())
 		{
 			in = ov_read_float(&theVorbisFile, &buffer, theReadFrames, &current_section);
 			if (in == 0)
@@ -273,7 +273,7 @@ void Player::processor()
 	mad_timer_reset(&Timer);
 
 	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", thePath.latin1()); return; }
-	while (1)
+	while (guard())
 	{
 		if (Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN)
 		{

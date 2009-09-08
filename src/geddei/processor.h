@@ -234,7 +234,12 @@ private:
 	mutable QMutex thePause;
 	QFastWaitCondition theUnpaused;
 	bool thePaused;
-	void guard();
+	mutable uint theGuardsCrossed;
+protected:
+	bool guard();
+public:
+	uint guardsCrossed() const { uint ret = theGuardsCrossed; theGuardsCrossed = 0; return ret; }
+private:
 	//@}
 
 	//@{
@@ -443,7 +448,7 @@ protected:
 	 * Call this from initFromProperties to initialise the visual properties of
 	 * the class.
 	 *
-	 * If this is not called, the size will default to 50x30 and no redraw.
+	 * If this is not called, the size will default to 32x32 and no redraw.
 	 *
 	 * @param width The width of the drawing canvas. Should be a multiple of 10.
 	 * @param height The height of the drawing canvas. Should be a multiple of 10.
@@ -451,7 +456,7 @@ protected:
 	 * be redrawn in milliseconds. A value of zero means no explicit redraw.
 	 * @sa setupIO()
 	 */
-	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0);
+	void setupVisual(uint width = 32, uint height = 32, uint redrawPeriod = 0);
 
 	/**
 	 * Reimplement for to define how the processor should be drawn visually.

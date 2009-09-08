@@ -60,9 +60,9 @@ class ALSAPlayer: public Processor
 	}
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("device", "hw:0,1", "The ALSA hardware device to open.")
+		return PropertiesInfo	("device", "hw:0,0", "The ALSA hardware device to open.")
 								("channels", 2, "The number of channels to use.")
-								("periodsize", 1024, "The number of frames in each period.")
+								("periodsize", 4096, "The number of frames in each period.")
 								("periods", 2, "The number of periods in the outgoing buffer.");
 	}
 public:
@@ -98,7 +98,12 @@ bool ALSAPlayer::processorStarted()
 	else if (snd_pcm_hw_params(thePcmHandle, hwparams) < 0)
 		fprintf(stderr, "Error setting HW params.\n");
 	else
+	{
+		uint f;
+		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
+		qDebug() << "Using rate " << f;
 		return true;
+	}
 	if (thePcmHandle)
 		snd_pcm_close(thePcmHandle);
 	thePcmHandle = 0;

@@ -261,6 +261,11 @@ bool GeddeiNite::connectAll()
 		disconnectAll();
 		return false;
 	}
+
+	foreach (QGraphicsItem* i, theScene.items())
+		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			pi->typesConfirmed();
+
 	theConnected = true;
 	return true;
 }
@@ -296,11 +301,10 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 
 	if (running && !theRunning)
 	{
-		connectAll();
-		bool successful = theGroup.go();
-		if (successful)
+		if (connectAll() && theGroup.go())
 		{
 			theProperties->setEnabled(false);
+			theScene.onStarted();
 			theRunning = true;
 		}
 		else
@@ -314,6 +318,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 	}
 	else if (!running && theRunning)
 	{
+		theScene.onStopped();
 		theRunning = false;
 		theGroup.stop(false);
 		theGroup.reset();

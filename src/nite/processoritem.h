@@ -10,8 +10,12 @@
 #include "outputitem.h"
 
 static const double cornerSize = 4.0;
+static const double statusHeight = 8.0;
+static const double statusMargin = 2.0;
 static const double portSize = 8.0;
 static const double portLateralMargin = 4.0;
+
+class PauseItem;
 
 class ProcessorItem: public QObject, public QGraphicsItem
 {
@@ -21,17 +25,24 @@ class ProcessorItem: public QObject, public QGraphicsItem
 	friend class OutputItem;
 
 public:
-	ProcessorItem(Processor* _p, Properties const& _pr = Properties());
+	ProcessorItem(Processor* _p, Properties const& _pr = Properties(), QString const& _name = QString::null);
 	~ProcessorItem()
 	{
 		delete m_processor;
 	}
 
+	Processor* processor() const { return m_processor; }
+	QGraphicsItem* statusBar() const { return m_statusBar; }
+	QRectF clientArea() const;
+
 	Properties const& properties() const { return m_properties; }
 	void setProperty(QString const& _key, QVariant const& _value);
 
 	bool connectYourself(ProcessorGroup& _group);
+	void typesConfirmed();
 	void disconnectYourself();
+
+	void tick();
 
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	void loadYourself(QDomElement& _element);
@@ -51,15 +62,16 @@ public:
 	virtual int type() const { return Type; }
 
 private:
-	ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name);
-
 	virtual void timerEvent(QTimerEvent*);
 
 	void propertiesChanged();
+	void rejig(Processor* _old = 0);
 
-	Processor*	m_processor;
-	Properties	m_properties;
-	QSizeF		m_size;
-	int			m_timerId;
+	Processor*			m_processor;
+	QGraphicsRectItem*	m_statusBar;
+	PauseItem*			m_pauseItem;
+	Properties			m_properties;
+	QSizeF				m_size;
+	int					m_timerId;
 };
 

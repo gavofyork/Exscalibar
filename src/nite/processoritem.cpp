@@ -2,19 +2,73 @@
 #include "processorsview.h"
 #include "processoritem.h"
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1)
+class PauseItem: public QGraphicsRectItem
 {
+public:
+	PauseItem(ProcessorItem* _p): QGraphicsRectItem(_p->statusBar()), m_ticker(0)
+	{
+		setPen(QPen(Qt::black));
+		setBrush(Qt::green);
+		setRect(QRectF(0, 0, statusHeight, statusHeight));
+	}
+
+	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w)
+	{
+		_p->save();
+		QGraphicsRectItem::paint(_p, _o, _w);
+		_p->restore();
+		_p->setPen(QPen(QColor(0, 0, 0, 32), 2));
+		_p->translate(QPointF(statusHeight / 2, statusHeight / 2));
+		_p->rotate(m_ticker * 360.0 / 12);
+		_p->drawPoint(QPointF(statusHeight * 3 / 8, 0));
+		_p->setPen(QPen(QColor(0, 0, 0, 64), 2));
+		_p->rotate(360.0 / 12);
+		_p->drawPoint(QPointF(statusHeight * 3 / 8, 0));
+	}
+	Processor* processor() const { return qgraphicsitem_cast<ProcessorItem*>(parentItem()->parentItem())->processor(); }
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent*)
+	{
+		Processor* p = processor();
+		if (p->paused())
+		{
+			setBrush(Qt::green);
+			p->unpause();
+		}
+		else
+		{
+			setBrush(Qt::red);
+			p->pause();
+		}
+		update();
+	}
+
+	void tick()
+	{
+		m_ticker = (m_ticker += processor()->guardsCrossed()) % 12;
+		update();
+	}
+
+	enum { Type = UserType + 6 };
+	virtual int type() const { return Type; }
+
+private:
+	int m_ticker;
+};
+
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1)
+{
+	m_statusBar = new QGraphicsRectItem(this);
+	m_statusBar->setPen(Qt::NoPen);
+	m_statusBar->setBrush(QColor(255, 255, 255, 16));
+
+	m_pauseItem = new PauseItem(this);
+	m_pauseItem->setPos(0, 0);
+
 	foreach (QString s, m_processor->properties().keys())
 		if (!m_properties.keys().contains(s))
 			m_properties[s] = m_processor->properties().defaultValue(s);
-	propertiesChanged();
-	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
-}
-
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_timerId(-1)
-{
-	m_processor->init(_name, m_properties);
-	m_size = QSizeF(100, 100);
+	m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
+	rejig();
 }
 
 void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
@@ -26,9 +80,24 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 				ci->rejigEndPoints();
 }
 
+void ProcessorItem::tick()
+{
+	m_pauseItem->tick();
+	foreach (QGraphicsItem* i, childItems())
+		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
+			ii->update();
+}
+
 void ProcessorItem::timerEvent(QTimerEvent*)
 {
 	update();
+}
+
+void ProcessorItem::typesConfirmed()
+{
+	foreach (QGraphicsItem* i, childItems())
+		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
+			ii->typesConfirmed();
 }
 
 void ProcessorItem::propertiesChanged()
@@ -43,10 +112,17 @@ void ProcessorItem::propertiesChanged()
 		return;
 	}
 
-	m_processor->init(QString::number(uint(this)), m_properties);
+	m_processor->init(old->name(), m_properties);
+	rejig(old);
+	delete old;
+}
+
+void ProcessorItem::rejig(Processor* _old)
+{
+	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
 
 	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
-	minHeight = max(minHeight, cornerSize * 2 + m_processor->height());
+	minHeight = max(minHeight, cornerSize + m_processor->height() + statusHeight + statusMargin * 2);
 	double minWidth = cornerSize * 2 + m_processor->width();
 	m_size = QSizeF(max(m_size.width(), minWidth), max(m_size.height(), minHeight));
 
@@ -54,13 +130,15 @@ void ProcessorItem::propertiesChanged()
 		if ((qgraphicsitem_cast<InputItem*>(i) && qgraphicsitem_cast<InputItem*>(i)->index() >= m_processor->numInputs()) ||
 			(qgraphicsitem_cast<OutputItem*>(i) && qgraphicsitem_cast<OutputItem*>(i)->index() >= m_processor->numOutputs()))
 			delete i;
-	for (uint i = old->numInputs(); i < m_processor->numInputs(); i++)
+	for (uint i = _old ? _old->numInputs() : 0; i < m_processor->numInputs(); i++)
 		new InputItem(i, this);
-	for (uint i = old->numOutputs(); i < m_processor->numOutputs(); i++)
+	for (uint i = _old ? _old->numOutputs() : 0; i < m_processor->numOutputs(); i++)
 		new OutputItem(i, this);
 
-	delete old;
 	update();
+
+	m_statusBar->setPos(cornerSize * 2, m_size.height() - statusHeight - statusMargin);
+	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 4, statusHeight));
 }
 
 void ProcessorItem::setProperty(QString const& _key, QVariant const& _value)
@@ -102,6 +180,11 @@ void ProcessorItem::disconnectYourself()
 		this->killTimer(m_timerId);
 }
 
+QRectF ProcessorItem::clientArea() const
+{
+	return QRectF(QPointF(cornerSize, cornerSize), QSizeF(m_size.width() - 2 * cornerSize, m_size.height() - cornerSize - (statusHeight + 2 * statusMargin)));
+}
+
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	if (isSelected())
@@ -126,14 +209,14 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 		_p->drawLine(m_size.width(), m_size.height() - mp, m_size.width() - mp, m_size.height());
 	}
 
-	QRectF clientArea = QRectF(QPointF(cornerSize, cornerSize), m_size - QSizeF(2, 2) * cornerSize);
+	QRectF ca = clientArea();
 	_p->setPen(Qt::NoPen);
 	_p->setBrush(QColor(0, 0, 0, 128));
-	_p->drawRect(QRectF(QPointF(cornerSize, cornerSize), m_size - QSizeF(2, 2) * cornerSize));
+	_p->drawRect(ca);
 
-	_p->setClipRect(clientArea);
-	_p->translate(clientArea.topLeft());
-	m_processor->draw(*_p, clientArea.size());
+	_p->setClipRect(ca);
+	_p->translate(ca.topLeft());
+	m_processor->draw(*_p, ca.size());
 }
 
 void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

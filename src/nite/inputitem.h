@@ -29,6 +29,8 @@ public:
 		_parent.appendChild(out);
 	}
 
+	void typesConfirmed();
+
 	enum { Type = UserType + 2 };
 	virtual int type() const { return Type; }
 

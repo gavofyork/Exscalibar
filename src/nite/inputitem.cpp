@@ -6,13 +6,7 @@
 
 InputItem::InputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i)
 {
-	double secs = 0.1;
-	if (_p->m_processor->isRunning())
-	{
-		double f = _p->m_processor->input(m_index).type().frequency();
-		secs = _p->m_processor->input(m_index).capacity() / f;
-	}
-	m_size = QSizeF(secs * 100 + cornerSize, portSize);
+	m_size = QSizeF(10 + cornerSize, portSize);
 	setPos(cornerSize - m_size.width(), cornerSize + cornerSize / 2 + portLateralMargin + (portLateralMargin + portSize) * m_index);
 }
 
@@ -31,6 +25,19 @@ QPointF InputItem::tip() const
 	return QPointF(portSize / 2, portSize / 2);
 }
 
+void InputItem::typesConfirmed()
+{
+	prepareGeometryChange();
+	double f = processorItem()->m_processor->input(m_index).type().frequency();
+	double secs = processorItem()->m_processor->input(m_index).capacity() / f;
+	m_size = QSizeF(secs * 100 + cornerSize, portSize);
+	setPos(cornerSize - m_size.width(), cornerSize + cornerSize / 2 + portLateralMargin + (portLateralMargin + portSize) * m_index);
+	update();
+	foreach (QGraphicsItem* i, childItems())
+		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
+			ci->rejigEndPoints();
+}
+
 void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	_p->setPen(QPen(Qt::black, 0));
@@ -45,8 +52,7 @@ void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 
 	if (processorItem()->m_processor->isRunning())
 	{
-		double f = processorItem()->m_processor->input(m_index).type().frequency();
-		double cap = processorItem()->m_processor->input(m_index).filled() / f;
-		_p->fillRect(QRectF(m_size.width() - cap * 100, portSize / 4, m_size.width(), portSize * 3 / 4), QColor(Qt::darkRed));
+		double fill = processorItem()->m_processor->input(m_index).filled();
+		_p->fillRect(QRectF(cornerSize + (m_size.width() - cornerSize) * (1.f - fill), portSize / 4, (m_size.width() - cornerSize) * fill, portSize / 2), QColor(Qt::darkRed));
 	}
 }

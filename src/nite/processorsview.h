@@ -25,20 +25,25 @@ class ProcessorsScene: public QGraphicsScene
 public:
 	ProcessorsScene();
 
-	void beginConnect(OutputItem* _from);
-	IncompleteConnectionItem* incompleteConnectionItem() const { return m_currentConnect; }
+	void						beginConnect(OutputItem* _from);
+	IncompleteConnectionItem*	incompleteConnectionItem() const { return m_currentConnect; }
+
+	void						onStarted();
+	void						onStopped();
 
 signals:
-	void changed();
+	void						changed();
 
 private:
-	virtual void dragEnterEvent(QGraphicsSceneDragDropEvent* _event);
-	virtual void dragMoveEvent(QGraphicsSceneDragDropEvent* _event) { dragEnterEvent(_event); }
-	virtual void dropEvent(QGraphicsSceneDragDropEvent* _event);
+	virtual void				dragEnterEvent(QGraphicsSceneDragDropEvent* _event);
+	virtual void				dragMoveEvent(QGraphicsSceneDragDropEvent* _event) { dragEnterEvent(_event); }
+	virtual void				dropEvent(QGraphicsSceneDragDropEvent* _event);
 
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void				timerEvent(QTimerEvent*);
 
-	IncompleteConnectionItem* m_currentConnect;
+	IncompleteConnectionItem*	m_currentConnect;
+	int							m_timerId;
 };
 

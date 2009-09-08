@@ -243,13 +243,15 @@ void Processor::resetTypes()
 	theConfirming.unlock();
 }
 
-void Processor::guard()
+bool Processor::guard()
 {
 	thePause.lock();
 	while (thePaused)
 		theUnpaused.wait(&thePause);
 	thePause.unlock();
 	checkExit();
+	theGuardsCrossed++;
+	return true;
 }
 
 bool Processor::thereIsInputForProcessing(uint samples)
@@ -367,7 +369,8 @@ bool Processor::thereIsInputForProcessing()
 				if (!thePlungersLeft[i] && thePlungersEnded) votesToEnd++;
 			}
 			if (MESSAGES) qDebug("Processor: %d votes to end...", votesToEnd);
-			if (votesToEnd == (uint)theInputs.count()) return false;
+			if (theInputs.count() && votesToEnd == (uint)theInputs.count())
+				return false;
 
 			if (MESSAGES) qDebug("Processor: Waiting for something to change...");
 			// Wait until something changes...
