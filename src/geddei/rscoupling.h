@@ -44,7 +44,7 @@ class RSCoupling : public xSCoupling, protected QThread
 	/**
 	 * Simple constructor.
 	 */
-	RSCoupling(Q3SocketDevice *dev, SubProcessor *sub);
+	RSCoupling(QTcpSocket *dev, SubProcessor *sub);
 
 	/**
 	 * Simple destructor.

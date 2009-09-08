@@ -55,7 +55,7 @@ class DLLEXPORT Monitor: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void receivedPlunger();
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
 
 	QMutex thePlunging;
 	QFastWaitCondition thePlunge;

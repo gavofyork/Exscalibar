@@ -25,8 +25,6 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qdir.h>
-//Added by qt3to4:
-#include <Q3PtrList>
 
 #include <exscalibar.h>
 
@@ -43,7 +41,7 @@
 template<class Base>
 class DLLEXPORT QFactoryManager
 {
-	Q3PtrList<QFactory<Base> > theFactories;
+	QList<QFactory<Base>*> theFactories;
 	QMap<QString, QFactory<Base> * > theMappings;
 	QStringList theIds;
 
@@ -54,7 +52,8 @@ class DLLEXPORT QFactoryManager
 	{
 //		for (QMapIterator<QString, QFactory<Base> *> i = theFactories.begin(); i != theFactories.end(); i++)
 //			delete i.data();
-		theFactories.clear();
+		while (theFactories.size())
+			delete theFactories.takeLast();
 		theIds.clear();
 		theMappings.clear();
 	}
@@ -87,13 +86,13 @@ public:
 	}
 	Base *operator[](const QString &id) { return createInstance(id); }
 
-	QFactoryManager() { theFactories.setAutoDelete(true); }
+	QFactoryManager() { }
 };
 
 template<class Base>
 void QFactoryManager<Base>::loadLibrary(const QString &theFile)
 {
-	if (MESSAGES) qDebug("Loading library %s...", theFile.latin1());
+	if (MESSAGES) qDebug("Loading library %s...", qPrintable(theFile));
 	QFactory<Base> *newFactory = new QFactory<Base>(theFile);
 	if (!newFactory->isOpen()) { delete newFactory; return; }
 
@@ -101,7 +100,7 @@ void QFactoryManager<Base>::loadLibrary(const QString &theFile)
 	const QStringList &ids = newFactory->getAvailable();
 	for (QStringList::const_iterator i = ids.begin(); i != ids.end(); i++)
 	{
-		if (MESSAGES) qDebug("Found processor %s...", (*i).latin1());
+		if (MESSAGES) qDebug("Found processor %s...", qPrintable((*i)));
 		if (!theIds.contains(*i))
 			theIds += *i;
 		else if (newFactory->getVersion(*i) <= getVersion(*i))
@@ -119,12 +118,12 @@ void QFactoryManager<Base>::loadLibrary(const QString &theFile)
 template<class Base>
 void QFactoryManager<Base>::loadLibraries(const QString &thePath)
 {
-	if (MESSAGES) qDebug("Scanning path: %s...", thePath.latin1());
+	if (MESSAGES) qDebug("Scanning path: %s...", qPrintable(thePath));
 	QDir d(thePath);
 	d.setFilter(QDir::Readable | QDir::Executable | QDir::Files | QDir::NoSymLinks);
 	QStringList l = d.entryList();
 	for (uint i = 0; i < (uint)l.count(); i++)
-	{	if (MESSAGES) qDebug("Loading library %s...", l[i].latin1());
+	{	if (MESSAGES) qDebug("Loading library %s...", qPrintable(l[i]));
 		loadLibrary(thePath + "/" + l[i]);
 	}
 }

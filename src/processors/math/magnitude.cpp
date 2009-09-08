@@ -17,7 +17,6 @@
 #include <cmath>
 using namespace std;
 
-#include <q3valuevector.h>
 #include "qfactoryexporter.h"
 
 #include "geddei.h"
@@ -31,7 +30,7 @@ class Magnitude: public SubProcessor
 	virtual void initFromProperties(const Properties &);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	
+
 public:
 	Magnitude();
 };

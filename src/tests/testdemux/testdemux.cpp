@@ -22,8 +22,7 @@
 #include <iostream>
 using namespace std;
 
-#include <q3valuevector.h>
-#include <qthread.h>
+#include <QThread>
 
 #include "geddei.h"
 using namespace Geddei;
@@ -50,7 +49,7 @@ class PlungeGenerator : public Processor
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
-	
+
 public:
 	PlungeGenerator() : Processor("PlungeGenerator") {}
 };

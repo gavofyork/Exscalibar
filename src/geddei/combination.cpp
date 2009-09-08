@@ -64,7 +64,7 @@ void Combination::initFromProperties(const Properties &p)
 		if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
 	}
 	else
-		qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", theX->theType.latin1(), theX->theIn, theX->theStep, theX->theOut, theY->theType.latin1(), theY->theIn, theY->theStep, theY->theOut);
+		qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", qPrintable(theX->theType), theX->theIn, theX->theStep, theX->theOut, qPrintable(theY->theType), theY->theIn, theY->theStep, theY->theOut);
 }
 
 bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)

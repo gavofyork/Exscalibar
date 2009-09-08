@@ -64,7 +64,7 @@ protected:
 	friend class DomProcessor;
 
 	DomProcessor *theDomProcessor;
-	Q3ValueVector<BufferReader *> theReaders;
+	QVector<BufferReader *> theReaders;
 
 	int theLoad;
 	uint theLastTimeTaken;

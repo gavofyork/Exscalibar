@@ -11,11 +11,8 @@
 #ifndef _GEDDEI_MULTISINK_H
 #define _GEDDEI_MULTISINK_H
 
-#include "q3valuelist.h"
-
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "multiplicative.h"
 #include "processorport.h"
 #else
@@ -37,7 +34,7 @@ class MultiSource;
 class DLLEXPORT MultiSink: virtual public Multiplicative
 {
 	//* (Reverse) connection deferral mechanism
-	Q3ValueList<MultiSource *> theDeferrals;
+	QList<MultiSource *> theDeferrals;
 
 	//* Reimplementations from Multiplicative
 	virtual void setSinkMultiplicity(uint multiplicity);
@@ -57,7 +54,7 @@ class DLLEXPORT MultiSink: virtual public Multiplicative
 	 * This is done by the MultiSource in question once a deferred connection has been
 	 * made.
 	 */
-	void removeDeferral(MultiSource *o) { theDeferrals.remove(o); }
+	void removeDeferral(MultiSource *o) { theDeferrals.removeOne(o); }
 
 public:
 	/**

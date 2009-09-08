@@ -14,11 +14,8 @@
 #include <iostream>
 using namespace std;
 
-#include <q3ptrlist.h>
-
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "signaltyperef.h"
 #else
 #include <geddei/signaltyperef.h>
@@ -66,17 +63,19 @@ class DLLEXPORT SignalTypeRefs
 	 * These copies are then owned by @a dest and their lives should be
 	 * managed. i.e. They must be deleted by the caller before @a dest dies.
 	 *
-	 * @param dest The QPtrList to copy the SignalTypeRefs into as objects.
+	 * @param dest The list to copy the SignalTypeRefs into as objects. It
+	 * is cleared before anything is copied into it. To be safe, pass only
+	 * empty lists.
 	 */
-	void copyInto(Q3PtrList<SignalType> &dest);
+	void copyInto(QList<SignalType*> &dest);
 
 	/**
 	 * Makes an identical copy of the list given by @a src . This is a deep
 	 * copy - none of the data is shared.
 	 *
-	 * @param src The QPtrList of SignalType objects to copy into this object.
+	 * @param src The list of SignalType objects to copy into this object.
 	 */
-	explicit SignalTypeRefs(Q3PtrList<SignalType> &src);
+	explicit SignalTypeRefs(QList<SignalType*> &src);
 
 	/**
 	 * Copy constructor. Constructs an identical copy of the list given by
@@ -101,7 +100,7 @@ class DLLEXPORT SignalTypeRefs
 	{
 		return theData[i];
 	}
-	
+
 	/**
 	 * Sets index @a i to point to the SignalType pointed to by @a d .
 	 *
@@ -208,7 +207,7 @@ class DLLEXPORT SignalTypeRefs
 		}
 		if (theData[i])
 			qWarning("*** WARNING: You're probably attempting to write over an existing SignalType *.\n"
-			         "             Doing so will likely cause a memory leak. Delete this entry first.");
+					 "             Doing so will likely cause a memory leak. Delete this entry first.");
 #endif
 		return (((SignalType **)theData)[i]);
 	}
@@ -240,7 +239,7 @@ class DLLEXPORT SignalTypeRefs
 	 * @sa copyFill()
 	 */
 	void setFill(const SignalType *d, bool replaceExisting = true);
-	
+
 public:
 	const SignalTypeRef operator[](uint i) const { return SignalTypeRef((SignalType *&)(theData[i])); }
 	SignalTypeRef operator[](uint i) { return SignalTypeRef((SignalType *&)(theData[i])); }

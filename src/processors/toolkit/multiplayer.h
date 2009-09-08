@@ -67,7 +67,7 @@ class DLLEXPORT MultiPlayer: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
 
 public:
 	/**

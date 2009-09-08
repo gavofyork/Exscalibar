@@ -10,21 +10,16 @@
 
 #include <cstdlib>
 
-#include <qthread.h>
-#include <q3socketdevice.h>
+#include <QThread>
 
 #include "qsocketsession.h"
-//Added by qt3to4:
-#include <Q3CString>
 
 #define MESSAGES 0
 
-QSocketSession::QSocketSession(Q3SocketDevice *sd): theSD(sd)
+QSocketSession::QSocketSession(QTcpSocket *sd): theSD(sd)
 {
 	if (MESSAGES) qDebug("New QSocketSession...");
 	theClosed = false;
-	if (MESSAGES) qDebug("Setting up blocking...");
-	theSD->setBlocking(true);
 	if (MESSAGES) qDebug("Done.");
 }
 
@@ -122,8 +117,8 @@ void QSocketSession::receiveChunk(uchar *buffer, uint size)
 {
 	int r = 1;
 	uint read = 0;
-	while (r > 0 && read < size && isOpen())
-	{	r = theSD->readBlock((char *)(buffer + read), size - read);
+	while (r > 0 && read < size && isOpen() && theSD->waitForReadyRead())
+	{	r = theSD->read((char *)(buffer + read), size - read);
 		read += r;
 	}
 	if (r <= 0 || read != size)
@@ -137,7 +132,8 @@ void QSocketSession::sendChunk(const uchar *buffer, uint size)
 	int r = 1;
 	uint sent = 0;
 	while (r > 0 && sent < size && isOpen())
-	{	r = theSD->writeBlock((const char *)(buffer + sent), size - sent);
+	{	r = theSD->write((const char *)(buffer + sent), size - sent);
+		theSD->waitForBytesWritten();
 		sent += r;
 	}
 	if (sent != size)
@@ -150,14 +146,13 @@ void QSocketSession::sendChunk(const uchar *buffer, uint size)
 bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 {
 	if (!isOpen()) return false;
-	theSD->setBlocking(false);
 	int r = 1;
 	uint read = 0;
 	bool timedOut = false;
 	while (isOpen() && read < size && !timedOut)
-	{	r = theSD->readBlock((char *)(buffer + read), size - read);
+	{	r = theSD->read((char *)(buffer + read), size - read);
 		if (r <= 0)
-		{	if (theSD->waitForMore(timeOut, &timedOut) < 0)
+		{	if (!theSD->waitForReadyRead(timeOut))
 			{	if (MESSAGES) qDebug("Connection closed abruptly.");
 				timedOut = true;
 				close();
@@ -167,7 +162,6 @@ bool QSocketSession::receiveChunk(uchar *buffer, uint size, uint timeOut)
 		else
 			read += r;
 	}
-	theSD->setBlocking(true);
 
 	if (timedOut)
 		if (MESSAGES) qWarning("*** INFO: Timeout on socket receive (given %d, read %d of %d).\n"
@@ -256,15 +250,15 @@ void QSocketSession::safeReceiveWordArray(uint32_t *t, uint32_t size)
 			array[i] = bswap_32(array[i]);
 }
 
-const Q3CString QSocketSession::receiveString()
+QByteArray QSocketSession::receiveString()
 {
 	int l = safeReceiveWord<uint32_t>();
-	Q3CString s(l + 1);
+	QByteArray s(l, ' ');
 	receiveChunk((uchar *)s.data(), l);
 	return s;
 }
 
-void QSocketSession::sendString(const Q3CString &s)
+void QSocketSession::sendString(const QByteArray &s)
 {
 	safeSendWord((uint32_t)s.length());
 	sendChunk((const uchar *)s.data(), s.length());

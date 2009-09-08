@@ -11,11 +11,8 @@
 #ifndef _GEDDEI_LMCONNECTION_H
 #define _GEDDEI_LMCONNECTION_H
 
-#include <q3ptrlist.h>
-
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "buffer.h"
 #include "lxconnectionreal.h"
 #else
@@ -41,7 +38,7 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 {
 	friend class MLConnection;
 	friend class Processor;
-	
+
 	//* Reimplementations from Connection
 	virtual const SignalTypeRef type();
 
@@ -60,7 +57,7 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	virtual uint maximumScratchElements(uint minimum = 1);
 	virtual uint maximumScratchElementsEver();
 	virtual void enforceMinimum(uint elements);
-	
+
 	//* Reimplementations from LxConnectionReal
 	virtual void bufferWaitForFree();
 	virtual uint bufferElementsFree();
@@ -68,29 +65,29 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 
 	/**
 	 * Relays an openTrapdoor call to the Buffer object.
-	 * 
+	 *
 	 * This is used by the MLConnection class as it is more robust than relying
 	 * on the BufferReader object to be existant (which, in the case of being
 	 * connected to a DomProcessor object it would not be).
-	 * 
+	 *
 	 * @param sink The Processor object that the trapdoor must be opened for.
 	 */
 	void openBufferTrapdoor(Processor *sink) { theBuffer.openTrapdoor(sink); }
-	
+
 	/**
 	 * Relays an closeTrapdoor call to the Buffer object.
-	 * 
+	 *
 	 * This is used by the MLConnection class as it is more robust than relying
 	 * on the BufferReader object to be existant (which, in the case of being
 	 * connected to a DomProcessor object it would not be).
-	 * 
+	 *
 	 * @param sink The Processor object that the trapdoor must be opened for.
 	 */
 	void closeBufferTrapdoor(Processor *sink) { theBuffer.closeTrapdoor(sink); }
 
 	/**
 	 * Simple constructor, used from Processor object.
-	 * 
+	 *
 	 * @param source The connection's source.
 	 * @param sourceIndex The port index of the source.
 	 * @param bufferSize The minimum size of buffer to be used for the
@@ -104,7 +101,7 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	~LMConnection();
 
 protected:
-	Q3PtrList<MLConnection> theConnections;
+	QList<MLConnection*> theConnections;
 	Buffer theBuffer;
 };
 

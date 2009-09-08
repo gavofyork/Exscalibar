@@ -44,7 +44,7 @@ BufferReader::~BufferReader()
 	QMutexLocker lock(&theBuffer->theDataFlux);
 	clearUNSAFE();
 	delete lastRead;
-	theBuffer->theReaders.remove(this);
+	theBuffer->theReaders.removeOne(this);
 	theBuffer->theDataIn.wakeAll();
 	theBuffer->theDataOut.wakeAll();
 }

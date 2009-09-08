@@ -39,7 +39,7 @@ RemoteProcessor::RemoteProcessor(RemoteSession &session, const QString &type)
 	theHandle = theSession->makeUniqueProcessorName();
 
 	if (!theSession->newProcessor(type, theHandle))
-	{	qWarning("*** WARNING: RemoteProcessor: Attempt to create Processor of type %s failed.", type.latin1());
+	{	qWarning("*** WARNING: RemoteProcessor: Attempt to create Processor of type %s failed.", qPrintable(type));
 		return;
 	}
 	theType = type;
@@ -63,12 +63,12 @@ void RemoteProcessor::doInit(const QString &name, AbstractProcessorGroup *g, con
 
 bool RemoteProcessor::connect(uint sourceIndex, const LocalProcessor *sink, uint sinkIndex, uint bufferSize)
 {
-	return theSession->processorConnect(theHandle, bufferSize, sourceIndex, sink->theSession->theHost, sink->theSession->thePort, sink->theProcessor->name().latin1(), sinkIndex);
+	return theSession->processorConnect(theHandle, bufferSize, sourceIndex, sink->theSession->theHost, sink->theSession->thePort, qPrintable(sink->theProcessor->name()), sinkIndex);
 }
 
 bool RemoteProcessor::connect(uint sourceIndex, const RemoteProcessor *sink, uint sinkIndex, uint bufferSize)
 {
-	if (MESSAGES) qDebug("RemoteProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, sink->theSession->theHost.latin1(), sink->theHandle.latin1());
+	if (MESSAGES) qDebug("RemoteProcessor::connect(): key=%d, host=%s, processor=%s", sink->theSession->theKey, qPrintable(sink->theSession->theHost), qPrintable(sink->theHandle));
 	if (sink->theSession != theSession)
 		return theSession->processorConnect(theHandle, bufferSize, sourceIndex, sink->theSession->theHost, sink->theSession->theKey, sink->theHandle, sinkIndex);
 	else

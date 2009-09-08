@@ -22,8 +22,7 @@
 #include <cmath>
 using namespace std;
 
-#include <q3valuevector.h>
-#include <qthread.h>
+#include <QThread>
 
 #include "geddei.h"
 using namespace Geddei;
@@ -103,8 +102,8 @@ void DownSample::initFromProperties(const Properties &properties)
 PropertiesInfo DownSample::specifyProperties() const
 {
 	return PropertiesInfo("Spread", 1, "The number of samples from which to calculate the value. A larger number results in a smoother output, a lower number is faster. This should be >= 1 and <= Divisor.")
-	                     ("Divisor", 2, "The sampling frequency divisor.")
-	                     ("Consolidate", 0, "The method to determine the final sample when Spread > 1. { 0: Average; 1: Max; 2: Min }");
+						 ("Divisor", 2, "The sampling frequency divisor.")
+						 ("Consolidate", 0, "The method to determine the final sample when Spread > 1. { 0: Average; 1: Max; 2: Min }");
 }
 
 

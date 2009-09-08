@@ -11,11 +11,8 @@
 #ifndef _GEDDEI_SPLITTER_H
 #define _GEDDEI_SPLITTER_H
 
-#include <q3ptrlist.h>
-
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "lxconnection.h"
 #include "lxconnectionreal.h"
 #else
@@ -67,7 +64,7 @@ class Splitter: public LxConnection, public Source
 	virtual uint maximumScratchElementsEver();
 	virtual void enforceMinimum(uint elements);
 
-	Q3PtrList<LxConnection> theConnections;
+	QList<LxConnection*> theConnections;
 
 public:
 	Splitter(Processor *source, uint sourceIndex);

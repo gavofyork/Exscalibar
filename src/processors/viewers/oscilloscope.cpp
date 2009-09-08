@@ -31,7 +31,7 @@ class Oscilloscope : public Processor
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
-	virtual void specifyInputSpace(Q3ValueVector<uint>& _s) { _s[0] = m_last.count(); }
+	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
 
 public:
 	Oscilloscope() : Processor("Oscilloscope") {}

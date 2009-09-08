@@ -36,7 +36,7 @@ class MySource: public Processor
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &o) { o[0] = 10; }
+	virtual void specifyOutputSpace(QVector<uint> &o) { o[0] = 10; }
 public:
 	MySource() : Processor("MySource") {}
 };

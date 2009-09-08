@@ -12,11 +12,9 @@
 
 // TODO: may need compatibility fixes.
 #include <byteswap.h>
-
 #include <stdint.h>
 
-#include <q3socketdevice.h>
-#include <q3cstring.h>
+#include <QtNetwork>
 
 #include <exscalibar.h>
 
@@ -41,7 +39,7 @@
 class DLLEXPORT QSocketSession
 {
 	bool theIsMaster, theSameByteOrder, theClosed;
-	Q3SocketDevice *theSD;
+	QTcpSocket *theSD;
 
 	void findByteOrder();
 
@@ -54,6 +52,8 @@ public:
 	 * handshaking.
 	 */
 	//@{
+
+	QTcpSocket* sd() const { return theSD; }
 
 	/**
 	 * Determine if the current connection is open.
@@ -92,7 +92,7 @@ public:
 	 */
 	void sendByte(uchar c)
 	{
-		if (theSD->writeBlock((char *)&c, 1) == 1)
+		if (theSD->write((char *)&c, 1) == 1)
 			return;
 		qWarning("*** ERROR: Socket send error. Unable to send a byte.");
 		close();
@@ -123,7 +123,7 @@ public:
 	uchar receiveByte()
 	{
 		uchar c;
-		if (theSD->readBlock((char *)&c, 1) == 1)
+		if (theSD->read((char *)&c, 1) == 1)
 			return c;
 		qWarning("***  ERROR: Socket receive error. Unable to read a byte.");
 		close();
@@ -306,7 +306,7 @@ public:
 	 *
 	 * @param s The QCString value to be sent.
 	 */
-	void sendString(const Q3CString &s);
+	void sendString(const QByteArray &s);
 
 	/**
 	 * Receive a string value from the connection.
@@ -316,7 +316,7 @@ public:
 	 *
 	 * @return The sent string.
 	 */
-	const Q3CString receiveString();
+	QByteArray receiveString();
 	//@}
 
 	/**
@@ -326,7 +326,7 @@ public:
 	 * communications. It will adopt this and thus destroy it when this object
 	 * gets destroyed. Deleting @a sd yourself will result in a memory error.
 	 */
-	QSocketSession(Q3SocketDevice *sd);
+	QSocketSession(QTcpSocket *sd);
 
 	/**
 	 * Safe destructor.

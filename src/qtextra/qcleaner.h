@@ -21,22 +21,22 @@
 #ifndef _QT_CLEANER_H
 #define _QT_CLEANER_H
 
-#include <qthread.h>
-#include <qmutex.h>
-#include <q3ptrlist.h>
+#include <QThread>
+#include <QMutex>
 
 #include <exscalibar.h>
 
 template<class X>
 class DLLEXPORT QCleaner: public QThread, private QMutex
 {
-	Q3PtrList<X> theRow;
+	QList<X*> theRow;
 	int theInterval;
 
 	void purgeAll()
 	{
 		QMutexLocker lock(this);
-		theRow.clear();
+		while (theRow.size())
+			delete theRow.takeLast();
 	}
 
 	void run()
@@ -57,7 +57,6 @@ public:
 	QCleaner(int interval = 300): QThread()
 	{
 		theInterval = interval;
-		theRow.setAutoDelete(true);
 		start();
 	}
 

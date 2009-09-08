@@ -21,7 +21,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-RSCoupling::RSCoupling(Q3SocketDevice *dev, SubProcessor *sub) : xSCoupling(sub), QThread(0), theSession(dev)
+RSCoupling::RSCoupling(QTcpSocket *dev, SubProcessor *sub) : xSCoupling(sub), QThread(0), theSession(dev)
 {
 	theBeingDeleted = false;
 	if (MESSAGES) qDebug("RSC: Handshaking...");
@@ -38,7 +38,7 @@ RSCoupling::~RSCoupling()
 	// This flag should never have to be used as the thread should be stopped before deletion, however
 	// this is here for a fail-safe.
 	theBeingDeleted = true;
-	if (running())
+	if (isRunning())
 	{	if (MESSAGES) qDebug("RSCoupling::~RSCoupling(): Thread still running on RSCoupling destruction. Safely stopping...");
 		theSession.close();
 		// Trapdoor opening needed?
@@ -69,7 +69,7 @@ void RSCoupling::run()
 		{
 			if (MESSAGES) qDebug("RSC: InitFromProperties...");
 			int s = theSession.safeReceiveWord<int>();
-			QByteArray a(s);
+			QByteArray a(s, ' ');
 			theSession.receiveChunk((uchar *)a.data(), s);
 			initFromProperties(Properties(a));
 			if (MESSAGES) qDebug("RSC: InitFromProperties: Done.");

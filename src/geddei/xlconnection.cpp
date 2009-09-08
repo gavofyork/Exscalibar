@@ -36,7 +36,7 @@ xLConnection::~xLConnection()
 	// processor's port, and that there's no need to again.
 	if (theSink)
 	{
-//		if (MESSAGES) qDebug("Deleting input link on %s...", theSink->name().latin1());
+//		if (MESSAGES) qDebug("Deleting input link on %s...", theSink->name().toLatin1());
 		theSink->undoRegisterIn(this, theSinkIndex);
 	}
 }

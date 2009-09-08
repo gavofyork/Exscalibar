@@ -3,8 +3,7 @@ using namespace std;
 
 #include <exscalibar.h>
 
-#include <qfile.h>
-#include <q3textstream.h>
+#include <QFile>
 
 #include "qpca.h"
 using namespace QtExtra;
@@ -64,7 +63,7 @@ void QFeatures::pca(const Matrix &_values)
 			covariance[x][y] /= float(samples - 1);
 		}
 	}
-	
+
 	// get eigenvalues
 	eigenvalues(covariance, m_eigenValues, m_eigenVectors);
 	// reverse order so biggest = first
@@ -87,12 +86,12 @@ ReturnMatrix QFeatures::project(const Matrix &_values, const uint _count, bool c
 	for (uint f = 0; f < _count; f++)
 		for (int d = 0; d < _values.ncols(); d++)
 			features[d][f] = m_eigenVectors[d][f];
-	
+
 	Matrix v = _values.t();
 	for (int d = 0; d < m_means.ncols(); d++)
 		v.row(d + 1) -= m_means[d];
 	Matrix ret = (features.t() * v).t();
-	
+
 	// normalise and bound by -ing mean, /ing by SD, /2 +.5, max(0, min(1, x))
 	if (_normalise)
 	{
@@ -127,7 +126,7 @@ ReturnMatrix QFeatures::extrapolate(const Matrix &_projected)
 	for (int f = 0; f < features.nrows(); f++)
 		for (int d = 0; d < features.ncols(); d++)
 			features[d][f] = m_eigenVectors[d][f];
-	
+
 	Matrix v = (features * _projected.t());
 	for (int d = 0; d < m_means.ncols(); d++)
 		v.row(d + 1) += m_means[d];
@@ -141,7 +140,7 @@ void QFeatures::readVec(const QString &_fn)
 	// load a feature vector
 	QFile f(_fn);
 	if (!f.open(QIODevice::ReadOnly)) return;
-	
+
 	uint dims;
 	f.readBlock(reinterpret_cast<char*>(&dims), sizeof(uint));
 	m_means.resize(dims);
@@ -154,7 +153,7 @@ void QFeatures::readVec(const QString &_fn)
 		f.readBlock(reinterpret_cast<char*>(m_eigenValues.data()), sizeof(Real) * dims);
 	}
 	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().latin1());
+		qDebug("File error: %s", f.errorString().toLatin1());
 	f.close();
 }
 
@@ -163,42 +162,42 @@ void QFeatures::writeVec(const QString &_fn)
 	QFile f(_fn);
 	if (!f.open(QIODevice::WriteOnly)) return;
 /*	QTextStream fout(&f);
-	
+
 	fout.precision(20);
-	
+
 	qDebug("Writing (fr=%d, fc=%d, mc=%d)", m_features.nrows(), m_features.ncols(), m_means.ncols());
-	
-	
+
+
 	uint dims = m_features.nrows();
 	uint count = m_features.ncols();
-	
+
 	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().latin1());
-	
+		qDebug("File error: %s", f.errorString().toLatin1());
+
 	fout << dims << " " << count << endl;
-	
+
 	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().latin1());
-		
+		qDebug("File error: %s", f.errorString().toLatin1());
+
 	// means first
 	for (uint v = 0; v < dims; v++)
 		fout << m_means[v] << endl << flush;
 	fout << endl;
-	
+
 	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().latin1());
-		
+		qDebug("File error: %s", f.errorString().toLatin1());
+
 	// actual features second (xposed)
 	for (uint f = 0; f < count; f++)
 		for (uint v = 0; v < dims; v++)
 			fout << m_features[f][v] << endl << flush;
 	*/
-	
+
 	uint dims = m_eigenValues.nrows();
 	f.writeBlock(reinterpret_cast<char*>(&dims), sizeof(uint));
 	f.writeBlock(reinterpret_cast<char*>(m_means.data()), sizeof(Real) * dims);
 	f.writeBlock(reinterpret_cast<char*>(m_eigenVectors.data()), sizeof(Real) * dims * dims);
 	f.writeBlock(reinterpret_cast<char*>(m_eigenValues.data()), sizeof(Real) * dims);
 	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().latin1());
+		qDebug("File error: %s", f.errorString().toLatin1());
 }

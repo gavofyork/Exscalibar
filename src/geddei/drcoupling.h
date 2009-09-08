@@ -10,12 +10,10 @@
 #ifndef _GEDDEI_DRCOUPLING_H
 #define _GEDDEI_DRCOUPLING_H
 
-#include <qmutex.h>
-#include <q3socketdevice.h>
+#include <QMutex>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "qsocketsession.h"
 #include "dxcoupling.h"
 #include "qfastwaitcondition.h"
@@ -72,7 +70,7 @@ public:
 	/**
 	 * Basic constructor.
 	 */
-	DRCoupling(DomProcessor *dom, Q3SocketDevice *sink);
+	DRCoupling(DomProcessor *dom, QTcpSocket *sink);
 
 	/**
 	 * Default destructor.

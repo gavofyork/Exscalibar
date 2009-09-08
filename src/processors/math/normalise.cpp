@@ -17,7 +17,6 @@
 #include <cmath>
 using namespace std;
 
-#include <q3valuevector.h>
 #include "qfactoryexporter.h"
 
 #include "geddei.h"
@@ -28,13 +27,13 @@ using namespace SignalTypes;
 
 class Normalise: public Processor
 {
-	Q3ValueVector<float> f;
+	QVector<float> f;
 	uint theOutputSpace, theScope;
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &out);
+	virtual void specifyOutputSpace(QVector<uint> &out);
 	virtual void processor();
 	virtual void receivedPlunger();
 
@@ -64,7 +63,7 @@ bool Normalise::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &
 	return true;
 }
 
-void Normalise::specifyOutputSpace(Q3ValueVector<uint> &out)
+void Normalise::specifyOutputSpace(QVector<uint> &out)
 {
 	out[0] = theOutputSpace;
 }

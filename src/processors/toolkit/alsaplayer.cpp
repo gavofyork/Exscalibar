@@ -58,7 +58,7 @@ class ALSAPlayer: public Processor
 		thePeriods = _p["periods"].toInt();
 		setupIO(theChannels, 0);
 	}
-	virtual void specifyInputSpace(Q3ValueVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
+	virtual void specifyInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("device", "hw:0,0", "The ALSA hardware device to open.")

@@ -67,12 +67,12 @@ QFactory<Base>::QFactory(const QString &libPath) : QLibrary(libPath)
 		provIds = ((const QStringList &(*)(const QString &))(resolve("getAvailable")))(typeid(Base).name());
 	if (MESSAGES) qDebug("Found %d candidates.", provIds.count());
 	for (QStringList::const_iterator i = provIds.begin(); i != provIds.end(); i++)
-	{	if (MESSAGES) qDebug("Loading class %s (derived from %s)...", (*i).latin1(), typeid(Base).name());
+	{	if (MESSAGES) qDebug("Loading class %s (derived from %s)...", qPrintable((*i)), typeid(Base).name());
 		Base *(*creator)();
 		int version = -1;
-		creator = (Base *(*)())(resolve("create" + *i));
-		if (resolve("version" + *i))
-			version = ((int (*)())(resolve("version" + *i)))();
+		creator = (Base *(*)())(resolve(("create" + *i).toLatin1()));
+		if (resolve(("version" + *i).toLatin1()))
+			version = ((int (*)())(resolve(("version" + *i).toLatin1())))();
 		if (creator && version > -1)
 		{	theIds += *i;
 			theCreators[*i] = creator;

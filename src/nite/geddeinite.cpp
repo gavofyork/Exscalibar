@@ -31,12 +31,14 @@ using namespace std;
 #include "geddeinite.h"
 
 GeddeiNite::GeddeiNite():
-	QMainWindow				(0, "GeddeiNite", Qt::WDestructiveClose),
+	QMainWindow				(0),
 	theRunning				(false),
 	theConnected			(false),
 	theIgnoreNext			(false),
 	theModified				(false)
 {
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	setupUi(this);
 	connect(theProperties, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(slotPropertyChanged(QTableWidgetItem*)));
 	connect(&theScene, SIGNAL(selectionChanged()), this, SLOT(slotUpdateProperties()));
@@ -54,14 +56,14 @@ GeddeiNite::GeddeiNite():
 
 	if (QFile::exists(s.value("mainwindow/lastproject").toString()))
 		doLoad(s.value("mainwindow/lastproject").toString());
-	statusBar()->message(tr("Ready"), 2000);
+	statusBar()->showMessage(tr("Ready"), 2000);
 
 	slotUpdateProperties();
 }
 
 GeddeiNite::~GeddeiNite()
 {
-	if (modeRun->isOn())
+	if (modeRun->isChecked())
 		on_modeRun_toggled(false);
 
 	QSettings s;
@@ -88,12 +90,12 @@ void GeddeiNite::doSave(const QString& _filename)
 
 	QFile f(_filename);
 	if (!f.open(QIODevice::WriteOnly))
-	{	statusBar()->message("Couldn't write to " + _filename, 2000);
+	{	statusBar()->showMessage("Couldn't write to " + _filename, 2000);
 		return;
 	}
 	QTextStream out(&f);
 	out << doc.toString();
-	statusBar()->message("Saved.", 2000);
+	statusBar()->showMessage("Saved.", 2000);
 	setModified(false);
 }
 
@@ -101,7 +103,7 @@ void GeddeiNite::doLoad(const QString &filename)
 {
 	QFile f(filename);
 	if (!f.open(QIODevice::ReadOnly))
-	{	statusBar()->message("Couldn't read from " + filename, 2000);
+	{	statusBar()->showMessage("Couldn't read from " + filename, 2000);
 		return;
 	}
 	QDomDocument doc;
@@ -117,7 +119,7 @@ void GeddeiNite::doLoad(const QString &filename)
 		else if (elem.tagName() == "processor")
 			ProcessorItem::fromDom(elem, &theScene);
 	}
-	statusBar()->message("Loaded.", 2000);
+	statusBar()->showMessage("Loaded.", 2000);
 	setModified(false);
 }
 
@@ -129,7 +131,7 @@ void GeddeiNite::setModified(bool modified)
 		modeRun->setEnabled(connectAll());
 		disconnectAll();
 	}
-	setCaption((theFilename.isEmpty() ? "Untitled" : theFilename) + (modified ? " [ Modified ]" : "") + " - Geddei Nite");
+	setWindowTitle((theFilename.isEmpty() ? "Untitled" : theFilename) + (modified ? " [ Modified ]" : "") + " - Geddei Nite");
 }
 
 void GeddeiNite::updateItems()
@@ -194,7 +196,7 @@ void GeddeiNite::on_fileSave_activated()
 		return;
 	}
 
-	statusBar()->message("Saving...");
+	statusBar()->showMessage("Saving...");
 	doSave(theFilename);
 }
 
@@ -220,7 +222,7 @@ void GeddeiNite::on_fileSaveAs_activated()
 		on_fileSave_activated();
 	}
 	else
-		statusBar()->message("Save aborted.");
+		statusBar()->showMessage("Save aborted.");
 }
 
 void GeddeiNite::on_editRemove_activated()
@@ -254,14 +256,14 @@ bool GeddeiNite::connectAll()
 		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
 			if (!pi->connectYourself(theGroup))
 			{
-				statusBar()->message("Problem creating connections.");
+				statusBar()->showMessage("Problem creating connections.");
 				disconnectAll();
 				return false;
 			}
 
 	if (!theGroup.confirmTypes())
 	{
-		statusBar()->message("Problem confirming types.");
+		statusBar()->showMessage("Problem confirming types.");
 		disconnectAll();
 		return false;
 	}
@@ -318,7 +320,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 			// restore to stable state.
 			disconnectAll();
 			modeStop->setChecked(true);
-			statusBar()->message("Problem starting processors.");
+			statusBar()->showMessage("Problem starting processors.");
 		}
 	}
 	else if (!running && theRunning)

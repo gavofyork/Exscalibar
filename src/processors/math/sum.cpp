@@ -17,7 +17,6 @@
 #include <cmath>
 using namespace std;
 
-#include <q3valuevector.h>
 #include "qfactoryexporter.h"
 
 #include "geddei.h"

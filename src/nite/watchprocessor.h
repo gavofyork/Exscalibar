@@ -17,16 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef __WATCHPROCESSOR_H
+#if !defined(__WATCHPROCESSOR_H) && 0
 #define __WATCHPROCESSOR_H
 
 #define __GEDDEI_BUILD
 
-#include <qobject.h>
-#include <q3picture.h>
-#include <qpixmap.h>
-#include <qmutex.h>
-//Added by qt3to4:
+#include <QObject>
+#include <QPixmap>
+#include <QMutex>
 #include <QLabel>
 
 #include "processor.h"
@@ -74,8 +72,8 @@ class WatchProcessor: public Processor
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &) { setupIO(1, 1); }
-	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples) { specifyInputSpace(samples); }
+	virtual void specifyInputSpace(QVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples) { specifyInputSpace(samples); }
 
 private slots:
 	void repaint();

@@ -49,8 +49,8 @@ protected:
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
-	virtual void specifyInputSpace(Q3ValueVector<uint> &samples) { samples[0] = theSize; }
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples) { samples[0] = 1; }
+	virtual void specifyInputSpace(QVector<uint> &samples) { samples[0] = theSize; }
+	virtual void specifyOutputSpace(QVector<uint> &samples) { samples[0] = 1; }
 public:
 	Similarity() : Processor("Similarity") {}
 };

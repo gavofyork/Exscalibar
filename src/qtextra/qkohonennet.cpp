@@ -1,9 +1,9 @@
 /***************************************************************************
-                          kohonennet.cpp  -  description
-                             -------------------
-    begin                : Sun Jan 9 2000
-    copyright            : (C) 2000 by Gavin James Wood
-    email                : gav@indigoarchive.net
+						  kohonennet.cpp  -  description
+							 -------------------
+	begin                : Sun Jan 9 2000
+	copyright            : (C) 2000 by Gavin James Wood
+	email                : gav@indigoarchive.net
  ***************************************************************************/
 
 #ifdef HAVE_CONFIG_H
@@ -17,8 +17,7 @@
 #include <cmath>
 using namespace std;
 
-#include <qfile.h>
-#include <q3textstream.h>
+#include <QFile>
 
 #include "qpca.h"
 #include "qkohonennet.h"
@@ -48,8 +47,8 @@ void QKohonenNet::readCod(QString const& file)
 {
 	QFile f(file);
 	if (!f.open(QIODevice::ReadOnly)) return;
-	Q3TextStream fin(&f);
-	
+	QTextStream fin(&f);
+
 	uint w, h, d;
 	fin >> w >> h >> d;
 
@@ -62,7 +61,7 @@ void QKohonenNet::writeCod(QString const& file)
 {
 	QFile f(file);
 	if (!f.open(QIODevice::WriteOnly)) return;
-	Q3TextStream fout(&f);
+	QTextStream fout(&f);
 	fout << theWidth << " " << theHeight << " " << theDimensions << endl;
 	for (uint i = 0; i < theWidth * theHeight * theDimensions; i++)
 		fout << theData[i] << " ";
@@ -71,13 +70,13 @@ void QKohonenNet::writeCod(QString const& file)
 void QKohonenNet::init(uint width, uint height, QFeatures const& _f)
 {
 	resize(width, height, _f.eigenVectors().ncols());
-	
+
 	for (uint y = 0; y < theHeight; y++)
 		for (uint x = 0; x < theWidth; x++)
 			for (uint i = 0; i < theDimensions; i++)
 			{	float xt = float(x)/float(theWidth-1) * 2.f - 1.f;
 				float yt = float(y)/float(theHeight-1) * 2.f - 1.f;
-				value(x, y, i) = _f.eigenValues()[0] * xt * _f.eigenVectors()[i][0] + 
+				value(x, y, i) = _f.eigenValues()[0] * xt * _f.eigenVectors()[i][0] +
 									_f.eigenValues()[1] * yt * _f.eigenVectors()[i][1] +
 									_f.means()[i];
 			}
@@ -136,7 +135,7 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 						avgFit[x][y][i] = 0.0;
 					avgFitCount[x][y] = 0;
 				}
-			
+
 			for (int d = 0; d < data.nrows(); ++d)
 			{	uint x, y;
 				closest(data[d], x, y);
@@ -144,12 +143,12 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 					avgFit[x][y][i] += data[d][i];
 				avgFitCount[x][y]++;
 			}
-			
+
 			for (uint y = 0; y < theHeight; y++)
 				for (uint x = 0; x < theWidth; x++)
 					for (uint i = 0; i < theDimensions; i++)
 						avgFit[x][y][i] /= Real(avgFitCount[x][y]);
-			
+
 			Real hji;
 			Real tc = 0.0;
 			Real mc = 0.0;
@@ -194,7 +193,7 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 		for (int i = 0, d = 1; i < data.nrows(); ++i, d = random()%data.nrows())
 			perm[i] ^= perm[d] ^= perm[i] ^= perm[d];
 		while (++t < iterations)
-		{	
+		{
 			alpha *= lambda;
 			diameter *= lambda;
 			for (int i = 0; i < data.nrows(); ++i)
@@ -203,11 +202,11 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 	}
 	return t;
 }
-	
+
 ReturnMatrix QKohonenNet::project(const Matrix &data)
 {
 	Matrix s(data.nrows(), 2);
-	
+
 	for (int i = 0; i < data.nrows(); i++)
 	{
 		uint x, y;
@@ -215,7 +214,7 @@ ReturnMatrix QKohonenNet::project(const Matrix &data)
 		s[i][0] = float(x) / float(theWidth - 1);
 		s[i][1] = float(y) / float(theHeight - 1);
 	}
-	
+
 	s.release();
 	return s;
 }
@@ -223,7 +222,7 @@ ReturnMatrix QKohonenNet::project(const Matrix &data)
 void QKohonenNet::update(const Real *vector, double alpha, double diameter)
 {
 	uint closestX, closestY;
-    closest(vector, closestX, closestY);
+	closest(vector, closestX, closestY);
 	for (uint x = 0; x < theWidth; x++)
 		for (uint y = 0; y < theHeight; y++)
 		{	double p = proximity(closestX, closestY, x, y, diameter);
@@ -235,7 +234,7 @@ void QKohonenNet::update(const Real *vector, double alpha, double diameter)
 
 double QKohonenNet::closest(const Real *vector, uint &returnX, uint &returnY) const
 {
-    double minDist = 1.0e90;
+	double minDist = 1.0e90;
 	for (uint x = 0; x < theWidth; x++)
 		for (uint y = 0; y < theHeight; y++)
 		{	double distance = 0;
@@ -249,7 +248,7 @@ double QKohonenNet::closest(const Real *vector, uint &returnX, uint &returnY) co
 				returnY = y;
 			}
 		}
-	
+
 	return minDist;
 }
 

@@ -9,7 +9,7 @@ exceptions
 
 COMPOSE = $$PWD/compose.sh
 
-QT *= qt3support
+QT *= network
 
 BUILD_ROOT = $$PWD
 OURVERSION = $$system("grep EXSCALIBAR_VERSION \"$$PWD/system/exscalibar.h\" | sed \"s:.define EXSCALIBAR_VERSION ::g\"")

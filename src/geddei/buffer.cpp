@@ -11,10 +11,9 @@
 #define __GEDDEI_BUILD
 
 #include <iostream>
-//Added by qt3to4:
-#include <Q3ValueList>
-#include <Q3PtrList>
 using namespace std;
+
+#include <QList>
 
 #include "processor.h"
 #include "buffer.h"
@@ -43,9 +42,12 @@ void Buffer::debug()
 	for (uint i = 0; i < theSize; i++)
 	{
 		char c = 'A';
-		for (Q3PtrList<BufferReader>::Iterator j = theReaders.begin(); j != theReaders.end(); j++, c++)
-			if (i == (*j)->readPos) out += c; else out += " ";
-		Q3ValueList<uint>::Iterator p; for (p = thePlungers.begin(); p != thePlungers.end(); p++)
+		foreach (BufferReader* j, theReaders)
+		{
+			if (i == j->readPos) out += c; else out += " ";
+			c++;
+		}
+		QList<uint>::Iterator p; for (p = thePlungers.begin(); p != thePlungers.end(); p++)
 			if (*p == i) break;
 		out += (readPos == i) ? "R" : " ";
 		if (p == thePlungers.end()) out += " "; else out += "#";
@@ -54,7 +56,7 @@ void Buffer::debug()
 		out += ":" + QString::number(theData[i & theMask]) + ":";
 	}
 	out += "]";
-	qDebug("%s", out.latin1());
+	qDebug("%s", qPrintable(out));
 }
 
 void Buffer::updateUNSAFE()
@@ -62,9 +64,9 @@ void Buffer::updateUNSAFE()
 	// figure out how much theUsed will be moved on.
 	if (MESSAGES) qDebug("Updating position");
 	uint newUsed = 0;
-	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-		if (newUsed < (*i)->theUsed)
-			newUsed = (*i)->theUsed;
+	foreach (BufferReader* i, theReaders)
+		if (newUsed < i->theUsed)
+			newUsed = i->theUsed;
 
 	uint moveBy = theUsed - newUsed;
 	if (MESSAGES) qDebug("Moving by %d", moveBy);
@@ -74,7 +76,7 @@ void Buffer::updateUNSAFE()
 	while (1)
 		if (thePlungers.begin() != thePlungers.end())
 			if (((*thePlungers.begin() - readPos) & theMask) < moveBy)
-				thePlungers.remove(thePlungers.begin());
+				thePlungers.removeFirst();
 			else
 				break;
 		else
@@ -85,7 +87,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(false)
+Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(QMutex::Recursive)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -114,6 +116,8 @@ Buffer::~Buffer()
 {
 	if (MESSAGES) qDebug("> ~Buffer");
 	theDataFlux.lock();
+	while (theReaders.size())
+		delete theReaders.takeLast();
 	delete [] theData;
 	delete theType;
 	theData = 0;
@@ -148,10 +152,11 @@ void Buffer::resize(uint size)
 	lastScratch->thePlunger = false;
 
 	theTrapdoors.clear();
-	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-	{	(*i)->clearUNSAFE();
-		(*i)->lastRead->theData = theData;
-		(*i)->lastRead->theMask = theMask;
+	foreach (BufferReader* i, theReaders)
+	{
+		i->clearUNSAFE();
+		i->lastRead->theData = theData;
+		i->lastRead->theMask = theMask;
 	}
 
 	theDataFlux.unlock();
@@ -192,13 +197,13 @@ void Buffer::discardNextPlungerUNSAFE()
 {
 	if (MESSAGES) qDebug("* discardNextPlungerUNSAFE");
 	if (thePlungers.begin() != thePlungers.end())
-		thePlungers.remove(thePlungers.begin());
+		thePlungers.removeFirst();
 }
 
 bool Buffer::trapdoorUNSAFE() const
 {
-	if (MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? Processor::getCallersProcessor()->name().latin1() : "[SubProcessor]");
-	Q3ValueVector<const Processor *>::const_iterator i;
+	if (MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? qPrintable(Processor::getCallersProcessor()->name()) : "[SubProcessor]");
+	QVector<const Processor *>::const_iterator i;
 	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 		if (*i == Processor::getCallersProcessor()) break;
 	return i != theTrapdoors.end();
@@ -206,8 +211,8 @@ bool Buffer::trapdoorUNSAFE() const
 
 void Buffer::openTrapdoor(const Processor *processor)
 {
-	if (MESSAGES) qDebug("> openTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
-	if (MESSAGES) qDebug("= openTrapdoor(%p): Going to lock mutex: %p (%d)", this, &theDataFlux, theDataFlux.locked());
+	if (MESSAGES) qDebug("> openTrapdoor %p (for %p: %s)", this, processor, processor ? qPrintable(processor->name()) : "<n/a>");
+	if (MESSAGES) qDebug("= openTrapdoor(%p): Going to lock mutex: %p", this, &theDataFlux);
 	theDataFlux.lock();
 	theTrapdoors.push_back(processor);
 	if (MESSAGES) qDebug("Size: %d", theTrapdoors.size());
@@ -219,14 +224,14 @@ void Buffer::openTrapdoor(const Processor *processor)
 
 void Buffer::closeTrapdoor(const Processor *processor)
 {
-	if (MESSAGES) qDebug("> closeTrapdoor %p (for %p: %s)", this, processor, processor ? processor->name().latin1() : "<n/a>");
+	if (MESSAGES) qDebug("> closeTrapdoor %p (for %p: %s)", this, processor, processor ? qPrintable(processor->name()) : "<n/a>");
 	theDataFlux.lock();
 	if (MESSAGES) qDebug("* closeTrapdoor");
 //	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 //		qDebug("List: iterator %p", *i);
 	if (MESSAGES) qDebug("Size: %d", theTrapdoors.size());
 
-	Q3ValueVector<const Processor *>::iterator i;
+	QVector<const Processor *>::iterator i;
 	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
 		if (*i == processor) break;
 	assert(i != theTrapdoors.end());	// assert trapdoor is open.
@@ -246,7 +251,7 @@ int Buffer::nextPlungerUNSAFE() const
 int Buffer::nextPlungerUNSAFE(uint pos, uint ignore) const
 {
 	// 'ii' starts at first plunger
-	Q3ValueList<uint>::const_iterator ii = thePlungers.begin();
+	QList<uint>::const_iterator ii = thePlungers.begin();
 
 	// First we skip down the plunger list until we find the first plunger at or past 'pos'
 	for (; ii != thePlungers.end() && ((*ii - readPos) & theMask) < ((pos - readPos) & theMask); ii++) {}
@@ -385,8 +390,8 @@ void Buffer::pushScratch(const BufferData &data)
 
 	writePos = (writePos + lastScratch->theAccessibleSize) & theMask;
 	theUsed += lastScratch->theAccessibleSize;
-	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-		(*i)->theUsed += lastScratch->theAccessibleSize;
+	foreach (BufferReader* i, theReaders)
+		i->theUsed += lastScratch->theAccessibleSize;
 
 	theDataIn.wakeAll();
 	if (MESSAGES) qDebug("< pushScratch");
@@ -457,8 +462,8 @@ void Buffer::pushData(const BufferData &data)
 			memcpy(theData + writePos, data.theInfo->theData + data.theOffset, data.theVisibleSize * 4);
 	writePos = (writePos + data.theVisibleSize) & theMask;
 	theUsed += data.theVisibleSize;
-	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-		(*i)->theUsed += data.theVisibleSize;
+	foreach (BufferReader* i, theReaders)
+		i->theUsed += data.theVisibleSize;
 	theDataIn.wakeAll();
 	if (MESSAGES) qDebug("< pushData");
 }
@@ -495,8 +500,8 @@ void Buffer::clear()
 	readPos = 0;
 	theUsed = 0;
 	for (uint i = 0; i < theSize; i++) theData[i] = i + 0.667;
-	for (Q3PtrList<BufferReader>::Iterator i = theReaders.begin(); i != theReaders.end(); i++)
-		(*i)->clearUNSAFE();
+	foreach (BufferReader* i, theReaders)
+		i->clearUNSAFE();
 	thePlungers.clear();
 	theDataOut.wakeAll();
 	if (MESSAGES) qDebug("< clear");

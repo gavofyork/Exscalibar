@@ -11,12 +11,10 @@
 #ifndef _GEDDEI_MULTIPROCESSOR_H
 #define _GEDDEI_MULTIPROCESSOR_H
 
-#include <qstring.h>
-#include <q3valuevector.h>
+#include <QString>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "multisource.h"
 #include "multisink.h"
 #include "properties.h"
@@ -79,7 +77,7 @@ class DLLEXPORT MultiProcessor: public MultiSource, public MultiSink
 	Processor *theSource;
 
 	bool theIsInitialised;
-	Q3ValueVector<Processor *> theProcessors;
+	QVector<Processor *> theProcessors;
 
 	/**
 	 * @return true iff the quantity of multiplicity is known.

@@ -11,15 +11,12 @@
 #ifndef _GEDDEI_PROCESSOR_H
 #define _GEDDEI_PROCESSOR_H
 
-#include <qmutex.h>
-#include <qthread.h>
-#include <qthreadstorage.h>
-#include <qpainter.h>
-#include <qstring.h>
-#include <q3ptrlist.h>
-#include <q3valuevector.h>
+#include <QMutex>
+#include <QThread>
+#include <QThreadStorage>
+#include <QPainter>
+#include <QString>
 
-#include <exscalibar.h>
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 
@@ -225,7 +222,7 @@ private:
 	/** Typing subsystem. */
 	mutable QMutex theConfirming;
 	SignalTypeRefs theTypesCache;
-	Q3ValueVector<uint> theSizesCache;
+	QVector<uint> theSizesCache;
 	bool theTypesConfirmed;
 	//@}
 
@@ -264,8 +261,8 @@ public:
 private:
 	//@{
 	/** Connection subsystem. */
-	Q3ValueVector<xLConnection *> theInputs;
-	Q3ValueVector<LxConnection *> theOutputs;
+	QVector<xLConnection *> theInputs;
+	QVector<LxConnection *> theOutputs;
 	friend class RLConnection;
 	friend class ProcessorForwarder;
 	void dropInput(uint index);
@@ -303,9 +300,9 @@ private:
 	friend class LRConnection;
 	friend class xLConnectionReal;
 	friend class MLConnection;
-	Q3ValueVector<uint> thePlungedInputs;
+	QVector<uint> thePlungedInputs;
 	mutable QMutex thePlungerSystem;
-	Q3ValueVector<uint> thePlungersLeft, thePlungersNotified;
+	QVector<uint> thePlungersLeft, thePlungersNotified;
 	bool thePlungersStarted, thePlungersEnded;
 	virtual void startPlungers();
 	virtual void plungerSent(uint index);
@@ -612,7 +609,7 @@ protected:
 	 * @param samples A correctly-sized array (well; QValueVector) into which your minima can
 	 * be placed.
 	 */
-	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyInputSpace(QVector<uint> &samples);
 
 	/**
 	 * Reimplement to force the outputs' buffer size to be at least samples big, explicitly
@@ -629,7 +626,7 @@ protected:
 	 * @param samples A correctly-sized array (well; QValueVector) into which your minima can
 	 * be placed.
 	 */
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
 
 	/**
 	 * Simple constructor.

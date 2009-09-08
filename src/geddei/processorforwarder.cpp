@@ -10,12 +10,9 @@
 
 #define __GEDDEI_BUILD
 
-#include <qstring.h>
-#include <q3socketdevice.h>
-#include <qtextcodec.h>
-//Added by qt3to4:
-#include <Q3TextStream>
-#include <Q3PtrList>
+#include <QString>
+#include <QTextCodec>
+#include <QTextStream>
 
 #include "subprocessorfactory.h"
 #include "drcoupling.h"
@@ -32,19 +29,24 @@ namespace Geddei
 {
 
 QMutex *ProcessorForwarder::theReaper;
-Q3PtrList<RLConnection> ProcessorForwarder::theGraveyard;
+QList<RLConnection*> ProcessorForwarder::theGraveyard;
 
-ProcessorForwarder::ProcessorForwarder(uint port) : Q3ServerSocket(port ? port : GEDDEI_PORT )
+ProcessorForwarder::ProcessorForwarder(uint port)
 {
+	listen(QHostAddress::LocalHost, port ? port : GEDDEI_PORT);
 	if (MESSAGES) qDebug("Starting server on port: %d.", port ? port : GEDDEI_PORT);
+}
+
+ProcessorForwarder::~ProcessorForwarder()
+{
+	while (theGraveyard.size())
+		delete theGraveyard.takeLast();
 }
 
 QMutex *ProcessorForwarder::reaper()
 {
 	if (!theReaper)
-	{	theReaper = new QMutex;
-		theGraveyard.setAutoDelete(true);
-	}
+		theReaper = new QMutex;
 	return theReaper;
 }
 
@@ -54,7 +56,7 @@ void ProcessorForwarder::deleteMeLater(RLConnection *me)
 	theGraveyard.append(me);
 }
 
-void ProcessorForwarder::newConnection(int socket)
+void ProcessorForwarder::incomingConnection(int socket)
 {
 	if (MESSAGES) qDebug("> newConnection()");
 	clearGraveyard();
@@ -65,12 +67,13 @@ void ProcessorForwarder::newConnection(int socket)
 	// We give ownership of the link to RLConnection (though we, in fact, sort of
 	// keep ownership of the RLC anyways. RLC will look after its deletion and
 	// we sort of look after the deletion of the RLC.
-	Q3SocketDevice *link = new Q3SocketDevice(socket, Q3SocketDevice::Stream);
+	QTcpSocket *link = new QTcpSocket;
+	link->setSocketDescriptor(socket);
 	if (MESSAGES) qDebug("= newConnection(): Created. Creating stream and encoding.");
 
 	{
-		Q3TextStream header(link);
-		header.setEncoding(Q3TextStream::Latin1);
+		QTextStream header(link);
+		header.setCodec("UTF-8");
 
 		if (MESSAGES) qDebug("= newConnection(): Done. Reading key...");
 		uint key = header.readLine().toUInt();
@@ -79,7 +82,7 @@ void ProcessorForwarder::newConnection(int socket)
 		if (command == "connect")
 		{
 			QString procName = header.readLine();
-			if (MESSAGES) qDebug("Received proc name: %s.", procName.latin1());
+			if (MESSAGES) qDebug("Received proc name: %s.", qPrintable(procName));
 			Processor *processor = lookup(key, procName);
 			if (MESSAGES) qDebug("Processor is %p", processor);
 			int input = header.readLine().toInt();
@@ -98,7 +101,7 @@ void ProcessorForwarder::newConnection(int socket)
 		else if (command == "disconnect")
 		{
 			QString procName = header.readLine();
-			if (MESSAGES) qDebug("Received proc name: %s.", procName.latin1());
+			if (MESSAGES) qDebug("Received proc name: %s.", qPrintable(procName));
 			// Need QMutexLocker for the group here.
 			Processor *processor = lookup(key, procName);
 			if (MESSAGES) qDebug("Processor is %p", processor);
@@ -117,7 +120,7 @@ void ProcessorForwarder::newConnection(int socket)
 			if (MESSAGES) qDebug("Got COUPLE command:");
 			// Create a subProc, then create a RSCoupling. Associate them.
 			QString type = header.readLine();
-			if (MESSAGES) qDebug("Received proc type: %s", type.latin1());
+			if (MESSAGES) qDebug("Received proc type: %s", qPrintable(type));
 			SubProcessor *sub = SubProcessorFactory::create(type);
 			if (MESSAGES) qDebug("Created SubProcessor at %p", sub);
 			// Return the subProc's pointer for decoupling later...
@@ -146,17 +149,18 @@ void ProcessorForwarder::newConnection(int socket)
 LRConnection *ProcessorForwarder::createConnection(Source *source, uint sourceIndex, uint bufferSize, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex)
 {
 	LRConnection *ret;
-	Q3SocketDevice *link = new Q3SocketDevice;
-	if (MESSAGES) qDebug("> ProcessorForwarder::createConnection() : sinkHost = %s", sinkHost.latin1());
-	if (!link->connect(QHostAddress(sinkHost), sinkKey < 65536 ? sinkKey : GEDDEI_PORT))
-	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", sinkHost.latin1(), (int)link->error());
+	QTcpSocket *link = new QTcpSocket;
+	if (MESSAGES) qDebug("> ProcessorForwarder::createConnection() : sinkHost = %s", qPrintable(sinkHost));
+	link->connectToHost(QHostAddress(sinkHost), sinkKey < 65536 ? sinkKey : GEDDEI_PORT);
+	if (!link->waitForConnected())
+	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", qPrintable(sinkHost), (int)link->error());
 		return 0;
 	}
 	else
-	{	Q3TextStream header(link);
+	{	QTextStream header(link);
 		if (MESSAGES) qDebug("Setting codec...");
-		header.setEncoding(Q3TextStream::Latin1);
-		if (MESSAGES) qDebug("Sending credentials (key=%d, name=%s)", sinkKey, sinkProcessorName.latin1());
+		header.setCodec("UTF-8");
+		if (MESSAGES) qDebug("Sending credentials (key=%d, name=%s)", sinkKey, qPrintable(sinkProcessorName));
 		header << sinkKey << endl << "connect" << endl << sinkProcessorName << endl << sinkIndex << endl << bufferSize << endl;
 		if (MESSAGES) qDebug("Sent. Creating LRC...");
 		ret = new LRConnection(source, sourceIndex, link);
@@ -168,27 +172,29 @@ LRConnection *ProcessorForwarder::createConnection(Source *source, uint sourceIn
 
 bool ProcessorForwarder::deleteConnection(const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex)
 {
-	Q3SocketDevice link;
-	if (MESSAGES) qDebug("> ProcessorForwarder::deleteConnection() : sinkHost = %s", sinkHost.latin1());
-	if (!link.connect(QHostAddress(sinkHost), sinkKey < 65536 ? sinkKey : GEDDEI_PORT))
-	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", sinkHost.latin1(), (int)link.error());
+	QTcpSocket link;
+	if (MESSAGES) qDebug("> ProcessorForwarder::deleteConnection() : sinkHost = %s", qPrintable(sinkHost));
+	link.connectToHost(QHostAddress(sinkHost), sinkKey < 65536 ? sinkKey : GEDDEI_PORT);
+	if (!link.waitForConnected())
+	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", qPrintable(sinkHost), (int)link.error());
 		return false;
 	}
-	Q3TextStream header(&link);
+	QTextStream header(&link);
 	if (MESSAGES) qDebug("Setting codec...");
-	header.setEncoding(Q3TextStream::Latin1);
-	if (MESSAGES) qDebug("Sending credentials (key=%d, name=%s)", sinkKey, sinkProcessorName.latin1());
+	header.setCodec("UTF-8");
+	if (MESSAGES) qDebug("Sending credentials (key=%d, name=%s)", sinkKey, qPrintable(sinkProcessorName));
 	header << sinkKey << endl << "disconnect" << endl << sinkProcessorName << endl << sinkIndex << endl;
 	if (MESSAGES) qDebug("Done. Verifying...");
 	return header.readLine() == "OK";
 }
 
-Q3SocketDevice *ProcessorForwarder::login(const QString &host, uint key)
+QTcpSocket *ProcessorForwarder::login(const QString &host, uint key)
 {
-	Q3SocketDevice *link = new Q3SocketDevice;
-	if (MESSAGES) qDebug("> ProcessorForwarder::login() : host = %s, key = %d", host.latin1(), key);
-	if (!link->connect(QHostAddress(host), key < 65536 ? key : GEDDEI_PORT))
-	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", host.latin1(), (int)link->error());
+	QTcpSocket *link = new QTcpSocket;
+	if (MESSAGES) qDebug("> ProcessorForwarder::login() : host = %s, key = %d", qPrintable(host), key);
+	link->connectToHost(QHostAddress(host), key < 65536 ? key : GEDDEI_PORT);
+	if (!link->waitForConnected())
+	{	qWarning("*** ERROR: Couldn't connect to sink host (%s). Code %d.", qPrintable(host), (int)link->error());
 		return 0;
 	}
 	if (MESSAGES) qDebug("< ProcessorForwarder::login() : Logged in OK");
@@ -197,13 +203,13 @@ Q3SocketDevice *ProcessorForwarder::login(const QString &host, uint key)
 
 DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString &host, uint key, const QString &type)
 {
-	Q3SocketDevice *link = login(host, key);
+	QTcpSocket *link = login(host, key);
 	if (!link) return 0;
 	DRCoupling *ret;
-	Q3TextStream header(link);
+	QTextStream header(link);
 	if (MESSAGES) qDebug("Setting codec...");
-	header.setEncoding(Q3TextStream::Latin1);
-	if (MESSAGES) qDebug("Sending credentials (key=%d, type=%s)", key, type.latin1());
+	header.setCodec("UTF-8");
+	if (MESSAGES) qDebug("Sending credentials (key=%d, type=%s)", key, qPrintable(type));
 	header << key << endl << "couple" << endl << type << endl;
 	if (MESSAGES) qDebug("Sent. Reading subProcKey...");
 	uint sPK = header.readLine().toUInt();
@@ -216,11 +222,11 @@ DRCoupling *ProcessorForwarder::createCoupling(DomProcessor *dom, const QString 
 
 bool ProcessorForwarder::deleteCoupling(const QString &host, uint key, uint sPK)
 {
-	Q3SocketDevice *link = login(host, key);
+	QTcpSocket *link = login(host, key);
 	if (!link) return false;
-	Q3TextStream header(link);
+	QTextStream header(link);
 	if (MESSAGES) qDebug("Setting codec...");
-	header.setEncoding(Q3TextStream::Latin1);
+	header.setCodec("UTF-8");
 	if (MESSAGES) qDebug("Sending credentials (key=%d, subProcKey=%d)", key, sPK);
 	header << key << endl << "decouple" << endl << sPK << endl;
 	if (MESSAGES) qDebug("Done. Verifying...");

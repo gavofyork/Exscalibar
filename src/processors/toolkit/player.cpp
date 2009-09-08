@@ -78,7 +78,7 @@ bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTy
 	return true;
 }
 
-void Player::specifyOutputSpace(Q3ValueVector<uint> &samples)
+void Player::specifyOutputSpace(QVector<uint> &samples)
 {
 	for (uint i = 0; i < theChannels; i++)
 		samples[i] = theReadFrames;
@@ -91,15 +91,15 @@ void Player::initFromProperties(const Properties &p)
 	theMode = NoMode;
 	theChannels = 0;
 
-	qDebug("Opening file %s...", thePath.latin1());
+	qDebug("Opening file %s...", qPrintable(thePath));
 #ifdef HAVE_VORBISFILE
-	if (thePath.lower().contains(".ogg"))
+	if (thePath.toLower().contains(".ogg"))
 	{
 		QFile qfile(thePath);
 		if (!qfile.open(QIODevice::ReadOnly))
-			qWarning("*** WARNING: Cannot open file %s", thePath.latin1());
+			qWarning("*** WARNING: Cannot open file %s", qPrintable(thePath));
 		else if (ov_open(fdopen(qfile.handle(), "r"), &theVorbisFile, NULL, 0) < 0)
-			qWarning("*** WARNING: File %s does not appear to be an Ogg bitstream.", thePath.latin1());
+			qWarning("*** WARNING: File %s does not appear to be an Ogg bitstream.", qPrintable(thePath));
 		else
 		{
 			vorbis_info *vi = ov_info(&theVorbisFile, -1);
@@ -112,11 +112,11 @@ void Player::initFromProperties(const Properties &p)
 	}
 #endif
 #ifdef HAVE_SNDFILE
-	if (thePath.lower().contains(".wav"))
+	if (thePath.toLower().contains(".wav"))
 	{
 		SF_INFO sfinfo;
-		if (!(theSndFile = sf_open(thePath, SFM_READ, &sfinfo)))
-			qWarning("*** WARNING: File %s cannot be read.", thePath.latin1());
+		if (!(theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &sfinfo)))
+			qWarning("*** WARNING: File %s cannot be read.", qPrintable(thePath));
 		else
 		{
 			theLength = sfinfo.frames;
@@ -128,20 +128,20 @@ void Player::initFromProperties(const Properties &p)
 	}
 #endif
 #ifdef HAVE_MAD
-	if (thePath.lower().contains(".mp3"))
+	if (thePath.toLower().contains(".mp3"))
 	{
 	uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
 	unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
 	QFile qfile(thePath);
 	if (!qfile.open(QIODevice::ReadOnly))
-		qWarning("*** WARNING: Cannot open file %s", thePath.latin1());
+		qWarning("*** WARNING: Cannot open file %s", qPrintable(thePath));
 	else if (!(theMadFile = fdopen(qfile.handle(), "r")))
-		qWarning("*** WARNING: File %s cannot be opened.", thePath.latin1());
+		qWarning("*** WARNING: File %s cannot be opened.", qPrintable(thePath));
 	else
 	{
 	mad_stream_init(&Stream);
 	mad_frame_init(&Frame);
-	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", thePath.latin1()); return; }
+	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(thePath)); return; }
 	theRate = 0;
 	while (!theRate || !theChannels)
 	{
@@ -202,7 +202,7 @@ void Player::processor()
 	if (theMode == ModeSF)
 	{
 		SF_INFO sfinfo;
-		theSndFile = sf_open(thePath, SFM_READ, &sfinfo);
+		theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &sfinfo);
 		if (!theSndFile) return;
 		float buffer[theReadFrames * theChannels];
 		int in = 0;
@@ -268,7 +268,7 @@ void Player::processor()
 	mad_synth_init(&Synth);
 	mad_timer_reset(&Timer);
 
-	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", thePath.latin1()); return; }
+	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(thePath)); return; }
 	while (guard())
 	{
 		if (Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN)
@@ -289,7 +289,7 @@ void Player::processor()
 			ReadSize=BstdRead(ReadStart,1,ReadSize,BstdFile);
 			if (ReadSize<=0)
 			{
-				if (ferror(theMadFile)) qDebug("*** WARNING: Read error on bit-stream from file %s (%s)", thePath.latin1(), strerror(errno));
+				if (ferror(theMadFile)) qDebug("*** WARNING: Read error on bit-stream from file %s (%s)", qPrintable(thePath), strerror(errno));
 				break;
 			}
 
@@ -309,7 +309,7 @@ void Player::processor()
 			if (MAD_RECOVERABLE(Stream.error))
 			{
 				if (Stream.error!=MAD_ERROR_LOSTSYNC || Stream.this_frame!=GuardPtr)
-					qDebug("*** WARNING: Recoverable frame level error in file %s (%s)", thePath.latin1(), mad_stream_errorstr(&Stream));
+					qDebug("*** WARNING: Recoverable frame level error in file %s (%s)", qPrintable(thePath), mad_stream_errorstr(&Stream));
 				continue;
 			}
 			else
@@ -317,7 +317,7 @@ void Player::processor()
 					continue;
 				else
 				{
-					qDebug("*** WARNING: Unrecoverable frame level error in file %s (%s)", thePath.latin1(), mad_stream_errorstr(&Stream));
+					qDebug("*** WARNING: Unrecoverable frame level error in file %s (%s)", qPrintable(thePath), mad_stream_errorstr(&Stream));
 					break;
 				}
 		}
@@ -336,7 +336,7 @@ void Player::processor()
 	}
 #endif
 	plunge();
-	if (MESSAGES) qDebug("Player (%s): Outahere", name().latin1());
+	if (MESSAGES) qDebug("Player (%s): Outahere", qPrintable(name()));
 }
 
 void Player::processorStopped()

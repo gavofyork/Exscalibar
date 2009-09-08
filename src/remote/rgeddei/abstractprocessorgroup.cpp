@@ -39,7 +39,7 @@ AbstractProcessor &AbstractProcessorGroup::get(const QString &name)
 		return *(theProcessors[name]);
 	else
 	{	qFatal("*** FATAL: Attempting to attain a Processor object that does not exist.\n"
-			   "           You used the non-existant name %s. Bailing.", name.latin1());
+			   "           You used the non-existant name %s. Bailing.", qPrintable(name));
 		return *((AbstractProcessor *)0);
 	}
 }
@@ -50,7 +50,7 @@ AbstractDomProcessor &AbstractProcessorGroup::dom(const QString &name)
 		return *dynamic_cast<AbstractDomProcessor *>(theProcessors[name]);
 	else
 	{	qFatal("*** FATAL: Attempting to attain a DomProcessor object that does not exist.\n"
-			   "           You used the non-existant name %s. Bailing.", name.latin1());
+			   "           You used the non-existant name %s. Bailing.", qPrintable(name));
 		return *((AbstractDomProcessor *)0);
 	}
 }
@@ -58,7 +58,7 @@ AbstractDomProcessor &AbstractProcessorGroup::dom(const QString &name)
 void AbstractProcessorGroup::add(AbstractProcessor *o)
 {
 	for (QMap<QString, AbstractProcessor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if (i.data() == o) return;
+		if (i.value() == o) return;
 		else if (i.key() == o->name())
 			qDebug("*** ERROR: You are using the same name for multiple AbstractProcessor objects.\n"
 				   "           You have to use a unique name for each object or grouping will not\n"
@@ -70,7 +70,7 @@ void AbstractProcessorGroup::add(AbstractProcessor *o)
 void AbstractProcessorGroup::remove(AbstractProcessor *o)
 {
 	for (QMap<QString, AbstractProcessor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if (i.data() == o)
+		if (i.value() == o)
 		{	theProcessors.erase(i);
 			o->setNoGroup();
 			return;
@@ -81,8 +81,8 @@ void AbstractProcessorGroup::deleteAll()
 {
 	QMap<QString, AbstractProcessor *> theProcessorsBU = theProcessors;
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessorsBU.begin(); i != theProcessorsBU.end(); i++)
-	{	if (MESSAGES) qDebug("Deleting %s...", i.data()->name().latin1());
-		delete i.data();
+	{	if (MESSAGES) qDebug("Deleting %s...", qPrintable(i.value()->name()));
+		delete i.value();
 	}
 	theProcessors.clear();
 }
@@ -90,21 +90,21 @@ void AbstractProcessorGroup::deleteAll()
 void AbstractProcessorGroup::disconnectAll()
 {
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.data()->disconnectAll();
+		i.value()->disconnectAll();
 }
 
 void AbstractProcessorGroup::init() const
 {
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.data()->init();
+		i.value()->init();
 }
 
 bool AbstractProcessorGroup::go(bool waitUntilGoing) const
 {
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if (!i.data()->go())
+		if (!i.value()->go())
 		{	for (QMap<QString, AbstractProcessor *>::ConstIterator j = theProcessors.begin(); j != i; j++)
-				j.data()->stop();
+				j.value()->stop();
 			return false;
 		}
 	if (!waitUntilGoing) return true;
@@ -112,7 +112,7 @@ bool AbstractProcessorGroup::go(bool waitUntilGoing) const
 	int errorData;
 	Processor::ErrorType e = this->waitUntilGoing(&errorProc, &errorData);
 	if (e != Processor::NoError)
-	{	qWarning("Error starting processors: Code %d (name=%s, data=%d).", (int)e, errorProc->name().latin1(), errorData);
+	{	qWarning("Error starting processors: Code %d (name=%s, data=%d).", (int)e, qPrintable(errorProc->name()), errorData);
 		return false;
 	}
 	return true;
@@ -122,10 +122,10 @@ Processor::ErrorType AbstractProcessorGroup::waitUntilGoing(AbstractProcessor **
 {
 	Processor::ErrorType ret;
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if ((ret = i.data()->waitUntilGoing(errorData)) != Processor::NoError)
-		{	if (errorProc) *errorProc = i.data();
+		if ((ret = i.value()->waitUntilGoing(errorData)) != Processor::NoError)
+		{	if (errorProc) *errorProc = i.value();
 			for (QMap<QString, AbstractProcessor *>::ConstIterator j = theProcessors.begin(); j != i; j++)
-				j.data()->stop();
+				j.value()->stop();
 			return ret;
 		}
 	return Processor::NoError;
@@ -134,14 +134,14 @@ Processor::ErrorType AbstractProcessorGroup::waitUntilGoing(AbstractProcessor **
 void AbstractProcessorGroup::stop(bool resetToo) const
 {
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.data()->stop();
+		i.value()->stop();
 	if (resetToo) reset();
 }
 
 void AbstractProcessorGroup::reset() const
 {
 	for (QMap<QString, AbstractProcessor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.data()->reset();
+		i.value()->reset();
 }
 
 };

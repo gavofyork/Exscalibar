@@ -14,14 +14,11 @@
 #include <cassert>
 using namespace std;
 
-#include <qmap.h>
-#include <qmutex.h>
-#include <q3valuevector.h>
+#include <QMap>
+#include <QMutex>
 
-#include <exscalibar.h>
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "bufferinfo.h"
 #include "signaltype.h"
 #include "globals.h"

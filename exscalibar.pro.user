@@ -406,7 +406,7 @@
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-Y4dCuDsXVx,guid=e5c0c7290b74c657c62da2274aa52815</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-JwK0JLGbQj,guid=b38ed7e8c3e24c54501bdcff4aa55adf</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
@@ -414,8 +414,8 @@
     <value type="QString" >GDM_LANG=en_GB.UTF-8</value>
     <value type="QString" >GDM_XSERVER_LOCATION=local</value>
     <value type="QString" >GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-iwjtqa/socket</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-0wGHs5/S.gpg-agent:3557:1</value>
+    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-Txgej2/socket</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-IQxqEY/S.gpg-agent:3922:1</value>
     <value type="QString" >GTK_MODULES=canberra-gtk-module</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/gav/.gtkrc-1.2-gnome2</value>
     <value type="QString" >HOME=/home/gav</value>
@@ -426,16 +426,16 @@
     <value type="QString" >PATH=/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString" >PWD=/home/gav</value>
     <value type="QString" >QTDIR=/usr</value>
-    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3476</value>
+    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3841</value>
     <value type="QString" >SHELL=/bin/bash</value>
-    <value type="QString" >SSH_AGENT_PID=3533</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-iwjtqa/socket.ssh</value>
+    <value type="QString" >SSH_AGENT_PID=3898</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-Txgej2/socket.ssh</value>
     <value type="QString" >USER=gav</value>
     <value type="QString" >USERNAME=gav</value>
     <value type="QString" >WINDOWPATH=7</value>
     <value type="QString" >XAUTHORITY=/home/gav/.Xauthority</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252337683.920707-97332366</value>
+    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252350685.348319-119451989</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >/home/gav/Projects/exscalibar/exscalibar.pro</value>
@@ -454,7 +454,7 @@
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-Y4dCuDsXVx,guid=e5c0c7290b74c657c62da2274aa52815</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-JwK0JLGbQj,guid=b38ed7e8c3e24c54501bdcff4aa55adf</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
@@ -462,8 +462,8 @@
     <value type="QString" >GDM_LANG=en_GB.UTF-8</value>
     <value type="QString" >GDM_XSERVER_LOCATION=local</value>
     <value type="QString" >GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-iwjtqa/socket</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-0wGHs5/S.gpg-agent:3557:1</value>
+    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-Txgej2/socket</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-IQxqEY/S.gpg-agent:3922:1</value>
     <value type="QString" >GTK_MODULES=canberra-gtk-module</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/gav/.gtkrc-1.2-gnome2</value>
     <value type="QString" >HOME=/home/gav</value>
@@ -474,16 +474,16 @@
     <value type="QString" >PATH=/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString" >PWD=/home/gav</value>
     <value type="QString" >QTDIR=/usr</value>
-    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3476</value>
+    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3841</value>
     <value type="QString" >SHELL=/bin/bash</value>
-    <value type="QString" >SSH_AGENT_PID=3533</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-iwjtqa/socket.ssh</value>
+    <value type="QString" >SSH_AGENT_PID=3898</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-Txgej2/socket.ssh</value>
     <value type="QString" >USER=gav</value>
     <value type="QString" >USERNAME=gav</value>
     <value type="QString" >WINDOWPATH=7</value>
     <value type="QString" >XAUTHORITY=/home/gav/.Xauthority</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252337683.920707-97332366</value>
+    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252350685.348319-119451989</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >-w</value>
@@ -498,7 +498,7 @@
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList" >
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-O9vMx2zkhW,guid=34fa8a7739acbbcea0905dec4aa3d2a2</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-JwK0JLGbQj,guid=b38ed7e8c3e24c54501bdcff4aa55adf</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
@@ -506,9 +506,8 @@
     <value type="QString" >GDM_LANG=en_GB.UTF-8</value>
     <value type="QString" >GDM_XSERVER_LOCATION=local</value>
     <value type="QString" >GNOME_DESKTOP_SESSION_ID=this-is-deprecated</value>
-    <value type="QString" >GNOME_KEYRING_PID=3792</value>
-    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-m1bV6v/socket</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-eM4xM0/S.gpg-agent:3885:1</value>
+    <value type="QString" >GNOME_KEYRING_SOCKET=/tmp/keyring-Txgej2/socket</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/seahorse-IQxqEY/S.gpg-agent:3922:1</value>
     <value type="QString" >GTK_MODULES=canberra-gtk-module</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/gav/.gtkrc-1.2-gnome2</value>
     <value type="QString" >HOME=/home/gav</value>
@@ -519,16 +518,16 @@
     <value type="QString" >PATH=/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games</value>
     <value type="QString" >PWD=/home/gav</value>
     <value type="QString" >QTDIR=/usr</value>
-    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3804</value>
+    <value type="QString" >SESSION_MANAGER=local/mama:/tmp/.ICE-unix/3841</value>
     <value type="QString" >SHELL=/bin/bash</value>
-    <value type="QString" >SSH_AGENT_PID=3861</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-m1bV6v/socket.ssh</value>
+    <value type="QString" >SSH_AGENT_PID=3898</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/keyring-Txgej2/socket.ssh</value>
     <value type="QString" >USER=gav</value>
     <value type="QString" >USERNAME=gav</value>
     <value type="QString" >WINDOWPATH=7</value>
     <value type="QString" >XAUTHORITY=/home/gav/.Xauthority</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/local/share/:/usr/share/:/usr/share/gdm/</value>
-    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252250272.518102-311224054</value>
+    <value type="QString" >XDG_SESSION_COOKIE=ecd819583fbe67b4bdf2b650483ed6a7-1252350685.348319-119451989</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >clean</value>

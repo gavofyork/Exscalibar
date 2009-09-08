@@ -51,7 +51,7 @@ void Monitor::receivedPlunger()
 	QMutexLocker lock(&thePlunging);
 	thePlungersCaught++;
 	thePlunge.wakeAll();
-	qDebug("--- [%s] Total samples received: %d", name().latin1(), theTotalSamples);
+	qDebug("--- [%s] Total samples received: %d", qPrintable(name()), theTotalSamples);
 }
 
 void Monitor::resetPlungerMemory()
@@ -82,7 +82,7 @@ void Monitor::processorStopped()
 	theTotalTime = double(theTimer.elapsed()) / 1000.0;
 }
 
-void Monitor::specifyOutputSpace(Q3ValueVector<uint> &samples)
+void Monitor::specifyOutputSpace(QVector<uint> &samples)
 {
 	samples[0] = input(0).capacity() / 2;
 }

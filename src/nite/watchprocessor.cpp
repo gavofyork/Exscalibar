@@ -20,8 +20,9 @@
 
 #define __GEDDEI_BUILD
 
+#if 0
+
 #include <cmath>
-//Added by qt3to4:
 #include <QPixmap>
 using namespace std;
 
@@ -30,15 +31,12 @@ using namespace std;
 #include "buffer.h"
 using namespace Geddei;
 
-#include <qdatetime.h>
-#include <qstatusbar.h>
-#include <qapplication.h>
-#include <qpainter.h>
-#include <q3paintdevicemetrics.h>
-#include <q3dockwindow.h>
-#include <qlabel.h>
-#include <qtimer.h>
-#include <q3deepcopy.h>
+#include <QDateTime>
+#include <QStatusBar>
+#include <QApplication>
+#include <QPainter>
+#include <QLabel>
+#include <QTimer>
 
 #include "geddeinite.h"
 
@@ -290,7 +288,7 @@ void WatchProcessor::watchSpectrum()
 	}
 }
 
-void WatchProcessor::specifyInputSpace(Q3ValueVector<uint> &samples)
+void WatchProcessor::specifyInputSpace(QVector<uint> &samples)
 {
 	if (theWatcher == 0)
 		samples[0] = 1;
@@ -314,3 +312,4 @@ void WatchProcessor::processor()
 		watchMatrix();
 }
 
+#endif

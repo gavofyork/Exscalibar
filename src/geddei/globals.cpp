@@ -76,7 +76,7 @@ const QStringList getPaths()
 	ret += ".";
 #endif
 	if (std::getenv("GEDDEI_PLUGINS"))
-		ret += QStringList::split(":", std::getenv("GEDDEI_PLUGINS"));
+		ret += QString(std::getenv("GEDDEI_PLUGINS")).split(":");
 	if (std::getenv("EXSCALIBAR_LOCATION"))
 		ret += QString(std::getenv("EXSCALIBAR_LOCATION")) + "/plugins/geddei";
 	QStringList thePaths(QApplication::libraryPaths());

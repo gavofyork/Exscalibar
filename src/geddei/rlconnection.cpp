@@ -13,8 +13,6 @@
 #include <cassert>
 using namespace std;
 
-#include <q3socketdevice.h>
-
 #include "processorforwarder.h"
 #include "processor.h"
 #include "bufferdata.h"
@@ -27,7 +25,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-RLConnection::RLConnection(Q3SocketDevice *sourceSocketDevice, Sink *newSink, int newSinkIndex, uint bufferSize) : xLConnectionReal(newSink, newSinkIndex, bufferSize), QThread(0), theSource(sourceSocketDevice)
+RLConnection::RLConnection(QTcpSocket *sourceSocketDevice, Sink *newSink, int newSinkIndex, uint bufferSize) : xLConnectionReal(newSink, newSinkIndex, bufferSize), QThread(0), theSource(sourceSocketDevice)
 {
 	theBeingDeleted = false;
 	theHaveType = false;
@@ -46,7 +44,7 @@ RLConnection::~RLConnection()
 	// this is here for a fail-safe.
 
 	theBeingDeleted = true;
-	if (running())
+	if (isRunning())
 	{	if (MESSAGES) qDebug("RLConnection::~RLConnection(): Thread still running on RLConnection destruction. Safely stopping...");
 		theSource.close();
 		theBuffer.openTrapdoor(0);

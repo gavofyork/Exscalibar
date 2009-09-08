@@ -23,7 +23,6 @@
 
 #include <qmutex.h>
 #include <qfile.h>
-#include <q3textstream.h>
 #include <qwaitcondition.h>
 
 #include <exscalibar.h>
@@ -39,22 +38,22 @@
 /** @ingroup Toolkit
  * @author Gav Wood <gav@cs.york.ac.uk>
  * @brief Data recording sink Processor object.
- * 
+ *
  * This is the Processor class for dumping data to disk. Data is dumped in text
- * format, with customisable delimiters, determined by the properties "Field 
+ * format, with customisable delimiters, determined by the properties "Field
  * Delimiter" and "Record Delimiter".
- * 
+ *
  * You can customise what record information is output also - if property
  * "Print Section" an extra field at the start of the record with the number of
  * plungers that have passed through will be printed. If "Print Sample" is true
  * then an extra field at the start (though after the section if there is one)
  * will be printed containing the number of records before this in this section
  * there are. Together these form a two dimensional counter.
- * 
+ *
  * You can control to which file the output goes with the property "Output",
  * and you can control how many inputs may be connected with the property
  * "Inputs".
- * 
+ *
  * This is guarded, so you can use Processor::waitUntilDone() on it.
  */
 class DLLEXPORT Recorder: public Processor
@@ -64,14 +63,14 @@ class DLLEXPORT Recorder: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void initFromProperties(const Properties &p);
 	virtual void receivedPlunger();
-	
+
 	// Properties
 	QFile theOutput;
-	Q3TextStream stream;
+	QTextStream stream;
 	QString theFieldDelimiter, theRecordDelimiter;
 	bool thePrintSection, thePrintSample, thePrintTime;
 	uint thePadBefore, thePadAfter;
-	
+
 	// State
 	uint theCurrentSample, theCurrentSection;
 public:

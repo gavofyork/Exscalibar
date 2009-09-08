@@ -13,8 +13,6 @@
 #include <cassert>
 using namespace std;
 
-#include <q3ptrlist.h>
-
 #include "signaltyperefs.h"
 #include "signaltyperef.h"
 #include "signaltype.h"
@@ -31,7 +29,7 @@ SignalTypeRefs::SignalTypeRefs(const SignalTypeRefs &src): theImplicitCopying(tr
 		theData[i] = src.theData[i]->copy();
 }
 
-SignalTypeRefs::SignalTypeRefs(Q3PtrList<SignalType> &src): theImplicitCopying(true)
+SignalTypeRefs::SignalTypeRefs(QList<SignalType*> &src): theImplicitCopying(true)
 {
 	theCount = src.count();
 	theData = new const SignalType *[theCount];
@@ -137,7 +135,7 @@ void SignalTypeRefs::copyData(uint i, const SignalType *d)
 	theData[i] = d->copy();
 }
 
-void SignalTypeRefs::copyInto(Q3PtrList<SignalType> &dest)
+void SignalTypeRefs::copyInto(QList<SignalType*> &dest)
 {
 	dest.clear();
 	for (uint i = 0; i < theCount; i++)

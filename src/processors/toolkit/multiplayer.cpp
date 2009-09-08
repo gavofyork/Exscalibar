@@ -46,8 +46,8 @@ bool MultiPlayer::openFile()
 {
 	if (theFile) sf_close(theFile);
 	SF_INFO sfinfo;
-	for (; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
-	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
+	for (; theIndex < (uint)thePaths.count(); thePaths.removeOne(thePaths.at(theIndex)))
+	{	theFile = sf_open(thePaths[theIndex].toLatin1(), SFM_READ, &sfinfo);
 		if (theChannels == sfinfo.channels && theRate == sfinfo.samplerate) break;
 		if (theFile) sf_close(theFile);
 		theFile = 0;
@@ -66,8 +66,8 @@ void MultiPlayer::initFromProperties(const Properties &p)
 	theChannels = 0;
 	// A quick openFile(), that doesn't check the channels/rate, in fact it gets them.
 	SF_INFO sfinfo;
-	for (; theIndex < (uint)thePaths.count(); thePaths.remove(thePaths.at(theIndex)))
-	{	theFile = sf_open(thePaths[theIndex], SFM_READ, &sfinfo);
+	for (; theIndex < (uint)thePaths.count(); thePaths.removeOne(thePaths.at(theIndex)))
+	{	theFile = sf_open(thePaths[theIndex].toLatin1(), SFM_READ, &sfinfo);
 		if (theFile)
 		{	theChannels = sfinfo.channels;
 			theRate = sfinfo.samplerate;
@@ -84,7 +84,7 @@ PropertiesInfo MultiPlayer::specifyProperties() const
 						 ("Frames", 8192, "The number of samples to output in each chunk.");
 }
 
-void MultiPlayer::specifyOutputSpace(Q3ValueVector<uint> &samples)
+void MultiPlayer::specifyOutputSpace(QVector<uint> &samples)
 {
 	for (int i = 0; i < theChannels; i++)
 		samples[i] = theFrames;

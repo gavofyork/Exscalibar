@@ -10,15 +10,13 @@
 #ifndef _RGEDDEI_NODESESSION_H
 #define _RGEDDEI_NODESESSION_H
 
-#include <qmutex.h>
-#include <qthread.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <q3cstring.h>
+#include <QMutex>
+#include <QThread>
+#include <QString>
+#include <QStringList>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "properties.h"
 #include "commcodes.h"
 #else

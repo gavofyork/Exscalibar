@@ -29,7 +29,7 @@ MLConnection::MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection)
 MLConnection::~MLConnection()
 {
 	delete theReader;
-	theConnection->theConnections.remove(this);
+	theConnection->theConnections.removeAll(this);
 }
 
 void MLConnection::plungerSent()
@@ -83,7 +83,7 @@ uint MLConnection::elementsReady() const
 		return 0;
 	}
 #endif
-	
+
 	uint ret = theReader->elementsReady();
 	return ret;
 }
@@ -97,7 +97,7 @@ void MLConnection::waitForElements(uint elements) const
 		return;
 	}
 #endif
-	
+
 	theReader->waitForElements(elements);
 	theSink->checkExit();
 }
@@ -111,7 +111,7 @@ bool MLConnection::plungeSync(uint samples) const
 		return false;
 	}
 #endif
-	
+
 	BufferData ret = theReader->readElements(theType->scope() * samples, false);
 	theSink->checkExit();
 	if (ret.plunger())
@@ -132,7 +132,7 @@ const BufferData MLConnection::readElements(uint elements)
 		return BufferData();
 	}
 #endif
-	
+
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, true);
 		theSink->checkExit();
@@ -155,7 +155,7 @@ const BufferData MLConnection::peekElements(uint elements)
 		return BufferData();
 	}
 #endif
-	
+
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, false);
 		theSink->checkExit();

@@ -13,8 +13,6 @@
 #include <cassert>
 using namespace std;
 
-#include <q3socketdevice.h>
-
 #include "processor.h"
 #include "bufferdata.h"
 #include "commandcodes.h"
@@ -27,7 +25,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-LRConnection::LRConnection(Source *newSource, uint sourceIndex, Q3SocketDevice *sinkSocketDevice) : LxConnectionReal(newSource, sourceIndex), theSink(sinkSocketDevice)
+LRConnection::LRConnection(Source *newSource, uint sourceIndex, QTcpSocket *sinkSocketDevice) : LxConnectionReal(newSource, sourceIndex), theSink(sinkSocketDevice)
 {
 	if (MESSAGES) qDebug("LRC: Handshaking...");
 	theSink.handshake(true);
@@ -155,7 +153,7 @@ bool LRConnection::waitUntilReady()
 
 void LRConnection::transport(const BufferData &data)
 {
-	if (MESSAGES) qDebug("> LRC::transport() (L=%s, size=%d)", dynamic_cast<Processor *>(theSource)->name().latin1(), data.elements());
+	if (MESSAGES) qDebug("> LRC::transport() (L=%s, size=%d)", qPrintable(dynamic_cast<Processor *>(theSource)->name()), data.elements());
 	// TODO: Currently this silently discards the data.
 	// It should really block until the connection is remade or until it's stopped.
 	// But I dont need to implement that until i want dynamic connections sorted.

@@ -18,13 +18,13 @@ namespace Geddei
 Properties::Properties(const PropertiesInfo &info)
 {
 	for (QMap<QString, QVariant>::ConstIterator i = info.theData.begin(); i != info.theData.end(); i++)
-		theData[i.key()] = i.data();
+		theData[i.key()] = i.value();
 }
 
 void Properties::set(const Properties &pairs)
 {
 	for (QMap<QString, QVariant>::ConstIterator i = pairs.theData.begin(); i != pairs.theData.end(); i++)
-		theData[i.key()] = i.data();
+		theData[i.key()] = i.value();
 }
 
 void Properties::toBuffer(QBuffer &data) const

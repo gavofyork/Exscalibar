@@ -30,13 +30,13 @@ class Dumper: public Processor
 {
 	QFile theOut;
 	bool theFloats;
-	
+
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Floats", false, "Use binary floats instead of bytes."); }
 	virtual void initFromProperties(const Properties &p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void processor();
 	virtual void processorStopped();
-	
+
 public:
 	Dumper();
 };
@@ -47,9 +47,9 @@ Dumper::Dumper(): Processor("Dumper", In, Guarded)
 
 void Dumper::initFromProperties(const Properties &p)
 {
-	theOut.setName(p["Output"].toString());
+	theOut.setFileName(p["Output"].toString());
 	theFloats = p["Floats"].toBool();
-	
+
 	setupIO(Undefined, 0);
 }
 
@@ -68,13 +68,13 @@ void Dumper::processor()
 				if (theFloats)
 				{
 					unsigned char* dc = (unsigned char*)&(d[j]);
-					theOut.putch(dc[0]);
-					theOut.putch(dc[1]);
-					theOut.putch(dc[2]);
-					theOut.putch(dc[3]);
+					theOut.putChar(dc[0]);
+					theOut.putChar(dc[1]);
+					theOut.putChar(dc[2]);
+					theOut.putChar(dc[3]);
 				}
 				else
-					theOut.putch(int(min(max(0.f, d[j]), 1.f) * 255));
+					theOut.putChar(int(min(max(0.f, d[j]), 1.f) * 255));
 		}
 }
 

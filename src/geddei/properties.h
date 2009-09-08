@@ -10,11 +10,10 @@
 #ifndef _GEDDEI_PROPERTIES_H
 #define _GEDDEI_PROPERTIES_H
 
-#include <qbuffer.h>
-#include <q3cstring.h>
-#include <qdatastream.h>
-#include <qvariant.h>
-#include <qmap.h>
+#include <QBuffer>
+#include <QDataStream>
+#include <QVariant>
+#include <QMap>
 #include <QStringList>
 
 #include <exscalibar.h>
@@ -153,7 +152,7 @@ public:
 	 *
 	 * @sa get()
 	 */
-	QVariant operator[](const QString &key) const { if (!theData.contains(key)) qWarning("*** WARNING: Reading undefined property (%s)", key.latin1()); return theData[key]; }
+	QVariant operator[](const QString &key) const { if (!theData.contains(key)) qWarning("*** WARNING: Reading undefined property (%s)", qPrintable(key)); return theData[key]; }
 
 	/**
 	 * Subscript operator giving full access to the mapping. This can be used
@@ -280,7 +279,7 @@ public:
 	 *
 	 * @sa operator()()
 	 */
-	void set(const PropertiesInfo &merge) { for (QMap<QString, PropertiesDatum>::const_iterator i = merge.theInfo.begin(); i != merge.theInfo.end(); i++) theInfo[i.key()] = i.data(); Properties::set(merge); }
+	void set(const PropertiesInfo &merge) { for (QMap<QString, PropertiesDatum>::const_iterator i = merge.theInfo.begin(); i != merge.theInfo.end(); i++) theInfo[i.key()] = i.value(); Properties::set(merge); }
 
 	/**
 	 * Inserts (or overwrites) a new tuple into this object.

@@ -81,7 +81,7 @@ void Recorder::processor()
 		if (MESSAGES) qDebug("= Recorder::processor(): Done reading.");
 		theCurrentSample++;
 	}
-	
+
 	if (MESSAGES) qDebug("= Recorder::processor(): All done.");
 	theOutput.close();
 }
@@ -117,24 +117,24 @@ bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 PropertiesInfo Recorder::specifyProperties() const
 {
 	return PropertiesInfo("Inputs", 1, "The number of inputs to collect data from.")
-	                     ("Output", "/tmp/out.dat", "The file into which the output data will be placed.")
-	                     ("Pad Before", 0, "The number of 0-filled records to put before each section.")
-	                     ("Pad After", 0, "The number of 0-filled records to put after each section.")
-	                     ("Field Delimiter", " ", "The string to be inserted between each field of a record.")
-	                     ("Record Delimiter", "\n", "The string to be inserted between each record.")
-	                     ("Print Section", true, "If true, print the number of plungers that have come before the sample at the start of every record.")
-	                     ("Print Sample", true, "If true, print the number of samples preceeding this one but after the last plunger. This will be printed at the start of the record, but after the section if there is one.")
-	                     ("Print Time", true, "If true, print the number of seconds of signal data between this and the last plunger. This will be printed at the start of the record, but after the sample if there is one.");
+						 ("Output", "/tmp/out.dat", "The file into which the output data will be placed.")
+						 ("Pad Before", 0, "The number of 0-filled records to put before each section.")
+						 ("Pad After", 0, "The number of 0-filled records to put after each section.")
+						 ("Field Delimiter", " ", "The string to be inserted between each field of a record.")
+						 ("Record Delimiter", "\n", "The string to be inserted between each record.")
+						 ("Print Section", true, "If true, print the number of plungers that have come before the sample at the start of every record.")
+						 ("Print Sample", true, "If true, print the number of samples preceeding this one but after the last plunger. This will be printed at the start of the record, but after the section if there is one.")
+						 ("Print Time", true, "If true, print the number of seconds of signal data between this and the last plunger. This will be printed at the start of the record, but after the sample if there is one.");
 }
 
 void Recorder::initFromProperties(const Properties &p)
 {
 	// Check how many inputs we need...
 	setupIO(p["Inputs"].toInt(), 0);
-	
+
 	// Set output file
-	theOutput.setName(p["Output"].toString());
-	
+	theOutput.setFileName(p["Output"].toString());
+
 	// And the others
 	theFieldDelimiter = p["Field Delimiter"].toString();
 	theRecordDelimiter = p["Record Delimiter"].toString();

@@ -22,7 +22,7 @@
 namespace Geddei
 {
 
-DRCoupling::DRCoupling(DomProcessor *dom, Q3SocketDevice *remote) : DxCoupling(dom), theRemote(remote)
+DRCoupling::DRCoupling(DomProcessor *dom, QTcpSocket *remote) : DxCoupling(dom), theRemote(remote)
 {
 	if (MESSAGES) qDebug("DRC: Handshaking...");
 	theRemote.handshake(true);
@@ -117,7 +117,7 @@ void DRCoupling::initFromProperties(const Properties &p)
 {
 	if (MESSAGES) qDebug("> DRCoupling::initFromProperties()");
 	QMutexLocker lock(&theComm);
-	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", p.keys()[i].latin1(), p[p.keys()[i]].toString().latin1());
+	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", qPrintable(p.keys()[i]), qPrintable(p[p.keys()[i]].toString()));
 	theRemote.sendByte(InitFromProperties);
 	// Serialise and send properties.
 	QByteArray sp = p.serialise();

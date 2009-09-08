@@ -27,7 +27,7 @@
 #endif
 using namespace Geddei;
 
-class Q3SocketDevice;
+class QTcpSocket;
 
 namespace Geddei
 {
@@ -60,7 +60,7 @@ public:
 	/**
 	 * Simple constructor, for developer's use.
 	 */
-	RLConnection(Q3SocketDevice *sourceSocketDevice, Sink *newSink, int newSinkIndex, uint bufferSize);
+	RLConnection(QTcpSocket *sourceSocketDevice, Sink *newSink, int newSinkIndex, uint bufferSize);
 
 	/**
 	 * Simple destructor.

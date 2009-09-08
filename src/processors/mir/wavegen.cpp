@@ -33,7 +33,7 @@ class WaveGen: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const;
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
 public:
 	WaveGen() : Processor("WaveGen", NotMulti, Guarded) {}
 };
@@ -64,7 +64,7 @@ bool WaveGen::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outT
 	return true;
 }
 
-void WaveGen::specifyOutputSpace(Q3ValueVector<uint> &samples)
+void WaveGen::specifyOutputSpace(QVector<uint> &samples)
 {
 	samples[0] = theChunk;
 }

@@ -24,7 +24,7 @@
 #endif
 using namespace Geddei;
 
-class Q3SocketDevice;
+class QTcpSocket;
 
 namespace Geddei
 {
@@ -78,7 +78,7 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	 * Used from ProcessorForwarder object.
 	 */
 	friend class ProcessorForwarder;
-	LRConnection(Source *newSource, uint newSourceIndex, Q3SocketDevice *newSink);
+	LRConnection(Source *newSource, uint newSourceIndex, QTcpSocket *newSink);
 
 	/**
 	 * Simple destructor.

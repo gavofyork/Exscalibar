@@ -10,8 +10,6 @@
 
 #define __GEDDEI_BUILD
 
-#include <q3deepcopy.h>
-
 #include "processorfactory.h"
 #include "subprocessorfactory.h"
 #include "domprocessor.h"
@@ -26,7 +24,7 @@ namespace rGeddei
 {
 
 QMap<uint, SessionServer *> SessionServer::theSessionKeyMap;
-QMutex SessionServer::mutSessionKeyMap(true);
+QMutex SessionServer::mutSessionKeyMap(QMutex::Recursive);
 SessionServer::SessionServerReaper *SessionServer::theReaper = 0;
 
 void SessionServer::SessionServerReaper::run()
@@ -62,13 +60,14 @@ SessionServer::SessionServer()
 SessionServer::~SessionServer()
 {
 	if (MESSAGES) qDebug("> ~SessionServer()");
-	{	QMutexLocker lock(&mutSessionKeyMap);
-		theSessionKeyMap.erase(theSessionKey);
+	{
+		QMutexLocker lock(&mutSessionKeyMap);
+		theSessionKeyMap.remove(theSessionKey);
 	}
 	if (theProcessors.count())
 		qWarning("*** Session %d is being deleted. %d processors left undeleted!", theSessionKey, theProcessors.count());
 	for (QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.data()->stop();
+		i.value()->stop();
 	// TODO: Delete all processors when I believe I can do it safely.
 //	theProcessors.deleteAll();
 	if (MESSAGES) qDebug("< ~SessionServer(): key = %d", theSessionKey);
@@ -117,7 +116,7 @@ bool SessionServer::newProcessor(const QString &type, const QString &name, bool 
 	if (MESSAGES) qDebug("> newProcessor()");
 	QMutexLocker lock(&theCalling);
 	theAlive = true;
-	if (MESSAGES) qDebug("= newProcessor(): Creating %s called %s. count = %d.", type.latin1(), name.latin1(), theProcessors.count());
+	if (MESSAGES) qDebug("= newProcessor(): Creating %s called %s. count = %d.", qPrintable(type), qPrintable(name), theProcessors.count());
 	Processor *p = ProcessorFactory::create(type);
 	if (p)
 	{	if (MESSAGES) qDebug("= newProcessor(): Creaded; mapping... count = %d.", theProcessors.count());
@@ -195,7 +194,7 @@ bool SessionServer::processorInit(const QString &name, const Properties &propert
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
-	theProcessors.erase(name);
+	theProcessors.remove(name);
 	theProcessors[newName] = p;
 	p->init(newName, properties);
 	return true;
@@ -203,12 +202,12 @@ bool SessionServer::processorInit(const QString &name, const Properties &propert
 
 bool SessionServer::processorGo(const QString &name, bool &ret)
 {
-	if (MESSAGES) qDebug("> processorGo() [%s]", name.latin1());
+	if (MESSAGES) qDebug("> processorGo() [%s]", qPrintable(name));
 	QMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
-	if (MESSAGES) qDebug("< processorGo() [%s]", name.latin1());
+	if (MESSAGES) qDebug("< processorGo() [%s]", qPrintable(name));
 	ret = p->go();
 	return true;
 }
@@ -261,7 +260,7 @@ bool SessionServer::processorReset(const QString &name)
 
 bool SessionServer::processorConnectLocal(const QString &name, uint bufferSize, uint output, const QString &destname, uint destinput, bool &ret)
 {
-	if (MESSAGES) qDebug("> processorConnectLocal(): name=%s", destname.latin1());
+	if (MESSAGES) qDebug("> processorConnectLocal(): name=%s", qPrintable(destname));
 	QMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
@@ -274,7 +273,7 @@ bool SessionServer::processorConnectLocal(const QString &name, uint bufferSize, 
 
 bool SessionServer::processorConnectNetwork(const QString &name, uint bufferSize, uint output, const QString &desthost, uint destkey, const QString &destname, uint destinput, bool &ret)
 {
-	if (MESSAGES) qDebug("> processorConnectNetwork(): key=%d, host=%s, name=%s", destkey, desthost.latin1(), destname.latin1());
+	if (MESSAGES) qDebug("> processorConnectNetwork(): key=%d, host=%s, name=%s", destkey, qPrintable(desthost), qPrintable(destname));
 	QMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];

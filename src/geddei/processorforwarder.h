@@ -10,14 +10,11 @@
 #ifndef _RGEDDEI_PROCESSORFORWARDER_H
 #define _RGEDDEI_PROCESSORFORWARDER_H
 
-#include <q3ptrlist.h>
-#include <qmutex.h>
-#include <qstring.h>
-#include <q3serversocket.h>
+#include <QMutex>
+#include <QString>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "processor.h"
 #else
 #include <geddei/processor.h>
@@ -38,19 +35,19 @@ class DRCoupling;
  * @note This class can ONLY ever be used when a QApplication object is running
  * in the main() thread. It's completely useless otherwise.
  */
-class DLLEXPORT ProcessorForwarder: public Q3ServerSocket
+class DLLEXPORT ProcessorForwarder: public QTcpServer
 {
 	// Orderly (out of thread) remote connection deletion subsystem.
 	// Needed because a connection cannot delete itself from its own thread.
 	static QMutex *theReaper;
-	static Q3PtrList<RLConnection> theGraveyard;
+	static QList<RLConnection*> theGraveyard;
 	static QMutex *reaper();
 	void clearGraveyard();
 
 	friend class ProcessorForwarderLink;
 
 	//* Reimplementation from QServerSocket.
-	virtual void newConnection(int socket);
+	virtual void incomingConnection(int socket);
 
 	/**
 	 * Subclass this method to derive processor from key and name.
@@ -65,7 +62,7 @@ class DLLEXPORT ProcessorForwarder: public Q3ServerSocket
 	 * This point is moot though, since the returned QSD is adopted by a connection
 	 * or coupling.
 	 */
-	static Q3SocketDevice *login(const QString &host, uint key);
+	static QTcpSocket *login(const QString &host, uint key);
 
 public:
 	/**
@@ -109,6 +106,8 @@ public:
 	 * Simple constructor.
 	 */
 	ProcessorForwarder(uint port = 0);
+
+	~ProcessorForwarder();
 };
 
 };

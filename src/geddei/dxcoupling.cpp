@@ -29,7 +29,7 @@ DxCoupling::DxCoupling(DomProcessor *dom): theDomProcessor(dom)
 
 DxCoupling::~DxCoupling()
 {
-	theDomProcessor->theWorkers.remove(this);
+	theDomProcessor->theWorkers.removeAll(this);
 }
 
 void DxCoupling::skipPlungeAndSend(uint samples)
@@ -78,7 +78,7 @@ void DxCoupling::peekAndSend(uint samples, uint chunks)
 		{
 			if (isnan(d[i][e]) || isinf(d[i][e]))
 			{
-				qDebug("%s: Contains non-finite value on input %d, element %d", theDomProcessor->name().latin1(), i, e);
+				qDebug("%s: Contains non-finite value on input %d, element %d", qPrintable(theDomProcessor->name()), i, e);
 			}
 		}
 	}

@@ -10,12 +10,10 @@
 #ifndef _GEDDEI_DOMPROCESSOR_H
 #define _GEDDEI_DOMPROCESSOR_H
 
-#include <qmutex.h>
-#include <q3ptrlist.h>
+#include <QMutex>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "properties.h"
 #include "processor.h"
 #include "qfastwaitcondition.h"
@@ -88,8 +86,8 @@ class DLLEXPORT DomProcessor: public Processor
 	uint theOptimalThroughput, theWantSize;
 
 	//* Queue management stuff.
-	Q3PtrList<DxCoupling> theWorkers;
-	Q3PtrList<DxCoupling>::Iterator theQueuePos;
+	QList<DxCoupling*> theWorkers;
+	QList<DxCoupling*>::Iterator theQueuePos;
 	uint theQueueLen;
 	QMutex theQueueLock;
 	QFastWaitCondition theQueueChanged;
@@ -172,8 +170,8 @@ class DLLEXPORT DomProcessor: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
-	virtual void specifyInputSpace(Q3ValueVector<uint> &samples);
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
+	virtual void specifyInputSpace(QVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 	/**

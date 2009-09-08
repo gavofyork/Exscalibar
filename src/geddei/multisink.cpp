@@ -13,15 +13,15 @@
 #include "multisource.h"
 #include "multisink.h"
 //Added by qt3to4:
-#include <Q3ValueList>
+#include <QList>
 
 namespace Geddei
 {
 
 void MultiSink::setSinkMultiplicity(uint multiplicity)
 {
-	Q3ValueList<MultiSource *> t = theDeferrals;
-	for (Q3ValueList<MultiSource *>::Iterator i = t.begin(); i != t.end(); i++)
+	QList<MultiSource *> t = theDeferrals;
+	for (QList<MultiSource *>::Iterator i = t.begin(); i != t.end(); i++)
 		(*i)->setMultiplicity(multiplicity);
 }
 

@@ -60,7 +60,7 @@ class ALSACapturer: public Processor
 		thePeriods = _p["Periods"].toInt();
 		setupIO(0, theChannels);
 	}
-	virtual void specifyOutputSpace(Q3ValueVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
+	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")

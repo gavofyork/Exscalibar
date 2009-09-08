@@ -43,12 +43,12 @@ class JackCapturer: public Processor
 	bool theKeepGoing, theDoneTransfer;
 	jack_nframes_t theWantFrames;
 	BufferData theBuffer;
-	
+
 	jack_port_t *theInputPort;
 	jack_client_t *theClient;
 	uint theFreq;
 	uint theCount;
-	
+
 	int process(jack_nframes_t nframes)
 	{
 		jack_default_audio_sample_t *in = (jack_default_audio_sample_t *)jack_port_get_buffer(theInputPort, nframes);
@@ -61,30 +61,30 @@ class JackCapturer: public Processor
 		theDoneTransfer = true;
 		return 0;
 	}
-	
+
 	void shutdown()
 	{
 		theKeepGoing = false;
 	}
-	
+
 	static int jackProcess(jack_nframes_t nframes, void *arg)
 	{
 		return static_cast<JackCapturer *>(arg)->process(nframes);
 	}
-	
+
 	static void jackShutdown(void *arg)
 	{
 		static_cast<JackCapturer *>(arg)->shutdown();
 	}
-	
+
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out);
 	virtual bool processorStarted();
 	virtual void processor();
 	virtual void processorStopped();
-	virtual void specifyOutputSpace(Q3ValueVector<uint> &samples);
-	
+	virtual void specifyOutputSpace(QVector<uint> &samples);
+
 public:
 	JackCapturer(): Processor("JackCapturer", NotMulti, Guarded) {}
 };
@@ -94,14 +94,14 @@ PropertiesInfo JackCapturer::specifyProperties() const
 	return PropertiesInfo();
 }
 
-void JackCapturer::specifyOutputSpace(Q3ValueVector<uint> &samples)
+void JackCapturer::specifyOutputSpace(QVector<uint> &samples)
 {
 	samples[0] = 8192;
 }
 
 void JackCapturer::initFromProperties(const Properties &)
 {
-	if ((theClient = jack_client_new(name())) == 0)
+	if ((theClient = jack_client_new(name().toLocal8Bit())) == 0)
 		qWarning("*** WARNING: JACK server not running!");
 	else
 	{	setupIO(0, theClient ? 1 : 0);
@@ -122,7 +122,7 @@ bool JackCapturer::processorStarted()
 	theBuffer.nullify();
 	theKeepGoing = true;
 	theCount = 0;
-	if ((theClient = jack_client_new(name())) == 0)
+	if ((theClient = jack_client_new(name().toLocal8Bit())) == 0)
 	{
 		qWarning("*** ERROR: JACK server not running!");
 		return false;

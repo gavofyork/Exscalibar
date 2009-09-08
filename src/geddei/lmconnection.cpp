@@ -15,8 +15,6 @@
 #include "processor.h"
 #include "mlconnection.h"
 #include "lmconnection.h"
-//Added by qt3to4:
-#include <Q3PtrList>
 using namespace Geddei;
 
 #define MESSAGES 0
@@ -27,13 +25,12 @@ namespace Geddei
 LMConnection::LMConnection(Source *source, uint sourceIndex, uint bufferSize)
 	: LxConnectionReal(source, sourceIndex), theBuffer(bufferSize)
 {
-	// we want to own the outputs.
-	theConnections.setAutoDelete(true);
 }
 
 LMConnection::~LMConnection()
 {
-	theConnections.clear();
+	while (theConnections.size())
+		delete theConnections.takeLast();
 }
 
 void LMConnection::enforceMinimum(uint elements)
@@ -44,8 +41,8 @@ void LMConnection::enforceMinimum(uint elements)
 
 bool LMConnection::waitUntilReady()
 {
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		if (!(*i)->waitUntilReady()) return false;
+	foreach (MLConnection* i, theConnections)
+		if (!i->waitUntilReady()) return false;
 	return true;
 }
 
@@ -64,8 +61,8 @@ void LMConnection::setType(const SignalType *type)
 {
 	delete theType;
 	theType = type->copy();
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		(*i)->setType(type);
+	foreach (MLConnection* i, theConnections)
+		i->setType(type);
 	theBuffer.setType(theType);
 }
 
@@ -73,8 +70,8 @@ void LMConnection::resetType()
 {
 	delete theType;
 	theType = 0;
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		(*i)->resetType();
+	foreach (MLConnection* i, theConnections)
+		i->resetType();
 
 	// TODO: Reset the type in the buffer too really...
 	theBuffer.clear();
@@ -118,15 +115,15 @@ BufferData LMConnection::makeScratchElements(uint elements, bool autoPush)
 
 void LMConnection::startPlungers()
 {
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		(*i)->startPlungers();
+	foreach (MLConnection* i, theConnections)
+		i->startPlungers();
 }
 
 void LMConnection::plungerSent()
 {
 	if (MESSAGES) qDebug("> LMConnection::plungerSent()");
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		(*i)->plungerSent();
+	foreach (MLConnection* i, theConnections)
+		i->plungerSent();
 	if (MESSAGES) qDebug("< LMConnection::plungerSent()");
 }
 
@@ -139,8 +136,8 @@ void LMConnection::pushPlunger()
 
 void LMConnection::noMorePlungers()
 {
-	for (Q3PtrList<MLConnection>::Iterator i = theConnections.begin(); i != theConnections.end(); i++)
-		(*i)->noMorePlungers();
+	foreach (MLConnection* i, theConnections)
+		i->noMorePlungers();
 }
 
 void LMConnection::transport(const BufferData &data)

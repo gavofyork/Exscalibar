@@ -36,8 +36,8 @@ bool MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 		if (sink->knowMultiplicity())
 		{	if (multiplicity() != sink->multiplicity())
 			{	qWarning("*** MultiSource::deferConnect(): Multiplicity incompatibility: Attempting to connect %d outputs to %d inputs!", multiplicity(), sink->multiplicity());
-				if (dynamic_cast<Processor *>(this)) qWarning("                                 Name of source: %s", dynamic_cast<Processor *>(this)->name().latin1());
-				if (dynamic_cast<Processor *>(sink)) qWarning("                                 Name of sink:   %s", dynamic_cast<Processor *>(sink)->name().latin1());
+				if (dynamic_cast<Processor *>(this)) qWarning("                                 Name of source: %s", qPrintable(dynamic_cast<Processor *>(this)->name()));
+				if (dynamic_cast<Processor *>(sink)) qWarning("                                 Name of sink:   %s", qPrintable(dynamic_cast<Processor *>(sink)->name()));
 				// TODO: error reporting code.
 				return true;
 			}

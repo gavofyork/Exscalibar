@@ -27,7 +27,7 @@ namespace rGeddei
 RemoteDomProcessor::RemoteDomProcessor(RemoteSession &session, const QString &type) : RemoteProcessor(session)
 {
 	if (!theSession->newDomProcessor(type, theHandle))
-	{	qWarning("*** WARNING: RemoteProcessor: Attempt to create DomProcessor of subtype %s failed.", type.latin1());
+	{	qWarning("*** WARNING: RemoteProcessor: Attempt to create DomProcessor of subtype %s failed.", qPrintable(type));
 		return;
 	}
 	// Any accesses to type must be virtual, since it will change its meaning depending upon

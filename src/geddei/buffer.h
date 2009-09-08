@@ -5,15 +5,12 @@
 #include <cassert>
 using namespace std;
 
-#include <qthread.h>
-#include <qmutex.h>
-#include <q3valuelist.h>
-#include <q3ptrlist.h>
+#include <QThread>
+#include <QMutex>
+#include <QVector>
 
-#include <exscalibar.h>
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "qfastwaitcondition.h"
 #include "bufferdata.h"
 #include "signaltype.h"
@@ -46,9 +43,9 @@ class Buffer: public ScratchOwner
 	uint readPos, writePos;
 	BufferInfo *lastScratch;
 	SignalType *theType;
-	Q3ValueVector<const Processor *> theTrapdoors;
-	Q3ValueList<uint> thePlungers;
-	Q3PtrList<BufferReader> theReaders;
+	QVector<const Processor *> theTrapdoors;
+	QList<uint> thePlungers;
+	QList<BufferReader*> theReaders;
 
 	friend ostream &operator<<(ostream &out, Buffer &me);
 
@@ -76,7 +73,7 @@ class Buffer: public ScratchOwner
 	/**
 	 * Simply finds the next plunger from readPos and returns its position in
 	 * the buffer.
-	 * 
+	 *
 	 * @return -1 if there isn't one.
 	 */
 	int nextPlungerUNSAFE() const;
@@ -84,7 +81,7 @@ class Buffer: public ScratchOwner
 	/**
 	 * Finds the next plunger from @a pos and returns its position relative to
 	 * @a pos. Upto @arg ignore plungers are ignored at position @a pos.
-	 * 
+	 *
 	 * @return -1 if there isn't such a plunger.
 	 */
 	int nextPlungerUNSAFE(uint pos, uint ignore) const;
@@ -96,14 +93,14 @@ public:
 
 	/**
 	 * Discards the next plunger, if there is one.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void discardNextPlunger();
 
 	/**
 	 * Checks for the space availability of elements in the buffer.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	uint elementsFree() const;
@@ -111,17 +108,17 @@ public:
 	/**
 	 * Waits until the buffer is at least empty enough to allow a number of
 	 * elements to be pushed into it or a native scratch to be made.
-	 * 
+	 *
 	 * @note The buffer size should be at least twice as big as any size waited
 	 * upon to prevent WSD.
-	 * 
+	 *
 	 * Thread-safe. Blocking.
 	 */
 	void waitForFreeElements(uint elements) const;
 
 	/**
 	 * Creates a scratch of a given length in either samples or seconds (or elements, but this is discouraged).
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	BufferData makeScratchElements(uint elements, bool autoPush = false);
@@ -129,7 +126,7 @@ public:
 	/**
 	 * Invalidates the last scratch. Should only be used if scratch was *not* auto-pushing.
 	 * Can be called automatically by non-auto-pushing native scratches at end of life.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void forgetScratch(const BufferData &data);
@@ -137,14 +134,14 @@ public:
 	/**
 	 * Pushes native data into Buffer. Will not cause a block. Invalidates the scratch passed as the argument.
 	 * Can be called automatically at end of life of a BufferData.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void pushScratch(const BufferData &data);
 
 	/**
 	 * Pushes non-native data into Buffer. May block if Buffer is full. Invalidates the last scratch silently.
-	 * 
+	 *
 	 * Thread-safe. Blocking.
 	 */
 	void pushData(const BufferData &data);
@@ -152,14 +149,14 @@ public:
 	/**
 	 * Puts all of data into buffer, blocking until complete. Invalidates the last scratch silently (unless == data, in which case not silently).
 	 * May block if data is non-native.
-	 * 
+	 *
 	 * Thread-safe. Blocking (potentially).
 	 */
 	void push(const BufferData &data);
 
 	/**
 	 * Appends a plunger to the current data.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void appendPlunger();
