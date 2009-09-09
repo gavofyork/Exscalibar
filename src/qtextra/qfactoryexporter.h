@@ -79,8 +79,8 @@
 
 #include <typeinfo>
 
-#include <QStringList.h>
-#include <QMap.h>
+#include <QStringList>
+#include <QMap>
 
 #include <exscalibar.h>
 

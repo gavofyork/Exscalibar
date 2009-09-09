@@ -10,6 +10,13 @@ ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
 	rejigEndPoints();
 }
 
+QPointF ConnectionItem::wouldAdjust() const
+{
+	QPointF to = qgraphicsitem_cast<InputItem*>(parentItem())->tip();
+	QPointF from = mapFromItem(m_from, m_from->tip());
+	return QPointF(1e99, from.y() - to.y());
+}
+
 void ConnectionItem::rejigEndPoints()
 {
 	QPainterPath p;
@@ -20,7 +27,6 @@ void ConnectionItem::rejigEndPoints()
 	QPointF c2((to.x() + from.x() * 3) / 4.0, to.y());
 	p.cubicTo(c1, c2, to);
 	setPath(p);
-//	setLine(QLineF(mapFromItem(m_from, m_from->tip()), qgraphicsitem_cast<InputItem*>(parentItem())->tip()));
 }
 
 ProcessorItem* ConnectionItem::fromProcessor() const

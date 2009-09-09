@@ -17,6 +17,8 @@ public:
 
 	OutputItem* from() const { return m_from; }
 
+	QPointF wouldAdjust() const;
+
 	ProcessorItem* toProcessor() const;
 	ProcessorItem* fromProcessor() const;
 

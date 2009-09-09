@@ -74,7 +74,7 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 
 void ProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
-	m_resizing = QRectF(m_size.width(), m_size.height(), -cornerSize * 2, -cornerSize * 2).contains(_e->pos());
+	m_resizing = QRectF(m_size.width(), m_size.height(), -(statusHeight + cornerSize), -(statusHeight + cornerSize)).contains(_e->pos());
 	if (m_resizing)
 		m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
 	QGraphicsItem::mousePressEvent(_e);
@@ -88,7 +88,7 @@ void ProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 
 void ProcessorItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
 {
-	if (QRectF(m_size.width(), m_size.height(), -cornerSize * 2, -cornerSize * 2).contains(_e->pos()))
+	if (QRectF(m_size.width(), m_size.height(), -(statusHeight + cornerSize), -(statusHeight + cornerSize)).contains(_e->pos()))
 		setCursor(Qt::SizeFDiagCursor);
 	else
 		setCursor(Qt::ArrowCursor);
@@ -104,7 +104,32 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		rejig();
 	}
 	else
+	{
+		QPointF best = QPointF(1.0e99, 1.0e99);
 		QGraphicsItem::mouseMoveEvent(_e);
+		foreach (QGraphicsItem* i, scene()->items())
+		{
+			QPointF wa = QPointF(1.0e99, 1.0e99);
+			if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
+			{
+				if (ci->toProcessor() == this || ci->fromProcessor() == this)
+					wa = (ci->toProcessor() == this ? 1 : -1) * ci->wouldAdjust();
+			}
+			else if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			{
+				if (pi != this)
+					wa = QPointF(pi->pos().x() - pos().x(), pi->pos().y() - pos().y());
+			}
+			if (fabs(best.x()) > fabs(wa.x()))
+				best.setX(wa.x());
+			if (fabs(best.y()) > fabs(wa.y()))
+				best.setY(wa.y());
+		}
+		if (fabs(best.x()) < 5)
+			setPos(pos() + QPointF(best.x(), 0));
+		if (fabs(best.y()) < 5)
+			setPos(pos() + QPointF(0, best.y()));
+	}
 
 	foreach (QGraphicsItem* i, scene()->items())
 		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
@@ -257,7 +282,12 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 		_p->drawLine(mp, m_size.height(), 0, m_size.height() - mp);
 		_p->drawLine(mp, 0, 0, mp);
 		_p->drawLine(m_size.width(), mp, m_size.width() - mp, 0);
-		_p->drawLine(m_size.width(), m_size.height() - mp, m_size.width() - mp, m_size.height());
+	}
+	_p->setPen(QPen(QColor(0, 0, 0, 128), 1));
+	for (int i = 0; i < 4; i++)
+	{
+		double mp = (statusHeight + cornerSize) * (4.0 - i) / 4.0;
+		_p->drawLine(m_size.width() - statusMargin, m_size.height() - mp, m_size.width() - mp, m_size.height() - statusMargin);
 	}
 
 	QRectF ca = clientArea();

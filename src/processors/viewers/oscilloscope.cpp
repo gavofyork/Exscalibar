@@ -73,7 +73,7 @@ bool Oscilloscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 void Oscilloscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	this->setupVisual(32, 20, 1000 / ((uint)_p["Refresh Frequency"].toInt() + 1));
+	this->setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
 	m_last.resize(_p["Size"].toInt());
 }
 

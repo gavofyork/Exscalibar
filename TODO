@@ -1,5 +1,6 @@
+SubProcessors
+Delete connections.
 Can't handle 48K rate.
-Resizable.
 Processor information - paused, cycles, CPU, samples read, ticker.
 Buffer information.
 Connection information.
