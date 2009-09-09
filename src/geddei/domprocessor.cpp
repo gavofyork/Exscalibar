@@ -52,12 +52,14 @@ DomProcessor::~DomProcessor()
 
 bool DomProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	return thePrimary->paintProcessor(_p, _s);
+	_p.fillRect(QRectF(QPointF(0, 0), _s), QBrush(Qt::black, Qt::Dense4Pattern));
+	return true;
+//	return thePrimary->paintProcessor(_p);
 }
 
 bool DomProcessor::createAndAddWorker()
 {
-	SubProcessor *sub = SubProcessorFactory::create(thePrimary->theType);
+	SubProcessor *sub = SubProcessorFactory::create(thePrimary->type());
 	if (!sub) return false;
 	addWorker(sub);
 	return true;
@@ -65,7 +67,7 @@ bool DomProcessor::createAndAddWorker()
 
 bool DomProcessor::createAndAddWorker(const QString &host, uint key)
 {
-	return ProcessorForwarder::createCoupling(this, host, key, thePrimary->theType) != 0;
+	return ProcessorForwarder::createCoupling(this, host, key, thePrimary->type()) != 0;
 }
 
 void DomProcessor::wantToStopNow()
@@ -505,11 +507,11 @@ bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 
 PropertiesInfo DomProcessor::specifyProperties() const
 {
-	return PropertiesInfo(thePrimary->specifyProperties())
+	return PropertiesInfo(thePrimary->specifyProperties().stashed())
 						 ("Latency/Throughput", 0.5, "Throughput to latency optimisation weighting. Towards 0 for low latency at the cost of CPU usage and throughput, towards 1 for high throughput at the cost of memory and latency. { Value >= 0; Value <= 1 }")
 						 ("Alter Buffer", true, "Change buffer size according to optimal configuration.")
 						 ("Optimal Throughput", 262144, "Optimal size of buffer for maximum throughput in elements.")
-						 ("Balance Load", true, "Attempt to balance load between different workers (if there is more than 1).")
+						 ("Balance Load", true, "Attempt to balance load between different workers (if there are more than 1).")
 						 ("Balance Interval", 10000, "Minimum time between balancing intervals in milliseconds. A larger value results in more accurate estimation but is less quick to adapt.")
 						 ("Local Fudge", 0.01, "Coefficient of load for a SubProcessor being local. Above 1.0 results in the localhost being given more than estimated, below 1.0 results in it being given less then the estimate.")
 						 ("Debug", false, "Debug this DomProcessor.");
@@ -517,16 +519,18 @@ PropertiesInfo DomProcessor::specifyProperties() const
 
 void DomProcessor::initFromProperties(const Properties &properties)
 {
-	theWeighting = max(0., min(1., properties["Latency/Throughput"].toDouble()));
-	theAlterBuffer = properties["Alter Buffer"].toBool();
-	theOptimalThroughput = properties["Optimal Throughput"].toInt();
-	theDebug = properties["Debug"].toBool();
-	theBalanceLoad = properties["Balance Load"].toBool();
-	theBalanceInterval = properties["Balance Interval"].toInt();
-	theLocalFudge = properties["Local Fudge"].toDouble();
+	Properties tp = properties;
+	Properties wp = tp.unstashed();
+	theWeighting = max(0., min(1., tp["Latency/Throughput"].toDouble()));
+	theAlterBuffer = tp["Alter Buffer"].toBool();
+	theOptimalThroughput = tp["Optimal Throughput"].toInt();
+	theDebug = tp["Debug"].toBool();
+	theBalanceLoad = tp["Balance Load"].toBool();
+	theBalanceInterval = tp["Balance Interval"].toInt();
+	theLocalFudge = tp["Local Fudge"].toDouble();
 	foreach (DxCoupling* w, theWorkers)
-		w->initFromProperties(properties);
-	theProperties = properties;
+		w->initFromProperties(wp);
+	theProperties = wp;
 	setupIO(thePrimary->theNumInputs, thePrimary->theNumOutputs);
 	foreach (DxCoupling* w, theWorkers)
 		w->defineIO(numInputs(), numOutputs());

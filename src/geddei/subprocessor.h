@@ -122,6 +122,12 @@ class DLLEXPORT SubProcessor: public QThread
 	//@}
 
 	//@{
+	/** Graphics stuff. */
+	uint theWidth;
+	uint theHeight;
+	//@}
+
+	//@{
 	/** Thread subsystem. */
 	virtual void run();
 	//@}
@@ -325,7 +331,7 @@ protected:
 	 * sample of output and each sample will be used exactly once, and there would be
 	 * only one input and one output exhibiting this behaviour.
 	 * Changing @a samplesIn to 2 would mean the 2 samples in would correspond to
-	 * one sample out and that each ionput chunk would overlap by 50%, meaning that
+	 * one sample out and that each input chunk would overlap by 50%, meaning that
 	 * generally each sample would be used twice.
 	 *
 	 * @param numInputs The number of input connection ports. This must be > 0. In
@@ -352,16 +358,14 @@ protected:
 	 * Call this from initFromProperties to initialise the visual properties of
 	 * the SubProcessor.
 	 *
-	 * If this is not called, the size will default to 50x30 and no redraw.
+	 * If this is not called, the size will default to 32x32.
 	 *
 	 * @param width The width of the drawing canvas. Should be a multiple of 10.
 	 * @param height The height of the drawing canvas. Should be a multiple of 10.
-	 * @param redrawPeriod The rate for which the processor's visual should
-	 * be redrawn in milliseconds. A value of zero means no explicit redraw.
 	 *
 	 * @sa setupIO() paintProcessor()
 	 */
-	void setupVisual(uint width = 32, uint height = 32, uint redrawPeriod = 0);
+	void setupVisual(uint width = 32, uint height = 32);
 
 	/**
 	 * Reimplement for to define how the SubProcessor should be drawn visually.
@@ -369,7 +373,9 @@ protected:
 	 *
 	 * @sa setupVisual()
 	 */
-	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual void paintProcessor(QPainter& _p) const;
+
+	virtual QString simpleText() const { return "S"; }
 
 	/**
 	 * SubProcessor constructor - use this when subclassing.
@@ -384,8 +390,46 @@ public:
 	 * Basic destructor.
 	 */
 	virtual ~SubProcessor() { }
+
+	virtual QString type() const { return theType; }
+
+	// Note the following are not for real use - only for getting visuals in GUI.
+
+	void init(Properties const& _p) { initFromProperties(_p); }
+
+	PropertiesInfo properties() const { return specifyProperties(); }
+
+	void draw(QPainter& _p) const { paintProcessor(_p); }
+
+	/**
+	 * Gets the width of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's width.
+	 */
+	uint width() const { return theWidth; }
+
+	/**
+	 * Gets the height of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's height.
+	 */
+	uint height() const { return theHeight; }
+
+	/**
+	 * Gets the number of inputs this processor has.
+	 *
+	 * @return The number of inputs.
+	 */
+	uint numInputs() const { return theNumInputs; }
+
+	/**
+	 * Gets the number of outputs this processor has.
+	 *
+	 * @return The number of outputs.
+	 */
+	uint numOutputs() const { return theNumOutputs; }
 };
 
-};
+}
 
 #endif

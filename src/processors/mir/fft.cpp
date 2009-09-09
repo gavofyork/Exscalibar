@@ -31,7 +31,7 @@ using namespace SignalTypes;
 
 #define PI 3.1415926535898
 
-#ifdef HAVE_FFTW
+#ifdef HAVE_FFTW3F
 
 #include <fftw3.h>
 
@@ -80,9 +80,9 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 	for (int i = 0; i < theSize; i++)
 	{	theIn[i] = in[0][i] * theWindow[i];
 	}
-	
+
 	fftwf_execute(thePlan);
-	
+
 	out[0][0] = theOut[0] / float(theSize / 2);
 	for (int i = 1; i < theSize / 2; i++)
 	{
@@ -187,8 +187,8 @@ void FFT::initFromProperties(const Properties &properties)
 	theSize = 1 << theLogSize;
 	if (theSize != (uint)properties["Size"].toInt())
 		qDebug("*** WARNING: Using simple FFT as FFTW not found. Can only use FFT sizes that are\n"
-		       "             powers of 2. Size truncated from %d (=2^%f) to %d (=2^%d). Fix this\n"
-		       "             by installing libfftw and recompiling the FFT subprocessor.", properties["Size"].toInt(), log(double(properties["Size"].toInt())) / log(2.0), theSize, theLogSize);
+			   "             powers of 2. Size truncated from %d (=2^%f) to %d (=2^%d). Fix this\n"
+			   "             by installing libfftw and recompiling the FFT subprocessor.", properties["Size"].toInt(), log(double(properties["Size"].toInt())) / log(2.0), theSize, theLogSize);
 	theSizeMask = theSize - 1;
 	setupIO(1, 1, theSize, theStep, 1);
 
@@ -223,8 +223,8 @@ bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &o
 PropertiesInfo FFT::specifyProperties() const
 {
 	return PropertiesInfo("Size", 2048, "The size of the block (in samples) from which to conduct a short time Fourier transform.")
-	                     ("Step", 1024, "The number of samples between consequent sampling blocks.")
-	                     ("Optimise", true, "True if time is taken to optimise the calculation.");
+						 ("Step", 1024, "The number of samples between consequent sampling blocks.")
+						 ("Optimise", true, "True if time is taken to optimise the calculation.");
 }
 
 EXPORT_CLASS(FFT, 0,9,0, SubProcessor);

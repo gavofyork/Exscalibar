@@ -84,6 +84,7 @@ class JackCapturer: public Processor
 	virtual void processor();
 	virtual void processorStopped();
 	virtual void specifyOutputSpace(QVector<uint> &samples);
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 
 public:
 	JackCapturer(): Processor("JackCapturer", NotMulti, Guarded) {}

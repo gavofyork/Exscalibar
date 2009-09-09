@@ -63,6 +63,7 @@ class DLLEXPORT Recorder: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void initFromProperties(const Properties &p);
 	virtual void receivedPlunger();
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 
 	// Properties
 	QFile theOutput;

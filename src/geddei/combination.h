@@ -12,7 +12,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "subprocessor.h"
 #else
 #include <geddei/subprocessor.h>
@@ -24,20 +23,24 @@ namespace Geddei
 class DLLEXPORT Combination: public SubProcessor
 {
 	SubProcessor *theX, *theY;
-	
+
 	uint theInterScope;
 	mutable BufferData *theResident;
-	
+
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	
+	virtual QString type() const { return theX->type() + "&" + theY->type(); }
+
 public:
+	SubProcessor* x() const { return theX; }
+	SubProcessor* y() const { return theY; }
+
 	Combination(SubProcessor *x, SubProcessor *y);
 	~Combination();
 };
 
-};
+}
 
 #endif

@@ -51,6 +51,7 @@ class ALSACapturer: public Processor
 	virtual void processorStopped();
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
 	{
 		theDevice = _p["Device"].toString();

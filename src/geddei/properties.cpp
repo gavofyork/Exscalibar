@@ -21,6 +21,13 @@ Properties::Properties(const PropertiesInfo &info)
 		theData[i.key()] = i.value();
 }
 
+void Properties::defaultFrom(PropertiesInfo const& _defaults)
+{
+	foreach (QString s, _defaults.keys())
+		if (!keys().contains(s))
+			theData[s] = _defaults.defaultValue(s);
+}
+
 void Properties::set(const Properties &pairs)
 {
 	for (QMap<QString, QVariant>::ConstIterator i = pairs.theData.begin(); i != pairs.theData.end(); i++)

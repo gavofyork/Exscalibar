@@ -102,6 +102,11 @@ public:
 	 */
 	QVariant get(const QString &key) const { return theData[key]; }
 
+	Properties stashed() const { Properties ret; foreach (QString k, keys()) ret[":" + k] = get(k); return ret; }
+	Properties unstashed() { Properties ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret[k.mid(1)] = get(k); remove(k); } return ret; }
+	Properties operator+(Properties const& _p) const { Properties ret(_p); ret.theData.unite(theData); return ret; }
+	void defaultFrom(const PropertiesInfo& _i);
+
 	/**
 	 * Set a value in the mapping.
 	 *
@@ -117,6 +122,8 @@ public:
 	 * @param value The value intended for key @a key .
 	 */
 	void set(const QString &key, const QVariant value) { theData[key] = value; }
+
+	void remove(QString const& _key) { theData.remove(_key); }
 
 	/** @internal
 	 * Destructively merge key-value pairs into the mapping.
@@ -253,12 +260,18 @@ public:
 	 */
 	uint size() const { return Properties::size(); }
 
+	PropertiesInfo stashed() const { PropertiesInfo ret; foreach (QString k, keys()) ret.set(":" + k, Properties::get(k), theInfo[k].description); return ret; }
+	PropertiesInfo unstashed() { PropertiesInfo ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret.set(k.mid(1), Properties::get(k), theInfo[k].description); remove(k); } return ret; }
+	PropertiesInfo destash() { PropertiesInfo ret = *this; (*this) = ret.unstashed(); return ret; }
+
+	void remove(QString const& _k) { Properties::remove(_k); theInfo.remove(_k); }
+
 	/**
 	 * Get a list of the keys in this object.
 	 *
 	 * @return A QStringList containing an entry of each key in this object.
 	 */
-	const QStringList keys() const { return Properties::keys(); }
+	QStringList keys() const { return Properties::keys(); }
 
 	/**
 	 * Inserts (or overwrites) a set of new tuples into this object.

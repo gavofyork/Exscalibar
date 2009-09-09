@@ -19,12 +19,27 @@ ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1)
 
 void ProcessorsScene::dragEnterEvent(QGraphicsSceneDragDropEvent* _event)
 {
-	_event->setAccepted(_event->mimeData()->hasFormat("text/plain") && ProcessorFactory::available(_event->mimeData()->text()));
+	if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("Processor:"))
+		_event->setAccepted(ProcessorFactory::available(_event->mimeData()->text().mid(10)));
+	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
+		_event->setAccepted(SubProcessorFactory::available(_event->mimeData()->text().mid(13)));
 }
 
 void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 {
-	ProcessorItem* i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text()));
+	ProcessorItem* i;
+	qDebug() << _event->mimeData()->text();
+	if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("Processor:"))
+		i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text().mid(10)));
+	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
+	{
+		// TODO Handle drag onto a Dom.
+		DomProcessorItem* dpi = new DomProcessorItem;
+		new SubProcessorItem(dpi, _event->mimeData()->text().mid(13), 0);
+		i = dpi;
+	}
+	else
+		return;
 	i->setPos(_event->scenePos());
 	addItem(i);
 	changed();

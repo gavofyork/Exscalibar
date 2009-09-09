@@ -31,6 +31,8 @@ SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi) :
 	thePrimaryOf = 0;
 	theTimeTaken = 0;
 	theNumInputs = theNumOutputs = theIn = theStep = theOut = 1;
+	theWidth = 32;
+	theHeight = 32;
 }
 
 void SubProcessor::setupIO(uint numInputs, uint numOutputs, uint samplesIn, uint samplesStep, uint samplesOut)
@@ -89,27 +91,23 @@ void SubProcessor::stop()
 	theCurrentOut.resize(0);
 }
 
-void SubProcessor::setupVisual(uint width, uint height, uint redrawPeriod)
+void SubProcessor::setupVisual(uint width, uint height)
 {
-	if (thePrimaryOf)
-		thePrimaryOf->setupVisual(width, height, redrawPeriod);
+	theWidth = width;
+	theHeight = height;
+//	if (thePrimaryOf)
+//		thePrimaryOf->setupVisual(width, height);
 }
 
-bool SubProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
+void SubProcessor::paintProcessor(QPainter& _p) const
 {
-	if (!thePrimaryOf)
-	{
-		qWarning("WARNING: paintProcessor called on a non-primary Sub!");
-		return false;
-	}
-	QRectF area(QPointF(0, 0), _s - QSizeF(1, 1));
-	_p.setFont(QFont("Helvetica", _s.height() *4/5, QFont::Black, false));
+	QRectF area(0, 0, width() - 1, height() - 1);
+	_p.setFont(QFont("Helvetica", height() *4/5, QFont::Black, false));
 	_p.setPen(Qt::black);
-	_p.drawText(area, Qt::AlignCenter, "?");
+	_p.drawText(area, Qt::AlignCenter, simpleText());
 	area.setTopLeft(QPointF(1, 1));
 	_p.setPen(Qt::white);
-	_p.drawText(area, Qt::AlignCenter, "?");
-	return true;
+	_p.drawText(area, Qt::AlignCenter, simpleText());
 }
 
 PropertiesInfo SubProcessor::specifyProperties() const

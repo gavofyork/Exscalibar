@@ -465,6 +465,7 @@ protected:
 	 * @return true if @a _s was honoured. false if setupVisual() was honoured.
 	 */
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 
 	/**
 	 * Reimplement to control execution to do processing.
@@ -989,6 +990,7 @@ public:
 	 * according to width()/height().
 	 */
 	bool draw(QPainter& _p, QSizeF const& _s) const;
+	QColor outlineColour() const { return specifyOutlineColour(); }
 
 	/**
 	 * Determine how full the buffer at input @a index is. Used by the Nite for

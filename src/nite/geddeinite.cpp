@@ -155,10 +155,21 @@ void GeddeiNite::slotUpdateProperties()
 {
 	theUpdatingProperties = true;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
-	if (i && qgraphicsitem_cast<ProcessorItem*>(i))
+	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
 	{
-		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i);
 		Properties const& p(pi->properties());
+		theProperties->setRowCount(p.size());
+		for (uint i = 0; i < p.size(); i++)
+		{
+			theProperties->setVerticalHeaderItem(i, new QTableWidgetItem(p.keys()[i]));
+			theProperties->setItem(i, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
+		}
+		theProperties->resizeColumnsToContents();
+		theProperties->setEnabled(true);
+	}
+	else if (SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(i))
+	{
+		Properties const& p(spi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
 		{
@@ -246,6 +257,11 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 	{
 		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
 		pi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
+	}
+	else if (qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
+	{
+		SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]);
+		spi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
 	setModified(true);
 }

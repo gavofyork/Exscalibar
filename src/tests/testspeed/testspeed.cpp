@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 	ProcessorGroup g;
 
 	int mode = argc > 1 ? QString(argv[1]).toInt() : 0;
-	
+
 	if (mode == 0)
 	{
 		(new MySource)->init("o", g);
@@ -157,10 +157,10 @@ int main(int argc, char **argv)
 		for (int i = 0; i < links; i++)
 			g["p" + QString::number(i)][0] >>=
 				g[i == links - 1 ? "i" : ("p" + QString::number(i+1))][0];
-		
+
 		uint count = 3;
 		float times[count], ltimes[count];
-		
+
 		for (uint t = 0; t < count; t++)
 		{
 			QTime clock;
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 		for (uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
 		sd = sqrt(sd / float(count));
 		lsd = sqrt(lsd / float(count));
-		
+
 		cout << mean << " " << sd << " " << lmean << " " << lsd << endl;
 	}
 	else if (mode == 3)
@@ -200,10 +200,10 @@ int main(int argc, char **argv)
 			g["p"][0] >>= g["i"][0];
 		}
 		else
-			g["o"][0] >>= g["i"][0];	
+			g["o"][0] >>= g["i"][0];
 		uint count = 3;
 		float times[count], ltimes[count];
-		
+
 		for (uint t = 0; t < count; t++)
 		{
 			QTime clock;
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
 		for (uint t = 0; t < count; t++) lsd += ((float(ltimes[t]) - lmean) * (float(ltimes[t]) - lmean));
 		sd = sqrt(sd / float(count));
 		lsd = sqrt(lsd / float(count));
-		
+
 		cout << mean << " " << sd << " " << lmean << " " << lsd << endl;
 	}
 	g.disconnectAll();

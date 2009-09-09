@@ -29,6 +29,6 @@ QMimeData* ProcessorView::mimeData(const QList<QListWidgetItem *> _items) const
 	if (!_items.size())
 		return 0;
 	QMimeData* r = new QMimeData;
-	r->setText(_items[0]->text());
+	r->setText((_items[0]->type() == QListWidgetItem::UserType ? "Processor:" : "SubProcessor:") + _items[0]->text());
 	return r;
 }

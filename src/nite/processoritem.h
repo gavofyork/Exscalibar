@@ -51,6 +51,8 @@ public:
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	void postLoad()	{}
 
+	virtual QSizeF centreMin() const { return QSizeF(m_processor->width(), m_processor->height()); }
+
 	virtual QRectF boundingRect() const
 	{
 		return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f));
@@ -66,19 +68,81 @@ public:
 	enum { Type = UserType + 1 };
 	virtual int type() const { return Type; }
 
+	virtual void propertiesChanged();
+
+protected:
+	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);
+	virtual Processor* reconstructProcessor();
+	virtual Properties completeProperties() const { return m_properties; }
+
+	Properties			m_properties;
+	Processor*			m_processor;
+
 private:
 	virtual void timerEvent(QTimerEvent*);
 
-	void propertiesChanged();
-	void rejig(Processor* _old = 0, bool _bootStrap = false);
-
-	Processor*			m_processor;
 	QGraphicsRectItem*	m_statusBar;
 	PauseItem*			m_pauseItem;
-	Properties			m_properties;
 	QSizeF				m_size;
 	int					m_timerId;
 	bool				m_resizing;
 	QPointF				m_origPosition;
 };
 
+class SubProcessorItem;
+
+class DomProcessorItem: public ProcessorItem
+{
+public:
+	DomProcessorItem(Properties const& _pr = Properties(), QString const& _name = QString::null);
+
+	DomProcessor* domProcessor() const;
+
+//	enum { Type = UserType + 7 };
+//	virtual int type() const { return Type; }
+
+protected:
+	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);
+	virtual QSizeF centreMin() const;
+	virtual Properties completeProperties() const;
+	virtual Processor* reconstructProcessor();
+
+private:
+	QString composedSubs() const;
+	QList<SubProcessorItem*> ordered() const;
+};
+
+class SubProcessorItem: public QGraphicsItem
+{
+	friend class DomProcessorItem;// so it can have its properties populated.
+
+public:
+	SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index = 0, Properties const& _pr = Properties());
+
+	QSizeF size() const { return QSizeF(subProcessor()->width(), subProcessor()->height()); }
+
+	uint index() const { return m_index; }
+	DomProcessorItem* domProcessorItem() const { return qgraphicsitem_cast<DomProcessorItem*>(parentItem()); }
+	DomProcessor* domProcessor() const { return domProcessorItem()->domProcessor(); }
+	SubProcessor* subProcessor() const;
+
+	QString spType() const { return m_type; }
+
+	enum { Type = UserType + 8 };
+	virtual int type() const { return Type; }
+
+	Properties const& properties() const { return m_properties; }
+	void setProperty(QString const& _key, QVariant const& _value);
+
+private:
+	virtual QRectF boundingRect() const
+	{
+		return QRectF(QPointF(-2, -2), size() + QSizeF(4, 4));
+	}
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual void focusInEvent(QFocusEvent* _e);
+
+	Properties			m_properties;
+	QString				m_type;
+	uint				m_index;
+};

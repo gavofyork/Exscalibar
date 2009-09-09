@@ -95,6 +95,7 @@ class DLLEXPORT Player: public Processor
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual void specifyOutputSpace(QVector<uint> &samples);
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 
 public:
 	/**

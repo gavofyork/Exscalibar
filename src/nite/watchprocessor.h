@@ -49,7 +49,7 @@ class GeddeiNite;
  */
 class WatchProcessor: public Processor
 {
-	Q_OBJECT
+//	Q_OBJECT
 
 	GeddeiNite *theGeddeiNite;
 	QDockWidget *theDockWatch;

@@ -54,7 +54,154 @@ public:
 	virtual int type() const { return Type; }
 };
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_processor(_p), m_properties(_pr), m_size(0, 0), m_timerId(-1), m_resizing(true)
+DomProcessorItem::DomProcessorItem(Properties const& _pr, QString const& _name):
+	ProcessorItem(0, _pr, _name)
+{
+}
+
+DomProcessor* DomProcessorItem::domProcessor() const { return dynamic_cast<DomProcessor*>(processor()); }
+
+QSizeF DomProcessorItem::centreMin() const
+{
+	QSizeF s(0, 0);
+	foreach (SubProcessorItem* i, filter<SubProcessorItem>(childItems()))
+		s = QSizeF(s.width() + i->size().width(), max(s.height(), i->size().height()));
+	return s;
+}
+
+QString DomProcessorItem::composedSubs() const
+{
+	QString ret;
+	foreach (SubProcessorItem* i, ordered())
+		ret += "&" + i->spType();
+	return ret.mid(1);
+}
+
+Properties DomProcessorItem::completeProperties() const
+{
+	Properties ret;
+	QList<SubProcessorItem*> spis = ordered();
+	for (int i = (uint)spis.count() - 1; i >= 0; i--)
+		ret = ret.stashed() + spis[i]->properties();
+	ret = ret.stashed() + properties();
+	return ret;
+}
+
+Processor* DomProcessorItem::reconstructProcessor()
+{
+	QString cs = composedSubs();
+	if (cs.isEmpty())
+		return 0;
+	Processor* p = new DomProcessor(cs);
+	PropertiesInfo pi = p->properties();
+	m_properties.defaultFrom(pi.destash());
+	foreach (SubProcessorItem* i, ordered())
+		i->m_properties.defaultFrom(pi.destash());
+	return p;
+}
+
+QList<SubProcessorItem*> DomProcessorItem::ordered() const
+{
+	QList<SubProcessorItem*> ret;
+	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
+	for (uint i = 0; i < (uint)spis.count(); i++)
+	{
+		SubProcessorItem* spi;
+		foreach (spi, spis)
+			if (spi->index() == i)
+				goto OK;
+		assert("Indices out of order.");
+		break;
+		OK:
+		ret << spi;
+	}
+	return ret;
+}
+
+void DomProcessorItem::rejig(Processor* _old, bool _bootStrap)
+{
+	QPointF cp = clientArea().topLeft();
+	foreach (SubProcessorItem* spi, ordered())
+	{
+		spi->setPos(cp);
+		cp += QPointF(spi->size().width(), 0);
+	}
+	ProcessorItem::rejig(_old, _bootStrap);
+}
+
+SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index, Properties const& _pr):
+	QGraphicsItem	(_dpi),
+	m_properties	(_pr),
+	m_type			(_type),
+	m_index			(_index)
+{
+	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
+	_dpi->propertiesChanged();
+}
+
+SubProcessor* SubProcessorItem::subProcessor() const
+{
+	QList<SubProcessor*> cs;
+	SubProcessor* cur = domProcessor()->primary();
+	int i = m_index;
+	forever
+	{
+		if (Combination* c = dynamic_cast<Combination*>(cur))
+		{
+			cs.append(c->y());
+			cs.append(c->x());
+		}
+		else
+			if (i)
+				i--;
+			else
+				return cur;
+		if (cs.isEmpty())
+			return 0;
+		cur = cs.takeLast();
+	}
+}
+
+void SubProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
+{
+	QRectF ca = QRectF(QPointF(0, 0), size());
+	_p->save();
+	_p->setClipRect(ca);
+	_p->fillRect(ca, QColor::fromHsv(300, 96, 160));
+	subProcessor()->draw(*_p);
+	_p->restore();
+
+	if (isSelected())
+	{
+		_p->setBrush(Qt::NoBrush);
+		for (int i = 0; i < 5; i+=2)
+		{
+			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
+			_p->drawRect(ca);
+		}
+	}
+}
+
+void SubProcessorItem::setProperty(QString const& _key, QVariant const& _value)
+{
+	m_properties[_key] = _value;
+	prepareGeometryChange();
+	domProcessorItem()->propertiesChanged();
+	update();
+}
+
+void SubProcessorItem::focusInEvent(QFocusEvent* _e)
+{
+	foreach (QGraphicsItem* i, scene()->selectedItems())
+		if (i != this)
+			i->setSelected(false);
+	setSelected(true);
+	assert(isSelected());
+	update();
+	QGraphicsItem::focusInEvent(_e);
+}
+
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(0, 0), m_timerId(-1), m_resizing(true)
 {
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
@@ -63,13 +210,15 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 	m_pauseItem = new PauseItem(this);
 	m_pauseItem->setPos(0, 0);
 
-	foreach (QString s, m_processor->properties().keys())
-		if (!m_properties.keys().contains(s))
-			m_properties[s] = m_processor->properties().defaultValue(s);
-	m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
-	rejig(0, true);
 	setAcceptHoverEvents(true);
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
+
+	if (m_processor)
+	{
+		m_properties.defaultFrom(m_processor->properties());
+		m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
+		rejig(0, true);
+	}
 }
 
 void ProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
@@ -157,28 +306,33 @@ void ProcessorItem::typesConfirmed()
 			ii->typesConfirmed();
 }
 
+Processor* ProcessorItem::reconstructProcessor()
+{
+	return ProcessorFactory::create(m_processor->type());
+}
+
 void ProcessorItem::propertiesChanged()
 {
-	if (m_processor->isRunning())
+	if (m_processor && m_processor->isRunning())
 		return;
 	Processor* old = m_processor;
-	m_processor = ProcessorFactory::create(old->type());
+	m_processor = reconstructProcessor();
 	if (!m_processor)
 	{
 		m_processor = old;
 		return;
 	}
 
-	m_processor->init(old->name(), m_properties);
-	rejig(old);
+	m_processor->init(old ? old->name() : QString::number((uint)this), completeProperties());
+	rejig(old, !old);
 	delete old;
 }
 
 void ProcessorItem::rejig(Processor* _old, bool _bootStrap)
 {
 	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
-	minHeight = max(minHeight, cornerSize + m_processor->height() + statusHeight + statusMargin * 2);
-	double minWidth = cornerSize * 2 + m_processor->width();
+	minHeight = max(minHeight, cornerSize + centreMin().height() + statusHeight + statusMargin * 2);
+	double minWidth = cornerSize * 2 + centreMin().width();
 	prepareGeometryChange();
 	m_size = QSizeF(max(m_size.width(), minWidth), max(m_size.height(), minHeight));
 	update();
@@ -272,7 +426,7 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 
 	//_p->setPen(QPen(QColor::fromHsv(120, 96, 80, 255), 0));
 	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(QColor::fromHsv(120, 96, 160, 255));
+	_p->setBrush(m_processor->outlineColour());
 	_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
 
 	_p->setPen(QPen(QColor(0, 0, 0, 64), 1));

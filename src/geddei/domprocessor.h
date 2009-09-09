@@ -159,7 +159,7 @@ class DLLEXPORT DomProcessor: public Processor
 	 *
 	 * @sa Processor
 	 */
-	void setupVisual(uint width = 50, uint height = 30, uint redrawPeriod = 0) { Processor::setupVisual(width, height, redrawPeriod); }
+	void setupVisual(uint width = 32, uint height = 32, uint redrawPeriod = 0) { Processor::setupVisual(width, height, redrawPeriod); }
 	friend class SubProcessor;
 
 	//* Reimplementations from Processor.
@@ -173,6 +173,7 @@ class DLLEXPORT DomProcessor: public Processor
 	virtual void specifyInputSpace(QVector<uint> &samples);
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 96, 160); }
 
 	/**
 	 * Note this will assume the stack has a QMutexLocker for theQueueLock in
@@ -226,6 +227,8 @@ public:
 	 * @return true iff a worker was added.
 	 */
 	bool createAndAddWorker(const QString &host, uint key);
+
+	SubProcessor* primary() const { return thePrimary; }
 
 	/**
 	 * Constructor. A valid primary SubProcessor must be passed in @a primary.
