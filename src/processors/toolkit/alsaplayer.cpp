@@ -54,19 +54,19 @@ class ALSAPlayer: public Processor
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
 	{
-		theDevice = _p["device"].toString();
-		theChannels = _p["channels"].toInt();
-		thePeriodSize = _p["periodsize"].toInt();
-		thePeriods = _p["periods"].toInt();
+		theDevice = _p["Device"].toString();
+		theChannels = _p["Channels"].toInt();
+		thePeriodSize = _p["Period Size"].toInt();
+		thePeriods = _p["Periods"].toInt();
 		setupIO(theChannels, 0);
 	}
 	virtual void specifyInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("device", "hw:0,0", "The ALSA hardware device to open.")
-								("channels", 2, "The number of channels to use.")
-								("periodsize", 1024, "The number of frames in each period.")
-								("periods", 4, "The number of periods in the outgoing buffer.");
+		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
+								("Channels", 2, "The number of channels to use.")
+								("Period Size", 1024, "The number of frames in each period.")
+								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
 	ALSAPlayer() : Processor("ALSAPlayer", NotMulti, Cooperative), thePcmHandle(0) {}

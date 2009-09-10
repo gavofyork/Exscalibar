@@ -94,10 +94,11 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		delete m_currentConnect;
 		m_currentConnect = 0;
 		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(itemAt(_e->scenePos())))
-		{
-			ci = new ConnectionItem(ii, oi);
-			changed();
-		}
+			if (!filter<ConnectionItem>(ii->childItems()).count())
+			{
+				ci = new ConnectionItem(ii, oi);
+				changed();
+			}
 	}
 	QGraphicsScene::mouseReleaseEvent(_e);
 

@@ -83,7 +83,11 @@ bool ProcessorGroup::confirmTypes() const
 	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes()");
 	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
 	{	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes(): Confirming %p...", i.value());
-		if (!i.value()->confirmTypes()) ret = false;
+		if (!i.value()->confirmTypes())
+		{
+			m_errorProc = i.value();
+			ret = false;
+		}
 	}
 	return ret;
 }

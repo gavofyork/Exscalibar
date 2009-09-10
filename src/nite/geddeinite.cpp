@@ -241,9 +241,9 @@ void GeddeiNite::on_editRemove_activated()
 	if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
 	{
 		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
-			if (i->fromProcessor() == qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+			if (i->fromProcessor() == theScene.selectedItems()[0])
 				delete i;
-		delete qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
+		delete theScene.selectedItems()[0];
 		setModified(true);
 		theScene.update();
 	}
@@ -279,6 +279,11 @@ bool GeddeiNite::connectAll()
 
 	if (!theGroup.confirmTypes())
 	{
+		Processor* p = theGroup.errorProc();
+		assert(p);
+		Processor::ErrorType et = p->errorType();
+		int ed = p->errorData();
+		qDebug() << et << ed;
 		statusBar()->showMessage("Problem confirming types.");
 		disconnectAll();
 		return false;

@@ -4,9 +4,10 @@
 
 ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
 	QGraphicsPathItem	(_to),
+	m_isValid			(true),
 	m_from				(_from)
 {
-	setPen(QPen(Qt::black, 2));
+	setPen(QPen(m_isValid ? Qt::black : Qt::red, 2));
 	rejigEndPoints();
 }
 

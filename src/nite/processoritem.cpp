@@ -389,22 +389,31 @@ void ProcessorItem::focusInEvent(QFocusEvent* _e)
 bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 {
 	m_processor->setGroup(_g);
-	foreach (QGraphicsItem* i, childItems())
-		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
-			foreach (QGraphicsItem* j, ii->childItems())
-				if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(j))
-				{	if (ci->from()->inputItem())
-					{
-						ci->from()->processorItem()->m_processor->disconnect(ci->from()->index());
-						ci->from()->processorItem()->m_processor->split(ci->from()->index());
-						ci->from()->processorItem()->m_processor->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->processor(), ci->from()->inputItem()->index());
-						ci->from()->setInputItem(0);
-					}
-					else if (!ci->from()->processorItem()->m_processor->isConnected(ci->from()->index()))
-						ci->from()->setInputItem(ii);
-					if (!ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
-						return false;
-				}
+	bool ret = true;
+	foreach (InputItem* ii, filter<InputItem>(childItems()))
+	{
+		QList<ConnectionItem*> cis = filter<ConnectionItem>(ii->childItems());
+		if (cis.size() != 1)
+			return false;
+		ConnectionItem* ci = cis[0];
+		if (ci->from()->inputItem())
+		{
+			ci->from()->processorItem()->m_processor->disconnect(ci->from()->index());
+			ci->from()->processorItem()->m_processor->split(ci->from()->index());
+			ci->from()->processorItem()->m_processor->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->processor(), ci->from()->inputItem()->index());
+			ci->from()->setInputItem(0);
+		}
+		else if (!ci->from()->processorItem()->m_processor->isConnected(ci->from()->index()))
+			ci->from()->setInputItem(ii);
+		if (ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
+			ci->setValid(true);
+		else
+		{
+			ci->setValid(false);
+			ret = false;
+		}
+	}
+	if (!ret) return false;
 	if (uint i = m_processor->redrawPeriod())
 		m_timerId = startTimer(i);
 	return true;

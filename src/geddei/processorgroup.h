@@ -39,6 +39,7 @@ class DomProcessor;
  */
 class DLLEXPORT ProcessorGroup
 {
+	mutable Processor* m_errorProc;
 	bool theAdopt;
 	QMap<QString, Processor *> theProcessors;
 
@@ -54,6 +55,7 @@ public:
 	 * @return true iff all types confirm correctly.
 	 */
 	bool confirmTypes() const;
+	Processor* errorProc() const { return m_errorProc; }
 
 	/**
 	 * Start all Processor objects in the group. Note this returns once all have

@@ -17,6 +17,8 @@ public:
 
 	OutputItem* from() const { return m_from; }
 
+	void setValid(bool _v) { m_isValid = _v; }
+
 	QPointF wouldAdjust() const;
 
 	ProcessorItem* toProcessor() const;
@@ -25,5 +27,6 @@ public:
 	void rejigEndPoints();
 
 private:
+	bool m_isValid;
 	OutputItem* m_from;
 };
