@@ -298,7 +298,7 @@ void DomProcessor::processor()
 
 void DomProcessor::eater()
 {
-	theOwningProcessor.setLocalData(new Processor *(this));
+	setThreadProcessor();
 
 	uint lastPri = 0;
 

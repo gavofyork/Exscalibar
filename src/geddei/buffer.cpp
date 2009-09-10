@@ -202,10 +202,10 @@ void Buffer::discardNextPlungerUNSAFE()
 
 bool Buffer::trapdoorUNSAFE() const
 {
-	if (MESSAGES) qDebug("Checking trapdoor for %s...", Processor::getCallersProcessor() ? qPrintable(Processor::getCallersProcessor()->name()) : "[SubProcessor]");
+	if (MESSAGES) qDebug("Checking trapdoor for %s...", Processor::threadProcessor() ? qPrintable(Processor::threadProcessor()->name()) : "[SubProcessor]");
 	QVector<const Processor *>::const_iterator i;
 	for (i = theTrapdoors.begin(); i != theTrapdoors.end(); i++)
-		if (*i == Processor::getCallersProcessor()) break;
+		if (*i == Processor::threadProcessor()) break;
 	return i != theTrapdoors.end();
 }
 

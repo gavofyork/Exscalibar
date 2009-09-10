@@ -13,7 +13,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "signaltyperef.h"
 #include "lxconnection.h"
 #else
@@ -36,7 +35,7 @@ namespace Geddei
 class DLLEXPORT LxConnectionNull: public LxConnection
 {
 	virtual const SignalTypeRef type() { return SignalTypeRef(theType); }
-	virtual void push(const BufferData &) {}
+	virtual void push(const BufferData &);
 	virtual void pushPlunger() {}
 	virtual void startPlungers() {}
 	virtual void plungerSent() {}
@@ -51,11 +50,12 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual void sourceStopped() {}
 	virtual void reset() {}
 	virtual void enforceMinimum(const uint) {}
+	virtual uint bufferElementsFree() { return (uint)-1; }
 
 public:
 	LxConnectionNull(Source *source, uint sourceIndex) : LxConnection(source, sourceIndex) {}
 };
 
-};
+}
 
 #endif

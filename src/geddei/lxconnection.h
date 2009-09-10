@@ -84,13 +84,13 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 * generally use this method directly unless you know what you are doing.
 	 * Instead use Processor::plunge(), which will insert a plunger into all
 	 * output connections.
-	 * 
+	 *
 	 * Notifies any receiving Sink objects that anther plunger will be ready to
 	 * be received in the future.
 	 *
 	 * @note To avoid any confusion regarding order, do not call this when
 	 * there are any active (unpushed) scratch BufferData objects around.
-	 * 
+	 *
 	 * @sa Processor::plunge()
 	 */
 	virtual void pushPlunger() = 0;
@@ -141,19 +141,19 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 * we may receive a new set of plunger notifications.
 	 */
 	virtual void startPlungers() = 0;
-	
+
 	/**
 	 * This will let the opposite end of the connection know that the source is
 	 * done, so they know that no more data will follow.
 	 */
 	virtual void noMorePlungers() = 0;
-	
+
 	/**
 	 * This will let the opposite end of the connection know that the source
 	 * is about to push a plunger.
 	 */
 	virtual void plungerSent() = 0;
-	
+
 	//@}
 
 protected:
@@ -179,7 +179,7 @@ protected:
 	/**
 	 * Returns the maximum amount of scratch elements we could ever make that
 	 * won't (definately) cause a deadlock.
-	 * 
+	 *
 	 * Typically this value should be divided by two to be sure that the
 	 * scratch size asked for will definately be possible.
 	 *
@@ -211,11 +211,17 @@ protected:
 public:
 	/**
 	 * Retrieves the type of signal this connection transfers.
-	 * 
+	 *
 	 * @return A SignalTypeRef of this conection's SignalType.
 	 */
 	virtual const SignalTypeRef type() { return SignalTypeRef(theType); }
-	
+
+	/**
+	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but
+	 * harder for LR). Useful for gauging amount to push.
+	 */
+	virtual uint bufferElementsFree() = 0;
+
 	/**
 	 * Create a new scratch pad with which data may be sent efficiently.
 	 *
@@ -308,7 +314,7 @@ public:
 	/**
 	 * Returns the maximum amount of scratch samples we could ever make that
 	 * won't (definately) cause a deadlock.
-	 * 
+	 *
 	 * Typically this value should be divided by two to be sure that the
 	 * scratch size asked for will definately be possible.
 	 *

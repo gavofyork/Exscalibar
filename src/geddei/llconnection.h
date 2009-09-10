@@ -13,7 +13,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "xlconnectionreal.h"
 #include "lxconnectionreal.h"
 #else

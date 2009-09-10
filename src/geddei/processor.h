@@ -141,6 +141,10 @@ class DLLEXPORT BailException
  * values for those properties. It may specify a visual size and method for
  * drawing in a GUI.
  */
+class DLLEXPORT CoProcessor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
+{
+};
+
 class DLLEXPORT Processor: protected QThread, virtual public Source, virtual public Sink, public MultiSource, public MultiSink
 {
 public:
@@ -248,7 +252,7 @@ private:
 	QString theCustomError;
 	//@}
 
-	/** Thread subsystem. @sa getCallersProcessor() */
+	/** Thread subsystem. @sa threadProcessor() */
 	virtual void run();
 
 public:
@@ -256,7 +260,9 @@ public:
 	 * @return Returns the Processor that the calling thread is operating under, or 0
 	 * if no Processor is associated with calling thread.
 	 */
-	static Processor *getCallersProcessor();
+	static Processor *threadProcessor();
+	static void unsetThreadProcessor();
+	void setThreadProcessor();
 
 private:
 	//@{
@@ -429,24 +435,7 @@ protected:
 	 * to be read, false iff no more data can *ever* be read.
 	 */
 	bool thereIsInputForProcessing();
-
-	/** @overload
-	 * Blocks until either:
-	 *
-	 * 1) There will never again be enough input for any processing. In this
-	 * instance, it returns false.
-	 *
-	 * 2) There are at least specifyInputSpace() samples (for each input)ready
-	 * for reading immediately. It guarantees that reading this data will not
-	 * require any more plunging. In this case, true is returned.
-	 *
-	 * If there are any plungers to be read immediately, then they are read.
-	 * This is only the case if the next read would cause a plunger to be read.
-	 *
-	 * @return true iff a read of @a samples will not block or cause a plunger
-	 * to be read, false iff no more data can *ever* be read.
-	 */
-	bool thereIsSomeOutputSpace();
+	virtual int canProcess();
 
 	/**
 	 * Call this from initFromProperties to initialise I/O connections.
@@ -495,7 +484,7 @@ protected:
 	 * however, always return true).
 	 */
 	virtual void processor();
-	virtual void processCycle() {}
+	virtual void process() {}
 
 	/**
 	 * Reimplement to initialise any stuff that processor may need to be open/
@@ -668,6 +657,11 @@ public:
 	 * They are generally not used when coding a new type of Processor class.
 	 */
 	//@{
+
+	/**
+	 * Do computation, but do not block.
+	 */
+	void processCycle();
 
 	/**
 	 * Puts the Processor into a gvien ProcessorGroup.

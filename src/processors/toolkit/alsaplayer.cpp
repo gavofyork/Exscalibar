@@ -45,10 +45,11 @@ class ALSAPlayer: public Processor
 	uint thePeriodSize;
 	uint thePeriods;
 	snd_pcm_t *thePcmHandle;
+	QVector<short> m_outData;
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
-	virtual void processor();
+	virtual void process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
@@ -104,6 +105,7 @@ bool ALSAPlayer::processorStarted()
 		uint f;
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
 		qDebug() << "Using rate " << f;
+		m_outData.resize(thePeriodSize * theChannels);
 		return true;
 	}
 	if (thePcmHandle)
@@ -112,29 +114,25 @@ bool ALSAPlayer::processorStarted()
 	return false;
 }
 
-void ALSAPlayer::processor()
+void ALSAPlayer::process()
 {
-	short outdata[thePeriodSize * theChannels];
-	while (thereIsInputForProcessing(thePeriodSize))
+	BufferData d[theChannels];
+	for (uint c = 0; c < theChannels; c++)
 	{
-		BufferData d[theChannels];
+		d[c] = input(c).readSamples(thePeriodSize, false);
+		assert(d[c].elements() == thePeriodSize);
+	}
+	for (uint i = 0; i < thePeriodSize; i++)
 		for (uint c = 0; c < theChannels; c++)
-		{
-			d[c] = input(c).readSamples(thePeriodSize, false);
-			assert(d[c].elements() == thePeriodSize);
-		}
-		for (uint i = 0; i < thePeriodSize; i++)
-			for (uint c = 0; c < theChannels; c++)
-				outdata[i * theChannels + c] = short(d[c][i] * 32768.f);
-		uint written = 0;
-		while (written < thePeriodSize)
-		{
-			int pcmreturn = snd_pcm_writei(thePcmHandle, outdata + written * theChannels, thePeriodSize - written);
-			if (pcmreturn > 0)
-				written += pcmreturn;
-			else
-				snd_pcm_prepare(thePcmHandle);
-		}
+			m_outData[i * theChannels + c] = short(d[c][i] * 32768.f);
+	uint written = 0;
+	while (written < thePeriodSize)
+	{
+		int pcmreturn = snd_pcm_writei(thePcmHandle, m_outData.data() + written * theChannels, thePeriodSize - written);
+		if (pcmreturn > 0)
+			written += pcmreturn;
+		else
+			snd_pcm_prepare(thePcmHandle);
 	}
 }
 

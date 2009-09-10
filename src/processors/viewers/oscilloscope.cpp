@@ -25,7 +25,7 @@ class Oscilloscope : public Processor
 {
 	QVector<float> m_last;
 
-	virtual void processor();
+	virtual void process();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
@@ -37,13 +37,10 @@ public:
 	Oscilloscope() : Processor("Oscilloscope") {}
 };
 
-void Oscilloscope::processor()
+void Oscilloscope::process()
 {
-	while (thereIsInputForProcessing())
-	{
-		BufferData d = input(0).readSamples(m_last.count());
-		d.copyTo(m_last.data());
-	}
+	BufferData d = input(0).readSamples(m_last.count());
+	d.copyTo(m_last.data());
 }
 
 bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const

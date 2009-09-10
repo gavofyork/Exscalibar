@@ -61,6 +61,33 @@ uint xLConnectionReal::elementsReady() const
 	return ret;
 }
 
+bool xLConnectionReal::require(uint elements) const
+{
+#ifdef EDEBUG
+	if (!theReader)
+	{	qWarning("*** WARNING: requireSamples() cannot be called on a xLConnection object after\n"
+				 "             killReader() has been called. Ignoring this call.\n");
+		return true;
+	}
+#endif
+	if (MESSAGES) qDebug("xLC::require(%d)...", elements);
+
+	while (1)
+	{
+		int np = theReader->nextPlunger();
+		if (np != -1 && (uint)np < elements)
+		{
+			theReader->skipElements(np);
+			theReader->skipPlunger();
+			theSink->plunged(theSinkIndex);
+		}
+		else
+			break;
+	}
+	return theReader->elementsReady() >= elements;
+		return true;
+}
+
 void xLConnectionReal::waitForElements(uint elements) const
 {
 #ifdef EDEBUG

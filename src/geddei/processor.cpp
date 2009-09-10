@@ -62,12 +62,38 @@ Processor::~Processor()
 	if (MESSAGES) qDebug("Deleted Processor.");
 }
 
-void Processor::process()
+void Processor::processor()
 {
-	while (thereIsInputForProcessing())
+	while (guard())
 	{
-		processCycle();
+		if (canProcess())
+			process();
 	}
+}
+
+int Processor::canProcess()
+{
+	QVector<uint> rData(numInputs());
+	specifyInputSpace(rData);
+	QVector<uint> rSpace(numOutputs());
+	specifyOutputSpace(rSpace);
+
+	uint cycles = UINT_MAX;
+	for (uint i = 0; i < numOutputs(); i++)
+	{
+		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
+		if (bFree < rSpace[i])
+			return 0;
+		else if (rSpace[i] > 0)
+			cycles = min(cycles, bFree / rSpace[i]);
+	}
+	for (uint i = 0; i < numInputs(); i++)
+	{
+		if (!theInputs[i]->require(theInputs[i]->type().scope() * rData[i]))
+			return 0;
+		cycles = min(cycles, theInputs[i]->samplesReady() / rData[i]);
+	}
+	return cycles;
 }
 
 void Processor::startPlungers()
@@ -203,11 +229,25 @@ void Processor::undoRegisterIn(xLConnection *me, uint port)
 	if (MESSAGES) qDebug("Done.");
 }
 
-Processor *Processor::getCallersProcessor()
+Processor *Processor::threadProcessor()
 {
 	if (!theOwningProcessor.localData())
 		return 0;
 	return *(theOwningProcessor.localData());
+}
+
+void Processor::setThreadProcessor()
+{
+	if (!theOwningProcessor.localData())
+		theOwningProcessor.setLocalData(new Processor*);
+	*(theOwningProcessor.localData()) = this;
+}
+
+void Processor::unsetThreadProcessor()
+{
+	if (!theOwningProcessor.localData())
+		theOwningProcessor.setLocalData(new Processor*);
+	*(theOwningProcessor.localData()) = 0;
 }
 
 void Processor::checkExit()
@@ -527,9 +567,94 @@ bool Processor::go()
 	}
 	theAllDone = false;
 
+	// Fill up any output slots left
+	for (uint i = 0; i < (uint)theOutputs.size(); i++)
+		if (!theOutputs[i])
+			theOutputs[i] = new LxConnectionNull(this, i);
+
 	start(NormalPriority);
 	if (MESSAGES) qDebug("< Processor::go() (name=%s)", qPrintable(theName));
 	return true;
+}
+
+void Processor::run()
+{
+	setThreadProcessor();
+
+	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
+	// TODO: Look into reasons why this shouldn't go back in.
+	// currently theTypesConfirmed *never* seems to be falsified after being initially
+	// set to true.
+	/*{	QMutexLocker lock(&theConfirming);
+		theTypesConfirmed = false;
+		theTypesCache.clear();
+	}*/
+	if (!confirmTypes()) return;
+
+	// Wait for them to confirm their own types before we start our processing/pushing data.
+	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting for outputs...", qPrintable(theName));
+	for (uint i = 0; i < (uint)theOutputs.size(); i++)
+		if (theOutputs[i])
+		{	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting on output %d...", qPrintable(theName), i);
+			if (!theOutputs[i]->waitUntilReady())
+			{	if (MESSAGES) qDebug("Processor::run(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
+				QMutexLocker lock(&theErrorSystem);
+				theError = RecursiveFailure;
+				theErrorData = i;
+				theErrorWritten.wakeAll();
+				if (MESSAGES) qDebug("Processor::run(): (%s) Error recorded. Bailing...", qPrintable(theName));
+				return;
+			}
+		}
+
+	if (MESSAGES) qDebug("Processor::run(): (%s) All tests completed. Releasing lock and starting.", qPrintable(theName));
+	theErrorSystem.lock();
+	theError = NoError;
+	theErrorWritten.wakeAll();
+	theErrorSystem.unlock();
+	for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
+		thePlungedInputs[i] = 0L;
+
+	// Execute processor with exception handler to bail it if it throws an int
+	try
+	{
+		if (!theInputs.count())
+			for (uint i = 0; i < (uint)theOutputs.count(); i++)
+				theOutputs[i]->startPlungers();
+
+		if (MESSAGES) qDebug("Processor[%s]: Plungers primed; starting task...", qPrintable(name()));
+
+		processor();
+
+		if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
+		{	QMutexLocker lock(&theStop);
+			theAllDone = true;
+			theAllDoneChanged.wakeAll();
+		}
+
+		if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
+		for (uint i = 0; i < (uint)theOutputs.count(); i++)
+			theOutputs[i]->noMorePlungers();
+		if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
+		// We must remember that we started expecting a plunger that we never sent, so...
+		// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
+		for (uint i = 0; i < (uint)theOutputs.count(); i++)
+			theOutputs[i]->pushPlunger();
+
+		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
+		while (1)
+		{	pause();
+			thereIsInputForProcessing();
+		}
+	}
+	catch(BailException &) {}
+	catch(int e) {}
+
+	if (MESSAGES) qDebug("Processor stopping (name=%s).", qPrintable(theName));
+
+	processorStopped();
+
+	if (MESSAGES) qDebug("Stopped.");
 }
 
 void Processor::stop()
@@ -908,89 +1033,19 @@ bool Processor::waitUntilReady()
 	return waitUntilGoing() == NoError;
 }
 
-void Processor::run()
+void Processor::processCycle()
 {
-	theOwningProcessor.setLocalData(new Processor *(this));
-
-	// Fill up any output slots left
-	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		if (!theOutputs[i])
-			theOutputs[i] = new LxConnectionNull(this, i);
-
-	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
-	// TODO: Look into reasons why this shouldn't go back in.
-	// currently theTypesConfirmed *never* seems to be falsified after being initially
-	// set to true.
-	/*{	QMutexLocker lock(&theConfirming);
-		theTypesConfirmed = false;
-		theTypesCache.clear();
-	}*/
-	if (!confirmTypes()) return;
-
-	// Wait for them to confirm their own types before we start our processing/pushing data.
-	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting for outputs...", qPrintable(theName));
-	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		if (theOutputs[i])
-		{	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting on output %d...", qPrintable(theName), i);
-			if (!theOutputs[i]->waitUntilReady())
-			{	if (MESSAGES) qDebug("Processor::run(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
-				QMutexLocker lock(&theErrorSystem);
-				theError = RecursiveFailure;
-				theErrorData = i;
-				theErrorWritten.wakeAll();
-				if (MESSAGES) qDebug("Processor::run(): (%s) Error recorded. Bailing...", qPrintable(theName));
-				return;
-			}
-		}
-
-	if (MESSAGES) qDebug("Processor::run(): (%s) All tests completed. Releasing lock and starting.", qPrintable(theName));
-	theErrorSystem.lock();
-	theError = NoError;
-	theErrorWritten.wakeAll();
-	theErrorSystem.unlock();
-	for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
-		thePlungedInputs[i] = 0L;
-
-	// Execute processor with exception handler to bail it if it throws an int
+	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
+	// Same with try/catch.
+	setThreadProcessor();
 	try
 	{
-		if (!theInputs.count())
-			for (uint i = 0; i < (uint)theOutputs.count(); i++)
-				theOutputs[i]->startPlungers();
-
-		if (MESSAGES) qDebug("Processor[%s]: Plungers primed; starting task...", qPrintable(name()));
-
-		processor();
-
-		if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
-		{	QMutexLocker lock(&theStop);
-			theAllDone = true;
-			theAllDoneChanged.wakeAll();
-		}
-
-		if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
-		for (uint i = 0; i < (uint)theOutputs.count(); i++)
-			theOutputs[i]->noMorePlungers();
-		if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
-		// We must remember that we started expecting a plunger that we never sent, so...
-		// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
-		for (uint i = 0; i < (uint)theOutputs.count(); i++)
-			theOutputs[i]->pushPlunger();
-
-		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
-		while (1)
-		{	pause();
-			thereIsInputForProcessing();
-		}
+		if (canProcess())
+			process();
 	}
 	catch(BailException &) {}
 	catch(int e) {}
-
-	if (MESSAGES) qDebug("Processor stopping (name=%s).", qPrintable(theName));
-
-	processorStopped();
-
-	if (MESSAGES) qDebug("Stopped.");
+	unsetThreadProcessor();
 }
 
 void Processor::bail()

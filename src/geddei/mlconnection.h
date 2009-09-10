@@ -54,6 +54,7 @@ class DLLEXPORT MLConnection: public xLConnection
 	virtual void resurectReader();
 	virtual bool plungeSync(uint samples) const;
 	virtual uint capacity() const;
+	virtual bool require(uint elements) const;
 
 protected:
 	LMConnection *theConnection;
@@ -75,26 +76,27 @@ public:
 	 * Sets the (wouldbe cached) type of the connection.
 	 */
 	void setType(const SignalType *type);
-	
+
 	/**
 	 * Notifies the Sink that a fresh stream of plungers may be coming from the
 	 * source.
 	 */
 	void startPlungers();
-	
+
 	/**
 	 * Half the dispatchPlunger() operation. This one doesn't actually append
 	 * the plunger to the Buffer, it simply notifies the Sink that a plunger
 	 * has been appended.
 	 */
 	void plungerSent();
-	
+
 	/**
 	 * Notifies the Sink that no more plungers will be on their way from this
 	 * source.
 	 */
 	void noMorePlungers();
-	
+
+
 	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();
 };

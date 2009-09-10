@@ -63,6 +63,7 @@ class Splitter: public LxConnection, public Source
 	virtual uint maximumScratchElements(uint minimum = 1);
 	virtual uint maximumScratchElementsEver();
 	virtual void enforceMinimum(uint elements);
+	virtual uint bufferElementsFree();
 
 	QList<LxConnection*> theConnections;
 

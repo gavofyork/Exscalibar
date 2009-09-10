@@ -16,6 +16,8 @@
 #include "processor.h"
 using namespace Geddei;
 
+#define MESSAGES 0
+
 namespace Geddei
 {
 
@@ -45,6 +47,33 @@ void MLConnection::startPlungers()
 void MLConnection::noMorePlungers()
 {
 	theSink->noMorePlungers();
+}
+
+bool MLConnection::require(uint elements) const
+{
+#ifdef EDEBUG
+	if (!theReader)
+	{	qWarning("*** WARNING: requireSamples() cannot be called on a MLConnection object after\n"
+				 "             killReader() has been called. Ignoring this call.\n");
+		return true;
+	}
+#endif
+	if (MESSAGES) qDebug("xLC::require(%d)...", elements);
+
+	while (1)
+	{
+		int np = theReader->nextPlunger();
+		if (np != -1 && (uint)np < elements)
+		{
+			theReader->skipElements(np);
+			theReader->skipPlunger();
+			theSink->plunged(theSinkIndex);
+		}
+		else
+			break;
+	}
+	return theReader->elementsReady() >= elements;
+		return true;
 }
 
 uint MLConnection::capacity() const
@@ -203,5 +232,6 @@ const SignalTypeRef MLConnection::type()
 	return SignalTypeRef(theType);
 }
 
-};
+}
 
+#undef MESSAGES

@@ -53,25 +53,25 @@ public:
 
 	/**
 	 * Discards the next plunger iff it is immediate to this reader.
-	 * 
+	 *
 	 * This actually simply increments theAlreadyPlungedHere, so the plunger
 	 * is ignored. No effort whatsoever is made to actually delete the plunger.
 	 * It is assumed that the Buffer object will do that when all Readers have
 	 * moved past it.
-	 * 
+	 *
 	 * NOT TRUE:
 	 * This is a dodgy proxy method. It actually acts upon the Buffer, not
 	 * the reader; its effects are realised for any readers of the buffer.
 	 * This should only be called once for any particular buffer.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void skipPlunger();
-	
+
 	/**
 	 * Returns the number of elements before the next plunger is reached, or
 	 * -1 if no plunger exists in the input stream.
-	 * 
+	 *
 	 * This takes into account theAlreadyPlungedHere counter.
 	 */
 	int nextPlunger() const;
@@ -79,12 +79,12 @@ public:
 	/**
 	 * Returns the number of elements that would definately cause an immediate
 	 * and complete return from readElements.
-	 * 
+	 *
 	 * Essentially, it is min(elementsUsed, nextPlunger), where nextPlunger ==
 	 * elementsUsed if there is no plunger.
-	 * 
+	 *
 	 * This takes into account theAlreadyPlungedHere counter.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	uint elementsReady() const;
@@ -92,27 +92,27 @@ public:
 	/**
 	 * Waits until the buffer is at least full enough to allow a read of a
 	 * number of elements.
-	 * 
+	 *
 	 * @note The buffer size should be at least twice as big as any size waited
 	 * upon.
-	 * 
+	 *
 	 * This takes into account theAlreadyPlungedHere counter.
-	 * 
+	 *
 	 * Thread-safe. Blocking.
 	 */
 	void waitForElements(uint elements) const;
 
 	/**
 	 * Reads a number of elements from the buffer.
-	 * 
+	 *
 	 * May cause a block if the buffer hasn't enough data ready to be read.
-	 * 
+	 *
 	 * If autoFree is true (default) the elements are removed from the buffer.
 	 * If autoFree is false, they are not removed so any subsequent reads will
 	 * return them again.
-	 * 
+	 *
 	 * This takes into account theAlreadyPlungedHere counter.
-	 * 
+	 *
 	 * Thread-safe. Blocking.
 	 */
 	const BufferData readElements(uint elements, bool autoFree = true);
@@ -122,21 +122,21 @@ public:
 	 * If a read is currently taking place, the elements are not immediately
 	 * discarded but will be once the read has finished. If the read finishes
 	 * as a forgetRead(), the action is undefined.
-	 * 
+	 *
 	 * This will block until enough elements are ready to be read. If there
 	 * happens to be one or many plungers before @arg elements elements could
 	 * be read under normal circumstances, then they will be skipped and
 	 * silently discarded. In this circumstance, the operation may block until
 	 * all pending reads are completed.
-	 * 
+	 *
 	 * Any number of skipElements -based BufferReader objects may be called on
 	 * a single Buffer object, but they wont work properly until a real reader
 	 * is called. i.e. all elements must be read one way or another. Skipping
 	 * elements can only be used in conjunction with reading, not exclusively.
-	 * 
+	 *
 	 * This takes into account theAlreadyPlungedHere counter, and may or reset
 	 * it.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	void skipElements(uint elements);
@@ -145,22 +145,22 @@ public:
 
 	/**
 	 * To be called when data in the last read is finished with.
-	 * 
+	 *
 	 * Called implicitly at end of life of an autoFree = true (default) read
 	 * BufferData.
-	 * 
+	 *
 	 * This may increment or reset theAlreadyPlungedHere counter.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	virtual void haveRead(const BufferData &data);
 
 	/**
 	 * Invalidates the last read operation's BufferData.
-	 * 
+	 *
 	 * The buffer will act as though it was never read and a subsequent read
 	 * operation will return the same data.
-	 * 
+	 *
 	 * Thread-safe.
 	 */
 	virtual void forgetRead(const BufferData &data);

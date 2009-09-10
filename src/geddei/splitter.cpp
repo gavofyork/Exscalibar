@@ -122,6 +122,15 @@ void Splitter::reset()
 		i->reset();
 }
 
+uint Splitter::bufferElementsFree()
+{
+	uint ret = theConnections.first()->bufferElementsFree();
+	QList<LxConnection*>::iterator i = theConnections.begin();
+	for (i++; i != theConnections.end(); i++)
+		ret = min(ret, (*i)->bufferElementsFree());
+	return ret;
+}
+
 BufferData Splitter::makeScratchElements(uint elements, bool autoPush)
 {
 	BufferData ret = theConnections.first()->makeScratchElements(elements, autoPush);

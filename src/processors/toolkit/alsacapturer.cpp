@@ -46,10 +46,11 @@ class ALSACapturer: public Processor
 	uint thePeriods;
 	uint theFrequency;
 	snd_pcm_t *thePcmHandle;
+	QVector<short> m_inData;
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
-	virtual void processor();
+	virtual void process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
@@ -109,6 +110,7 @@ bool ALSACapturer::processorStarted()
 		uint f;
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
 		qDebug() << "Using rate " << f;
+		m_inData.resize(thePeriodSize * theChannels);
 		return true;
 	}
 	if (thePcmHandle)
@@ -117,26 +119,22 @@ bool ALSACapturer::processorStarted()
 	return false;
 }
 
-void ALSACapturer::processor()
+void ALSACapturer::process()
 {
-	short indata[thePeriodSize * theChannels];
-	while (guard())
+	int count = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
+	if (count > 0)
 	{
-		int count;
-		if ((count = snd_pcm_readi(thePcmHandle, indata, thePeriodSize)) > 0)
-		{
-			BufferData d[theChannels];
+		BufferData d[theChannels];
+		for (uint c = 0; c < theChannels; c++)
+			d[c] = output(c).makeScratchSamples(count);
+		for (int i = 0; i < count; i++)
 			for (uint c = 0; c < theChannels; c++)
-				d[c] = output(c).makeScratchSamples(count);
-			for (int i = 0; i < count; i++)
-				for (uint c = 0; c < theChannels; c++)
-					d[c][i] = float(indata[i * theChannels + c]) / 32768.f;
-			for (uint c = 0; c < theChannels; c++)
-				output(c) << d[c];
-		}
-		else
-			snd_pcm_prepare(thePcmHandle);
+				d[c][i] = float(m_inData[i * theChannels + c]) / 32768.f;
+		for (uint c = 0; c < theChannels; c++)
+			output(c) << d[c];
 	}
+	else
+		snd_pcm_prepare(thePcmHandle);
 }
 
 void ALSACapturer::processorStopped()

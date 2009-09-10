@@ -14,6 +14,8 @@ LIBS += -lqtextra \
 	-lgeddei
 INCLUDEPATH += ../../src/geddei \
 	../../src/qtextra
+DEPENDPATH += ../../src/geddei \
+	../../src/qtextra
 FORMS += geddeinitebase.ui
 HEADERS += geddeinite.h \
 	watchprocessor.h \
