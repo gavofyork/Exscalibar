@@ -69,7 +69,7 @@ class ALSAPlayer: public Processor
 								("periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSAPlayer() : Processor("ALSAPlayer"), thePcmHandle(0) {}
+	ALSAPlayer() : Processor("ALSAPlayer", NotMulti, Cooperative), thePcmHandle(0) {}
 };
 
 bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)

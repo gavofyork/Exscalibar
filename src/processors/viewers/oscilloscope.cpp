@@ -34,7 +34,7 @@ class Oscilloscope : public Processor
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
 
 public:
-	Oscilloscope() : Processor("Oscilloscope") {}
+	Oscilloscope() : Processor("Oscilloscope", NotMulti, Cooperative) {}
 };
 
 void Oscilloscope::process()

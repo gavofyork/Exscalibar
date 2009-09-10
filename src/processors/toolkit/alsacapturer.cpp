@@ -72,7 +72,7 @@ class ALSACapturer: public Processor
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSACapturer() : Processor("ALSACapturer"), thePcmHandle(0) {}
+	ALSACapturer() : Processor("ALSACapturer", NotMulti, Cooperative), thePcmHandle(0) {}
 };
 
 bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)

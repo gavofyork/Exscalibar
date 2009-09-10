@@ -28,34 +28,49 @@ class WaveGen: public Processor
 	enum WaveType { Sine, Square, Triangular } theWaveType;
 	float theFrequency, theRate;
 	int theChunk, theChunksPerPlunge, theStopAfterChunks;
+	float m_phase;
+	int m_chunksLeft;
+	int m_hadChunks;
 
-	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void specifyOutputSpace(QVector<uint> &samples);
+	virtual bool processorStarted();
+	virtual int canProcess();
+	virtual void process();
 public:
-	WaveGen() : Processor("WaveGen", NotMulti, Guarded) {}
+	WaveGen() : Processor("WaveGen", NotMulti, Guarded|Cooperative) {}
 };
 
-void WaveGen::processor()
+bool WaveGen::processorStarted()
 {
-	float phase = 0;
-	int chunksLeft = 0, hadChunks = 0;
-	while (!theStopAfterChunks || theStopAfterChunks > hadChunks)
-	{
-		BufferData d = output(0).makeScratchSamples(theChunk);
-		for (int i = 0; i < theChunk; i++)
-			d[i] = sin(2.0 * 3.14159265898 * (float(i) * theFrequency / theRate + phase));
-		output(0) << d;
-		phase += float(theChunk) * theFrequency / theRate;
-		if (phase > 1.0) phase -= 1.0;
-		if (theChunksPerPlunge && ++chunksLeft == theChunksPerPlunge)
-		{	plunge();
-			chunksLeft = 0;
-		}
-		hadChunks++;
+	m_phase = 0.f;
+	m_chunksLeft = 0;
+	m_hadChunks = 0;
+	return true;
+}
+
+int WaveGen::canProcess()
+{
+	if (theStopAfterChunks && theStopAfterChunks > m_hadChunks)
+		return 0;
+	return Processor::canProcess();
+}
+
+void WaveGen::process()
+{
+	BufferData d = output(0).makeScratchSamples(theChunk);
+	for (int i = 0; i < theChunk; i++)
+		d[i] = sin(2.0 * 3.14159265898 * (float(i) * theFrequency / theRate + m_phase));
+	output(0) << d;
+	m_phase += float(theChunk) * theFrequency / theRate;
+	if (m_phase > 1.0) m_phase -= 1.0;
+	if (theChunksPerPlunge && ++m_chunksLeft == theChunksPerPlunge)
+	{	plunge();
+		m_chunksLeft = 0;
 	}
+	m_hadChunks++;
 }
 
 bool WaveGen::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
