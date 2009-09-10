@@ -662,7 +662,7 @@ public:
 	/**
 	 * Do computation, but do not block.
 	 */
-	void processCycle();
+	bool processCycle();
 
 	/**
 	 * Puts the Processor into a gvien ProcessorGroup.

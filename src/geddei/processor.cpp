@@ -28,7 +28,7 @@ using namespace std;
 #include "splitter.h"
 using namespace Geddei;
 
-#define MESSAGES 0
+#define MESSAGES 1
 #define pMESSAGES 0
 
 namespace Geddei
@@ -60,40 +60,6 @@ Processor::~Processor()
 	// FINISH MUTUAL EXCLUSIVITY
 
 	if (MESSAGES) qDebug("Deleted Processor.");
-}
-
-void Processor::processor()
-{
-	while (guard())
-	{
-		if (canProcess())
-			process();
-	}
-}
-
-int Processor::canProcess()
-{
-	QVector<uint> rData(numInputs());
-	specifyInputSpace(rData);
-	QVector<uint> rSpace(numOutputs());
-	specifyOutputSpace(rSpace);
-
-	uint cycles = UINT_MAX;
-	for (uint i = 0; i < numOutputs(); i++)
-	{
-		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
-		if (bFree < rSpace[i])
-			return 0;
-		else if (rSpace[i] > 0)
-			cycles = min(cycles, bFree / rSpace[i]);
-	}
-	for (uint i = 0; i < numInputs(); i++)
-	{
-		if (!theInputs[i]->require(theInputs[i]->type().scope() * rData[i]))
-			return 0;
-		cycles = min(cycles, theInputs[i]->samplesReady() / rData[i]);
-	}
-	return cycles;
 }
 
 void Processor::startPlungers()
@@ -293,10 +259,13 @@ void Processor::resetTypes()
 
 bool Processor::guard()
 {
-	thePause.lock();
-	while (thePaused)
-		theUnpaused.wait(&thePause);
-	thePause.unlock();
+	if (!(theFlags & Cooperative))
+	{
+		thePause.lock();
+		while (thePaused)
+			theUnpaused.wait(&thePause);
+		thePause.unlock();
+	}
 	checkExit();
 	theGuardsCrossed++;
 	return true;
@@ -577,8 +546,131 @@ bool Processor::go()
 	return true;
 }
 
+void Processor::processor()
+{
+}
+
+int Processor::canProcess()
+{
+	QVector<uint> rData(numInputs());
+	specifyInputSpace(rData);
+	QVector<uint> rSpace(numOutputs());
+	specifyOutputSpace(rSpace);
+
+	uint cycles = UINT_MAX;
+	for (uint i = 0; i < numOutputs(); i++)
+	{
+		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
+		if (bFree < rSpace[i])
+			return 0;
+		else if (rSpace[i] > 0)
+			cycles = min(cycles, bFree / rSpace[i]);
+	}
+	for (uint i = 0; i < numInputs(); i++)
+	{
+		if (!theInputs[i]->require(theInputs[i]->type().scope() * rData[i]))
+			return 0;
+		cycles = min(cycles, theInputs[i]->samplesReady() / rData[i]);
+	}
+	return cycles;
+}
+
+bool Processor::processCycle()
+{
+	if (thePaused)
+		return true;
+	bool ret = true;
+	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
+	// Same with try/catch.
+	setThreadProcessor();
+	try
+	{
+		if (theError == Pending)
+		{
+			if (MESSAGES) qDebug("Processor::processCycle(): (%s) Checking outputs...", qPrintable(theName));
+			bool allOk = true;
+			for (uint i = 0; i < (uint)theOutputs.size(); i++)
+			{
+				assert(theOutputs[i]);
+				Connection::Tristate e = theOutputs[i]->isReadyYet();
+				if (e == Connection::Failed)
+				{	if (MESSAGES) qDebug("Processor::processCycle(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
+					QMutexLocker lock(&theErrorSystem);
+					theError = RecursiveFailure;
+					theErrorData = i;
+					theErrorWritten.wakeAll();
+					if (MESSAGES) qDebug("Processor::processCycle(): (%s) Error recorded. Bailing...", qPrintable(theName));
+					ret = false;
+					allOk = false;
+					break;
+				}
+				else if (e == Connection::Pending)
+					allOk = false;
+			}
+			if (allOk)
+			{
+				{
+					QMutexLocker lock(&theErrorSystem);
+					theError = NoError;
+					theErrorWritten.wakeAll();
+				}
+				for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
+					thePlungedInputs[i] = 0L;
+				if (!theInputs.count())
+					for (uint i = 0; i < (uint)theOutputs.count(); i++)
+						theOutputs[i]->startPlungers();
+			}
+		}
+		else if (theError == NoError)
+		{
+			guard();
+			if (canProcess())
+				process();
+/*
+			else if (neverAnyMoreInput())
+			{
+				if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
+				{	QMutexLocker lock(&theStop);
+					theAllDone = true;
+					theAllDoneChanged.wakeAll();
+				}
+
+				if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
+				for (uint i = 0; i < (uint)theOutputs.count(); i++)
+					theOutputs[i]->noMorePlungers();
+				if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
+				// We must remember that we started expecting a plunger that we never sent, so...
+				// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
+				for (uint i = 0; i < (uint)theOutputs.count(); i++)
+					theOutputs[i]->pushPlunger();
+
+				ret = false;
+			}*/
+		}
+	}
+	catch(BailException &) { ret = false; }
+	catch(int e) { ret = false; }
+	unsetThreadProcessor();
+	return ret;
+}
+
 void Processor::run()
 {
+	if (theFlags & Cooperative)
+	{
+		forever
+			if (!processCycle())
+				break;
+		processorStopped();
+		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
+		setThreadProcessor();
+		while (1)
+		{	pause();
+			thereIsInputForProcessing();
+		}
+		unsetThreadProcessor();
+		return;
+	}
 	setThreadProcessor();
 #if 0
 	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
@@ -1044,21 +1136,6 @@ void Processor::setNoGroup()
 bool Processor::waitUntilReady()
 {
 	return waitUntilGoing() == NoError;
-}
-
-void Processor::processCycle()
-{
-	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
-	// Same with try/catch.
-	setThreadProcessor();
-	try
-	{
-		if (canProcess())
-			process();
-	}
-	catch(BailException &) {}
-	catch(int e) {}
-	unsetThreadProcessor();
 }
 
 void Processor::bail()

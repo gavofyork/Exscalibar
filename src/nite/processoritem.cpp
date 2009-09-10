@@ -32,17 +32,20 @@ public:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*)
 	{
 		Processor* p = processor();
-		if (p->paused())
+		if (p->isRunning())
 		{
-			setBrush(Qt::NoBrush);
-			p->unpause();
+			if (p->paused())
+			{
+				setBrush(Qt::NoBrush);
+				p->unpause();
+			}
+			else
+			{
+				setBrush(Qt::red);
+				p->pause();
+			}
+			update();
 		}
-		else
-		{
-			setBrush(Qt::red);
-			p->pause();
-		}
-		update();
 	}
 
 	void tick()
