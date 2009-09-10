@@ -17,7 +17,7 @@ public:
 		_p->save();
 		QGraphicsEllipseItem::paint(_p, _o, _w);
 		_p->restore();
-		if (processor()->isRunning())
+		if (processor() && processor()->isRunning())
 		{
 			_p->setPen(QPen(QColor(0, 0, 0, 32), 2));
 			_p->translate(QPointF(statusHeight / 2, statusHeight / 2));
@@ -54,8 +54,8 @@ public:
 	virtual int type() const { return Type; }
 };
 
-DomProcessorItem::DomProcessorItem(Properties const& _pr, QString const& _name):
-	ProcessorItem(0, _pr, _name)
+DomProcessorItem::DomProcessorItem(Properties const& _pr, QString const& _name, QSizeF const& _size):
+	ProcessorItem(0, _pr, _name, _size)
 {
 }
 
@@ -322,7 +322,7 @@ Processor* ProcessorItem::reconstructProcessor()
 	return ProcessorFactory::create(m_processor->type());
 }
 
-void ProcessorItem::propertiesChanged()
+void ProcessorItem::propertiesChanged(QString const& _newName)
 {
 	if (m_processor && m_processor->isRunning())
 		return;
@@ -334,7 +334,7 @@ void ProcessorItem::propertiesChanged()
 		return;
 	}
 
-	m_processor->init(old ? old->name() : QString::number((uint)this), completeProperties());
+	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number((uint)this) : _newName, completeProperties());
 	rejig(old, !old);
 	delete old;
 }
@@ -447,7 +447,8 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 
 	//_p->setPen(QPen(QColor::fromHsv(120, 96, 80, 255), 0));
 	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(m_processor->outlineColour());
+	if (m_processor)
+		_p->setBrush(m_processor->outlineColour());
 	_p->drawRect(QRectF(QPointF(0.0, 0.0), m_size));
 
 	_p->setPen(QPen(QColor(0, 0, 0, 64), 1));
@@ -473,7 +474,8 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 	_p->setClipping(true);
 	_p->setClipRect(ca, Qt::IntersectClip);
 	_p->translate(ca.topLeft());
-	m_processor->draw(*_p, ca.size());
+	if (m_processor)
+		m_processor->draw(*_p, ca.size());
 }
 
 void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
@@ -487,9 +489,9 @@ void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 	pi->setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
 }
 
-void ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
+QDomElement ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const
 {
-	QDomElement proc = _doc.createElement("processor");
+	QDomElement proc = _doc.createElement(_n);
 	proc.setAttribute("type", m_processor->type());
 
 	proc.setAttribute("name", m_processor->name());
@@ -498,6 +500,54 @@ void ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 	proc.setAttribute("w", m_size.width());
 	proc.setAttribute("h", m_size.height());
 
+	foreach (QString k, m_properties.keys())
+	{
+		QDomElement prop = _doc.createElement("property");
+		proc.appendChild(prop);
+		prop.setAttribute("name", k);
+		prop.setAttribute("value", m_properties[k].toString());
+	}
+	_root.appendChild(proc);
+	return proc;
+}
+
+void DomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
+{
+	Properties p;
+	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
+		if (n.toElement().tagName() == "property")
+			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
+	DomProcessorItem* dpi = new DomProcessorItem(p, _element.attribute("name"), QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble()));
+	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
+		if (n.toElement().tagName() == "subprocessor")
+			SubProcessorItem::fromDom(n.toElement(), dpi);
+	dpi->propertiesChanged(_element.attribute("name"));
+	_scene->addItem(dpi);
+	dpi->setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
+}
+
+QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const&) const
+{
+	QDomElement us = ProcessorItem::saveYourself(_root, _doc, "domprocessor");
+	foreach (SubProcessorItem* spi, filter<SubProcessorItem>(childItems()))
+		spi->saveYourself(us, _doc);
+	return us;
+}
+
+void SubProcessorItem::fromDom(QDomElement const& _element, DomProcessorItem* _dpi)
+{
+	Properties p;
+	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
+		if (n.toElement().tagName() == "property")
+			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
+	new SubProcessorItem(_dpi, _element.attribute("type"), _element.attribute("index").toInt(), p);
+}
+
+void SubProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
+{
+	QDomElement proc = _doc.createElement("subprocessor");
+	proc.setAttribute("type", m_type);
+	proc.setAttribute("index", m_index);
 	foreach (QString k, m_properties.keys())
 	{
 		QDomElement prop = _doc.createElement("property");

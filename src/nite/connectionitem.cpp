@@ -46,12 +46,12 @@ void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 	OutputItem* oi = 0;
 	InputItem* ii = 0;
 	foreach (ProcessorItem* pi, filter<ProcessorItem>(_scene->items()))
-		if (pi->processor()->name() == _element.attribute("from"))
+		if (pi->processor() && pi->processor()->name() == _element.attribute("from"))
 			foreach (OutputItem* i, filter<OutputItem>(pi->childItems()))
 				if (i->index() == (uint)_element.attribute("fromindex").toInt())
 					oi = i;
 				else {}
-		else if (pi->processor()->name() == _element.attribute("to"))
+		else if (pi->processor() && pi->processor()->name() == _element.attribute("to"))
 			foreach (InputItem* i, filter<InputItem>(pi->childItems()))
 				if (i->index() == (uint)_element.attribute("toindex").toInt())
 					ii = i;

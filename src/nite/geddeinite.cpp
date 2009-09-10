@@ -119,9 +119,12 @@ void GeddeiNite::doLoad(const QString &filename)
 			continue;
 		else if (elem.tagName() == "processor")
 			ProcessorItem::fromDom(elem, &theScene);
+		else if (elem.tagName() == "domprocessor")
+			DomProcessorItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "connection")
 			ConnectionItem::fromDom(elem, &theScene);
 	}
+	setModified(true);
 	statusBar()->showMessage("Loaded.", 2000);
 	setModified(false);
 }

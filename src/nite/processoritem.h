@@ -47,7 +47,7 @@ public:
 	void tick();
 
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
+	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "processor") const;
 
 	virtual QSizeF centreMin() const { return QSizeF(m_processor->width(), m_processor->height()); }
 
@@ -66,7 +66,7 @@ public:
 	enum { Type = UserType + 1 };
 	virtual int type() const { return Type; }
 
-	virtual void propertiesChanged();
+	virtual void propertiesChanged(QString const& _newName = QString::null);
 
 protected:
 	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);
@@ -92,7 +92,7 @@ class SubProcessorItem;
 class DomProcessorItem: public ProcessorItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.2), QString const& _name = QString::null);
+	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.2), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 
 	DomProcessor* domProcessor() const;
 
@@ -100,6 +100,9 @@ public:
 //	virtual int type() const { return Type; }
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+
+	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
+	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
 protected:
 	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);
@@ -125,6 +128,9 @@ public:
 	DomProcessorItem* domProcessorItem() const { return qgraphicsitem_cast<DomProcessorItem*>(parentItem()); }
 	DomProcessor* domProcessor() const { return domProcessorItem()->domProcessor(); }
 	SubProcessor* subProcessor() const;
+
+	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
+	static void fromDom(QDomElement const& _element, DomProcessorItem* _dpi);
 
 	QString spType() const { return m_type; }
 
