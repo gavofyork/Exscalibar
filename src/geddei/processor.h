@@ -192,7 +192,7 @@ private:
 	friend class MultiProcessor;
 	mutable QMutex theStop;
 	QFastWaitCondition theAllDoneChanged;
-	bool theIOSetup, theStopping, theIsInitialised, theAllDone;
+	bool theIOSetup, theStopping, theIsInitialised, theAllDone, theIsActive;
 	void doInit(const QString &name, ProcessorGroup *group, const Properties &properties);
 	//@}
 
@@ -942,7 +942,8 @@ public:
 	 *
 	 * @sa pause() unpause()
 	 */
-	bool isRunning() const { return QThread::isRunning(); }
+	bool isRunning() const;
+	bool isActive() const;
 
 	/**
 	 * Make the thing stop doing stuff. i.e. Cancels processor thread.

@@ -62,6 +62,48 @@ Processor::~Processor()
 	if (MESSAGES) qDebug("Deleted Processor.");
 }
 
+class ProcessorScheduler: public QThread
+{
+public:
+	ProcessorScheduler(): m_robin(0)
+	{
+		start();
+	}
+	static ProcessorScheduler* get() { if (!s_this) s_this = new ProcessorScheduler; return s_this; }
+	void registerTask(Processor* _p) { QMutexLocker l(&l_tasks); m_tasks.append(_p); }
+	void unregisterTask(Processor* _p) { QMutexLocker l(&l_tasks); m_tasks.removeAll(_p); }
+	void run()
+	{
+		forever
+		{
+			l_tasks.lock();
+			if (m_tasks.count() == 0)
+			{
+				l_tasks.unlock();
+				msleep(100);
+				l_tasks.lock();
+			}
+			else
+			{
+				m_robin = (m_robin + 1) % m_tasks.count();
+				if (!m_tasks[m_robin]->processCycle())
+					m_tasks.removeAt(m_robin);
+			}
+			l_tasks.unlock();
+			yieldCurrentThread();
+		}
+	}
+
+private:
+	QMutex l_tasks;
+	QList<Processor*> m_tasks;
+	int m_robin;
+
+	static ProcessorScheduler* s_this;
+};
+
+ProcessorScheduler* ProcessorScheduler::s_this = 0;
+
 void Processor::startPlungers()
 {
 	if (pMESSAGES) qDebug("> Processor::startPlungers() [%s]: %d finished", qPrintable(name()), thePlungersEnded);
@@ -506,6 +548,16 @@ void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
 	theRedrawPeriod = redrawPeriod;
 }
 
+bool Processor::isRunning() const
+{
+	return QThread::isRunning();
+}
+
+bool Processor::isActive() const
+{
+	return theIsActive;
+}
+
 bool Processor::go()
 {
 	if (MESSAGES) qDebug("> Processor::go() (name=%s)", qPrintable(theName));
@@ -541,7 +593,13 @@ bool Processor::go()
 		if (!theOutputs[i])
 			theOutputs[i] = new LxConnectionNull(this, i);
 
-	start(NormalPriority);
+	if (theFlags & Cooperative)
+	{
+		theIsActive = true;
+		ProcessorScheduler::get()->registerTask(this);
+	}
+	else
+		start(NormalPriority);
 	if (MESSAGES) qDebug("< Processor::go() (name=%s)", qPrintable(theName));
 	return true;
 }
@@ -651,26 +709,23 @@ bool Processor::processCycle()
 	catch(BailException &) { ret = false; }
 	catch(int e) { ret = false; }
 	unsetThreadProcessor();
-	return ret;
-}
-
-void Processor::run()
-{
-	if (theFlags & Cooperative)
+	if (!ret)
 	{
-		forever
-			if (!processCycle())
-				break;
 		processorStopped();
-		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
+		theIsActive = false;
+/*		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
 		setThreadProcessor();
 		while (1)
 		{	pause();
 			thereIsInputForProcessing();
 		}
-		unsetThreadProcessor();
-		return;
+		unsetThreadProcessor();*/
 	}
+	return ret;
+}
+
+void Processor::run()
+{
 	setThreadProcessor();
 #if 0
 	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
@@ -1069,7 +1124,7 @@ void Processor::waitUntilDone()
 
 Connection::Tristate Processor::isGoingYet()
 {
-	if (theError == Pending)
+	if (theError == Pending || theError == NotStarted)
 		return Connection::Pending;
 	else if (theError == NoError)
 		return Connection::Succeeded;

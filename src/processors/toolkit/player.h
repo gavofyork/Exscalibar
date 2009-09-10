@@ -74,6 +74,8 @@ class DLLEXPORT Player: public Processor
 
 #ifdef HAVE_SNDFILE
 	SNDFILE *theSndFile;
+	SF_INFO m_sfinfo;
+	QVector<float> m_buffer;
 #endif
 #ifdef HAVE_VORBISFILE
 	OggVorbis_File theVorbisFile;
@@ -89,6 +91,8 @@ class DLLEXPORT Player: public Processor
 	uint theChannels, theRate, theLength, thePosition, theReadFrames;
 
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual bool processorStarted();
+	virtual void process();
 	virtual void processor();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);

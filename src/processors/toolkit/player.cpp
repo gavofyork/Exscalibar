@@ -43,7 +43,7 @@ using namespace SignalTypes;
 
 #define MESSAGES 0
 
-Player::Player(QString const& _filename) : Processor("Player", OutConst, Guarded), thePath(_filename), theChannels(0), theRate(0), theLength(0), thePosition(0)
+Player::Player(QString const& _filename) : Processor("Player", OutConst, Guarded | Cooperative), thePath(_filename), theChannels(0), theRate(0), theLength(0), thePosition(0)
 {
 }
 
@@ -196,35 +196,49 @@ PropertiesInfo Player::specifyProperties() const
 						 ("Frames", 1024, "The number of samples to output in each chunk.");
 }
 
-void Player::processor()
+bool Player::processorStarted()
 {
 #ifdef HAVE_SNDFILE
 	if (theMode == ModeSF)
 	{
-		SF_INFO sfinfo;
-		theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &sfinfo);
-		if (!theSndFile) return;
-		float buffer[theReadFrames * theChannels];
-		int in = 0;
-		while (guard())
-		{
-			if ((in = sf_readf_float(theSndFile, buffer, theReadFrames)) > 0)
-			{	thePosition += in;
-				for (uint i = 0; i < theChannels; i++)
-				{	BufferData d = output(i).makeScratchSamples(in);
-					if (!d.isNull())
-						for (int j = 0; j < in; j++)
-							d[j] = buffer[j * theChannels + i];
-					output(i).push(d);
-				}
-			}
-			else if (in == 0)
-				break;
-			else
-				sf_perror(theSndFile);
-		}
+		theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &m_sfinfo);
+		if (!theSndFile) return false;
+		m_buffer.resize(theReadFrames * theChannels);
+		return true;
 	}
 #endif
+	return false;
+}
+
+void Player::process()
+{
+#ifdef HAVE_SNDFILE
+	if (theMode == ModeSF)
+	{
+		int in = sf_readf_float(theSndFile, m_buffer.data(), theReadFrames);
+		if (in > 0)
+		{	thePosition += in;
+			for (uint i = 0; i < theChannels; i++)
+			{	BufferData d = output(i).makeScratchSamples(in);
+				if (!d.isNull())
+					for (int j = 0; j < in; j++)
+						d[j] = m_buffer[j * theChannels + i];
+				output(i).push(d);
+			}
+		}
+		else if (in == 0)
+		{
+			// TODO: api to say finished.
+			//break;
+		}
+		else
+			sf_perror(theSndFile);
+	}
+#endif
+}
+
+void Player::processor()
+{
 #ifdef HAVE_VORBISFILE
 	if (theMode == ModeVF)
 	{

@@ -27,7 +27,7 @@ class Spectroscope: public Processor
 	float m_minAmp;
 	float m_deltaAmp;
 
-	virtual void processor();
+	virtual void process();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
@@ -35,13 +35,12 @@ class Spectroscope: public Processor
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 public:
-	Spectroscope(): Processor("Spectroscope") {}
+	Spectroscope(): Processor("Spectroscope", NotMulti, Cooperative) {}
 };
 
-void Spectroscope::processor()
+void Spectroscope::process()
 {
-	while (guard())
-		input(0).readSample().copyTo(m_last.data());
+	input(0).readSample().copyTo(m_last.data());
 }
 
 bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
@@ -50,7 +49,7 @@ bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.translate(0, _s.height());
 	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
 	_p.drawLine(0, 0, _s.width(), 0);
-	if (isRunning())
+	if (isActive())
 	{
 		_p.scale(_s.width() / m_last.size(), 1);
 		_p.setPen(QPen(Qt::black, 0));
