@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -40,7 +40,7 @@
 /**
   * @defgroup rGeddei rGeddei's core classes.
   * @brief Module containing classes for remote controlling Geddei.
-  * @author Gav Wood <gav@cs.york.ac.uk>
+  * @author Gav Wood <gav@kde.org>
   *
   * Any classes used from this module are in namespace rGeddei. Make sure
   * you either manually specify it with rGeddei::ClassName or use it at

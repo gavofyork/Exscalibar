@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -42,7 +42,7 @@ typedef BufferInfo *BufferID;
 
 /** @internal @ingroup Geddei
  * @brief Abstract class to represent classes that handle BufferData objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * BufferData objects may be "owned" by other Geddei objects. In this case it
  * may be useful to have default actions upon destruction of the BufferData,
@@ -79,7 +79,7 @@ public:
 
 /** @internal @ingroup Geddei
  * @brief An Auxilliary-derived class to represent a scratch owner.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * A scratch, Geddei speak for a writable BufferData object may be "owned" by
  * some objects. If these object are derived form ScratchOwner, auxilliary
@@ -118,7 +118,7 @@ public:
 
 /** @internal @ingroup Geddei
  * @brief An Auxilliary-derived class to represent a screen owner.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * A screen, Geddei speak for a readable BufferData object may be "owned" by
  * some objects. If these object are derived form ScreenOwner, auxilliary
@@ -159,7 +159,7 @@ public:
 
 /** @ingroup Geddei
  * @brief Class for interfacing with signal data in Geddei.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * BufferData objects are among the most important and well used objects in
  * Geddei. The capture the essence of a data container. They present a simple

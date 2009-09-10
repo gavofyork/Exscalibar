@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -14,7 +14,7 @@
 /**
  * @defgroup SignalTypes Classes derived from SignalType.
  * @brief Module containing classes for describing different types of Signal.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Any classes used from this module are in namespace SignalTypes. Make sure
  * you either manually specify it with SignalTypes::ClassName or use it at

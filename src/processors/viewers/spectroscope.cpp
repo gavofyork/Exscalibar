@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@kde.org                                                     *
+ *   gav@kde.org			                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,15 +15,17 @@
 #include "processor.h"
 using namespace Geddei;
 
-#include "wave.h"
+#include "spectrum.h"
 using namespace SignalTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
  */
-class Oscilloscope : public Processor
+class Spectroscope: public Processor
 {
 	QVector<float> m_last;
+	float m_minAmp;
+	float m_deltaAmp;
 
 	virtual void processor();
 	virtual void processorStopped();
@@ -31,56 +33,58 @@ class Oscilloscope : public Processor
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
-	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
 
 public:
-	Oscilloscope() : Processor("Oscilloscope") {}
+	Spectroscope(): Processor("Spectroscope") {}
 };
 
-void Oscilloscope::processor()
+void Spectroscope::processor()
 {
-	while (thereIsInputForProcessing())
-	{
-		BufferData d = input(0).readSamples(m_last.count());
-		d.copyTo(m_last.data());
-	}
+	while (guard())
+		input(0).readSample().copyTo(m_last.data());
 }
 
-bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
+bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	_p.setRenderHint(QPainter::Antialiasing, false);
-	_p.translate(0, _s.height() / 2);
+	_p.translate(0, _s.height());
 	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
 	_p.drawLine(0, 0, _s.width(), 0);
 	if (isRunning())
 	{
-		_p.setPen(QPen(Qt::black, 0));
-		_p.scale(1, _s.height() / 2);
-		for (int i = 2; i < _s.width(); i+=2)
-			_p.drawLine(QLineF(i - 2, m_last[(i - 2) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
+		_p.scale(_s.width() / m_last.size(), 1);
+		_p.setPen(QPen(Qt::black, 1));
+		for (int i = 0; i < m_last.size(); i++)
+			_p.drawLine(QLineF(i, 0, i, -(m_last[i] - m_minAmp) * m_deltaAmp * _s.height()));
 	}
 	return true;
 }
 
-void Oscilloscope::processorStopped()
+void Spectroscope::processorStopped()
 {
 }
 
-bool Oscilloscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Spectroscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
 {
-	return _inTypes.count() == 1 && _inTypes[0].isA<Wave>();
+	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
+		return false;
+	m_minAmp = _inTypes[0].asA<Spectrum>().minAmplitude();
+	m_deltaAmp = _inTypes[0].asA<Spectrum>().maxAmplitude() - m_minAmp;
+	m_last.resize(_inTypes[0].asA<Spectrum>().size());
+	return true;
 }
 
-void Oscilloscope::initFromProperties(Properties const& _p)
+void Spectroscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
 	this->setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
-	m_last.resize(_p["Size"].toInt());
 }
 
-PropertiesInfo Oscilloscope::specifyProperties() const
+PropertiesInfo Spectroscope::specifyProperties() const
 {
-	return PropertiesInfo("Size", 1024, "The size of the window's width in samples.")("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).");
+	return PropertiesInfo("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).");
 }
 
-EXPORT_CLASS(Oscilloscope, 0,1,0, Processor);
+EXPORT_CLASS(Spectroscope, 0,1,0, Processor);
+
+

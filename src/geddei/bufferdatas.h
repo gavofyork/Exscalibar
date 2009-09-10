@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,7 +23,7 @@ namespace Geddei
 
 /** @ingroup Geddei
  * @brief Array-like class for a collection of BufferData objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class is a simple, array-like class but has extensions for holding
  * BufferData objects. This class will only be used publicly by SubProcessor

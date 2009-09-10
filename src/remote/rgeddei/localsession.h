@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,7 +33,7 @@ class RemoteDomProcessor;
 
 /** @ingroup rGeddei
  * @brief Control object for coordinating local Processor objects with remote.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This is the local equivalent to the RemoteSession class, this is a very
  * basic class to provide a similar mechanism to creating rGeddei

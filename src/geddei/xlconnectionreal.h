@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,7 +33,7 @@ class Processor;
 
 /** @internal @ingroup Geddei
  * @brief Refinement of a Connection to a local Sink object, that transfers data.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Data delivery mechanism implemented, though pullType() left as a hook to the
  * type delivery system and theBuffer left open for allowing actual data to be

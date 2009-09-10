@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -59,7 +59,7 @@ class ProcessorGroup;
 
 /** @internal @ingroup Geddei
  * @brief Void class to allow usable exception objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This was only made so ints don't have to be used, thereby not polluting the
  * exception namespace.
@@ -70,7 +70,7 @@ class DLLEXPORT BailException
 
 /** @ingroup Geddei
  * @brief Base class that defines a single Geddei signal data processing object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This is the most important class in Geddei. It embodies a multi-purpose
  * component in a data-flow network. Processor objects may be used as signal
@@ -430,6 +430,24 @@ protected:
 	 */
 	bool thereIsInputForProcessing();
 
+	/** @overload
+	 * Blocks until either:
+	 *
+	 * 1) There will never again be enough input for any processing. In this
+	 * instance, it returns false.
+	 *
+	 * 2) There are at least specifyInputSpace() samples (for each input)ready
+	 * for reading immediately. It guarantees that reading this data will not
+	 * require any more plunging. In this case, true is returned.
+	 *
+	 * If there are any plungers to be read immediately, then they are read.
+	 * This is only the case if the next read would cause a plunger to be read.
+	 *
+	 * @return true iff a read of @a samples will not block or cause a plunger
+	 * to be read, false iff no more data can *ever* be read.
+	 */
+	bool thereIsSomeOutputSpace();
+
 	/**
 	 * Call this from initFromProperties to initialise I/O connections.
 	 *
@@ -476,7 +494,8 @@ protected:
 	 * If there is a main loop, you should add thereIsInputForProcessing() as a guard upon it (it will,
 	 * however, always return true).
 	 */
-	virtual void processor() = 0;
+	virtual void processor();
+	virtual void processCycle() {}
 
 	/**
 	 * Reimplement to initialise any stuff that processor may need to be open/

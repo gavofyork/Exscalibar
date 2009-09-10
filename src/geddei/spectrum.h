@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,7 +24,7 @@ namespace SignalTypes
 
 /** @ingroup SignalTypes
  * @brief A SignalType refinement for describing 1-D spectral data.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to describe a signal type that is a vector of
  * elements. The vector can be any size (dimensionality), and has two
@@ -41,6 +41,8 @@ class DLLEXPORT Spectrum: public SignalType
 
 protected:
 	float theStep; ///< Step between spectral bands of represented Spectrum.
+	float theMin;
+	float theMax;
 
 public:
 	/**
@@ -50,6 +52,9 @@ public:
 	 * @return The midpoint frequency of band @a band.
 	 */
 	float bandFrequency(uint band) const { return band * theStep; }
+
+	float minAmplitude() const { return theMin; }
+	float maxAmplitude() const { return theMax; }
 
 	/**
 	 * Gets the number of bands in the spectra of the signal to which this
@@ -84,7 +89,7 @@ public:
 	 * @param step The increase in audio frequency (in Hz) per band. It is
 	 * currently assumed that the signal is a monotonically stepped spectrum.
 	 */
-	Spectrum(uint size = 1, float frequency = 0, float step = 1) : SignalType(size, frequency), theStep(step) {}
+	Spectrum(uint size = 1, float frequency = 0, float step = 1, float _max = 1.f, float _min = 0.f) : SignalType(size, frequency), theStep(step), theMin(_min), theMax(_max) {}
 };
 
 };

@@ -27,7 +27,7 @@
 
 /** @ingroup QtExtra
  * @brief Implement to give non-event driven programs use of the Qt event loop.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * QSubApp is a class for helping provide a convenient way to encapsulate the
  * idea of a normal C++ (non-event driven) style program while still retaining

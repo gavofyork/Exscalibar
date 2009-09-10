@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,7 +28,7 @@ class DomProcessor;
 
 /** @ingroup Geddei
  * @brief A class to segment a number of Processor objects into a set.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class allows several Processor objects to be controlled simultaneously.
  * They may be easily started, stopped and deleted. This helps enormously with

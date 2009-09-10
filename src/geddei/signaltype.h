@@ -15,7 +15,7 @@ namespace Geddei
 
 /** @ingroup Geddei
  * @brief Base class for describing a signal that may be transferred in a Connection.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Class encapsulating description of a signal. The base class includes
  * attributes for all signals (i.e. scope and frequency). On derivation,

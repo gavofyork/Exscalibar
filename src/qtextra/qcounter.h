@@ -33,7 +33,7 @@
 
 /** @internal @ingroup QtExtra
  * @brief Thread-safe integer counter object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class is a simple thread-safe integer counter similar in ways to some
  * of the functionality of a semaphore.

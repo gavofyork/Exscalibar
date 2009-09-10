@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +18,7 @@ class AbstractProcessor;
 
 /** @ingroup rGeddei
  * @brief Model of an AbstractProcessor connection port.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This is a convenience class meant primarily as an adjunct to the
  * AbstractProcessor class to allow subscripting (['s and ]'s) to be used to

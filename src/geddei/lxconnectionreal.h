@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,7 +27,7 @@ class Source;
 
 /** @internal @ingroup Geddei
  * @brief Refinement of Connection that transfers data from a local Source.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * A refinement of a flow control class for outbound communication.
  * This class implements "half" of a LxConnection class. Where the data goes is

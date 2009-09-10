@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,7 +32,7 @@ namespace rGeddei
 
 /** @ingroup rGeddei
  * @brief Client for a remote Geddei session.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class partners with SessionServer in order to allow controlling of
  * Geddei objects on one machine in one program by another program perhaps on a

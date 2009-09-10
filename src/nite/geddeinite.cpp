@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright(C)2004 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -323,7 +323,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 
 	if (running && !theRunning)
 	{
-		if (connectAll() && theGroup.go())
+		if (connectAll() && theGroup.go(true))
 		{
 			theProperties->setEnabled(false);
 			theScene.onStarted();

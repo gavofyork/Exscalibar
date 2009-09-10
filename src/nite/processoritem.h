@@ -94,12 +94,14 @@ class SubProcessorItem;
 class DomProcessorItem: public ProcessorItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties(), QString const& _name = QString::null);
+	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.2), QString const& _name = QString::null);
 
 	DomProcessor* domProcessor() const;
 
 //	enum { Type = UserType + 7 };
 //	virtual int type() const { return Type; }
+
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
 protected:
 	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);

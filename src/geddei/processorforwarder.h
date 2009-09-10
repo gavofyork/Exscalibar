@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -30,7 +30,7 @@ class DRCoupling;
 
 /** @internal @ingroup Geddei
  * @brief A class for serving and routing incoming Processor connections.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * @note This class can ONLY ever be used when a QApplication object is running
  * in the main() thread. It's completely useless otherwise.

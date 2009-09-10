@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,7 @@ class MLConnection;
 
 /** @internal @ingroup Geddei
  * @brief Embodiment of Connection between local Source and multiple outputs.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * A refinement of a flow control class for outbound communication.
  * This class implements a single-in, multiple-out connection paradigm.

@@ -29,7 +29,7 @@ class Processor;
 
 /** @internal @ingroup Geddei
  * @brief Class to encompass an efficient threadsafe databank.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  */
 class Buffer: public ScratchOwner
 {

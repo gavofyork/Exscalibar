@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,7 +33,7 @@ class ProcessorForwarder;
 
 /** @internal @ingroup Geddei
  * @brief Embodiment of Connection between a Source and a remote socket.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * A realisation of the Connection flow-control class framework.
  * This shunts data from a processor object, to a network socket, along with any control

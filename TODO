@@ -1,8 +1,14 @@
-SubProcessors
 Delete connections.
+Cooperative Processor CoProcessor
+- process() called when thereIsDataForProcessing() would return true.
+- DomProcessor inherits from.
+- CoProcessor registers itself with Scheduler singleton on start & dereg on stop.
+- 1 or more CoThread objects owned by Scheduler.
+- CoThread scan list of CoProcessors to find one with most in input buffer.
+  - Removes from work queue, calls process() on it, puts back into work queue.
+
 Can't handle 48K rate.
 Processor information - paused, cycles, CPU, samples read, ticker.
 Buffer information.
 Connection information.
-Watch should work and output to main display ala CLAM.
 

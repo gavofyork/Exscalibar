@@ -2,22 +2,21 @@
 # -------------------------------------------
 # Subdir relative project main directory: ./src/processors/example
 # Target is a library:
-
 include(../../../exscalibar.pri)
-
-TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
-LIBS += -lqtextra -lgeddei
-INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
-
+TARGETDEPS += $$DESTDIR/libqtextra.so \
+    $$DESTDIR/libgeddei.so
+LIBS += -lqtextra \
+    -lgeddei
+INCLUDEPATH += $$SRCDIR/qtextra \
+    $$SRCDIR/geddei
 SOURCES += oscilloscope.cpp \
-		   viewers.cpp
-
-!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
-	DEPLOYMENT += $$SOURCES
-	SOURCES = .composed.cpp
-	OBJECTS_DIR = $$OBJECTS_DIR/viewers
+    viewers.cpp \
+    spectroscope.cpp
+!isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
+    DEPLOYMENT += $$SOURCES
+    SOURCES = .composed.cpp
+    OBJECTS_DIR = $$OBJECTS_DIR/viewers
 }
-
 TEMPLATE = lib
 CONFIG += plugin
 VERSION = $$OURVERSION

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,7 +32,7 @@ class SubProcessor;
 
 /** @ingroup Geddei
  * @brief The Processor-derived class for handling SubProcessor objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  * DomProcessor can be thought of as a generic Processor class which is
  * specialised not at compile time but at runtime. It is publicly derived
  * from the Processor class and thus contains all the public Processor methods

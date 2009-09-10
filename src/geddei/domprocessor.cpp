@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -178,7 +178,7 @@ void DomProcessor::processor()
 	bool wasPlunger = false;
 
 	QList<DxCoupling*>::Iterator w = theWorkers.begin();
-	while (1)
+	while (true)
 	{
 
 		// Wait until there's room in the queue for another job, or the last iteration just pushed a plunger
@@ -279,6 +279,8 @@ void DomProcessor::processor()
 		// We set it here so that if we were a plunger (!willReadChunks) then next time
 		// we dont move the queue on (to keep in sync).
 		wasPlunger = (!willReadChunks);
+
+		guard();
 
 		theQueueLock.lock();
 

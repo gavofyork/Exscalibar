@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,7 +25,7 @@ namespace Geddei
 
 /** @ingroup Geddei
  * @brief Abstract class defining interface for creating Processor objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class facilitates creation of new Processor objects in customisable
  * manners. It provides one virtual method which when overridden can be coded
@@ -49,7 +49,7 @@ protected:
 
 /** @ingroup Geddei
  * @brief MultiProcessorCreator-derivation for creating templated Processor class.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class can be templated so as to allow creation of new Processor objects
  * of the given class.
@@ -62,7 +62,7 @@ class DLLEXPORT BasicCreator: public MultiProcessorCreator
 
 /** @ingroup Geddei
  * @brief MultiProcessorCreator-derivation for creating templated SubProcessor class.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class can be templated so as to allow creation of new DomProcessor
  * objects whose primary SubProcessor is of the given class.
@@ -75,7 +75,7 @@ class DLLEXPORT BasicSubCreator: public MultiProcessorCreator
 
 /** @ingroup Geddei
  * @brief MultiProcessorCreator-derivation for Factory creation of Processors.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class can be constructed so as to allow creation of new Processor
  * objects of the class given by the type @a type . @a type must be an
@@ -100,7 +100,7 @@ public:
 
 /** @ingroup Geddei
  * @brief MultiProcessorCreator-derivation for Factory creation of SubProcessors.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class can be constructed so as to allow creation of new DomProcessor
  * objects whose primary SubProcessor object is of the class given by the type

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2004 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -37,7 +37,7 @@
 
 /** @ingroup Toolkit
  * @brief Communications monitoring Processor object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  * 
  * This is an extended Processor-based class that is essentially just a
  * repeater. It may be placed between two other Processor objects and through

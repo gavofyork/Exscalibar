@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,7 +27,7 @@ namespace Geddei
 
 /** @internal @ingroup Geddei
  * @brief Abstract class defining link between two Processor objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * An abstract flow control class to put between two Processors on potentially
  * different machines. Handles data transfer between them and some basic control

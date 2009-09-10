@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,7 @@ class PropertiesInfo;
 
 /** @ingroup Geddei
  * @brief A set of name/value pairs that act as attributes to a Processor object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Properties is a simple class to store a set of name-value pairs. The values
  * are allowed to be of any valid Qt type.
@@ -236,7 +236,7 @@ struct PropertiesDatum
 
 /** @ingroup Geddei
  * @brief A set of tuples to describe the properties for a Processor object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * PropertiesInfo can be thought of as a map between names and certain
  * attributes for each property. Those attributes are a default value (which

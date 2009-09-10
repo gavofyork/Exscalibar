@@ -135,8 +135,8 @@ SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type,
 	m_type			(_type),
 	m_index			(_index)
 {
-	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
 	_dpi->propertiesChanged();
+	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
 }
 
 SubProcessor* SubProcessorItem::subProcessor() const
@@ -162,12 +162,23 @@ SubProcessor* SubProcessorItem::subProcessor() const
 	}
 }
 
+void DomProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w)
+{
+	QPainterPath p;
+	p.addRect(boundingRect());
+	foreach (SubProcessorItem* spi, filter<SubProcessorItem>(childItems()))
+		p.addRect(QRectF(spi->pos(), spi->size()));
+	_p->save();
+	_p->setClipPath(p);
+	ProcessorItem::paint(_p, _o, _w);
+	_p->restore();
+}
+
 void SubProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	QRectF ca = QRectF(QPointF(0, 0), size());
 	_p->save();
 	_p->setClipRect(ca);
-	_p->fillRect(ca, QColor::fromHsv(300, 96, 160));
 	subProcessor()->draw(*_p);
 	_p->restore();
 
@@ -417,6 +428,7 @@ QRectF ProcessorItem::clientArea() const
 
 void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
+	_p->setClipping(false);
 	if (isSelected())
 	{
 		_p->setPen(QPen(QColor::fromHsv(220, 220, 200), 0));
@@ -449,7 +461,8 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 	_p->setBrush(QColor(0, 0, 0, 128));
 	_p->drawRect(ca);
 
-	_p->setClipRect(ca);
+	_p->setClipping(true);
+	_p->setClipRect(ca, Qt::IntersectClip);
 	_p->translate(ca.topLeft());
 	m_processor->draw(*_p, ca.size());
 }

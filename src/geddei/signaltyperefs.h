@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,7 @@ class SignalType;
 
 /** @ingroup Geddei
  * @brief Array-like class for containing SignalTypePtr objects.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Though this class uses pointers in its storage mechanism (hence
  * SignalTypeRefs) it DOES own all data it points at. It will be deleted with

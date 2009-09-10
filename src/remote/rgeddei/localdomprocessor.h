@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,7 +38,7 @@ class RemoteSession;
 
 /** @ingroup rGeddei
  * @brief LocalProcessor refinement and AbstractDomProcessor realisation.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * This class is used in exactly the same way as a LocalProcessor class. It
  * accomplishes exactly the same job. However it caters for the situation where

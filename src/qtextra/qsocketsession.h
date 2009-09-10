@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,7 +20,7 @@
 
 /** @ingroup QtExtra
  * @brief Base utility class for dealing with Geddei socket connections.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * QSocketSession provides a suitable interface to TCP sockets for more
  * high-level uses. Through handshaking, it can determine if both hosts share

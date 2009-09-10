@@ -35,7 +35,7 @@
 
 /** @ingroup QtExtra
  * @brief Class for creating arbitrary subclasses from plugins at runtime.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  *
  * Not threadsafe.
  */

@@ -23,8 +23,8 @@ QPolygonF OutputItem::polygon() const
 
 QPointF OutputItem::tip() const
 {
-	double psot = portSize / 2 * (m_hover ? 2 : 1);
-	double cs = cornerSize * (m_hover ? 2 : 1);
+	double psot = portSize / 2;
+	double cs = cornerSize;
 	return QPointF(cs + psot, 0);
 }
 

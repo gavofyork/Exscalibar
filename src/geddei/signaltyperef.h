@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,7 +23,7 @@ class SignalType;
 
 /** @ingroup Geddei
  * @brief A container for a SignalType-derived object.
- * @author Gav Wood <gav@cs.york.ac.uk>
+ * @author Gav Wood <gav@kde.org>
  * 
  * This is a fairly unusual class; it is designed to be as simple to use as
  * possible but the simplicity does somewhat make light of the ownership
