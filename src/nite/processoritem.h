@@ -25,7 +25,7 @@ class ProcessorItem: public QObject, public QGraphicsItem
 	friend class OutputItem;
 
 public:
-	ProcessorItem(Processor* _p, Properties const& _pr = Properties(), QString const& _name = QString::null);
+	ProcessorItem(Processor* _p, Properties const& _pr = Properties(), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 	~ProcessorItem()
 	{
 		delete m_processor;
@@ -47,9 +47,7 @@ public:
 	void tick();
 
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	void loadYourself(QDomElement& _element);
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
-	void postLoad()	{}
 
 	virtual QSizeF centreMin() const { return QSizeF(m_processor->width(), m_processor->height()); }
 

@@ -84,9 +84,10 @@ void GeddeiNite::doSave(const QString& _filename)
 	QDomDocument doc;
 	QDomElement root = doc.createElement("network");
 	doc.appendChild(root);
-	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
-			pi->saveYourself(root, doc);
+	foreach (ProcessorItem* pi, filter<ProcessorItem>(theScene.items()))
+		pi->saveYourself(root, doc);
+	foreach (ConnectionItem* ci, filter<ConnectionItem>(theScene.items()))
+		ci->saveYourself(root, doc);
 
 	QFile f(_filename);
 	if (!f.open(QIODevice::WriteOnly))
@@ -118,6 +119,8 @@ void GeddeiNite::doLoad(const QString &filename)
 			continue;
 		else if (elem.tagName() == "processor")
 			ProcessorItem::fromDom(elem, &theScene);
+		else if (elem.tagName() == "connection")
+			ConnectionItem::fromDom(elem, &theScene);
 	}
 	statusBar()->showMessage("Loaded.", 2000);
 	setModified(false);

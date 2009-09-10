@@ -24,6 +24,9 @@ public:
 	ProcessorItem* toProcessor() const;
 	ProcessorItem* fromProcessor() const;
 
+	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
+	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
+
 	void rejigEndPoints();
 
 private:

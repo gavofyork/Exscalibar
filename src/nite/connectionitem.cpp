@@ -1,5 +1,6 @@
 #include "inputitem.h"
 #include "outputitem.h"
+#include "processoritem.h"
 #include "connectionitem.h"
 
 ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
@@ -40,3 +41,33 @@ ProcessorItem* ConnectionItem::toProcessor() const
 	return qgraphicsitem_cast<ProcessorItem*>(parentItem()->parentItem());
 }
 
+void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
+{
+	OutputItem* oi = 0;
+	InputItem* ii = 0;
+	foreach (ProcessorItem* pi, filter<ProcessorItem>(_scene->items()))
+		if (pi->processor()->name() == _element.attribute("from"))
+			foreach (OutputItem* i, filter<OutputItem>(pi->childItems()))
+				if (i->index() == (uint)_element.attribute("fromindex").toInt())
+					oi = i;
+				else {}
+		else if (pi->processor()->name() == _element.attribute("to"))
+			foreach (InputItem* i, filter<InputItem>(pi->childItems()))
+				if (i->index() == (uint)_element.attribute("toindex").toInt())
+					ii = i;
+	if (!ii || !oi)
+		return;
+	new ConnectionItem(ii, oi);
+}
+
+void ConnectionItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
+{
+	QDomElement proc = _doc.createElement("connection");
+
+	proc.setAttribute("from", fromProcessor()->processor()->name());
+	proc.setAttribute("fromindex", m_from->index());
+	proc.setAttribute("to", toProcessor()->processor()->name());
+	proc.setAttribute("toindex", qgraphicsitem_cast<InputItem*>(parentItem())->index());
+
+	_root.appendChild(proc);
+}

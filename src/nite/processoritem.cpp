@@ -212,7 +212,7 @@ void SubProcessorItem::focusInEvent(QFocusEvent* _e)
 	QGraphicsItem::focusInEvent(_e);
 }
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(0, 0), m_timerId(-1), m_resizing(true)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name, QSizeF const& _size): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(_size), m_timerId(-1), m_resizing(true)
 {
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
@@ -482,18 +482,9 @@ void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
 		if (n.toElement().tagName() == "property")
 			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
-	ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create(_element.attribute("type")), p, _element.attribute("name"));
-	pi->loadYourself(_element);
+	ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create(_element.attribute("type")), p, _element.attribute("name"), QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble()));
 	_scene->addItem(pi);
-}
-
-void ProcessorItem::loadYourself(QDomElement& _element)
-{
-	setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
-	m_size = QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble());
-	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-		if (n.toElement().tagName() == "input")
-			InputItem::fromDom(n.toElement(), this);
+	pi->setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
 }
 
 void ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
@@ -514,8 +505,5 @@ void ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 		prop.setAttribute("name", k);
 		prop.setAttribute("value", m_properties[k].toString());
 	}
-	foreach (QGraphicsItem* i, childItems())
-		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
-			ii->saveYourself(proc, _doc);
 	_root.appendChild(proc);
 }
