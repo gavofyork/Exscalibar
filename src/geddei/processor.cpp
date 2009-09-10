@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@cs.york.ac.uk                                                     *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -60,6 +60,14 @@ Processor::~Processor()
 	// FINISH MUTUAL EXCLUSIVITY
 
 	if (MESSAGES) qDebug("Deleted Processor.");
+}
+
+void Processor::process()
+{
+	while (thereIsInputForProcessing())
+	{
+		processCycle();
+	}
 }
 
 void Processor::startPlungers()
@@ -295,16 +303,18 @@ bool Processor::thereIsInputForProcessing(uint samples)
 
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
+			uint votesToContinue = 0;
 			for (uint i = 0; i < (uint)theInputs.count(); i++)
 			{
 				if (pMESSAGES) qDebug("Processor [%s]: Input %d (DR: %d)...", qPrintable(theName), i, dataReady[i]);
 				// If there's a plunger left to be gotten and we have to process stuff before we can get it then exit.
 				// FIXME: check and maybe make safe plungeSync with thePlungerSystem locked.
-				if (dataReady[i]) return true;
+				if (dataReady[i]) votesToContinue++;
 				if (!thePlungersLeft[i] && thePlungersEnded) votesToEnd++;
 			}
 			if (pMESSAGES) qDebug("Processor [%s]: %d votes to end...", qPrintable(theName), votesToEnd);
-			if (votesToEnd == (uint)theInputs.count()) return false;
+			if (theInputs.count() && votesToEnd == (uint)theInputs.count()) return false;
+			if (votesToContinue == (uint)theInputs.count()) return true;
 
 			if (MESSAGES) qDebug("Processor: Waiting for something to change...");
 			// Wait until something changes...
@@ -360,17 +370,19 @@ bool Processor::thereIsInputForProcessing()
 
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
+			uint votesToContinue = 0;
 			for (uint i = 0; i < (uint)theInputs.count(); i++)
 			{
 				if (MESSAGES) qDebug("Processor: Input %d...", i);
 				// If there's a plunger left to be gotten and we have to process stuff before we can get it then exit.
 				// FIXME: check and maybe make safe plungeSync with thePlungerSystem locked.
-				if (dataReady[i]) return true;
+				if (dataReady[i]) votesToContinue++;
 				if (!thePlungersLeft[i] && thePlungersEnded) votesToEnd++;
 			}
 			if (MESSAGES) qDebug("Processor: %d votes to end...", votesToEnd);
 			if (theInputs.count() && votesToEnd == (uint)theInputs.count())
 				return false;
+			if (votesToContinue == (uint)theInputs.count()) return true;
 
 			if (MESSAGES) qDebug("Processor: Waiting for something to change...");
 			// Wait until something changes...
