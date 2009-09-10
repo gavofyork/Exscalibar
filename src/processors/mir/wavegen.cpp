@@ -92,10 +92,10 @@ void WaveGen::initFromProperties(const Properties &properties)
 PropertiesInfo WaveGen::specifyProperties() const
 {
 	return PropertiesInfo("Frequency", 440., "Frequency of the wave to generate.")
-						 ("Sample Rate", 22050., "Rate at which samples of the wave are produced.")
-						 ("ChunksPerPlunger", 1, "Number of output chunks produced between each plunger. This is mutually exclusive with SamplesPerChunk.")
-						 ("PlungersPerSecond", 1., "Number of plungers produced per second. This is mutually exclusive with SamplesPerChunk.")
-						 ("SamplesPerChunk", 0, "Number of samples in each chunk of output data. This is mutually exclusive with ChunksPerPlunger and PlungersPerSecond.")
+						 ("Sample Rate", 44100., "Rate at which samples of the wave are produced.")
+						 ("ChunksPerPlunger", 0, "Number of output chunks produced between each plunger. This is mutually exclusive with SamplesPerChunk.")
+						 ("PlungersPerSecond", 0., "Number of plungers produced per second. This is mutually exclusive with SamplesPerChunk.")
+						 ("SamplesPerChunk", 1024, "Number of samples in each chunk of output data. This is mutually exclusive with ChunksPerPlunger and PlungersPerSecond.")
 						 ("Stop After", 0., "Number of plungers before this processors task has ended. If zero, continue indefinately. ");
 }
 

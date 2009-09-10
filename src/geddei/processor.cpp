@@ -580,7 +580,7 @@ bool Processor::go()
 void Processor::run()
 {
 	setThreadProcessor();
-
+#if 0
 	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
 	// TODO: Look into reasons why this shouldn't go back in.
 	// currently theTypesConfirmed *never* seems to be falsified after being initially
@@ -590,6 +590,9 @@ void Processor::run()
 		theTypesCache.clear();
 	}*/
 	if (!confirmTypes()) return;
+#endif
+	if (!theTypesConfirmed)
+		return;
 
 	// Wait for them to confirm their own types before we start our processing/pushing data.
 	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting for outputs...", qPrintable(theName));

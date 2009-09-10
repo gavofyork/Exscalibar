@@ -141,9 +141,9 @@ class DLLEXPORT BailException
  * values for those properties. It may specify a visual size and method for
  * drawing in a GUI.
  */
-class DLLEXPORT CoProcessor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
+/*class DLLEXPORT CoProcessor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
 {
-};
+};*/
 
 class DLLEXPORT Processor: protected QThread, virtual public Source, virtual public Sink, public MultiSource, public MultiSink
 {
@@ -166,7 +166,8 @@ public:
 	};
 
 	enum
-	{	Guarded = 1 ///< Indicates a subclass is able to finish when input EOS is given.
+	{	Guarded = 1, ///< Indicates a subclass is able to finish when input EOS is given.
+		Cooperative = 2 ///< Indicates the processor can exist as a fibre rather than a thread.
 	};
 
 private:

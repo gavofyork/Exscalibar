@@ -28,9 +28,8 @@ QPointF InputItem::tip() const
 void InputItem::typesConfirmed()
 {
 	prepareGeometryChange();
-	double f = processorItem()->m_processor->input(m_index).type().frequency();
-	double secs = processorItem()->m_processor->input(m_index).capacity() / f;
-	m_size = QSizeF(secs * 100 + cornerSize, portSize);
+	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
+	m_size = QSizeF(log(1.0 + secs) / log(2) * 32 + 10 + cornerSize, portSize);
 	setPos(cornerSize - m_size.width(), cornerSize + cornerSize / 2 + portLateralMargin + (portLateralMargin + portSize) * m_index);
 	update();
 	foreach (QGraphicsItem* i, childItems())

@@ -53,7 +53,7 @@ bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	if (isRunning())
 	{
 		_p.scale(_s.width() / m_last.size(), 1);
-		_p.setPen(QPen(Qt::black, 1));
+		_p.setPen(QPen(Qt::black, 0));
 		for (int i = 0; i < m_last.size(); i++)
 			_p.drawLine(QLineF(i, 0, i, -(m_last[i] - m_minAmp) * m_deltaAmp * _s.height()));
 	}
