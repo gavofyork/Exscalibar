@@ -975,6 +975,16 @@ void Processor::waitUntilDone()
 		theAllDoneChanged.wait(&theStop);
 }
 
+Connection::Tristate Processor::isGoingYet()
+{
+	if (theError == Pending)
+		return Connection::Pending;
+	else if (theError == NoError)
+		return Connection::Succeeded;
+	else
+		return Connection::Failed;
+}
+
 Processor::ErrorType Processor::waitUntilGoing(int *errorData)
 {
 	QMutexLocker lock(&theErrorSystem);

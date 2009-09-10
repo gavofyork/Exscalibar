@@ -151,6 +151,21 @@ bool LRConnection::waitUntilReady()
 	return theSink.isOpen();
 }
 
+Connection::Tristate LRConnection::isReadyYet()
+{
+	Tristate ret;
+	if (MESSAGES) qDebug("> LRC::iRY()");
+	if (theSink.isOpen())
+	{	theSink.sendByte(IsReadyYet);
+		if (MESSAGES) qDebug("= LRC::iRY(): isOpen() = %d", theSink.isOpen());
+		if (!trapdoor() && theSink.isOpen()) ret = (Tristate)theSink.receiveByte();
+	}
+	if (MESSAGES) qDebug("= LRC::iRY(): checkExit() (isOpen() = %d)", theSink.isOpen());
+	theSource->checkExit();
+	if (MESSAGES) qDebug("< LRC::iRY()");
+	return theSink.isOpen() ? ret : Failed;
+}
+
 void LRConnection::transport(const BufferData &data)
 {
 	if (MESSAGES) qDebug("> LRC::transport() (L=%s, size=%d)", qPrintable(dynamic_cast<Processor *>(theSource)->name()), data.elements());

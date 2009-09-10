@@ -88,6 +88,15 @@ bool Splitter::waitUntilReady()
 	return true;
 }
 
+Connection::Tristate Splitter::isReadyYet()
+{
+	Tristate ret = Succeeded;
+	foreach (LxConnection* i, theConnections)
+		if (i->isReadyYet() == Failed) return Failed;
+		else if (i->isReadyYet() == Pending) ret = Pending;
+	return ret;
+}
+
 void Splitter::setType(const SignalType *type)
 {
 	delete theType;

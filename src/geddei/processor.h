@@ -862,6 +862,7 @@ public:
 	 * @sa go()
 	 */
 	ErrorType waitUntilGoing(int *errorData = 0);
+	Connection::Tristate isGoingYet();
 
 	/**
 	 * Blocks until the Processor object is finished and has exited it's main

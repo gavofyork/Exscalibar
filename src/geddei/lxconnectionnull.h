@@ -45,7 +45,8 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual BufferData makeScratchElements(const uint, bool = false) { return BufferData::fake(); }
 	virtual void setType(const SignalType *type) { theType = type->copy(); }
 	virtual void resetType() { delete theType; theType = 0L; }
-	virtual bool waitUntilReady() { return true; }
+	virtual bool waitUntilReady() { return 1; }
+	virtual Tristate isReadyYet() { return Succeeded; }
 	virtual void sourceStopping() {}
 	virtual void sourceStopped() {}
 	virtual void reset() {}

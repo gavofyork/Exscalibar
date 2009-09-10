@@ -81,6 +81,13 @@ bool LLConnection::waitUntilReady()
 	return theSink->waitUntilReady();
 }
 
+Connection::Tristate LLConnection::isReadyYet()
+{
+	// Perhaps this shouldn't always call confirmTypes(), since it will clear stuff that we may not want cleared
+	//theSink->confirmTypes();
+	return theSink->isGoingYet();
+}
+
 void LLConnection::pushPlunger()
 {
 	if (MESSAGES) qDebug("> LLConnection::pushPlunger(): Appending plunger to buffer");

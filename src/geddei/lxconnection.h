@@ -102,6 +102,7 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 * @return false if something went wrong.
 	 */
 	virtual bool waitUntilReady() = 0;
+	virtual Tristate isReadyYet() = 0;
 
 	/**
 	 * Conducts the setting of the type if an object wants to do it without

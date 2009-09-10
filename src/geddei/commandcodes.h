@@ -22,6 +22,7 @@ enum Command
 	BufferWaitForFreeElements,
 	BufferSpaceFree,
 	WaitUntilReady,
+	IsReadyYet,
 	AppendPlunger,
 	StartPlungers,
 	PlungerSent,

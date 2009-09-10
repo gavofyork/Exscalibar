@@ -46,6 +46,7 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
+	virtual Tristate isReadyYet();
 	virtual void setType(const SignalType *type);
 	virtual void resetType();
 	virtual void sourceStopping();

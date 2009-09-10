@@ -46,6 +46,15 @@ bool LMConnection::waitUntilReady()
 	return true;
 }
 
+Connection::Tristate LMConnection::isReadyYet()
+{
+	Tristate ret = Succeeded;
+	foreach (MLConnection* i, theConnections)
+		if (i->isReadyYet() == Failed) return Failed;
+		else if (i->isReadyYet() == Pending) return ret = Pending;
+	return ret;
+}
+
 void LMConnection::reset()
 {
 	theBuffer.clear();

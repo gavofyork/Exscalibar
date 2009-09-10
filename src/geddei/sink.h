@@ -14,6 +14,12 @@
 #include <qstring.h>
 
 #include <exscalibar.h>
+#ifdef __GEDDEI_BUILD
+#include "connection.h"
+#else
+#include <geddei/connection.h>
+#endif
+using namespace Geddei;
 
 namespace Geddei
 {
@@ -51,24 +57,24 @@ public:
 	/**
 	 * Called by an incoming signal to suggest that the sink should initialise
 	 * ready for plunger notification.
-	 * 
+	 *
 	 * This is necessary since this Sink may be started after an input
 	 * Processor has already attempted notification of a plunger.
 	 */
 	virtual void startPlungers() = 0;
-	
+
 	/**
 	 * Called by an incoming signal to affirm that no more plungers will
 	 * follow in an input stream is received.
 	 */
 	virtual void noMorePlungers() = 0;
-	
+
 	/**
 	 * Called when an incoming signal to affirm that another plunger will
 	 * be available sometime in the future.
 	 */
 	virtual void plungerSent(uint index) = 0;
-	
+
 	/**
 	 * Callback for when a plunger is in the input.
 	 */
@@ -85,6 +91,7 @@ public:
 	 * due to error.
 	 */
 	virtual bool waitUntilReady() = 0;
+	virtual Connection::Tristate isGoingYet() = 0;
 
 	/**
 	 * This should return only when the Sink has finished all processing.

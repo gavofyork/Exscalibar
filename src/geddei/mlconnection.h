@@ -65,6 +65,7 @@ public:
 	 * Blocks until sink is happy that all inputs are confirmed.
 	 */
 	bool waitUntilReady();
+	Tristate isReadyYet();
 
 	/**
 	 * Resets the (essentially cached) type of the connection.

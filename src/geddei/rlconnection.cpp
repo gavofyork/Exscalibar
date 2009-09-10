@@ -131,6 +131,13 @@ void RLConnection::run()
 			if (MESSAGES) qDebug("= RLC::run(): All done.");
 			break;
 		}
+		case IsReadyYet:
+		{	if (MESSAGES) qDebug("= RLC::run(): IsReadyYet");
+//			theSource.ack(theSink->confirmTypes());
+			theSource.sendByte((uchar)theSink->isGoingYet());
+			if (MESSAGES) qDebug("= RLC::run(): All done.");
+			break;
+		}
 		case AppendPlunger:
 		{	if (MESSAGES) qDebug("= RLC::run(): Appending plunger!");
 			theBuffer.appendPlunger();

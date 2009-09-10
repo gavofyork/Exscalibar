@@ -226,6 +226,12 @@ bool MLConnection::waitUntilReady()
 	return theSink->waitUntilReady();
 }
 
+Connection::Tristate MLConnection::isReadyYet()
+{
+//	return theSink->confirmTypes();
+	return theSink->isGoingYet();
+}
+
 const SignalTypeRef MLConnection::type()
 {
 	if (!theType) theType = (theConnection->type().thePtr ? theConnection->type().thePtr->copy() : 0);

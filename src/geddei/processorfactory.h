@@ -12,7 +12,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "qfactorymanager.h"
 #include "processor.h"
 #else
@@ -72,7 +71,7 @@ public:
 	 * unavailable, in a proper string representation.
 	 */
 	static QString version(const QString &type) { return QString::number(versionId(type) / 65536) + "." + QString::number((versionId(type) / 256) % 256) + "." + QString::number(versionId(type) % 256); }
-	
+
 	/**
 	 * Retrieves a list of the types of Processor available for creation.
 	 *

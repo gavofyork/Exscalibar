@@ -35,26 +35,36 @@ namespace Geddei
  */
 class Connection
 {
+public:
+	/**
+	 * The various error types that a Processor may trip up on.
+	 */
+	enum Tristate
+	{	Succeeded = 0, ///< Indicates no error occured.
+		Pending, ///< Indicates the operation has yet to finish.
+		Failed
+	};
+
 protected:
 	SignalType *theType;
 
 public:
 	/**
 	 * Retrieves the type of signal for the connection.
-	 * 
+	 *
 	 * Should ask source processor if the type is unknown.
 	 */
 	virtual const SignalTypeRef type() = 0;
 
 	/**
 	 * Makes the writing/reading buffer at least @a elements big.
-	 * 
+	 *
 	 * Source-writers/sink-readers may make access transactions of elements
 	 * without blocking indefinately.
-	 * 
+	 *
 	 * Makes sure that maximumScratchElementsEver() will return at least
 	 * elements.
-	 * 
+	 *
 	 * Makes sure that readElements(@a elements) will never block indefinately.
 	 */
 	virtual void enforceMinimum(uint elements) = 0;
