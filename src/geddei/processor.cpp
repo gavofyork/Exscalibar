@@ -37,7 +37,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, const MultiplicityType multi, uint flags): QThread(0), theName(""), theType(type), theFlags(flags),
-	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false), theIsActive(false),
 	theTypesConfirmed(false), thePaused(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -87,7 +87,8 @@ public:
 			else if (sinceLastWorked >= (uint)m_tasks.count())
 			{
 				l_tasks.unlock();
-				msleep(10);
+				// Configurable by the processors.
+				msleep(10);	//allows 30 fps
 				l_tasks.lock();
 				sinceLastWorked	= 0;
 			}
@@ -563,7 +564,7 @@ void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
 
 bool Processor::isRunning() const
 {
-	return QThread::isRunning();
+	return (theFlags & Cooperative) ? isActive() : QThread::isRunning();
 }
 
 bool Processor::isActive() const
