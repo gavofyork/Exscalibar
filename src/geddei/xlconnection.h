@@ -107,11 +107,13 @@ protected:
 	/** @internal
 	 * Will return true if @a elements can be read from the input stream without
 	 * blocking. Any plungers that would block this from being true are skipped.
-	 * If a plunger is skipped then the sink is notified.
+	 * If a plunger is skipped then the sink is notified. Will return false if
+	 * @a elements could be read, but also if sometime in the future @a prefer
+	 * could be made available.
 	 *
 	 * NON-BLOCKING.
 	 */
-	virtual bool require(uint elements) const = 0;
+	virtual bool require(uint samples, uint preferSamples = Undefined) = 0;
 
 	/** @internal
 	 * Returns the number of elements currently available to be read without

@@ -92,7 +92,7 @@ class DLLEXPORT Player: public Processor
 
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual bool processorStarted();
-	virtual void process();
+	virtual int process();
 	virtual void processor();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);

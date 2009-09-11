@@ -27,7 +27,7 @@ class Spectroscope: public Processor
 	float m_minAmp;
 	float m_deltaAmp;
 
-	virtual void process();
+	virtual int process();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
@@ -38,9 +38,10 @@ public:
 	Spectroscope(): Processor("Spectroscope", NotMulti, Cooperative) {}
 };
 
-void Spectroscope::process()
+int Spectroscope::process()
 {
 	input(0).readSample().copyTo(m_last.data());
+	return DidWork;
 }
 
 bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const

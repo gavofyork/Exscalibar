@@ -50,7 +50,7 @@ class ALSACapturer: public Processor
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
-	virtual void process();
+	virtual int process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
@@ -119,7 +119,7 @@ bool ALSACapturer::processorStarted()
 	return false;
 }
 
-void ALSACapturer::process()
+int ALSACapturer::process()
 {
 	int count = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
 	if (count > 0)
@@ -132,9 +132,10 @@ void ALSACapturer::process()
 				d[c][i] = float(m_inData[i * theChannels + c]) / 32768.f;
 		for (uint c = 0; c < theChannels; c++)
 			output(c) << d[c];
+		return DidWork;
 	}
-	else
-		snd_pcm_prepare(thePcmHandle);
+	snd_pcm_prepare(thePcmHandle);
+	return NoWork;
 }
 
 void ALSACapturer::processorStopped()

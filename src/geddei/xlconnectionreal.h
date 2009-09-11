@@ -63,7 +63,7 @@ private:
 	virtual uint capacity() const { return theBuffer.size() / theType->scope(); }
 	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
 	virtual bool plungeSync(uint samples) const;
-	virtual bool require(uint elements) const;
+	virtual bool require(uint samples, uint preferSamples = Undefined);
 
 protected:
 	friend class BobPort;

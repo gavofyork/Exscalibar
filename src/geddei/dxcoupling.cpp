@@ -24,12 +24,10 @@ namespace Geddei
 
 DxCoupling::DxCoupling(DomProcessor *dom): theDomProcessor(dom)
 {
-	dom->theWorkers.append(this);
 }
 
 DxCoupling::~DxCoupling()
 {
-	theDomProcessor->theWorkers.removeAll(this);
 }
 
 void DxCoupling::skipPlungeAndSend(uint samples)

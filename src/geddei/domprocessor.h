@@ -83,7 +83,120 @@ class DLLEXPORT DomProcessor: public Processor
 	uint theNomChunks, theMaxChunks;
 	double theWeighting;
 	bool theAlterBuffer;
-	uint theOptimalThroughput, theWantSize;
+	bool theDebug;
+	uint theOptimalThroughput, theWantSamples, theWantChunks;
+
+	//* A cache of our properties, since we may need it after init.
+	Properties theProperties;
+
+	SubProcessor *thePrimary;
+
+	bool theLimbo;
+	bool theWasPlunger;
+	QList<DxCoupling*> theWorkers;
+	DxCoupling* theW;
+
+	virtual bool processorStarted();
+	virtual int process();
+	virtual void wantToStopNow();
+	virtual void haveStoppedNow();
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties(const Properties &properties);
+	virtual void specifyInputSpace(QVector<uint> &samples);
+	virtual void specifyOutputSpace(QVector<uint> &samples);
+	virtual void requireInputSpace(QVector<uint> &samples);
+	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 96, 160); }
+
+	/**
+	 * Adds another SubProcessor object to this Processor's list of "workers".
+	 *
+	 * Uses a DSCoupling for the connection (an efficient local shared memory
+	 * link).
+	 *
+	 * @param worker The SubProcessor object to be added as a worker. This must
+	 * be the same class as the primary.
+	 */
+	void addWorker(SubProcessor *worker);
+
+public:
+	/**
+	 * Note this will assume the stack has a QMutexLocker for theQueueLock in
+	 * it, and that theQueueLock has already been manually unlocked.
+	 * This means that no methods that may call checkExit() should be called
+	 * unless theQueueLock is unlocked.
+	 */
+	virtual void checkExit() { Processor::checkExit(); } // This can be removed once SubProcessors are coop.
+
+	/** @internal
+	 * To be called from the constructor of a mixin-ed coupling. This ratifies
+	 * the coupling ready for use and does any required post-initialisation on
+	 * it.
+	 *
+	 * This really belongs in DxCoupling, but it has to be called after the
+	 * left side is constructed, since it uses said methods.
+	 */
+	void ratify(DxCoupling *c);
+
+	/**
+	 * Creates and adds a local SubProcessor to this Processor's list of
+	 * workers. Uses SubProcessorFactory for the creation, and the primary for
+	 * the type.
+	 *
+	 * Uses a DSCoupling for the connection (an efficient local shared memory
+	 * link).
+	 *
+	 * @return true iff a worker was added.
+	 */
+	bool createAndAddWorker();
+
+	/**
+	 * Creates and adds a remote SubProcessor to this Processor's list of
+	 * workers. Uses a DR/RSCoupling for the connection (a remote TCP/IP link).
+	 *
+	 * @param host The host on which the SubProcessor should be added. This
+	 * must be running the Geddei nodeserver.
+	 * @param key The session key under which the SubProcessor will be added.
+	 * @return true iff a worker was added.
+	 */
+	bool createAndAddWorker(const QString &host, uint key);
+
+	SubProcessor* primary() const { return thePrimary; }
+
+	/**
+	 * Constructor. A valid primary SubProcessor must be passed in @a primary.
+	 * This is to determine the type of DomProcessor, and provide at leat one
+	 * worker.
+	 *
+	 * @param primary The primary SubProcessor object. This must be valid.
+	 */
+	DomProcessor(SubProcessor *primary);
+
+	/**
+	 * Constructor. Creates a new SubProcessor object of type given, then initialises
+	 * DomProcessor as a primary of this type (to provide at least one worker).
+	 *
+	 * @param primaryType A valid and factory-creatable type of SubProcessor.
+	 */
+	DomProcessor(const QString &primaryType);
+
+	/**
+	 * Default destructor.
+	 */
+	virtual ~DomProcessor();
+};
+#if 0
+class DLLEXPORT DomProcessor: public Processor
+{
+	//* Attributes of the data processing pipeline.
+	uint theSamplesIn, theSamplesStep, theSamplesOut;
+
+	//* Attributes that define how much data we want to take in normally.
+	uint theNomChunks, theMaxChunks;
+	double theWeighting;
+	bool theAlterBuffer;
+	uint theOptimalThroughput, theWantSamples;
 
 	//* Queue management stuff.
 	QList<DxCoupling*> theWorkers;
@@ -252,7 +365,7 @@ public:
 	 */
 	virtual ~DomProcessor();
 };
-
-};
+#endif
+}
 
 #endif

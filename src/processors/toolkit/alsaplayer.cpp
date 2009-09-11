@@ -49,7 +49,8 @@ class ALSAPlayer: public Processor
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
-	virtual void process();
+	virtual int canProcess();
+	virtual int process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
@@ -114,7 +115,17 @@ bool ALSAPlayer::processorStarted()
 	return false;
 }
 
-void ALSAPlayer::process()
+int ALSAPlayer::canProcess()
+{
+	snd_pcm_prepare(thePcmHandle);
+	int av = snd_pcm_avail(thePcmHandle);
+	qDebug() << av;
+	if (av < (int)thePeriodSize)
+		return NoWork;
+	return Processor::canProcess();
+}
+
+int ALSAPlayer::process()
 {
 	BufferData d[theChannels];
 	for (uint c = 0; c < theChannels; c++)
@@ -134,6 +145,7 @@ void ALSAPlayer::process()
 		else
 			snd_pcm_prepare(thePcmHandle);
 	}
+	return DidWork;
 }
 
 void ALSAPlayer::processorStopped()

@@ -29,6 +29,285 @@
 namespace Geddei
 {
 
+DomProcessor::DomProcessor(SubProcessor *primary):
+	Processor("DomProcessor", primary->theMulti, Cooperative),
+	thePrimary(primary)
+{
+	primary->thePrimaryOf = this;
+}
+
+DomProcessor::DomProcessor(const QString &primaryType):
+	Processor("DomProcessor", (thePrimary = SubProcessorFactory::create(primaryType))->theMulti, Cooperative)
+{
+	thePrimary->thePrimaryOf = this;
+}
+
+DomProcessor::~DomProcessor()
+{
+	while (theWorkers.size())
+		delete theWorkers.takeLast();
+	assert(theWorkers.isEmpty());
+}
+
+bool DomProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
+{
+	_p.fillRect(QRectF(QPointF(0, 0), _s), QBrush(Qt::black, Qt::Dense4Pattern));
+	return true;
+//	return thePrimary->paintProcessor(_p);
+}
+
+void DomProcessor::addWorker(SubProcessor *worker)
+{
+	theWorkers.append(new DSCoupling(this, worker));
+}
+
+void DomProcessor::ratify(DxCoupling *c)
+{
+	if (theIsInitialised)
+	{
+		c->initFromProperties(theProperties);
+		c->defineIO(numInputs(), numOutputs());
+	}
+}
+
+bool DomProcessor::createAndAddWorker()
+{
+	SubProcessor *sub = SubProcessorFactory::create(thePrimary->type());
+	if (!sub) return false;
+	addWorker(sub);
+	return true;
+}
+
+bool DomProcessor::createAndAddWorker(const QString &host, uint key)
+{
+	return ProcessorForwarder::createCoupling(this, host, key, thePrimary->type()) != 0;
+}
+
+void DomProcessor::wantToStopNow()
+{
+	if (MESSAGES) qDebug("DomProcessor[%s]: Initiating stop..", qPrintable(theName));
+
+	if (MESSAGES) qDebug("DomProcessor[%s]: %d workers.", qPrintable(theName), theWorkers.count());
+
+	if (MESSAGES) qDebug("DomProcessor[%s]: Informing couplings...", qPrintable(theName));
+	foreach (DxCoupling* w, theWorkers)
+		w->stopping();
+	if (MESSAGES) qDebug("DomProcessor[%s]: OK.", qPrintable(theName));
+}
+
+void DomProcessor::haveStoppedNow()
+{
+	if (MESSAGES) qDebug("DomProcessor[%s]: Stopped.", qPrintable(theName));
+
+	if (MESSAGES) qDebug("DomProcessor[%s]: Closing trapdoors...", qPrintable(theName));
+	foreach (DxCoupling* w, theWorkers)
+		w->stopped();
+
+	if (MESSAGES) qDebug("DomProcessor[%s]: Stopping workers...", qPrintable(theName));
+	foreach (DxCoupling* w, theWorkers)
+		w->stop();
+
+	if (MESSAGES) qDebug("DomProcessor[%s]: Deleting worker readers...", qPrintable(theName));
+	for (uint i = 0; i < numInputs(); i++)
+		if (theInputs[i])
+			foreach (DxCoupling* w, theWorkers)
+				delete w->theReaders[i];
+}
+
+void DomProcessor::specifyInputSpace(QVector<uint> &samples)
+{
+	theWantChunks = theWorkers.count() + 1;
+
+	if (theAlterBuffer)
+	{
+		uint minimumSamples = theWorkers.count() * theSamplesStep + theSamplesIn;
+		uint optimalSamples = Undefined;
+		for (uint i = 0; i < (uint)samples.count(); i++)
+			optimalSamples = min(optimalSamples, max(minimumSamples, theOptimalThroughput / input(i).type().scope()));
+		uint optimalChunks = (optimalSamples - theSamplesIn) / theSamplesStep;
+
+		// Formulate in terms of whole chunks, make sure it's divisible by the readers, recalculate how many samples.
+		theWantChunks = uint(ceil(exp((log(double(optimalChunks)) - log(double(theWantChunks))) * theWeighting + log(double(theWantChunks))))) / (theWorkers.count() + 1) * (theWorkers.count() + 1);
+	}
+
+	theWantSamples = (theWantChunks - 1) * theSamplesStep + theSamplesIn;
+
+	for (uint i = 0; i < (uint)samples.count(); i++)
+		samples[i] = theWantSamples;
+
+	if (theDebug && lMESSAGES) qDebug("sIS (%s): workers=%d, samples=%d, chunks=%d, alter=%d", qPrintable(name()), theWorkers.count(), theWantSamples, theWantChunks, theAlterBuffer);
+}
+
+void DomProcessor::requireInputSpace(QVector<uint> &samples)
+{
+	uint minimumSize = theSamplesIn + theSamplesStep * theWorkers.count();
+	for (uint i = 0; i < (uint)samples.count(); i++)
+		samples[i] = minimumSize;
+}
+
+void DomProcessor::specifyOutputSpace(QVector<uint> &samples)
+{
+	for (uint i = 0; i < (uint)samples.count(); i++)
+		samples[i] = theWantChunks * theSamplesOut;
+}
+
+bool DomProcessor::processorStarted()
+{
+	if (MESSAGES) qDebug("DomProcessor[%s]: Starting...", qPrintable(theName));
+
+	// Start all sub-processors
+	foreach (DxCoupling* w, theWorkers)
+	{
+		w->theLoad = theNomChunks;
+		w->go();
+	}
+
+	return true;
+}
+
+int DomProcessor::process()
+{
+	uint samples = Undefined;
+	for (uint i = 0; i < numInputs(); i++)
+		samples = min(samples, input(i).samplesReady());
+
+	if (samples != theWantSamples || true)
+	{
+		// stream discontinuity.
+		uint chunks = (samples - theSamplesIn) / theSamplesStep + 1;
+
+		BufferDatas ins(numInputs());
+		for (uint i = 0; i < ins.count(); i++)
+			ins.copyData(i, input(i).peekSamples(samples));	// normally would be theWantSamples
+		BufferDatas outs(numOutputs());
+		for (uint i = 0; i < outs.count(); i++)
+			outs.copyData(i, output(i).makeScratchSamples(chunks * theSamplesOut));	// normally would be theWantChunks * theSamplesOut
+		thePrimary->processChunks(ins, outs, chunks);
+		for (uint i = 0; i < ins.count(); i++)
+			input(i).readSamples(samples);	// normally would be theWantSamples - theSamplesIn + theSamplesStep
+		return DidWork;
+	}
+	else
+	{
+	}
+#if 0
+	// Wait until there's room in the queue for another job, or the last iteration just pushed a plunger
+	// (which means the queue may look full, but the current worker is, in fact, not busy, since it only
+	// pushed a plunger).
+	while (theQueueLen == (uint)theWorkers.count() && !wasPlunger)
+	{	checkExitDontLock();
+		theQueueChanged.wait(&theQueueLock);
+	}
+
+	// Now there's room, and since no other process will ever fill up the queue, we can relinquish our lock.
+	theQueueLock.unlock();
+
+	// Calculate how much data we're going to try to process this iteration.
+	uint wouldReadSamples = theSamplesStep * (max(1, (*w)->theLoad) - 1) + 3;
+
+	// This is some data to describe what we actually are doing this iteration.
+	uint willReadSamples, willReadChunks, discardFromOthers = 0;
+
+	// Wait for the data to be ready...
+	if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Waiting for a nominal (%d) or at least minimal (%d) amount of data...", qPrintable(theName), wouldReadSamples, theSamplesIn);
+	(*w)->theReaders[0]->waitForElements(wouldReadSamples * (*w)->theReaders[0]->type()->scope());
+
+	// Make sure that we don't have to exit now.
+	if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Checking exit status...", qPrintable(theName));
+	checkExit();
+
+	// Find out how much we will be reading
+	uint availableSamples = min(wouldReadSamples, (*w)->theReaders[0]->type()->samples((*w)->theReaders[0]->elementsReady()));
+	if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples ready for reading...", qPrintable(theName), availableSamples);
+
+	// If we don't get to read a useful amount (i.e. less than one single chunk)
+	if (availableSamples < theSamplesIn)
+	{
+#ifdef EDEBUG
+		if ((*w)->theReaders[0]->elementsReady() % (*w)->theReaders[0]->type()->scope())
+			qWarning("*** CRITICAL: A plunger is not on a sample boundary! The stream is corrupt.\n");
+#endif
+		// We don't actually read anything
+		willReadChunks = 0;
+		willReadSamples = 0;
+
+		// But we set it up so that later we discard all the samples from the others.
+		discardFromOthers = availableSamples;
+
+		// We must do us first, since another reader may be already at the plunger
+		//  and thus cannot read past it. Then must then send the plunger immediately,
+		//  since other readers may be ahead of us and unable to read past it.
+		if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Plunger after %d samples. Skipping samples and plunging on %p...", qPrintable(theName), availableSamples, *w);
+		(*w)->skipPlungeAndSend(availableSamples);
+		checkExit();
+	}
+	else
+	{	willReadChunks = ((availableSamples - theSamplesIn) / theSamplesStep) + 1;
+		willReadSamples = theSamplesStep * (willReadChunks - 1) + theSamplesIn;
+		discardFromOthers = willReadChunks * theSamplesStep;
+
+		if (MESSAGES && theDebug) qDebug("DomProcessor[%s]: Found %d samples (%d chunks) available. Reading & sending to %p...", qPrintable(theName), willReadSamples, willReadChunks, *w);
+		(*w)->peekAndSend(willReadSamples, willReadChunks);
+		(*w)->skip(discardFromOthers);
+		checkExit();
+	}
+
+	// If this is the first time we're pushing something to this SubProc, then we want the
+	// queue len to increase. It would be the first time if the last time was data.
+	if (MESSAGES && theDebug) qDebug("DomProcessor: Checking wasPlunger (%d).", wasPlunger);
+	theQueueLock.lock();
+	if (!wasPlunger)
+	{
+		if (MESSAGES && theDebug) qDebug("DomProcessor: Incrementing queue length.");
+		theQueueLen++;
+		theQueueChanged.wakeAll();
+	}
+
+	theLimbo = false;
+	theQueueChanged.wakeAll();
+	theQueueLock.unlock();
+
+	if (hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
+	if (MESSAGES && theDebug) qDebug("DomProcessor: Skipping %d samples on others...", discardFromOthers);
+	foreach (DxCoupling* x, theWorkers)
+		if (x != *w) x->skip(discardFromOthers);
+
+	if (hMESSAGES && theDebug) (*w)->theReaders[0]->debug();
+
+	// If we processed real data, then we want to go on.
+	// If we only processed a plunger, we want to stay still.
+	if (willReadChunks)
+	{	w++;
+		if (w == theWorkers.end()) w = theWorkers.begin();
+		if (MESSAGES && theDebug)
+		{	qDebug("\n---- NEXT WORKER ----");
+			char c = 'A';
+			for (QList<DxCoupling*>::Iterator x = theWorkers.begin(); x != theWorkers.end() && x != w; x++, c++) {}
+			qDebug("--------- %c ---------", c);
+		}
+	}
+
+	// We set it here so that if we were a plunger (!willReadChunks) then next time
+	// we dont move the queue on (to keep in sync).
+	wasPlunger = (!willReadChunks);
+
+	guard();
+
+	theQueueLock.lock();
+
+	// If we just pushed a plunger, wait until it has been processed (i.e. limbo has been acknowledged)
+	if (wasPlunger)
+	{	if (MESSAGES && theDebug) qDebug("DomProcessor: Waiting for limbo to be acked (or to be stopped)...");
+		while (!theLimbo)
+		{	checkExitDontLock();
+			theQueueChanged.wait(&theQueueLock);
+		}
+		if (MESSAGES && theDebug) qDebug("DomProcessor: Limbo acked!");
+	}
+#endif
+}
+
+#if 0
 DomProcessor::DomProcessor(SubProcessor *primary) : Processor("DomProcessor", primary->theMulti), theQueuePos(theWorkers.begin()), thePrimary(primary), theEaterThread(this)
 {
 	primary->thePrimaryOf = this;
@@ -150,7 +429,7 @@ void DomProcessor::processor()
 	if (minOutCap != Undefined)
 		theNomChunks = min(theNomChunks, minOutCap / theSamplesOut / theWorkers.count());
 
-	// We set nom to halve of the maximum possible in order to behave normally when the output
+	// We set nom to half of the maximum possible in order to behave normally when the output
 	// processor hits its worst case of having a minimum pushing chunk of size n/2+1 where n is
 	// the size of the buffer. In this case it is only able to push one chunk at once so the
 	// buffer could never be more than n/2+1 full at any one time; if we therefore only ever wait
@@ -545,19 +824,66 @@ void DomProcessor::specifyInputSpace(QVector<uint> &samples)
 	for (uint i = 0; i < (uint)samples.count(); i++)
 		if (optimalSize > max(theOptimalThroughput / input(i).type().scope(), minimumSize))
 			optimalSize = max(theOptimalThroughput / input(i).type().scope(), minimumSize);
-	theWantSize = uint(ceil(exp((log(double(optimalSize)) - log(double(minimumSize))) * theWeighting + log(double(minimumSize)))));
+	theWantSamples = uint(ceil(exp((log(double(optimalSize)) - log(double(minimumSize))) * theWeighting + log(double(minimumSize)))));
 	for (uint i = 0; i < (uint)samples.count(); i++)
-		samples[i] = theAlterBuffer ? theWantSize : minimumSize;
+		samples[i] = theAlterBuffer ? theWantSamples : minimumSize;
 
-	if (theDebug && lMESSAGES) qDebug("sIS (%s): minimum=%d, workers=%d, optimal=%d, want=%d, alter=%d", qPrintable(name()), minimumSize, theWorkers.count(), optimalSize, theWantSize, theAlterBuffer);
+	if (theDebug && lMESSAGES) qDebug("sIS (%s): minimum=%d, workers=%d, optimal=%d, want=%d, alter=%d", qPrintable(name()), minimumSize, theWorkers.count(), optimalSize, theWantSamples, theAlterBuffer);
 }
 
 void DomProcessor::specifyOutputSpace(QVector<uint> &samples)
 {
 	for (uint i = 0; i < (uint)samples.count(); i++)
-		samples[i] = theAlterBuffer ? ((theWantSize - theSamplesIn) / theSamplesStep + 1) * theSamplesOut : theSamplesOut * theWorkers.count();
+		samples[i] = theAlterBuffer ? ((theWantSamples - theSamplesIn) / theSamplesStep + 1) * theSamplesOut : theSamplesOut * theWorkers.count();
+}
+#endif
 }
 
+bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+{
+	// We can use just verifyAndSpecifyTypes here, since the outTypes will be recorded
+	// for our primary in the for loop later anyway (assuming they're valid).
+	bool ret = thePrimary->verifyAndSpecifyTypes(inTypes, outTypes);
+
+	theSamplesIn = thePrimary->theIn;
+	theSamplesStep = thePrimary->theStep;
+	theSamplesOut = thePrimary->theOut;
+
+	// Now we need a quick hack here since if we're a MultiOut, all outTypes==outTypes[0]:
+	if (theMulti&Out && outTypes.count() && outTypes.populated(0))
+		outTypes.setFill(outTypes.ptrAt(0), false);
+
+	if (ret)
+		foreach (DxCoupling* w, theWorkers)
+			w->specifyTypes(inTypes, outTypes);
+	return ret;
+}
+
+PropertiesInfo DomProcessor::specifyProperties() const
+{
+	return PropertiesInfo(thePrimary->specifyProperties().stashed())
+						 ("Latency/Throughput", 0.5, "Throughput to latency optimisation weighting. Towards 0 for low latency at the cost of CPU usage and throughput, towards 1 for high throughput at the cost of memory and latency. { Value >= 0; Value <= 1 }")
+						 ("Alter Buffer", true, "Change buffer size according to optimal configuration.")
+						 ("Optimal Throughput", 262144, "Optimal size of buffer for maximum throughput in elements.")
+						 ("Debug", false, "Debug this DomProcessor.");
+}
+
+void DomProcessor::initFromProperties(const Properties &properties)
+{
+	Properties tp = properties;
+	Properties wp = tp.unstashed();
+	theWeighting = max(0., min(1., tp["Latency/Throughput"].toDouble()));
+	theAlterBuffer = tp["Alter Buffer"].toBool();
+	theOptimalThroughput = tp["Optimal Throughput"].toInt();
+	theDebug = tp["Debug"].toBool();
+	thePrimary->initFromProperties(wp);
+	foreach (DxCoupling* w, theWorkers)
+		w->initFromProperties(wp);
+	theProperties = wp;
+	setupIO(thePrimary->theNumInputs, thePrimary->theNumOutputs);
+	thePrimary->defineIO(numInputs(), numOutputs());
+	foreach (DxCoupling* w, theWorkers)
+		w->defineIO(numInputs(), numOutputs());
 }
 
 #undef MESSAGES

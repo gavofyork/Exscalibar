@@ -74,6 +74,7 @@ public:
 	void unregisterTask(Processor* _p) { QMutexLocker l(&l_tasks); m_tasks.removeAll(_p); }
 	void run()
 	{
+		uint sinceLastWorked = 0;
 		forever
 		{
 			l_tasks.lock();
@@ -83,11 +84,23 @@ public:
 				msleep(100);
 				l_tasks.lock();
 			}
+			else if (sinceLastWorked >= (uint)m_tasks.count())
+			{
+				l_tasks.unlock();
+				msleep(10);
+				l_tasks.lock();
+				sinceLastWorked	= 0;
+			}
 			else
 			{
 				m_robin = (m_robin + 1) % m_tasks.count();
-				if (!m_tasks[m_robin]->processCycle())
+				int s = m_tasks[m_robin]->processCycle();
+				if (s == Processor::WillNeverWork)
 					m_tasks.removeAt(m_robin);
+				else if (s == Processor::NoWork)
+					sinceLastWorked++;
+				else
+					sinceLastWorked = 0;
 			}
 			l_tasks.unlock();
 			yieldCurrentThread();
@@ -610,34 +623,36 @@ void Processor::processor()
 
 int Processor::canProcess()
 {
+	QVector<uint> mData(numInputs());
+	specifyInputSpace(mData);
 	QVector<uint> rData(numInputs());
-	specifyInputSpace(rData);
-	QVector<uint> rSpace(numOutputs());
-	specifyOutputSpace(rSpace);
+	requireInputSpace(rData);
+	QVector<uint> mSpace(numOutputs());
+	specifyOutputSpace(mSpace);
 
 	uint cycles = UINT_MAX;
 	for (uint i = 0; i < numOutputs(); i++)
 	{
 		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
-		if (bFree < rSpace[i])
+		if (bFree < mSpace[i])
 			return 0;
-		else if (rSpace[i] > 0)
-			cycles = min(cycles, bFree / rSpace[i]);
+		else if (mSpace[i] > 0)
+			cycles = min(cycles, bFree / mSpace[i]);
 	}
 	for (uint i = 0; i < numInputs(); i++)
 	{
-		if (!theInputs[i]->require(theInputs[i]->type().scope() * rData[i]))
+		if (!theInputs[i]->require(rData[i], mData[i]))
 			return 0;
-		cycles = min(cycles, theInputs[i]->samplesReady() / rData[i]);
+		cycles = min(cycles, max(1u, theInputs[i]->samplesReady() / mData[i]));
 	}
 	return cycles;
 }
 
-bool Processor::processCycle()
+int Processor::processCycle()
 {
 	if (thePaused)
-		return true;
-	bool ret = true;
+		return NoWork;
+	int ret = DidWork;
 	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
 	// Same with try/catch.
 	setThreadProcessor();
@@ -658,7 +673,7 @@ bool Processor::processCycle()
 					theErrorData = i;
 					theErrorWritten.wakeAll();
 					if (MESSAGES) qDebug("Processor::processCycle(): (%s) Error recorded. Bailing...", qPrintable(theName));
-					ret = false;
+					ret = WillNeverWork;
 					allOk = false;
 					break;
 				}
@@ -682,10 +697,11 @@ bool Processor::processCycle()
 		else if (theError == NoError)
 		{
 			guard();
-			if (canProcess())
-				process();
-/*
-			else if (neverAnyMoreInput())
+			ret = canProcess();
+			if (ret > 0)
+				ret = process();
+
+			if (ret == WillNeverWork)
 			{
 				if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
 				{	QMutexLocker lock(&theStop);
@@ -701,25 +717,16 @@ bool Processor::processCycle()
 				// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
 				for (uint i = 0; i < (uint)theOutputs.count(); i++)
 					theOutputs[i]->pushPlunger();
-
-				ret = false;
-			}*/
+			}
 		}
 	}
-	catch(BailException &) { ret = false; }
-	catch(int e) { ret = false; }
+	catch(BailException &) { ret = WillNeverWork; }
+	catch(int e) { ret = WillNeverWork; }
 	unsetThreadProcessor();
-	if (!ret)
+	if (ret == WillNeverWork)
 	{
 		processorStopped();
 		theIsActive = false;
-/*		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
-		setThreadProcessor();
-		while (1)
-		{	pause();
-			thereIsInputForProcessing();
-		}
-		unsetThreadProcessor();*/
 	}
 	return ret;
 }

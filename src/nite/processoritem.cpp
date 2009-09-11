@@ -302,10 +302,10 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 
 void ProcessorItem::tick()
 {
-	m_pauseItem->tick();
+/*	m_pauseItem->tick();
 	foreach (QGraphicsItem* i, childItems())
 		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(i))
-			ii->update();
+			ii->update();*/
 }
 
 void ProcessorItem::timerEvent(QTimerEvent*)

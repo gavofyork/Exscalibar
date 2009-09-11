@@ -38,7 +38,7 @@ class WaveGen: public Processor
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 	virtual bool processorStarted();
 	virtual int canProcess();
-	virtual void process();
+	virtual int process();
 public:
 	WaveGen() : Processor("WaveGen", NotMulti, Guarded|Cooperative) {}
 };
@@ -54,11 +54,11 @@ bool WaveGen::processorStarted()
 int WaveGen::canProcess()
 {
 	if (theStopAfterChunks && theStopAfterChunks > m_hadChunks)
-		return 0;
+		return WillNeverWork;
 	return Processor::canProcess();
 }
 
-void WaveGen::process()
+int WaveGen::process()
 {
 	BufferData d = output(0).makeScratchSamples(theChunk);
 	for (int i = 0; i < theChunk; i++)
@@ -71,6 +71,7 @@ void WaveGen::process()
 		m_chunksLeft = 0;
 	}
 	m_hadChunks++;
+	return DidWork;
 }
 
 bool WaveGen::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)

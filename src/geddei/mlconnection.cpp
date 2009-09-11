@@ -49,7 +49,7 @@ void MLConnection::noMorePlungers()
 	theSink->noMorePlungers();
 }
 
-bool MLConnection::require(uint elements) const
+bool MLConnection::require(uint samples, uint preferSamples)
 {
 #ifdef EDEBUG
 	if (!theReader)
@@ -58,22 +58,24 @@ bool MLConnection::require(uint elements) const
 		return true;
 	}
 #endif
-	if (MESSAGES) qDebug("xLC::require(%d)...", elements);
+	if (MESSAGES) qDebug("xLC::require(%d, %d)...", samples, preferSamples);
 
 	while (1)
 	{
 		int np = theReader->nextPlunger();
-		if (np != -1 && (uint)np < elements)
+		if (np != -1 && (uint)np < samples * type().scope())
 		{
 			theReader->skipElements(np);
 			theReader->skipPlunger();
 			theSink->plunged(theSinkIndex);
 		}
+		else if (np != -1 && (uint)np < preferSamples * type().scope())
+		{
+			return true;
+		}
 		else
-			break;
+			return theReader->elementsReady() >= preferSamples * type().scope();
 	}
-	return theReader->elementsReady() >= elements;
-		return true;
 }
 
 uint MLConnection::capacity() const

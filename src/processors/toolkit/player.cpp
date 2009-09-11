@@ -210,7 +210,7 @@ bool Player::processorStarted()
 	return false;
 }
 
-void Player::process()
+int Player::process()
 {
 #ifdef HAVE_SNDFILE
 	if (theMode == ModeSF)
@@ -225,15 +225,19 @@ void Player::process()
 						d[j] = m_buffer[j * theChannels + i];
 				output(i).push(d);
 			}
+			return DidWork;
 		}
 		else if (in == 0)
 		{
-			// TODO: api to say finished.
-			//break;
+			return WillNeverWork;
 		}
 		else
+		{
 			sf_perror(theSndFile);
+			return DidWork;
+		}
 	}
+	return WillNeverWork;
 #endif
 }
 

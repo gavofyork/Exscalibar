@@ -54,7 +54,7 @@ class DLLEXPORT MLConnection: public xLConnection
 	virtual void resurectReader();
 	virtual bool plungeSync(uint samples) const;
 	virtual uint capacity() const;
-	virtual bool require(uint elements) const;
+	virtual bool require(uint samples, uint preferSamples = Undefined);
 
 protected:
 	LMConnection *theConnection;
