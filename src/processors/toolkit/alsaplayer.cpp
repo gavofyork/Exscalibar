@@ -119,7 +119,6 @@ int ALSAPlayer::canProcess()
 {
 	snd_pcm_prepare(thePcmHandle);
 	int av = snd_pcm_avail(thePcmHandle);
-	qDebug() << av;
 	if (av < (int)thePeriodSize)
 		return NoWork;
 	return Processor::canProcess();

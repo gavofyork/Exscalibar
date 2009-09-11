@@ -35,6 +35,7 @@ enum Command
 	Stop,
 	Transact,
 	DeliverResults,
+	ProcessChunks,
 	Stopping,
 	Stopped,
 	DefineIO

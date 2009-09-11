@@ -77,6 +77,16 @@ protected:
 
 public:
 	/**
+	 * Processes the chunks given asynchronously, returns immediately.
+	 */
+	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks) = 0;
+
+	/**
+	 * @returns true iff another processChunks operation may commence.
+	 */
+	virtual bool isReady() = 0;
+
+	/**
 	 * Used by LHS to specify the input/output types to the SubProcessor.
 	 * Both are const, since these are already checked as being correct by the
 	 * primary. An extra check can be made to make sure that the outTypes given

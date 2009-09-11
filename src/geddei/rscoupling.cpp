@@ -138,6 +138,42 @@ void RSCoupling::run()
 			if (MESSAGES) qDebug("RSC: DeliverResults: Done.");
 			break;
 		}
+		case ProcessChunks:
+		{
+			if (MESSAGES) qDebug("RSC: ProcessChunks...");
+			uint channels = theSession.safeReceiveWord<int>();
+			if (MESSAGES) qDebug("RSC: BufferDatas size = %d", channels);
+			BufferDatas ins(channels);
+			for (uint i = 0; i < ins.size(); i++)
+			{	uint size = theSession.safeReceiveWord<int>();
+				uint scope = theSession.safeReceiveWord<int>();
+				BufferData *data = new BufferData(size, scope);
+				theSession.safeReceiveWordArray((int *)data->firstPart(), size);
+				ins.setData(i, data);
+			}
+			BufferDatas outs(theSession.safeReceiveWord<int>());
+			for (uint i = 0; i < outs.count(); i++)
+			{
+				int sz = theSession.safeReceiveWord<int>();
+				int sc = theSession.safeReceiveWord<int>();
+				outs.setData(i, new BufferData(sz, sc));
+			}
+			uint chunks = theSession.safeReceiveWord<int>();
+			if (MESSAGES) qDebug("RSC: BufferDatas chunks = %d", chunks);
+			processChunks(ins, outs, chunks);
+			for (uint i = 0; i < ins.size(); i++)
+				if (outs[i].rollsOver())
+				{	theSession.safeSendWordArray((int *)outs[i].firstPart(), outs[i].sizeFirstPart());
+					theSession.safeSendWordArray((int *)outs[i].secondPart(), outs[i].sizeSecondPart());
+				}
+				else
+					theSession.safeSendWordArray((int *)outs[i].firstPart(), outs[i].sizeOnlyPart());
+			theSession.safeSendWord(0);
+			ins.nullify();
+			outs.nullify();
+			if (MESSAGES) qDebug("RSC: ProcessChunks: Done.");
+			break;
+		}
 		case DefineIO:
 		{
 			uint i = theSession.safeReceiveWord<int>();

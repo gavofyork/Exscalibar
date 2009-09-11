@@ -20,14 +20,40 @@
 namespace Geddei
 {
 
-xSCoupling::xSCoupling(SubProcessor *subProc) : theSubProc(subProc)
+xSCoupling::xSCoupling(SubProcessor *subProc) : theSubProc(subProc), m_isReady(true)
 {
 	subProc->theCoupling = this;
 }
 
 xSCoupling::~xSCoupling()
 {
+	assert(m_isReady);
 	theSubProc->theCoupling = 0;
+}
+
+void xSCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks)
+{
+	m_ins = _ins;
+	m_outs = _outs;
+	m_chunks = _chunks;
+	m_isReady = false;
+}
+
+int xSCoupling::canProcess()
+{
+	return m_isReady ? 1 : 0;
+}
+
+int xSCoupling::process()
+{
+	theSubProc->processChunks(m_ins, m_outs, m_chunks);
+	m_isReady = true;
+	return -2;
+}
+
+bool xSCoupling::isReady()
+{
+	return m_isReady;
 }
 
 void xSCoupling::stoppingR()

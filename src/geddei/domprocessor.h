@@ -95,9 +95,13 @@ class DLLEXPORT DomProcessor: public Processor
 	bool theWasPlunger;
 	QList<DxCoupling*> theWorkers;
 	DxCoupling* theW;
+	BufferDatas theCurrentIns;
+	BufferDatas theCurrentOuts;
+	bool serviceSubs();
 
 	virtual bool processorStarted();
 	virtual int process();
+	virtual int canProcess();
 	virtual void wantToStopNow();
 	virtual void haveStoppedNow();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);

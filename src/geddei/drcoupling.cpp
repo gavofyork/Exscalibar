@@ -22,7 +22,7 @@
 namespace Geddei
 {
 
-DRCoupling::DRCoupling(DomProcessor *dom, QTcpSocket *remote) : DxCoupling(dom), theRemote(remote)
+DRCoupling::DRCoupling(DomProcessor *dom, QTcpSocket *remote) : DxCoupling(dom), theRemote(remote), m_isReady(true)
 {
 	if (MESSAGES) qDebug("DRC: Handshaking...");
 	theRemote.handshake(true);
@@ -146,6 +146,55 @@ void DRCoupling::transact(const BufferDatas &d, uint chunks)
 	}
 	theRemote.safeSendWord(chunks);
 	if (MESSAGES) qDebug("< DRCoupling::transact()");
+}
+
+void DRCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks)
+{
+	if (MESSAGES) qDebug("> DRCoupling::processChunks() (%d chunks)", _chunks);
+	m_outs = _outs;
+	m_isReady = false;
+	QMutexLocker lock(&theComm);
+	theRemote.sendByte(ProcessChunks);
+	// Go through each BufferData in d, send each
+	theRemote.safeSendWord(_ins.size());
+	for (uint i = 0; i < _ins.size(); i++)
+	{	// TODO: maybe take this into BufferData?
+		theRemote.safeSendWord(_ins[i].elements());
+		theRemote.safeSendWord(_ins[i].scope());
+		if (_ins[i].rollsOver())
+		{	theRemote.safeSendWordArray((int *)_ins[i].firstPart(), _ins[i].sizeFirstPart());
+			theRemote.safeSendWordArray((int *)_ins[i].secondPart(), _ins[i].sizeSecondPart());
+		}
+		else
+			theRemote.safeSendWordArray((int *)_ins[i].firstPart(), _ins[i].sizeOnlyPart());
+	}
+	theRemote.safeSendWord(_outs.size());
+	for (uint i = 0; i < _outs.size(); i++)
+	{	theRemote.safeSendWord(_outs[i].elements());
+		theRemote.safeSendWord(_outs[i].scope());
+	}
+	theRemote.safeSendWord(_chunks);
+	if (MESSAGES) qDebug("< DRCoupling::processChunks()");
+}
+
+bool DRCoupling::isReady()
+{
+	if (m_isReady)
+		return true;
+	if (MESSAGES) qDebug("> DRCoupling::isReady()");
+	QMutexLocker lock(&theComm);
+	if (theRemote.bytesAvailable())
+	{
+		for (uint i = 0; i < m_outs.size(); i++)
+		{	theRemote.safeReceiveWordArray((int *)m_outs[i].firstPart(), m_outs[i].sizeFirstPart());
+			theRemote.safeReceiveWordArray((int *)m_outs[i].secondPart(), m_outs[i].sizeSecondPart());
+		}
+		theRemote.safeReceiveWord<int>();
+		m_outs.nullify();
+		m_isReady = true;
+	}
+	if (MESSAGES) qDebug("< DRCoupling::isReady(): Returning (isReady=%d)", m_isReady);
+	return m_isReady;
 }
 
 BufferDatas DRCoupling::deliverResults(uint *timeTaken)

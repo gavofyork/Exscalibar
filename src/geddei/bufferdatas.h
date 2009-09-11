@@ -107,6 +107,10 @@ public:
 	 */
 	void nullify();
 
+	/** @internal
+	 */
+	bool isNull() const { return !theCount || !theData[0]; }
+
 	/**
 	 * Get a single BufferData from the array.
 	 *
@@ -149,7 +153,7 @@ public:
 	 * @return The number of slots for BufferData objects.
 	 */
 	uint size() const { return theCount; }
-	
+
 	/**
 	 * Get the number of BufferDatas objects stored.
 	 *

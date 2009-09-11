@@ -31,13 +31,17 @@ namespace Geddei
 
 DomProcessor::DomProcessor(SubProcessor *primary):
 	Processor("DomProcessor", primary->theMulti, Cooperative),
-	thePrimary(primary)
+	thePrimary(primary),
+	theCurrentIns(0),
+	theCurrentOuts(0)
 {
 	primary->thePrimaryOf = this;
 }
 
 DomProcessor::DomProcessor(const QString &primaryType):
-	Processor("DomProcessor", (thePrimary = SubProcessorFactory::create(primaryType))->theMulti, Cooperative)
+	Processor("DomProcessor", (thePrimary = SubProcessorFactory::create(primaryType))->theMulti, Cooperative),
+	theCurrentIns(0),
+	theCurrentOuts(0)
 {
 	thePrimary->thePrimaryOf = this;
 }
@@ -155,14 +159,41 @@ bool DomProcessor::processorStarted()
 {
 	if (MESSAGES) qDebug("DomProcessor[%s]: Starting...", qPrintable(theName));
 
+	theCurrentIns.resize(numInputs());
+	theCurrentOuts.resize(numOutputs());
+
 	// Start all sub-processors
 	foreach (DxCoupling* w, theWorkers)
 	{
-		w->theLoad = theNomChunks;
+		w->theLoad = theWantChunks / (theWorkers.count() + 1);
 		w->go();
 	}
 
 	return true;
+}
+
+bool DomProcessor::serviceSubs()
+{
+	if (!theCurrentIns.isNull() || !theCurrentOuts.isNull())
+	{
+		foreach (DxCoupling* w, theWorkers)
+			if (!w->isReady())
+				return false;
+		for (uint i = 0; i < theCurrentOuts.count(); i++)
+			output(i) << theCurrentOuts[i];
+		theCurrentIns.nullify();
+		theCurrentOuts.nullify();
+		for (uint i = 0; i < numInputs(); i++)
+			input(i).readSamples(theWantChunks * theSamplesStep);
+	}
+	return true;
+}
+
+int DomProcessor::canProcess()
+{
+	if (!serviceSubs())
+		return NoWork;
+	return Processor::canProcess();
 }
 
 int DomProcessor::process()
@@ -171,24 +202,41 @@ int DomProcessor::process()
 	for (uint i = 0; i < numInputs(); i++)
 		samples = min(samples, input(i).samplesReady());
 
-	if (samples != theWantSamples || true)
+	if (samples != theWantSamples)
 	{
 		// stream discontinuity.
 		uint chunks = (samples - theSamplesIn) / theSamplesStep + 1;
-
-		BufferDatas ins(numInputs());
-		for (uint i = 0; i < ins.count(); i++)
-			ins.copyData(i, input(i).peekSamples(samples));	// normally would be theWantSamples
-		BufferDatas outs(numOutputs());
-		for (uint i = 0; i < outs.count(); i++)
-			outs.copyData(i, output(i).makeScratchSamples(chunks * theSamplesOut));	// normally would be theWantChunks * theSamplesOut
-		thePrimary->processChunks(ins, outs, chunks);
-		for (uint i = 0; i < ins.count(); i++)
+		for (uint i = 0; i < theCurrentIns.count(); i++)
+			theCurrentIns.copyData(i, input(i).peekSamples(samples));	// normally would be theWantSamples
+		for (uint i = 0; i < theCurrentOuts.count(); i++)
+			theCurrentOuts.copyData(i, output(i).makeScratchSamples(chunks * theSamplesOut));	// normally would be theWantChunks * theSamplesOut
+		thePrimary->processChunks(theCurrentIns, theCurrentOuts, chunks);
+		for (uint i = 0; i < theCurrentOuts.count(); i++)
+			output(i) << theCurrentOuts[i];
+		theCurrentIns.nullify();
+		theCurrentOuts.nullify();
+		for (uint i = 0; i < theCurrentIns.count(); i++)
 			input(i).readSamples(samples);	// normally would be theWantSamples - theSamplesIn + theSamplesStep
 		return DidWork;
 	}
 	else
 	{
+		uint chunksEach = theWantChunks / (theWorkers.count() + 1);
+		for (uint i = 0; i < theCurrentIns.count(); i++)
+			theCurrentIns.copyData(i, input(i).peekSamples(theWantSamples));
+		for (uint i = 0; i < theCurrentOuts.count(); i++)
+			theCurrentOuts.copyData(i, output(i).makeScratchSamples(theWantChunks * theSamplesOut));
+		for (int i = 0; i <= theWorkers.count(); i++)
+		{
+			BufferDatas ins = theCurrentIns.samples(i * chunksEach * theSamplesStep, chunksEach * (theSamplesStep - 1) + theSamplesIn);
+			BufferDatas outs = theCurrentOuts.samples(i * chunksEach * theSamplesOut, chunksEach * theSamplesOut);
+			if (i == theWorkers.count())
+				thePrimary->processChunks(ins, outs, chunksEach);
+			else
+				theWorkers[i]->processChunks(ins, outs, chunksEach);
+		}
+		serviceSubs();
+		return DidWork;
 	}
 #if 0
 	// Wait until there's room in the queue for another job, or the last iteration just pushed a plunger

@@ -131,6 +131,22 @@ public:
 	}
 
 	/**
+	 * Receive a single byte from the connection. Matches sendByte().
+	 *
+	 * This will block until either the connection fails or the byte is
+	 * received.
+	 *
+	 * @return A byte read from the connection. 0 if the connection is
+	 * not open by the time this returns.
+	 *
+	 * @sa sendByte()
+	 */
+	bool bytesAvailable()
+	{
+		return theSD->bytesAvailable();
+	}
+
+	/**
 	 * Receive some number of bytes from the connection. The number received is
 	 * stated in @a size.
 	 *

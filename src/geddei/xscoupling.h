@@ -33,9 +33,17 @@ class RSCoupling;	// hack around, because mixins aren't used for the remote vers
  * @brief Refinement of a Coupling for RHS attachment to a SubProcessor object.
  * @author Gav Wood <gav@kde.org>
  */
-class xSCoupling : virtual public xxCoupling
+class xSCoupling: virtual public xxCoupling/*, public QTask*/
 {
 	SubProcessor *theSubProc;
+	bool m_isReady;
+	BufferDatas m_ins;
+	BufferDatas m_outs;
+	uint m_chunks;
+
+	// Reimplementations from QTask
+	virtual int canProcess();
+	virtual int process();
 
 	// Reimplementations from xxCoupling
 	friend class RSCoupling;
@@ -48,6 +56,8 @@ class xSCoupling : virtual public xxCoupling
 	virtual void transact(const BufferDatas &d, uint chunks);
 	virtual BufferDatas deliverResults(uint *timeTaken);
 	virtual void defineIO(uint inputs, uint outputs);
+	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
+	virtual bool isReady();
 
 protected:
 

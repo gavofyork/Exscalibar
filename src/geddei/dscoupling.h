@@ -34,9 +34,11 @@ class DSCoupling: public DxCoupling, public xSCoupling
 {
 	friend class DomProcessor;
 	DSCoupling(DomProcessor *dom, SubProcessor *subProc);
+
+public:
 };
 
 
-};
+}
 
 #endif

@@ -38,7 +38,7 @@ class BufferReader;
  * This class represents the left side of a remote DRCoupling.
  * All overrided commands are essentially just passed down the line
  * with arguments serialised as neccessary.
- * 
+ *
  * @note If you subclass this in the future (for another mixin), be sure to
  * call ratify() from the constructor of that mixin. It really belongs in the
  * constructor of this class, but it requires methods that will only be defined

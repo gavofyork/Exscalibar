@@ -54,11 +54,15 @@ class DRCoupling : virtual public DxCoupling
 	virtual void transact(const BufferDatas &d, uint chunks);
 	virtual BufferDatas deliverResults(uint *timeTaken);
 	virtual void defineIO(uint inputs, uint outputs);
+	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
+	virtual bool isReady();
 
-	QMutex theComm;
-	QSocketSession theRemote;
+	mutable QMutex theComm;
+	mutable QSocketSession theRemote;
 	QString theRemoteHost;
 	uint theRemoteKey, theRemoteSubProcessorKey;
+	mutable BufferDatas m_outs;
+	bool m_isReady;
 
 public:
 	/**
