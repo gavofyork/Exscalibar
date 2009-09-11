@@ -36,7 +36,7 @@ ostream &operator<<(ostream &out, Buffer &me)
 
 void Buffer::debug()
 {
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	QString out = "[";
 
 	for (uint i = 0; i < theSize; i++)
@@ -87,7 +87,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(QMutex::Recursive)
+Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(QFastMutex::Recursive)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -165,7 +165,7 @@ void Buffer::resize(uint size)
 void Buffer::appendPlunger()
 {
 	if (MESSAGES) qDebug("Appending plunger to position %d", writePos);
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 
 #ifdef EDEBUG
 	if (theSize - theUsed == 0 && !thePlungers.count())
@@ -187,7 +187,7 @@ void Buffer::appendPlunger()
 void Buffer::discardNextPlunger()
 {
 	if (MESSAGES) qDebug("> discardNextPlungerUNSAFE");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	if (MESSAGES) qDebug("* discardNextPlungerUNSAFE");
 	discardNextPlungerUNSAFE();
 	if (MESSAGES) qDebug("< discardNextPlungerUNSAFE");
@@ -322,7 +322,7 @@ uint Buffer::waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *read
 uint Buffer::elementsFree() const
 {
 	if (MESSAGES) qDebug("= elementsFree");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	return theSize - theUsed;
 }
 
@@ -337,14 +337,14 @@ void Buffer::waitForFreeUNSAFE(uint elements) const
 void Buffer::waitForFreeElements(uint elements) const
 {
 	if (MESSAGES) qDebug("= waitForFreeElements");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	return waitForFreeUNSAFE(elements);
 }
 
 BufferData Buffer::makeScratchElements(uint elements, bool autoPush)
 {
 	if (MESSAGES) qDebug("> makeScratchElements");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	if (MESSAGES) qDebug("* makeScratchElements (elements: %d)", elements);
 #ifdef EDEBUG
 	if (elements >= size())
@@ -382,7 +382,7 @@ BufferData Buffer::makeScratchElements(uint elements, bool autoPush)
 void Buffer::pushScratch(const BufferData &data)
 {
 	if (MESSAGES) qDebug("> pushScratch");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	if (MESSAGES) qDebug("* pushScratch");
 	//TODO: change to Fatal.
 	assert(data.info() == lastScratch);
@@ -399,7 +399,7 @@ void Buffer::pushScratch(const BufferData &data)
 
 void Buffer::forgetScratch(const BufferData &data)
 {
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 
 	if (data.info() != lastScratch)
 	{	qFatal("*** FATAL: forgetScratch called on object whose info is not owned by this.\n"
@@ -411,7 +411,7 @@ void Buffer::forgetScratch(const BufferData &data)
 void Buffer::pushData(const BufferData &data)
 {
 	if (MESSAGES) qDebug("> pushData");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 #ifdef EDEBUG
 	if (data.theInfo->theAccessibleSize >= size())
 		qWarning("*** WARNING: pushData(): Size of buffer is critically low (size: %d,\n"
@@ -486,7 +486,7 @@ void Buffer::push(const BufferData &data)
 void Buffer::clear()
 {
 	if (MESSAGES) qDebug("> clear");
-	QMutexLocker lock(&theDataFlux);
+	QFastMutexLocker lock(&theDataFlux);
 	if (MESSAGES) qDebug("* clear");
 	if (lastScratch->isReferenced())
 	{

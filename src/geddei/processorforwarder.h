@@ -39,9 +39,9 @@ class DLLEXPORT ProcessorForwarder: public QTcpServer
 {
 	// Orderly (out of thread) remote connection deletion subsystem.
 	// Needed because a connection cannot delete itself from its own thread.
-	static QMutex *theReaper;
+	static QFastMutex *theReaper;
 	static QList<RLConnection*> theGraveyard;
-	static QMutex *reaper();
+	static QFastMutex *reaper();
 	void clearGraveyard();
 
 	friend class ProcessorForwarderLink;

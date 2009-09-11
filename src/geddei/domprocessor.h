@@ -15,10 +15,12 @@
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 #include "properties.h"
+#include "bufferdatas.h"
 #include "processor.h"
 #include "qfastwaitcondition.h"
 #else
 #include <qtextra/qfastwaitcondition.h>
+#include <geddei/bufferdatas.h>
 #include <geddei/properties.h>
 #include <geddei/processor.h>
 #endif
@@ -126,7 +128,7 @@ class DLLEXPORT DomProcessor: public Processor
 
 public:
 	/**
-	 * Note this will assume the stack has a QMutexLocker for theQueueLock in
+	 * Note this will assume the stack has a QFastMutexLocker for theQueueLock in
 	 * it, and that theQueueLock has already been manually unlocked.
 	 * This means that no methods that may call checkExit() should be called
 	 * unless theQueueLock is unlocked.
@@ -206,7 +208,7 @@ class DLLEXPORT DomProcessor: public Processor
 	QList<DxCoupling*> theWorkers;
 	QList<DxCoupling*>::Iterator theQueuePos;
 	uint theQueueLen;
-	QMutex theQueueLock;
+	QFastMutex theQueueLock;
 	QFastWaitCondition theQueueChanged;
 
 	//* A flag to tell us if we've been stopped.
@@ -254,7 +256,7 @@ class DLLEXPORT DomProcessor: public Processor
 	 * Special checkExit() variant that will *not* relock theQueueLock.
 	 * This should be used instead of checkExit() when theQueueLock mutex is
 	 * already in it's correct state before full stack unwinding (i.e.
-	 * QMutexLockers get resolved).
+	 * QFastMutexLockers get resolved).
 	 */
 	void checkExitDontLock();
 
@@ -293,7 +295,7 @@ class DLLEXPORT DomProcessor: public Processor
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 96, 160); }
 
 	/**
-	 * Note this will assume the stack has a QMutexLocker for theQueueLock in
+	 * Note this will assume the stack has a QFastMutexLocker for theQueueLock in
 	 * it, and that theQueueLock has already been manually unlocked.
 	 * This means that no methods that may call checkExit() should be called
 	 * unless theQueueLock is unlocked.

@@ -27,7 +27,7 @@ BufferReader::BufferReader(Buffer *buffer)
 	theBuffer = buffer;
 
 	lastReadSize = 0;
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	readPos = theBuffer->readPos;
 	theUsed = theBuffer->theUsed;
 	theToBeSkipped = 0;
@@ -41,7 +41,7 @@ BufferReader::~BufferReader()
 {
 	if (MESSAGES) qDebug("> [%p] ~BufferData()", this);
 
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	clearUNSAFE();
 	delete lastRead;
 	theBuffer->theReaders.removeOne(this);
@@ -57,7 +57,7 @@ void BufferReader::debug()
 void BufferReader::skipPlunger()
 {
 	if (MESSAGES) qDebug("> skipPlunger (rP: %d, tAPH: %d)", readPos, theAlreadyPlungedHere);
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	theAlreadyPlungedHere++;
 	if (MESSAGES) qDebug("< skipPlunger (rP: %d, tAPH: %d)", readPos, theAlreadyPlungedHere);
 }
@@ -65,7 +65,7 @@ void BufferReader::skipPlunger()
 uint BufferReader::elementsReady() const
 {
 	if (MESSAGES) qDebug("= elementsReady (rP: %d, tAPH: %d", readPos, theAlreadyPlungedHere);
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	int untilPlunger = theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere);
 	if (untilPlunger == -1 || untilPlunger > signed(theUsed))
 		return theUsed;
@@ -76,21 +76,21 @@ uint BufferReader::elementsReady() const
 int BufferReader::nextPlunger() const
 {
 	if (MESSAGES) qDebug("= nextPlunger");
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	return theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere);
 }
 
 void BufferReader::waitForElements(uint elements) const
 {
 	if (MESSAGES) qDebug("= waitForElements");
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	theBuffer->waitForUNSAFE(elements, this);
 }
 
 void BufferReader::skipElements(uint elements)
 {
 	if (MESSAGES) qDebug("> skipElements");
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 #ifdef EDEBUG
 	if (elements >= theBuffer->size())
 		qWarning("*** WARNING: skipElements(): Size of buffer is critically low (size: %d,\n"
@@ -158,7 +158,7 @@ void BufferReader::skipElementsUNSAFE(uint elements)
 const BufferData BufferReader::readElements(uint elements, bool autoFree)
 {
 	if (MESSAGES) qDebug("> [%p] readElements(%d)", this, elements);
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 #ifdef EDEBUG
 	if (elements > theBuffer->size())
 		qWarning("*** WARNING: readElements(): Size of buffer is critically low (size: %d,\n"
@@ -206,7 +206,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 void BufferReader::haveRead(const BufferData &data)
 {
 	if (MESSAGES) qDebug("> haveRead");
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	if (!data.info()->isLive())
 	{	qWarning("*** ERROR: Cannot haveRead() on a non-live BufferInfo (v: %d, t: %s)", data.info()->theValid, data.info()->theLife == BufferInfo::Foreign ? "F" : "M");
 		assert(0);
@@ -235,7 +235,7 @@ void BufferReader::haveRead(const BufferData &data)
 void BufferReader::forgetRead(const BufferData &data)
 {
 	if (MESSAGES) qDebug("> [%p] forgetRead (d: %p, lr: %p)", this, data.info(), lastRead);
-	QMutexLocker lock(&theBuffer->theDataFlux);
+	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	// next assertion: it shouldn't ever happen since this function cannot be called before last instance of bufferdata is destroyed
 	// and it ignores death after this has been called, so must mean the user is freeing it twice.
 	assert(data.info() == lastRead);

@@ -49,7 +49,7 @@ void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 	p.append(QPointF(m_size.width(), 0));
 	_p->drawPolygon(p);
 
-	if (processorItem()->m_processor->isRunning())
+	if (processorItem()->m_processor->isRunning())	//  a bit unsafe, since the processor could stop & get reset between these two.
 	{
 		double fill = processorItem()->m_processor->input(m_index).filled();
 		_p->fillRect(QRectF(cornerSize + (m_size.width() - cornerSize) * (1.f - fill), portSize / 4, (m_size.width() - cornerSize) * fill, portSize / 2), QColor(Qt::darkRed));

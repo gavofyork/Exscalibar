@@ -69,7 +69,7 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	uint theRemoteKey, theRemoteIndex;
 
 	QSocketSession theSink;
-	QMutex theTrapdoor;
+	QFastMutex theTrapdoor;
 	void openTrapdoor() { theTrapdoor.lock(); }
 	void closeTrapdoor() { theTrapdoor.unlock(); }
 	bool trapdoor() { bool ret = theTrapdoor.tryLock(); if (ret) theTrapdoor.unlock(); return !ret; }

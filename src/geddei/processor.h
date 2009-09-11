@@ -190,7 +190,7 @@ private:
 	/** Start/stop subsystem. @sa wantToStopNow() haveStoppedNow() */
 	friend class DomProcessor;
 	friend class MultiProcessor;
-	mutable QMutex theStop;
+	mutable QFastMutex theStop;
 	QFastWaitCondition theAllDoneChanged;
 	bool theIOSetup, theStopping, theIsInitialised, theAllDone, theIsActive;
 	void doInit(const QString &name, ProcessorGroup *group, const Properties &properties);
@@ -225,7 +225,7 @@ protected:
 private:
 	//@{
 	/** Typing subsystem. */
-	mutable QMutex theConfirming;
+	mutable QFastMutex theConfirming;
 	SignalTypeRefs theTypesCache;
 	QVector<uint> theSizesCache;
 	bool theTypesConfirmed;
@@ -233,7 +233,7 @@ private:
 
 	//@{
 	/** Pausing subsystem. */
-	mutable QMutex thePause;
+	mutable QFastMutex thePause;
 	QFastWaitCondition theUnpaused;
 	bool thePaused;
 	mutable uint theGuardsCrossed;
@@ -246,7 +246,7 @@ private:
 
 	//@{
 	/** Error subsystem. */
-	mutable QMutex theErrorSystem;
+	mutable QFastMutex theErrorSystem;
 	QFastWaitCondition theErrorWritten;
 	ErrorType theError;
 	int theErrorData;
@@ -255,6 +255,7 @@ private:
 
 	/** Thread subsystem. @sa threadProcessor() */
 	virtual void run();
+	void wait();
 
 public:
 	/** @internal
@@ -308,7 +309,7 @@ private:
 	friend class xLConnectionReal;
 	friend class MLConnection;
 	QVector<uint> thePlungedInputs;
-	mutable QMutex thePlungerSystem;
+	mutable QFastMutex thePlungerSystem;
 	QVector<uint> thePlungersLeft, thePlungersNotified;
 	bool thePlungersStarted, thePlungersEnded;
 	virtual void startPlungers();
@@ -887,7 +888,7 @@ public:
 	 *
 	 * @sa waitUntilGoing().
 	 */
-	ErrorType errorType() const { QMutexLocker lock(&theErrorSystem); return theError; }
+	ErrorType errorType() const { QFastMutexLocker lock(&theErrorSystem); return theError; }
 
 	/**
 	 * Get any (numerical) data associated with the error condition given
@@ -899,7 +900,7 @@ public:
 	 *
 	 * @sa errorType
 	 */
-	int errorData() const { QMutexLocker lock(&theErrorSystem); return theErrorData; }
+	int errorData() const { QFastMutexLocker lock(&theErrorSystem); return theErrorData; }
 
 	/**
 	 * Get a string which is a human readable interpretation of the last
@@ -937,7 +938,7 @@ public:
 	 *
 	 * @sa pause() unpause()
 	 */
-	bool paused() const { QMutexLocker lock(&thePause); return thePaused; }
+	bool paused() const { QFastMutexLocker lock(&thePause); return thePaused; }
 
 	/**
 	 * Get the pause state of the Processor.

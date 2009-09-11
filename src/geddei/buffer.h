@@ -36,7 +36,7 @@ class Buffer: public ScratchOwner
 	friend class BufferReader;
 
 	mutable QFastWaitCondition theDataIn, theDataOut;
-	mutable QMutex theDataFlux;
+	mutable QFastMutex theDataFlux;
 
 	float *theData;
 	uint theLogSize, theSize, theMask, theUsed;

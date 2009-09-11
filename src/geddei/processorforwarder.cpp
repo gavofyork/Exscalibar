@@ -28,7 +28,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-QMutex *ProcessorForwarder::theReaper;
+QFastMutex *ProcessorForwarder::theReaper;
 QList<RLConnection*> ProcessorForwarder::theGraveyard;
 
 ProcessorForwarder::ProcessorForwarder(uint port)
@@ -43,16 +43,16 @@ ProcessorForwarder::~ProcessorForwarder()
 		delete theGraveyard.takeLast();
 }
 
-QMutex *ProcessorForwarder::reaper()
+QFastMutex *ProcessorForwarder::reaper()
 {
 	if (!theReaper)
-		theReaper = new QMutex;
+		theReaper = new QFastMutex;
 	return theReaper;
 }
 
 void ProcessorForwarder::deleteMeLater(RLConnection *me)
 {
-	QMutexLocker lock(reaper());
+	QFastMutexLocker lock(reaper());
 	theGraveyard.append(me);
 }
 
@@ -102,7 +102,7 @@ void ProcessorForwarder::incomingConnection(int socket)
 		{
 			QString procName = header.readLine();
 			if (MESSAGES) qDebug("Received proc name: %s.", qPrintable(procName));
-			// Need QMutexLocker for the group here.
+			// Need QFastMutexLocker for the group here.
 			Processor *processor = lookup(key, procName);
 			if (MESSAGES) qDebug("Processor is %p", processor);
 			int input = header.readLine().toInt();
@@ -237,7 +237,7 @@ bool ProcessorForwarder::deleteCoupling(const QString &host, uint key, uint sPK)
 
 void ProcessorForwarder::clearGraveyard()
 {
-	QMutexLocker lock(reaper());
+	QFastMutexLocker lock(reaper());
 	theGraveyard.clear();
 }
 

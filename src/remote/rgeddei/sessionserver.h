@@ -54,7 +54,7 @@ namespace rGeddei
 class DLLEXPORT SessionServer
 {
 	static QMap<uint, SessionServer *> theSessionKeyMap;
-	static QMutex mutSessionKeyMap;
+	static QFastMutex mutSessionKeyMap;
 	class SessionServerReaper: public QThread { virtual void run(); };
 	// Created and started on (first) call to SessionServer::SessionServer
 	static SessionServerReaper *theReaper;
@@ -63,7 +63,7 @@ class DLLEXPORT SessionServer
 	uint theSessionKey;
 	QMap<QString, Processor *> theProcessors;
 	bool theAlive, theReaping;
-	mutable QMutex theCalling;
+	mutable QFastMutex theCalling;
 
 	void setAlive();
 	void resetAlive();

@@ -24,7 +24,7 @@ namespace rGeddei
 {
 
 QMap<uint, SessionServer *> SessionServer::theSessionKeyMap;
-QMutex SessionServer::mutSessionKeyMap(QMutex::Recursive);
+QFastMutex SessionServer::mutSessionKeyMap(QFastMutex::Recursive);
 SessionServer::SessionServerReaper *SessionServer::theReaper = 0;
 
 void SessionServer::SessionServerReaper::run()
@@ -45,11 +45,11 @@ SessionServer::SessionServer()
 	while (theSessionKey < 65536)
 		theSessionKey = random();
 	if (MESSAGES) qDebug("= SessionServer(): key = %d. Registering in key map...", theSessionKey);
-	{	QMutexLocker lock(&mutSessionKeyMap);
+	{	QFastMutexLocker lock(&mutSessionKeyMap);
 		theSessionKeyMap[theSessionKey] = this;
 	}
 	if (MESSAGES) qDebug("= SessionServer(): Locking theCalling and registering alive...");
-	{	QMutexLocker lock(&theCalling);
+	{	QFastMutexLocker lock(&theCalling);
 		theAlive = true;
 	}
 	if (MESSAGES) qDebug("= SessionServer(): Creating and starting reaper if it doesn't yet exist...");
@@ -61,7 +61,7 @@ SessionServer::~SessionServer()
 {
 	if (MESSAGES) qDebug("> ~SessionServer()");
 	{
-		QMutexLocker lock(&mutSessionKeyMap);
+		QFastMutexLocker lock(&mutSessionKeyMap);
 		theSessionKeyMap.remove(theSessionKey);
 	}
 	if (theProcessors.count())
@@ -75,14 +75,14 @@ SessionServer::~SessionServer()
 
 void SessionServer::safeDelete(uint key)
 {
-	QMutexLocker lock(&mutSessionKeyMap);
+	QFastMutexLocker lock(&mutSessionKeyMap);
 	if (theSessionKeyMap.count(key))
 		delete theSessionKeyMap[key];
 }
 
 void SessionServer::reap()
 {
-	QMutexLocker lock(&mutSessionKeyMap);
+	QFastMutexLocker lock(&mutSessionKeyMap);
 	QMap<uint, SessionServer *> skm = theSessionKeyMap;
 	for (QMap<uint, SessionServer *>::Iterator i = skm.begin(); i != skm.end(); i++)
 	{	if (MESSAGES) qDebug("Checking if session %d is still alive...", i.key());
@@ -95,26 +95,26 @@ void SessionServer::reap()
 
 bool SessionServer::alive() const
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	return theAlive;
 }
 
 void SessionServer::setAlive()
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 }
 
 void SessionServer::resetAlive()
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = false;
 }
 
 bool SessionServer::newProcessor(const QString &type, const QString &name, bool &ret)
 {
 	if (MESSAGES) qDebug("> newProcessor()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	if (MESSAGES) qDebug("= newProcessor(): Creating %s called %s. count = %d.", qPrintable(type), qPrintable(name), theProcessors.count());
 	Processor *p = ProcessorFactory::create(type);
@@ -130,7 +130,7 @@ bool SessionServer::newProcessor(const QString &type, const QString &name, bool 
 bool SessionServer::deleteProcessor(const QString &name)
 {
 	if (MESSAGES) qDebug("> deleteProcessor()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	if (!theProcessors.contains(name)) return false;
 	Processor *p = theProcessors[name];
@@ -145,7 +145,7 @@ bool SessionServer::deleteProcessor(const QString &name)
 bool SessionServer::newDomProcessor(const QString &subType, const QString &name, bool &ret)
 {
 	if (MESSAGES) qDebug("> newDomProcessor()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	DomProcessor *p = SubProcessorFactory::createDom(subType);
 	if (p) theProcessors[name] = p;
@@ -156,7 +156,7 @@ bool SessionServer::newDomProcessor(const QString &subType, const QString &name,
 bool SessionServer::deleteDomProcessor(const QString &name)
 {
 	if (MESSAGES) qDebug("> deleteDomProcessor()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	if (!theProcessors.contains(name)) return false;
 	DomProcessor *p = dynamic_cast<DomProcessor *>(theProcessors[name]);
@@ -168,7 +168,7 @@ bool SessionServer::deleteDomProcessor(const QString &name)
 bool SessionServer::domProcessorCreateAndAddLocal(const QString &name, bool &ret)
 {
 	if (MESSAGES) qDebug("> domProcessorCreateAndAddLocal()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	DomProcessor *p = dynamic_cast<DomProcessor *>(theProcessors[name]);
 	if (!p) return false;
@@ -179,7 +179,7 @@ bool SessionServer::domProcessorCreateAndAddLocal(const QString &name, bool &ret
 bool SessionServer::domProcessorCreateAndAddNetwork(const QString &name, const QString &host, uint key, bool &ret)
 {
 	if (MESSAGES) qDebug("> domProcessorCreateAndAddNetwork()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	DomProcessor *p = dynamic_cast<DomProcessor *>(theProcessors[name]);
 	if (!p) return false;
@@ -190,7 +190,7 @@ bool SessionServer::domProcessorCreateAndAddNetwork(const QString &name, const Q
 bool SessionServer::processorInit(const QString &name, const Properties &properties, const QString &newName)
 {
 	if (MESSAGES) qDebug("> processorInit()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -203,7 +203,7 @@ bool SessionServer::processorInit(const QString &name, const Properties &propert
 bool SessionServer::processorGo(const QString &name, bool &ret)
 {
 	if (MESSAGES) qDebug("> processorGo() [%s]", qPrintable(name));
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -215,7 +215,7 @@ bool SessionServer::processorGo(const QString &name, bool &ret)
 bool SessionServer::processorWaitUntilGoing(const QString &name, int &errorData, int &ret)
 {
 	if (MESSAGES) qDebug("> processorwaitUntilGoing()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -226,7 +226,7 @@ bool SessionServer::processorWaitUntilGoing(const QString &name, int &errorData,
 bool SessionServer::processorWaitUntilDone(const QString &name)
 {
 	if (MESSAGES) qDebug("> processorwaitUntilDone()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -237,7 +237,7 @@ bool SessionServer::processorWaitUntilDone(const QString &name)
 bool SessionServer::processorStop(const QString &name)
 {
 	if (MESSAGES) qDebug("> processorStop()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -249,7 +249,7 @@ bool SessionServer::processorStop(const QString &name)
 bool SessionServer::processorReset(const QString &name)
 {
 	if (MESSAGES) qDebug("> processorReset()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -261,7 +261,7 @@ bool SessionServer::processorReset(const QString &name)
 bool SessionServer::processorConnectLocal(const QString &name, uint bufferSize, uint output, const QString &destname, uint destinput, bool &ret)
 {
 	if (MESSAGES) qDebug("> processorConnectLocal(): name=%s", qPrintable(destname));
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -274,7 +274,7 @@ bool SessionServer::processorConnectLocal(const QString &name, uint bufferSize, 
 bool SessionServer::processorConnectNetwork(const QString &name, uint bufferSize, uint output, const QString &desthost, uint destkey, const QString &destname, uint destinput, bool &ret)
 {
 	if (MESSAGES) qDebug("> processorConnectNetwork(): key=%d, host=%s, name=%s", destkey, qPrintable(desthost), qPrintable(destname));
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -285,7 +285,7 @@ bool SessionServer::processorConnectNetwork(const QString &name, uint bufferSize
 bool SessionServer::processorDisconnect(const QString &name, uint output)
 {
 	if (MESSAGES) qDebug("> processorDisconnect()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -297,7 +297,7 @@ bool SessionServer::processorDisconnect(const QString &name, uint output)
 bool SessionServer::processorDisconnectAll(const QString &name)
 {
 	if (MESSAGES) qDebug("> processorDisconnectAll()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -309,7 +309,7 @@ bool SessionServer::processorDisconnectAll(const QString &name)
 bool SessionServer::processorSplit(const QString &name, uint output)
 {
 	if (MESSAGES) qDebug("> processorSplit()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -320,7 +320,7 @@ bool SessionServer::processorSplit(const QString &name, uint output)
 bool SessionServer::processorShare(const QString &name, uint output)
 {
 	if (MESSAGES) qDebug("> processorShare()");
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	Processor *p = theProcessors[name];
 	if (!p) return false;
@@ -330,7 +330,7 @@ bool SessionServer::processorShare(const QString &name, uint output)
 
 bool SessionServer::typeAvailable(const QString &id, bool &ret)
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	ret = ProcessorFactory::available(id);
 	return true;
@@ -338,7 +338,7 @@ bool SessionServer::typeAvailable(const QString &id, bool &ret)
 
 bool SessionServer::typeVersion(const QString &id, int &ret)
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	ret = ProcessorFactory::versionId(id);
 	return true;
@@ -346,7 +346,7 @@ bool SessionServer::typeVersion(const QString &id, int &ret)
 
 bool SessionServer::typeSubAvailable(const QString &id, bool &ret)
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	ret = SubProcessorFactory::available(id);
 	return true;
@@ -354,7 +354,7 @@ bool SessionServer::typeSubAvailable(const QString &id, bool &ret)
 
 bool SessionServer::typeSubVersion(const QString &id, int &ret)
 {
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theAlive = true;
 	ret = SubProcessorFactory::versionId(id);
 	return true;
@@ -363,7 +363,7 @@ bool SessionServer::typeSubVersion(const QString &id, int &ret)
 SessionServer *SessionServer::session(uint sessionKey)
 {
 	if (MESSAGES) qDebug("> session()");
-	QMutexLocker lock(&mutSessionKeyMap);
+	QFastMutexLocker lock(&mutSessionKeyMap);
 	return theSessionKeyMap.count(sessionKey) ? theSessionKeyMap[sessionKey] : NULL;
 }
 

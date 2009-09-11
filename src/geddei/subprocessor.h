@@ -112,7 +112,7 @@ class DLLEXPORT SubProcessor: public QThread
 	SignalTypeRefs theOutTypes;
 	bool theReturned, theLoaded;
 	uint theChunks;
-	mutable QMutex theDataInUse;
+	mutable QFastMutex theDataInUse;
 	mutable QFastWaitCondition theDataChanged;
 	//@}
 

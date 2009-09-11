@@ -29,6 +29,8 @@
 #include <qmutex.h>
 #endif
 
+#include "qfastwaitcondition.h"
+
 #include <exscalibar.h>
 
 /** @internal @ingroup QtExtra
@@ -44,7 +46,7 @@ class DLLEXPORT QCounter
 #ifdef UTILISE_PTHREAD
 	pthread_mutex_t theMutex;
 #else
-	QMutex theMutex;
+	QFastMutex theMutex;
 #endif
 public:
 	/**
@@ -141,13 +143,13 @@ inline QCounter::operator const int() const { return theCount; }
 inline QCounter::QCounter(int i) : theCount(i) { pthread_mutex_init(&theMutex, NULL); }
 inline QCounter::~QCounter() { pthread_mutex_destroy(&theMutex); }
 #else
-inline int QCounter::operator++() { QMutexLocker lock(&theMutex); return ++theCount; }
-inline int QCounter::operator++(int) { QMutexLocker lock(&theMutex); return theCount++; }
-inline int QCounter::operator--() { QMutexLocker lock(&theMutex); return --theCount; }
-inline int QCounter::operator--(int) { QMutexLocker lock(&theMutex); return theCount--; }
-inline int QCounter::operator+=(int i) { QMutexLocker lock(&theMutex); return theCount += i; }
-inline int QCounter::operator-=(int i) { QMutexLocker lock(&theMutex); return theCount -= i; }
-inline int QCounter::operator=(int i) { QMutexLocker lock(&theMutex); return theCount = i; }
+inline int QCounter::operator++() { QFastMutexLocker lock(&theMutex); return ++theCount; }
+inline int QCounter::operator++(int) { QFastMutexLocker lock(&theMutex); return theCount++; }
+inline int QCounter::operator--() { QFastMutexLocker lock(&theMutex); return --theCount; }
+inline int QCounter::operator--(int) { QFastMutexLocker lock(&theMutex); return theCount--; }
+inline int QCounter::operator+=(int i) { QFastMutexLocker lock(&theMutex); return theCount += i; }
+inline int QCounter::operator-=(int i) { QFastMutexLocker lock(&theMutex); return theCount -= i; }
+inline int QCounter::operator=(int i) { QFastMutexLocker lock(&theMutex); return theCount = i; }
 inline QCounter::operator int() const { return theCount; }
 inline QCounter::QCounter(int i) : theCount(i) {}
 inline QCounter::~QCounter() {}

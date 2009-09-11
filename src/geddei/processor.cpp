@@ -70,8 +70,8 @@ public:
 		start();
 	}
 	static ProcessorScheduler* get() { if (!s_this) s_this = new ProcessorScheduler; return s_this; }
-	void registerTask(Processor* _p) { QMutexLocker l(&l_tasks); m_tasks.append(_p); }
-	void unregisterTask(Processor* _p) { QMutexLocker l(&l_tasks); m_tasks.removeAll(_p); }
+	void registerTask(Processor* _p) { QFastMutexLocker l(&l_tasks); m_tasks.append(_p); }
+	void unregisterTask(Processor* _p) { QFastMutexLocker l(&l_tasks); m_tasks.removeAll(_p); }
 	void run()
 	{
 		uint sinceLastWorked = 0;
@@ -109,7 +109,7 @@ public:
 	}
 
 private:
-	QMutex l_tasks;
+	QFastMutex l_tasks;
 	QList<Processor*> m_tasks;
 	int m_robin;
 
@@ -121,7 +121,7 @@ ProcessorScheduler* ProcessorScheduler::s_this = 0;
 void Processor::startPlungers()
 {
 	if (pMESSAGES) qDebug("> Processor::startPlungers() [%s]: %d finished", qPrintable(name()), thePlungersEnded);
-	QMutexLocker lock(&thePlungerSystem);
+	QFastMutexLocker lock(&thePlungerSystem);
 	if (!thePlungersStarted)
 	{
 		thePlungersStarted = true;
@@ -140,7 +140,7 @@ void Processor::startPlungers()
 void Processor::noMorePlungers()
 {
 	if (pMESSAGES) qDebug("> Processor::noMorePlungers() [%s]: %d finished", qPrintable(name()), thePlungersEnded);
-	QMutexLocker lock(&thePlungerSystem);
+	QFastMutexLocker lock(&thePlungerSystem);
 	if (!thePlungersEnded)
 	{
 		thePlungersEnded = true;
@@ -155,7 +155,7 @@ void Processor::noMorePlungers()
 void Processor::plungerSent(uint index)
 {
 	if (pMESSAGES) qDebug("> Processor::plungerSent() [%s]: %d left, %d finished", qPrintable(name()), thePlungersLeft[index], thePlungersEnded);
-	QMutexLocker lock(&thePlungerSystem);
+	QFastMutexLocker lock(&thePlungerSystem);
 
 	thePlungersLeft[index]++;
 	thePlungersNotified[index]++;
@@ -288,7 +288,7 @@ void Processor::plunged(uint index)
 {
 	if (MESSAGES) qDebug("> Processor::plunged() [%s:%d] thePlungedInputs=%d", qPrintable(name()), index, thePlungedInputs[index]);
 	thePlungedInputs[index]++;
-	{	QMutexLocker lock(&thePlungerSystem);
+	{	QFastMutexLocker lock(&thePlungerSystem);
 		thePlungersLeft[index]--;
 	}
 	if (MESSAGES) qDebug("= Processor::plunged() [%s:%d]: %d left, %d finished, %d total", qPrintable(name()), index, thePlungersLeft[index], thePlungersEnded, thePlungedInputs[index]);
@@ -364,7 +364,7 @@ bool Processor::thereIsInputForProcessing(uint samples)
 		{
 			if (MESSAGES) qDebug("Processor: Locking plunger system...");
 			// Lock the system for now...
-			QMutexLocker lock(&thePlungerSystem);
+			QFastMutexLocker lock(&thePlungerSystem);
 
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
@@ -431,7 +431,7 @@ bool Processor::thereIsInputForProcessing()
 		{
 			if (MESSAGES) qDebug("Processor: Locking plunger system...");
 			// Lock the system for now...
-			QMutexLocker lock(&thePlungerSystem);
+			QFastMutexLocker lock(&thePlungerSystem);
 
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
@@ -474,9 +474,9 @@ void Processor::plunge()
 
 void Processor::pause()
 {
-	QMutexLocker lock(&theStop);
+	QFastMutexLocker lock(&theStop);
 	if (!theStopping)
-	{	QMutexLocker lock(&thePause);
+	{	QFastMutexLocker lock(&thePause);
 		thePaused = true;
 	}
 }
@@ -578,7 +578,7 @@ bool Processor::go()
 	if (!theIsInitialised)
 	{
 		if (MESSAGES) qDebug("= Processors::go() (name=%s) Not initialised!", qPrintable(theName));
-		QMutexLocker lock(&theErrorSystem);
+		QFastMutexLocker lock(&theErrorSystem);
 		theError = NotInitialised;
 		theErrorWritten.wakeAll();
 		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(theName));
@@ -594,7 +594,7 @@ bool Processor::go()
 	if (!(processorStarted() && processorStarted(theCustomError)))
 	{
 		if (MESSAGES) qDebug("= Processors::go() (name=%s) Unable to start!", qPrintable(theName));
-		QMutexLocker lock(&theErrorSystem);
+		QFastMutexLocker lock(&theErrorSystem);
 		theError = Custom;
 		theErrorWritten.wakeAll();
 		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(theName));
@@ -669,7 +669,7 @@ int Processor::processCycle()
 				Connection::Tristate e = theOutputs[i]->isReadyYet();
 				if (e == Connection::Failed)
 				{	if (MESSAGES) qDebug("Processor::processCycle(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
-					QMutexLocker lock(&theErrorSystem);
+					QFastMutexLocker lock(&theErrorSystem);
 					theError = RecursiveFailure;
 					theErrorData = i;
 					theErrorWritten.wakeAll();
@@ -684,7 +684,7 @@ int Processor::processCycle()
 			if (allOk)
 			{
 				{
-					QMutexLocker lock(&theErrorSystem);
+					QFastMutexLocker lock(&theErrorSystem);
 					theError = NoError;
 					theErrorWritten.wakeAll();
 				}
@@ -705,7 +705,7 @@ int Processor::processCycle()
 			if (ret == WillNeverWork)
 			{
 				if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
-				{	QMutexLocker lock(&theStop);
+				{	QFastMutexLocker lock(&theStop);
 					theAllDone = true;
 					theAllDoneChanged.wakeAll();
 				}
@@ -726,8 +726,8 @@ int Processor::processCycle()
 	unsetThreadProcessor();
 	if (ret == WillNeverWork)
 	{
-		processorStopped();
 		theIsActive = false;
+		processorStopped();
 	}
 	return ret;
 }
@@ -740,7 +740,7 @@ void Processor::run()
 	// TODO: Look into reasons why this shouldn't go back in.
 	// currently theTypesConfirmed *never* seems to be falsified after being initially
 	// set to true.
-	/*{	QMutexLocker lock(&theConfirming);
+	/*{	QFastMutexLocker lock(&theConfirming);
 		theTypesConfirmed = false;
 		theTypesCache.clear();
 	}*/
@@ -756,7 +756,7 @@ void Processor::run()
 		{	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting on output %d...", qPrintable(theName), i);
 			if (!theOutputs[i]->waitUntilReady())
 			{	if (MESSAGES) qDebug("Processor::run(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
-				QMutexLocker lock(&theErrorSystem);
+				QFastMutexLocker lock(&theErrorSystem);
 				theError = RecursiveFailure;
 				theErrorData = i;
 				theErrorWritten.wakeAll();
@@ -785,7 +785,7 @@ void Processor::run()
 		processor();
 
 		if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
-		{	QMutexLocker lock(&theStop);
+		{	QFastMutexLocker lock(&theStop);
 			theAllDone = true;
 			theAllDoneChanged.wakeAll();
 		}
@@ -815,13 +815,24 @@ void Processor::run()
 	if (MESSAGES) qDebug("Stopped.");
 }
 
+void Processor::wait()
+{
+	if (theFlags & Cooperative)
+	{
+		while (isActive())
+			QThread::msleep(1);
+	}
+	else
+		QThread::wait();
+}
+
 void Processor::stop()
 {
 	if (MESSAGES) qDebug("> Processor::stop() (name=%s)", qPrintable(theName));
 
 	// This little mechanism is just in case two stop()s are called simultaneously.
 	bool justExit = false;
-	{	QMutexLocker lock(&theStop);
+	{	QFastMutexLocker lock(&theStop);
 		if (!isRunning()) return;
 		if (theStopping)
 			justExit = true;
@@ -871,12 +882,12 @@ void Processor::stop()
 
 bool Processor::confirmTypes()
 {
-	QMutexLocker lock(&theConfirming);
+	QFastMutexLocker lock(&theConfirming);
 
 	if (theTypesConfirmed)
 	{
 		// If we're already running, best not to clear the buffer...
-		{	QMutexLocker lock(&theErrorSystem);
+		{	QFastMutexLocker lock(&theErrorSystem);
 			if (!theError) return true;
 		}
 		// refresh outputs in case of a reconnection
@@ -898,7 +909,7 @@ bool Processor::confirmTypes()
 	{	if (!*i)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input not connected.", qPrintable(name()));
 			theTypesConfirmed = false;
-			QMutexLocker lock(&theErrorSystem);
+			QFastMutexLocker lock(&theErrorSystem);
 			theError = InputNotConnected;
 			theErrorData = ii;
 			theErrorWritten.wakeAll();
@@ -908,7 +919,7 @@ bool Processor::confirmTypes()
 		if (!t)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d is null - exiting with error.", qPrintable(name()), ii);
 			theTypesConfirmed = false;
-			QMutexLocker lock(&theErrorSystem);
+			QFastMutexLocker lock(&theErrorSystem);
 			theError = InputTypeNull;
 			theErrorData = ii;
 			theErrorWritten.wakeAll();
@@ -926,7 +937,7 @@ bool Processor::confirmTypes()
 	{		if (!inTypes.allSame())
 			{	if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) No input types not homogeneous.", qPrintable(name()));
 				theTypesConfirmed = false;
-				QMutexLocker lock(&theErrorSystem);
+				QFastMutexLocker lock(&theErrorSystem);
 				theError = InputsNotHomogeneous;
 				theErrorData = ii;
 				theErrorWritten.wakeAll();
@@ -938,7 +949,7 @@ bool Processor::confirmTypes()
 	if (!theTypesConfirmed)
 	{
 		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Invalid inputs (verifyAndSpecifyTypes() returned false)", qPrintable(theName));
-		QMutexLocker lock(&theErrorSystem);
+		QFastMutexLocker lock(&theErrorSystem);
 		theError = InvalidInputs;
 		theErrorWritten.wakeAll();
 	}
@@ -948,7 +959,7 @@ bool Processor::confirmTypes()
 	{	if (!theTypesCache.populated(0))
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) No output type specified.", qPrintable(name()));
 			theTypesConfirmed = false;
-			QMutexLocker lock(&theErrorSystem);
+			QFastMutexLocker lock(&theErrorSystem);
 			theError = OutputsNull;
 			theErrorData = ii;
 			theErrorWritten.wakeAll();
@@ -1125,7 +1136,7 @@ void Processor::waitUntilDone()
 	if (!(theFlags & Guarded))
 		qWarning("*** WARNING: Processor::waitUntilDone(): I'll never exit, since I'm not a\n"
 				 "             Guarded Processor-derived object (name=%s).", qPrintable(name()));
-	QMutexLocker lock(&theStop);
+	QFastMutexLocker lock(&theStop);
 	while (!theAllDone)
 		theAllDoneChanged.wait(&theStop);
 }
@@ -1142,7 +1153,7 @@ Connection::Tristate Processor::isGoingYet()
 
 Processor::ErrorType Processor::waitUntilGoing(int *errorData)
 {
-	QMutexLocker lock(&theErrorSystem);
+	QFastMutexLocker lock(&theErrorSystem);
 	while (theError == Pending || theError == NotStarted)
 		theErrorWritten.wait(&theErrorSystem);
 	if (errorData) *errorData = theErrorData;

@@ -63,7 +63,7 @@ public:
 
 uint theCount;
 QFastWaitCondition theCondition;
-QMutex theMutex;
+QFastMutex theMutex;
 
 class PlungeEater : public Processor
 {
@@ -83,7 +83,7 @@ class PlungeEater : public Processor
 	virtual void receivedPlunger()
 	{
 		std::cout << "Eater " << qPrintable(name()) << ": Received plunger!" << std::endl;
-		QMutexLocker lock(&theMutex);
+		QFastMutexLocker lock(&theMutex);
 		theCount++;
 		theCondition.wakeAll();
 	}

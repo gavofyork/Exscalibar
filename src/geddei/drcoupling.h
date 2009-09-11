@@ -57,7 +57,7 @@ class DRCoupling : virtual public DxCoupling
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
 	virtual bool isReady();
 
-	mutable QMutex theComm;
+	mutable QFastMutex theComm;
 	mutable QSocketSession theRemote;
 	QString theRemoteHost;
 	uint theRemoteKey, theRemoteSubProcessorKey;

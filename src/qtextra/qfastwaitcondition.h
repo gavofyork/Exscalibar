@@ -33,11 +33,39 @@
 
 #include <exscalibar.h>
 
+#define SINGLE_THREADED 1
+
+#ifdef SINGLE_THREADED
+
+class DLLEXPORT QFastMutex
+{
+public:
+	enum { NonRecursive, Recursive };
+	void lock() {}
+	bool tryLock() { return true; }
+	void unlock() {}
+	bool isLocked() { return true; }
+	QFastMutex(int = NonRecursive) {}
+};
+
+class DLLEXPORT QFastMutexLocker
+{
+public:
+	QFastMutexLocker(QFastMutex*) {}
+};
+
+#else
+
+typedef QMutex QFastMutex;
+typedef QMutexLocker QFastMutexLocker;
+
+#endif
+
 class DLLEXPORT QFastWaitCondition
 {
 public:
 	bool wait(unsigned long  = ULONG_MAX) { sched_yield(); return true; }
-	bool wait(QMutex * mutex, unsigned long  = ULONG_MAX) { mutex->unlock(); sched_yield(); mutex->lock(); return true; }
+	bool wait(QFastMutex * mutex, unsigned long  = ULONG_MAX) { mutex->unlock(); sched_yield(); mutex->lock(); return true; }
 	void wakeOne() {}
 	void wakeAll() {}
 };

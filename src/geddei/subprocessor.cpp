@@ -70,7 +70,7 @@ void SubProcessor::go()
 void SubProcessor::stop()
 {
 	if (MESSAGES) qDebug("SubProc[%p]: stop(): Stopping...", theCoupling);
-	{	QMutexLocker lock(&theDataInUse);
+	{	QFastMutexLocker lock(&theDataInUse);
 		theStopping = true;
 		theDataChanged.wakeAll();
 	}
@@ -137,7 +137,7 @@ void SubProcessor::defineIO(uint numInputs, uint numOutputs)
 
 void SubProcessor::run()
 {
-	QMutexLocker lock(&theDataInUse);
+	QFastMutexLocker lock(&theDataInUse);
 	while (!theStopping)
 	{
 		if (MESSAGES) qDebug("SubProc[%p]: SubProc running...", theCoupling);
@@ -185,7 +185,7 @@ void SubProcessor::transact(const BufferDatas &i, uint chunks)
 		else
 			qDebug("SubProcT[%p]: Transacting plunger!", theCoupling);
 	}
-	QMutexLocker lock(&theDataInUse);
+	QFastMutexLocker lock(&theDataInUse);
 	while (!(!theLoaded && theReturned) && !theNoMoreTransactions)
 	{	if (MESSAGES) qDebug("SubProcT[%p]: Waiting for my transaction space: L: %d R: %d NMT: %d", theCoupling, theLoaded, theReturned, theNoMoreTransactions);
 		theDataChanged.wait(&theDataInUse);
@@ -206,7 +206,7 @@ void SubProcessor::transact(const BufferDatas &i, uint chunks)
 BufferDatas SubProcessor::deliverResults(uint *timeTaken)
 {
 	if (MESSAGES) qDebug("SubProcRR[%p]: Results wanted!", theCoupling);
-	QMutexLocker lock(&theDataInUse);
+	QFastMutexLocker lock(&theDataInUse);
 	while (!(!theLoaded && !theReturned) && !theNoMoreTransactions)
 	{	//if (MESSAGES) qDebug("SubProcRR[%p]: Waiting for some results: L: %d R: %d", theCoupling, theLoaded, theReturned);
 		theDataChanged.wait(&theDataInUse);

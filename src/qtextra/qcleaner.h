@@ -24,17 +24,19 @@
 #include <QThread>
 #include <QMutex>
 
+#include "qfastwaitcondition.h"
+
 #include <exscalibar.h>
 
 template<class X>
-class DLLEXPORT QCleaner: public QThread, private QMutex
+class DLLEXPORT QCleaner: public QThread, private QFastMutex
 {
 	QList<X*> theRow;
 	int theInterval;
 
 	void purgeAll()
 	{
-		QMutexLocker lock(this);
+		QFastMutexLocker lock(this);
 		while (theRow.size())
 			delete theRow.takeLast();
 	}
@@ -50,7 +52,7 @@ class DLLEXPORT QCleaner: public QThread, private QMutex
 public:
 	void deleteObject(X *theObject)
 	{
-		QMutexLocker lock(this);
+		QFastMutexLocker lock(this);
 		theRow.append(theObject);
 	}
 

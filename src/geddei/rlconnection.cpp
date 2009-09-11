@@ -109,7 +109,7 @@ void RLConnection::run()
 			if (MESSAGES) qDebug("= RLC::run(): theBuffer.setType()");
 			theBuffer.setType(theType);
 			if (MESSAGES) qDebug("= RLC::run(): Make lock");
-			QMutexLocker lock(&theGotTypeM);
+			QFastMutexLocker lock(&theGotTypeM);
 			if (MESSAGES) qDebug("= RLC::run(): Set haveType");
 			theHaveType = true;
 			if (MESSAGES) qDebug("= RLC::run(): wakeAll()");
@@ -201,7 +201,7 @@ void RLConnection::run()
 
 bool RLConnection::pullType()
 {
-	QMutexLocker lock(&theGotTypeM);
+	QFastMutexLocker lock(&theGotTypeM);
 	while (!theHaveType) theGotType.wait(&theGotTypeM);
 	return theType;
 }

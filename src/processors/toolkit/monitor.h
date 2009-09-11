@@ -57,7 +57,7 @@ class DLLEXPORT Monitor: public Processor
 	virtual void receivedPlunger();
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 
-	QMutex thePlunging;
+	QFastMutex thePlunging;
 	QFastWaitCondition thePlunge;
 	uint thePlungersCaught;
 

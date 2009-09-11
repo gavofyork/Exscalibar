@@ -402,7 +402,7 @@ void DomProcessor::wantToStopNow()
 	if (MESSAGES) qDebug("DomProcessor[%s]: Initiating stop..", qPrintable(theName));
 
 	if (MESSAGES) qDebug("DomProcessor[%s]: Unlocking queue...", qPrintable(theName));
-	{	QMutexLocker lock(&theQueueLock);
+	{	QFastMutexLocker lock(&theQueueLock);
 		theQueueChanged.wakeAll();
 	}
 
@@ -493,7 +493,7 @@ void DomProcessor::processor()
 		w->go();
 	}
 
-	QMutexLocker qlock(&theQueueLock);
+	QFastMutexLocker qlock(&theQueueLock);
 	theQueuePos = theWorkers.begin();
 	theQueueLen = 0;
 	theLimbo = false;
@@ -636,7 +636,7 @@ void DomProcessor::eater()
 	uint tc = theNomChunks * theWorkers.count();
 	float speeds[theWorkers.count()];
 	for (uint i = 0; i < (uint)theWorkers.count(); i++) speeds[i] = 0.;
-	QMutexLocker lock(&theQueueLock);
+	QFastMutexLocker lock(&theQueueLock);
 	while (1)
 	{
 		if (MESSAGES && theDebug) qDebug("Eater: Waiting for a new producer...");

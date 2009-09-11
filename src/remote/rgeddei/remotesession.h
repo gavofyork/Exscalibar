@@ -16,6 +16,7 @@
 #include <QStringList>
 
 #include <exscalibar.h>
+#include "qfastwaitcondition.h"
 #ifdef __GEDDEI_BUILD
 #include "properties.h"
 #include "commcodes.h"
@@ -55,7 +56,7 @@ class DLLEXPORT RemoteSession
   } theKeeper;
   friend class Keeper;
 
-  QMutex theCalling;
+  QFastMutex theCalling;
   uint theKey, theProcessorCount;
   int theLastError;
   QString theHost;

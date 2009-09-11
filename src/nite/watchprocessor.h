@@ -56,7 +56,7 @@ class WatchProcessor: public Processor
 	QTimer *theTimer;
 	QLabel *theLabel;
 
-	QMutex theDrawing;
+	QFastMutex theDrawing;
 
 	uint theWatcher, theScope;
 	float theFrequency;

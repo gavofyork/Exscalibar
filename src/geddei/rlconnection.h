@@ -48,7 +48,7 @@ class DLLEXPORT RLConnection: public xLConnectionReal, protected QThread
 	bool theBeingDeleted, theHaveType;
 	QSocketSession theSource;
 	QFastWaitCondition theGotType;
-	QMutex theGotTypeM;
+	QFastMutex theGotTypeM;
 
 	//* Reimplementation from QThread.
 	virtual void run();

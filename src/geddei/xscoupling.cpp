@@ -59,7 +59,7 @@ bool xSCoupling::isReady()
 void xSCoupling::stoppingR()
 {
 	if (MESSAGES) qDebug("xSCoupling::stopping(): Getting ready to stop. No more transactions allowed on %p.", theSubProc);
-	{	QMutexLocker l(&theSubProc->theDataInUse);
+	{	QFastMutexLocker l(&theSubProc->theDataInUse);
 		theSubProc->theNoMoreTransactions = true;
 		theSubProc->theDataChanged.wakeAll();
 	}
@@ -67,7 +67,7 @@ void xSCoupling::stoppingR()
 
 void xSCoupling::stoppedR()
 {
-	{	QMutexLocker l(&theSubProc->theDataInUse);
+	{	QFastMutexLocker l(&theSubProc->theDataInUse);
 		theSubProc->theNoMoreTransactions = false;
 	}
 }

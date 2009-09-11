@@ -121,7 +121,7 @@ int RemoteSession::subVersion(const QString &type)
 bool RemoteSession::newProcessor(const QString &type, const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(NewProcessor);
 	theSession->sendString(type.toLocal8Bit());
 	theSession->sendString(name.toLocal8Bit());
@@ -136,7 +136,7 @@ bool RemoteSession::newProcessor(const QString &type, const QString &name)
 void RemoteSession::deleteProcessor(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(DeleteProcessor);
 	theSession->sendString(name.toLocal8Bit());
 	if (!theSession->waitForAck())
@@ -148,7 +148,7 @@ void RemoteSession::deleteProcessor(const QString &name)
 bool RemoteSession::newDomProcessor(const QString &subType, const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(NewDomProcessor);
 	theSession->sendString(subType.toLocal8Bit());
 	theSession->sendString(name.toLocal8Bit());
@@ -163,7 +163,7 @@ bool RemoteSession::newDomProcessor(const QString &subType, const QString &name)
 void RemoteSession::deleteDomProcessor(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(DeleteDomProcessor);
 	theSession->sendString(name.toLocal8Bit());
 	if (!theSession->waitForAck())
@@ -175,7 +175,7 @@ void RemoteSession::deleteDomProcessor(const QString &name)
 void RemoteSession::processorInit(const QString &name, const Properties &p, const QString &newName)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorInit);
 	theSession->sendString(name.toLocal8Bit());
 	QByteArray a = p.serialise();
@@ -191,7 +191,7 @@ void RemoteSession::processorInit(const QString &name, const Properties &p, cons
 bool RemoteSession::processorGo(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorGo);
 	theSession->sendString(name.toLocal8Bit());
 	bool ret = theSession->waitForAck();
@@ -206,7 +206,7 @@ bool RemoteSession::processorGo(const QString &name)
 int RemoteSession::processorWaitUntilGoing(const QString &name, int &errorData)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorWaitUntilGoing);
 	theSession->sendString(name.toLocal8Bit());
 	errorData = theSession->safeReceiveWord<int>();
@@ -222,7 +222,7 @@ int RemoteSession::processorWaitUntilGoing(const QString &name, int &errorData)
 void RemoteSession::processorWaitUntilDone(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorWaitUntilDone);
 	theSession->sendString(name.toLocal8Bit());
 	if (!theSession->waitForAck())
@@ -235,7 +235,7 @@ void RemoteSession::processorStop(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
 	if (MESSAGES) qDebug("> RS::processorStop(%s)", qPrintable(name));
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	if (MESSAGES) qDebug("= RS::processorStop(%s): Got lock!", qPrintable(name));
 	theSession->sendByte(ProcessorStop);
 	theSession->sendString(name.toLocal8Bit());
@@ -251,7 +251,7 @@ void RemoteSession::processorReset(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
 	if (MESSAGES) qDebug("> RS::processorReset(%s)", qPrintable(name));
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	if (MESSAGES) qDebug("= RS::processorReset(%s): Got lock!", qPrintable(name));
 	theSession->sendByte(ProcessorReset);
 	theSession->sendString(name.toLocal8Bit());
@@ -266,7 +266,7 @@ void RemoteSession::processorReset(const QString &name)
 bool RemoteSession::processorConnect(const QString &name, uint bufferSize, uint output, const QString &destName, uint destInput)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorConnectL);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->safeSendWord(bufferSize);
@@ -285,7 +285,7 @@ bool RemoteSession::processorConnect(const QString &name, uint bufferSize, uint 
 bool RemoteSession::processorConnect(const QString &name, uint bufferSize, uint output, const QString &destHost, uint destKey, const QString &destName, uint destInput)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorConnectR);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->safeSendWord(bufferSize);
@@ -306,7 +306,7 @@ bool RemoteSession::processorConnect(const QString &name, uint bufferSize, uint 
 void RemoteSession::processorDisconnect(const QString &name, uint output)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorDisconnect);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->safeSendWord(output);
@@ -319,7 +319,7 @@ void RemoteSession::processorDisconnect(const QString &name, uint output)
 void RemoteSession::processorDisconnectAll(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorDisconnectAll);
 	theSession->sendString(name.toLocal8Bit());
 	if (!theSession->waitForAck())
@@ -331,7 +331,7 @@ void RemoteSession::processorDisconnectAll(const QString &name)
 void RemoteSession::processorSplit(const QString &name, uint output)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorSplit);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->safeSendWord(output);
@@ -344,7 +344,7 @@ void RemoteSession::processorSplit(const QString &name, uint output)
 void RemoteSession::processorShare(const QString &name, uint output)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(ProcessorShare);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->safeSendWord(output);
@@ -357,7 +357,7 @@ void RemoteSession::processorShare(const QString &name, uint output)
 bool RemoteSession::domProcessorCreateAndAdd(const QString &name)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(DomProcessorCreateAndAddL);
 	theSession->sendString(name.toLocal8Bit());
 	bool ret = theSession->waitForAck();
@@ -372,7 +372,7 @@ bool RemoteSession::domProcessorCreateAndAdd(const QString &name)
 bool RemoteSession::domProcessorCreateAndAdd(const QString &name, const QString &host, uint hostKey)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(DomProcessorCreateAndAddR);
 	theSession->sendString(name.toLocal8Bit());
 	theSession->sendString(host.toLocal8Bit());
@@ -389,7 +389,7 @@ bool RemoteSession::domProcessorCreateAndAdd(const QString &name, const QString 
 bool RemoteSession::typeAvailable(const QString &type)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(TypeAvailable);
 	theSession->sendString(type.toLocal8Bit());
 	bool ret = theSession->waitForAck();
@@ -403,7 +403,7 @@ bool RemoteSession::typeAvailable(const QString &type)
 int RemoteSession::typeVersion(const QString &type)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(TypeVersion);
 	theSession->sendString(type.toLocal8Bit());
 	int ret = theSession->safeReceiveWord<int>();
@@ -417,7 +417,7 @@ int RemoteSession::typeVersion(const QString &type)
 bool RemoteSession::typeSubAvailable(const QString &type)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(TypeSubAvailable);
 	theSession->sendString(type.toLocal8Bit());
 	bool ret = theSession->waitForAck();
@@ -431,7 +431,7 @@ bool RemoteSession::typeSubAvailable(const QString &type)
 int RemoteSession::typeSubVersion(const QString &type)
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(TypeSubVersion);
 	theSession->sendString(type.toLocal8Bit());
 	int ret = theSession->safeReceiveWord<int>();
@@ -445,7 +445,7 @@ int RemoteSession::typeSubVersion(const QString &type)
 void RemoteSession::keepAlive()
 {
 	if (!theSession) { qFatal("*** FATAL: RemoteSession: Session to %s is not open.", qPrintable(theHost)); }
-	QMutexLocker lock(&theCalling);
+	QFastMutexLocker lock(&theCalling);
 	theSession->sendByte(Nop);
 	theSession->waitForAck();
 }

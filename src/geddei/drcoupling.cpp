@@ -60,7 +60,7 @@ void DRCoupling::setCredentials(const QString &remoteHost, uint remoteKey, uint 
 void DRCoupling::go()
 {
 	if (MESSAGES) qDebug("> DRCoupling::go()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(Go);
 	theRemote.waitForAck(501);
 	if (MESSAGES) qDebug("< DRCoupling::go()");
@@ -69,7 +69,7 @@ void DRCoupling::go()
 void DRCoupling::stop()
 {
 	if (MESSAGES) qDebug("> DRCoupling::stop()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	if (MESSAGES) qDebug("= DRCoupling::stop(): Sending byte");
 	theRemote.sendByte(Stop);
 	theRemote.waitForAck(502);
@@ -80,7 +80,7 @@ void DRCoupling::stoppingR()
 {
 	if (MESSAGES) qDebug("> DRCoupling::stoppingR()");
 	// Cant just send byte as caller is a different thread to rest of comms - could clash.
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	if (MESSAGES) qDebug("= DRCoupling::stoppingR(): Sending byte");
 	theRemote.sendByte(Stopping);
 	theRemote.waitForAck(503);
@@ -90,7 +90,7 @@ void DRCoupling::stoppingR()
 void DRCoupling::stoppedR()
 {
 	if (MESSAGES) qDebug("> DRCoupling::stoppedR()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	if (MESSAGES) qDebug("= DRCoupling::stoppedR(): Sending byte");
 	theRemote.sendByte(Stopped);
 	theRemote.waitForAck(504);
@@ -100,7 +100,7 @@ void DRCoupling::stoppedR()
 void DRCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes)
 {
 	if (MESSAGES) qDebug("> DRCoupling::specifyTypes()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(SpecifyTypes);
 	// Send inTypes.count(), Go through each of inTypes, sending each one.
 	theRemote.safeSendWord(inTypes.count());
@@ -116,7 +116,7 @@ void DRCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRef
 void DRCoupling::initFromProperties(const Properties &p)
 {
 	if (MESSAGES) qDebug("> DRCoupling::initFromProperties()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", qPrintable(p.keys()[i]), qPrintable(p[p.keys()[i]].toString()));
 	theRemote.sendByte(InitFromProperties);
 	// Serialise and send properties.
@@ -129,7 +129,7 @@ void DRCoupling::initFromProperties(const Properties &p)
 void DRCoupling::transact(const BufferDatas &d, uint chunks)
 {
 	if (MESSAGES) qDebug("> DRCoupling::transact() (%d chunks)", chunks);
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(Transact);
 	// Go through each BufferData in d, send each
 	theRemote.safeSendWord(d.size());
@@ -153,7 +153,7 @@ void DRCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint
 	if (MESSAGES) qDebug("> DRCoupling::processChunks() (%d chunks)", _chunks);
 	m_outs = _outs;
 	m_isReady = false;
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(ProcessChunks);
 	// Go through each BufferData in d, send each
 	theRemote.safeSendWord(_ins.size());
@@ -182,7 +182,7 @@ bool DRCoupling::isReady()
 	if (m_isReady)
 		return true;
 	if (MESSAGES) qDebug("> DRCoupling::isReady()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	if (theRemote.bytesAvailable())
 	{
 		for (uint i = 0; i < m_outs.size(); i++)
@@ -200,7 +200,7 @@ bool DRCoupling::isReady()
 BufferDatas DRCoupling::deliverResults(uint *timeTaken)
 {
 	if (MESSAGES) qDebug("> DRCoupling::deliverResults()");
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(DeliverResults);
 	// Wait for results to be sent.
 	BufferDatas d(theRemote.safeReceiveWord<int>());
@@ -219,7 +219,7 @@ BufferDatas DRCoupling::deliverResults(uint *timeTaken)
 
 void DRCoupling::defineIO(uint inputs, uint outputs)
 {
-	QMutexLocker lock(&theComm);
+	QFastMutexLocker lock(&theComm);
 	theRemote.sendByte(DefineIO);
 	theRemote.safeSendWord(inputs);
 	theRemote.safeSendWord(outputs);

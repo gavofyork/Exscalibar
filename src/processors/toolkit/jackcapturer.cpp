@@ -39,7 +39,7 @@ using namespace SignalTypes;
 class JackCapturer: public Processor
 {
 	QFastWaitCondition theTransfer;
-	QMutex theTransferLock;
+	QFastMutex theTransferLock;
 	bool theKeepGoing, theDoneTransfer;
 	jack_nframes_t theWantFrames;
 	BufferData theBuffer;
@@ -52,7 +52,7 @@ class JackCapturer: public Processor
 	int process(jack_nframes_t nframes)
 	{
 		jack_default_audio_sample_t *in = (jack_default_audio_sample_t *)jack_port_get_buffer(theInputPort, nframes);
-		QMutexLocker lock(&theTransferLock);
+		QFastMutexLocker lock(&theTransferLock);
 		theWantFrames = nframes;
 		while (theBuffer.isNull()) theTransfer.wait(&theTransferLock);
 		for (uint i = 0; i < nframes; i++)
@@ -143,7 +143,7 @@ void JackCapturer::processor()
 {
 	while (theKeepGoing)
 	{
-		QMutexLocker lock(&theTransferLock);
+		QFastMutexLocker lock(&theTransferLock);
 		while (!theWantFrames) theTransfer.wait(&theTransferLock);
 		theDoneTransfer = false;
 		theBuffer = output(0).makeScratchSamples(theWantFrames);
