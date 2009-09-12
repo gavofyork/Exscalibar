@@ -7,17 +7,14 @@
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
  ***************************************************************************/
-#ifndef _GEDDEI_SUBPROCESSOR_H
-#define _GEDDEI_SUBPROCESSOR_H
 
-#include <qstring.h>
-#include <qmutex.h>
-#include <qthread.h>
-#include <qpainter.h>
+#pragma once
+
+#include <QString>
+#include <QPainter>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "qfastwaitcondition.h"
 #include "globals.h"
 #include "properties.h"
@@ -97,7 +94,7 @@ class RSCoupling;
  *
  * @sa DomProcessor @sa MultiProcessor
  */
-class DLLEXPORT SubProcessor: public QThread
+class DLLEXPORT SubProcessor
 {
 	friend class Combination;
 
@@ -106,21 +103,7 @@ class DLLEXPORT SubProcessor: public QThread
 	QString theType;
 	uint theNumInputs, theNumOutputs, theIn, theOut, theStep;
 	MultiplicityType theMulti;
-	//@}
-
-	//@{
-	/** Data passing mechanism. */
-	BufferDatas theCurrentIn, theCurrentOut;
 	SignalTypeRefs theOutTypes;
-	bool theReturned, theLoaded;
-	uint theChunks;
-	mutable QFastMutex theDataInUse;
-	mutable QFastWaitCondition theDataChanged;
-	//@}
-
-	//@{
-	/** Timing mechanism. */
-	uint theTimeTaken;
 	//@}
 
 	//@{
@@ -128,25 +111,6 @@ class DLLEXPORT SubProcessor: public QThread
 	uint theWidth;
 	uint theHeight;
 	//@}
-
-	//@{
-	/** Thread subsystem. */
-	virtual void run();
-	//@}
-
-	/** @internal
-	 * theStopping means that all processing must now stop.
-	 */
-	bool theStopping;
-
-	/** @internal
-	 * theNoMoreTransactions means that no more transactions may be taken or given,
-	 * but processing may continue for now.
-	 * Distinction between this and theStopping is neccessary to allow eater/demux
-	 * to drop out when neccessary. theNoMoreTransactions is protected by
-	 * theDataInUse/theDataChanged.
-	 */
-	bool theNoMoreTransactions;
 
 	//@{
 	/** DomProcessor relationship. */
@@ -176,39 +140,6 @@ class DLLEXPORT SubProcessor: public QThread
 	 */
 	xSCoupling *coupling() { return theCoupling; }
 	friend class ProcessorForwarder;
-
-	//* xSCoupling Interface
-	/** @internal
-	 * Starts the transaction processor.
-	 */
-	void go();
-
-	/** @internal
-	 * Stops the transaction processor.
-	 */
-	void stop();
-
-	/** @internal
-	 * Registers a new transaction. If one is already being processed it blocks
-	 * until completed and its results are returned.
-	 *
-	 * @param i The input data.
-	 * @param chunks The number of chunks that the data represents. Note if
-	 * chunks == 0, we implicitly mean a plunger.
-	 */
-	void transact(const BufferDatas &i, uint chunks);
-
-	/** @internal
-	 * Blocks until the last transaction is completed. Then retrieves the results
-	 * and returns then. It is up to the caller to know what to do with the results.
-	 *
-	 * @param timeTaken An int pointer which if not zero will be filled with the
-	 * (wall) time taken to process the chunks. If last was a plunger, it is filled
-	 * with the last actual computation or zero if there wasn't one.
-	 * @return The results of the transaction. Note if BufferDatas.size() == 0,
-	 * we implicitly mean a plunger.
-	 */
-	BufferDatas deliverResults(uint *timeTaken = 0);
 
 	/** @internal
 	 * A quick'n'dirty proxy method, that basically just calls the virtual function
@@ -435,5 +366,3 @@ public:
 };
 
 }
-
-#endif
