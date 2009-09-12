@@ -23,7 +23,7 @@ using namespace Geddei;
 #include "wave.h"
 using namespace SignalTypes;
 
-class WaveGen: public Processor
+class WaveGen: public CoProcessor
 {
 	enum WaveType { Sine, Square, Triangular } theWaveType;
 	float theFrequency, theRate;
@@ -40,7 +40,7 @@ class WaveGen: public Processor
 	virtual int canProcess();
 	virtual int process();
 public:
-	WaveGen() : Processor("WaveGen", NotMulti, Guarded|Cooperative) {}
+	WaveGen(): CoProcessor("WaveGen", NotMulti) {}
 };
 
 bool WaveGen::processorStarted()
@@ -55,7 +55,7 @@ int WaveGen::canProcess()
 {
 	if (theStopAfterChunks && theStopAfterChunks > m_hadChunks)
 		return WillNeverWork;
-	return Processor::canProcess();
+	return CanWork;
 }
 
 int WaveGen::process()

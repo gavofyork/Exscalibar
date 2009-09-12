@@ -56,7 +56,7 @@
  *
  * This is guarded, so you can use Processor::waitUntilDone() on it.
  */
-class DLLEXPORT Recorder: public Processor
+class DLLEXPORT Recorder: public HeavyProcessor
 {
 	virtual void processor();
 	virtual PropertiesInfo specifyProperties() const;
@@ -78,7 +78,7 @@ public:
 	/**
 	 * Basic constructor.
 	 */
-	Recorder() : Processor("Recorder", NotMulti, Guarded) {}
+	Recorder(): HeavyProcessor("Recorder", NotMulti, Guarded) {}
 };
 
 #endif

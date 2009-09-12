@@ -47,7 +47,7 @@ class GeddeiNite;
 /** @internal
  * @author Gav Wood <gav@kde.org>
  */
-class WatchProcessor: public Processor
+class WatchProcessor: public HeavyProcessor
 {
 //	Q_OBJECT
 

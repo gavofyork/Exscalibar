@@ -18,13 +18,13 @@
 #include "buffer.h"
 using namespace Geddei;
 
-class Split : public Processor
+class Split : public HeavyProcessor
 {
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
-	Split() : Processor("Split", Out, Guarded) {}
+	Split(): HeavyProcessor("Split", Out, Guarded) {}
 };
 
 void Split::processor()

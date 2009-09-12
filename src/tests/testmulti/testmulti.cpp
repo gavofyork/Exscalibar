@@ -107,7 +107,7 @@ PropertiesInfo DownSample::specifyProperties() const
 }
 
 
-class SpectrumSource: public Processor
+class SpectrumSource: public HeavyProcessor
 {
 	int theWidth;
 	virtual void processor()
@@ -140,7 +140,7 @@ class SpectrumSource: public Processor
 		theWidth = p["Width"].toInt();
 	}
 public:
-	SpectrumSource() : Processor("SpectrumSource") {}
+	SpectrumSource(): HeavyProcessor("SpectrumSource") {}
 };
 
 class SuitableSplit: public SubProcessor

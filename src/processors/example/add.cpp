@@ -18,14 +18,14 @@
 #include "buffer.h"
 using namespace Geddei;
 
-class DLLEXPORT Add: public Processor
+class DLLEXPORT Add: public HeavyProcessor
 {
 	int count;
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
-	Add() : Processor("Add") {}
+	Add(): HeavyProcessor("Add") {}
 };
 
 void Add::processor()

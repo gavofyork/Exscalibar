@@ -25,7 +25,7 @@ using namespace Geddei;
 #include "signaltypes.h"
 using namespace SignalTypes;
 
-class Normalise: public Processor
+class Normalise: public HeavyProcessor
 {
 	QVector<float> f;
 	uint theOutputSpace, theScope;
@@ -41,7 +41,7 @@ public:
 	Normalise();
 };
 
-Normalise::Normalise(): Processor("Normalise", NotMulti, Guarded)
+Normalise::Normalise(): HeavyProcessor("Normalise", NotMulti, Guarded)
 {
 }
 

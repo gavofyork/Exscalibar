@@ -21,7 +21,7 @@ using namespace SignalTypes;
 /** @internal
  * @author Gav Wood <gav@kde.org>
  */
-class Oscilloscope : public Processor
+class Oscilloscope: public CoProcessor
 {
 	QVector<float> m_last;
 
@@ -34,7 +34,7 @@ class Oscilloscope : public Processor
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
 
 public:
-	Oscilloscope() : Processor("Oscilloscope", NotMulti, Cooperative) {}
+	Oscilloscope(): CoProcessor("Oscilloscope", NotMulti) {}
 };
 
 int Oscilloscope::process()

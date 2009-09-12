@@ -18,14 +18,14 @@
 #include "processor.h"
 using namespace Geddei;
 
-class SignalSink: public Processor
+class SignalSink: public HeavyProcessor
 {
 protected:
 	virtual void processor();
 	virtual void initFromProperties(const Properties &props);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &/*inTypes*/, SignalTypeRefs &/*outTypes*/) { return true; }
 public:
-	SignalSink() : Processor("SignalSink") {}
+	SignalSink(): HeavyProcessor("SignalSink") {}
 };
 
 void SignalSink::processor()

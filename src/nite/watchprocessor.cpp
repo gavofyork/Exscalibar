@@ -43,7 +43,7 @@ using namespace Geddei;
 template<class A> A nmin(A a, A b) { return a > b ? b : a; }
 template<class A> A nmax(A a, A b) { return a < b ? b : a; }
 
-WatchProcessor::WatchProcessor(GeddeiNite *gn) : Processor("WatchProcessor")
+WatchProcessor::WatchProcessor(GeddeiNite *gn): HeavyProcessor("WatchProcessor")
 {
 	theWidth = 512;
 	theHeight = 128;

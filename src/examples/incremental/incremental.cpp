@@ -27,7 +27,7 @@ using namespace SignalTypes;
 
 // Our first custom processor. This has no inputs and one output, and it just
 // produces loads of ones on that output.
-class JustOnes: public Processor
+class JustOnes: public HeavyProcessor
 {
   // Here we setup our I/O. We want 0 inputs and 1 output:
   virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
@@ -36,14 +36,14 @@ class JustOnes: public Processor
   // Now we specify what this processor should output. We want it to infinitely produce 1s.
   virtual void processor() { while (true) output(0).makeScratchSamples(1, true)[0] = 1.; }
   // And a public constructor is necessary for use.
-  public: JustOnes(): Processor("JustOnes") {}
+  public: JustOnes(): HeavyProcessor("JustOnes") {}
 };
 
 // Our second custom processor. This has one input and one output, and it just
 // outputs the sum of the value from the input and the last output. For the
 // summation of the first output we allow an initial value to be set in the
 // properties under the key "First", which defaults to 0.
-class Incremental: public Processor
+class Incremental: public HeavyProcessor
 {
   // Member containing the initial value.
   float theFirst;
@@ -62,12 +62,12 @@ class Incremental: public Processor
   // This is implemented in the for loop.
   virtual void processor() { for (float last = theFirst; true; last += input(0).readSample()[0]) output(0).makeScratchSamples(1, true)[0] = last; }
   // And a public constructor to actually use it.
-  public: Incremental(): Processor("Incremental") {}
+  public: Incremental(): HeavyProcessor("Incremental") {}
 };
 
 // Our third and last custom processor. This will take one input and give no
 // output. We simply print off whatever we receive, one sample at a time.
-class Printer: public Processor
+class Printer: public HeavyProcessor
 {
   // Here we just setup the input. 1 input and no outputs.
   virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
@@ -78,7 +78,7 @@ class Printer: public Processor
   // print off the (first) value. Easy.
   virtual void processor() { for (int i = 1; true; i++) { cout << "[" << qPrintable(name()) << "] " << i << "th element: " << input(0).readSamples(1)[0] << endl; sleep(1); } }
   // And a public constructor, as with the others.
-  public: Printer(): Processor("Printer") {}
+  public: Printer(): HeavyProcessor("Printer") {}
 };
 
 int main()

@@ -8,7 +8,7 @@ using namespace Geddei;
 #include "signaltypes.h"
 using namespace SignalTypes;
 
-class PlungeGenerator : public Processor
+class PlungeGenerator : public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -28,10 +28,10 @@ class PlungeGenerator : public Processor
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 
 public:
-	PlungeGenerator() : Processor("PlungeGenerator") {}
+	PlungeGenerator(): HeavyProcessor("PlungeGenerator") {}
 };
 
-class PlungeDetector : public Processor
+class PlungeDetector : public HeavyProcessor
 {
 	void processor()
 	{
@@ -58,14 +58,14 @@ class PlungeDetector : public Processor
 		std::cout << "Detector " << qPrintable(name()) << ": Received plunger!" << std::endl;
 	}
 public:
-	PlungeDetector() : Processor("PlungeDetector") {}
+	PlungeDetector(): HeavyProcessor("PlungeDetector") {}
 };
 
 uint theCount;
 QFastWaitCondition theCondition;
 QFastMutex theMutex;
 
-class PlungeEater : public Processor
+class PlungeEater : public HeavyProcessor
 {
 	void processor()
 	{
@@ -93,7 +93,7 @@ class PlungeEater : public Processor
 		setupIO(1, 0);
 	}
 public:
-	PlungeEater() : Processor("PlungeEater") {}
+	PlungeEater(): HeavyProcessor("PlungeEater") {}
 };
 
 int main()

@@ -36,9 +36,9 @@ namespace Geddei
 
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
-Processor::Processor(const QString &type, const MultiplicityType multi, uint flags): QThread(0), theName(""), theType(type), theFlags(flags),
+Processor::Processor(const QString &type, const MultiplicityType multi): theName(""), theType(type),
 	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
-	theTypesConfirmed(false), thePaused(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
+	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
 
@@ -257,21 +257,18 @@ void Processor::resetTypes()
 	theConfirming.unlock();
 }
 
-bool Processor::guard()
+bool HeavyProcessor::guard()
 {
-	if (!(theFlags & Cooperative))
-	{
-		thePause.lock();
-		while (thePaused)
-			theUnpaused.wait(&thePause);
-		thePause.unlock();
-	}
+	thePause.lock();
+	while (thePaused)
+		theUnpaused.wait(&thePause);
+	thePause.unlock();
 	checkExit();
 	theGuardsCrossed++;
 	return true;
 }
 
-bool Processor::thereIsInputForProcessing(uint samples)
+bool HeavyProcessor::thereIsInputForProcessing(uint samples)
 {
 	guard();
 
@@ -290,10 +287,10 @@ bool Processor::thereIsInputForProcessing(uint samples)
 	// Keep looping here until we reach an acceptable state
 	while (1)
 	{
-		if (pMESSAGES) qDebug("Processor [%s]: Plunging as much as possible (waiting for %d samples)...", qPrintable(theName), samples);
+		if (pMESSAGES) qDebug("Processor [%s]: Plunging as much as possible (waiting for %d samples)...", qPrintable(name()), samples);
 		// Make any necessary updates...
 		//TODO: this state could be cached to potentially prevent plungeSync call
-		for (uint i = 0; i < (uint)theInputs.count(); i++)
+		for (uint i = 0; i < numInputs(); i++)
 			while (!dataReady[i] && thePlungersLeft[i] > 0)
 				if (theInputs[i]->plungeSync(samples))
 					dataReady[i] = true;
@@ -313,17 +310,17 @@ bool Processor::thereIsInputForProcessing(uint samples)
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
 			uint votesToContinue = 0;
-			for (uint i = 0; i < (uint)theInputs.count(); i++)
+			for (uint i = 0; i < numInputs(); i++)
 			{
-				if (pMESSAGES) qDebug("Processor [%s]: Input %d (DR: %d)...", qPrintable(theName), i, dataReady[i]);
+				if (pMESSAGES) qDebug("Processor [%s]: Input %d (DR: %d)...", qPrintable(name()), i, dataReady[i]);
 				// If there's a plunger left to be gotten and we have to process stuff before we can get it then exit.
 				// FIXME: check and maybe make safe plungeSync with thePlungerSystem locked.
 				if (dataReady[i]) votesToContinue++;
 				if (!thePlungersLeft[i] && thePlungersEnded) votesToEnd++;
 			}
-			if (pMESSAGES) qDebug("Processor [%s]: %d votes to end...", qPrintable(theName), votesToEnd);
-			if (theInputs.count() && votesToEnd == (uint)theInputs.count()) return false;
-			if (votesToContinue == (uint)theInputs.count()) return true;
+			if (pMESSAGES) qDebug("Processor [%s]: %d votes to end...", qPrintable(name()), votesToEnd);
+			if (theInputs.count() && votesToEnd == numInputs()) return false;
+			if (votesToContinue == numInputs()) return true;
 
 			if (MESSAGES) qDebug("Processor: Waiting for something to change...");
 			// Wait until something changes...
@@ -335,7 +332,7 @@ bool Processor::thereIsInputForProcessing(uint samples)
 	}
 }
 
-bool Processor::thereIsInputForProcessing()
+bool HeavyProcessor::thereIsInputForProcessing()
 {
 	QVector<uint> sready(numInputs());
 	specifyInputSpace(sready);
@@ -360,7 +357,7 @@ bool Processor::thereIsInputForProcessing()
 		if (MESSAGES) qDebug("Processor: Plunging as much as possible...");
 		// Make any necessary updates...
 		//TODO: this state could be cached to potentially prevent plungeSync call
-		for (uint i = 0; i < (uint)theInputs.count(); i++)
+		for (uint i = 0; i < numInputs(); i++)
 			while (!dataReady[i] && thePlungersLeft[i] > 0)
 				if (theInputs[i]->plungeSync(sready[i]))
 					dataReady[i] = true;
@@ -380,7 +377,7 @@ bool Processor::thereIsInputForProcessing()
 			if (MESSAGES) qDebug("Processor: Checking status...");
 			uint votesToEnd = 0;
 			uint votesToContinue = 0;
-			for (uint i = 0; i < (uint)theInputs.count(); i++)
+			for (uint i = 0; i < numInputs(); i++)
 			{
 				if (MESSAGES) qDebug("Processor: Input %d...", i);
 				// If there's a plunger left to be gotten and we have to process stuff before we can get it then exit.
@@ -389,9 +386,9 @@ bool Processor::thereIsInputForProcessing()
 				if (!thePlungersLeft[i] && thePlungersEnded) votesToEnd++;
 			}
 			if (MESSAGES) qDebug("Processor: %d votes to end...", votesToEnd);
-			if (theInputs.count() && votesToEnd == (uint)theInputs.count())
+			if (theInputs.count() && votesToEnd == numInputs())
 				return false;
-			if (votesToContinue == (uint)theInputs.count()) return true;
+			if (votesToContinue == numInputs()) return true;
 
 			if (MESSAGES) qDebug("Processor: Waiting for something to change...");
 			// Wait until something changes...
@@ -405,7 +402,7 @@ bool Processor::thereIsInputForProcessing()
 
 void Processor::plunge()
 {
-	if (pMESSAGES) qDebug("= Processor::plunge() [%s]", qPrintable(theName));
+	if (pMESSAGES) qDebug("= Processor::plunge() [%s]", qPrintable(name()));
 	if (numInputs())
 	{	qWarning("*** CRITICAL: Non-source Processors may not introduce plungers!");
 		return;
@@ -414,24 +411,6 @@ void Processor::plunge()
 		theOutputs[i]->plungerSent();
 	for (uint i = 0; i < (uint)theOutputs.count(); i++)
 		theOutputs[i]->pushPlunger();
-}
-
-void Processor::pause()
-{
-	QFastMutexLocker lock(&theStop);
-	if (!theStopping)
-	{	QFastMutexLocker lock(&thePause);
-		thePaused = true;
-	}
-}
-
-void Processor::unpause()
-{
-	thePause.lock();
-	theGuardsCrossed = 0;
-	thePaused = false;
-	theUnpaused.wakeAll();
-	thePause.unlock();
 }
 
 void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties &properties)
@@ -470,7 +449,7 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 	initFromProperties(p);
 	if (!theIOSetup)
 	{	qWarning("*** ERROR: Processor::init(): initFromProperties did not setup I/O. Cannot\n"
-				 "           continue. Culprit %s, named %s.", qPrintable(theType), qPrintable(theName));
+				 "           continue. Culprit %s, named %s.", qPrintable(theType), qPrintable(name));
 	}
 	else
 		theIsInitialised = true;
@@ -506,21 +485,16 @@ void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
 	theRedrawPeriod = redrawPeriod;
 }
 
-bool Processor::isRunning() const
-{
-	return (theFlags & Cooperative) ? QTask::isRunning() : QThread::isRunning();
-}
-
 bool Processor::go()
 {
-	if (MESSAGES) qDebug("> Processor::go() (name=%s)", qPrintable(theName));
+	if (MESSAGES) qDebug("> Processor::go() (name=%s)", qPrintable(name()));
 	if (!theIsInitialised)
 	{
-		if (MESSAGES) qDebug("= Processors::go() (name=%s) Not initialised!", qPrintable(theName));
+		if (MESSAGES) qDebug("= Processors::go() (name=%s) Not initialised!", qPrintable(name()));
 		QFastMutexLocker lock(&theErrorSystem);
 		theError = NotInitialised;
 		theErrorWritten.wakeAll();
-		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(theName));
+		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(name()));
 		return false;
 	}
 	assert(!isRunning());
@@ -532,11 +506,11 @@ bool Processor::go()
 	theCustomError = QString::null;
 	if (!(processorStarted() && processorStarted(theCustomError)))
 	{
-		if (MESSAGES) qDebug("= Processors::go() (name=%s) Unable to start!", qPrintable(theName));
+		if (MESSAGES) qDebug("= Processors::go() (name=%s) Unable to start!", qPrintable(name()));
 		QFastMutexLocker lock(&theErrorSystem);
 		theError = Custom;
 		theErrorWritten.wakeAll();
-		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(theName));
+		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(name()));
 		return false;
 	}
 	theAllDone = false;
@@ -546,212 +520,15 @@ bool Processor::go()
 		if (!theOutputs[i])
 			theOutputs[i] = new LxConnectionNull(this, i);
 
-	if (theFlags & Cooperative)
-		QTask::start();
-	else
-		QThread::start(NormalPriority);
-	if (MESSAGES) qDebug("< Processor::go() (name=%s)", qPrintable(theName));
+	start();
+
+	if (MESSAGES) qDebug("< Processor::go() (name=%s)", qPrintable(name()));
 	return true;
-}
-
-void Processor::processor()
-{
-}
-
-int Processor::canProcess()
-{
-	QVector<uint> mData(numInputs());
-	specifyInputSpace(mData);
-	QVector<uint> rData(numInputs());
-	requireInputSpace(rData);
-	QVector<uint> mSpace(numOutputs());
-	specifyOutputSpace(mSpace);
-
-	uint cycles = UINT_MAX;
-	for (uint i = 0; i < numOutputs(); i++)
-	{
-		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
-		if (bFree < mSpace[i])
-			return 0;
-		else if (mSpace[i] > 0)
-			cycles = min(cycles, bFree / mSpace[i]);
-	}
-	for (uint i = 0; i < numInputs(); i++)
-	{
-		if (!theInputs[i]->require(rData[i], mData[i]))
-			return 0;
-		cycles = min(cycles, max(1u, theInputs[i]->samplesReady() / mData[i]));
-	}
-	return cycles;
-}
-
-int Processor::doWork()
-{
-	if (thePaused)
-		return NoWork;
-	int ret = DidWork;
-	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
-	// Same with try/catch.
-	setThreadProcessor();
-	try
-	{
-		if (theError == Pending)
-		{
-			if (MESSAGES) qDebug("Processor::processCycle(): (%s) Checking outputs...", qPrintable(theName));
-			bool allOk = true;
-			for (uint i = 0; i < (uint)theOutputs.size(); i++)
-			{
-				assert(theOutputs[i]);
-				Connection::Tristate e = theOutputs[i]->isReadyYet();
-				if (e == Connection::Failed)
-				{	if (MESSAGES) qDebug("Processor::processCycle(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
-					QFastMutexLocker lock(&theErrorSystem);
-					theError = RecursiveFailure;
-					theErrorData = i;
-					theErrorWritten.wakeAll();
-					if (MESSAGES) qDebug("Processor::processCycle(): (%s) Error recorded. Bailing...", qPrintable(theName));
-					ret = WillNeverWork;
-					allOk = false;
-					break;
-				}
-				else if (e == Connection::Pending)
-					allOk = false;
-			}
-			if (allOk)
-			{
-				{
-					QFastMutexLocker lock(&theErrorSystem);
-					theError = NoError;
-					theErrorWritten.wakeAll();
-				}
-				for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
-					thePlungedInputs[i] = 0L;
-				if (!theInputs.count())
-					for (uint i = 0; i < (uint)theOutputs.count(); i++)
-						theOutputs[i]->startPlungers();
-			}
-		}
-		else if (theError == NoError)
-		{
-			guard();
-			ret = canProcess();
-			if (ret > 0)
-				ret = process();
-
-			if (ret == WillNeverWork)
-			{
-				if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
-				{	QFastMutexLocker lock(&theStop);
-					theAllDone = true;
-					theAllDoneChanged.wakeAll();
-				}
-
-				if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
-				for (uint i = 0; i < (uint)theOutputs.count(); i++)
-					theOutputs[i]->noMorePlungers();
-				if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
-				// We must remember that we started expecting a plunger that we never sent, so...
-				// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
-				for (uint i = 0; i < (uint)theOutputs.count(); i++)
-					theOutputs[i]->pushPlunger();
-			}
-		}
-	}
-	catch(BailException &) { ret = WillNeverWork; }
-	catch(int e) { ret = WillNeverWork; }
-	unsetThreadProcessor();
-	return ret;
-}
-
-void Processor::onStopped()
-{
-	processorStopped();
-}
-
-void Processor::run()
-{
-	setThreadProcessor();
-
-	if (!theTypesConfirmed)
-		return;
-
-	// Wait for them to confirm their own types before we start our processing/pushing data.
-	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting for outputs...", qPrintable(theName));
-	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		if (theOutputs[i])
-		{	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting on output %d...", qPrintable(theName), i);
-			if (!theOutputs[i]->waitUntilReady())
-			{	if (MESSAGES) qDebug("Processor::run(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(theName), i);
-				QFastMutexLocker lock(&theErrorSystem);
-				theError = RecursiveFailure;
-				theErrorData = i;
-				theErrorWritten.wakeAll();
-				if (MESSAGES) qDebug("Processor::run(): (%s) Error recorded. Bailing...", qPrintable(theName));
-				return;
-			}
-		}
-
-	if (MESSAGES) qDebug("Processor::run(): (%s) All tests completed. Releasing lock and starting.", qPrintable(theName));
-	theErrorSystem.lock();
-	theError = NoError;
-	theErrorWritten.wakeAll();
-	theErrorSystem.unlock();
-	for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
-		thePlungedInputs[i] = 0L;
-
-	// Execute processor with exception handler to bail it if it throws an int
-	try
-	{
-		if (!theInputs.count())
-			for (uint i = 0; i < (uint)theOutputs.count(); i++)
-				theOutputs[i]->startPlungers();
-
-		if (MESSAGES) qDebug("Processor[%s]: Plungers primed; starting task...", qPrintable(name()));
-
-		processor();
-
-		if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
-		{	QFastMutexLocker lock(&theStop);
-			theAllDone = true;
-			theAllDoneChanged.wakeAll();
-		}
-
-		if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
-		for (uint i = 0; i < (uint)theOutputs.count(); i++)
-			theOutputs[i]->noMorePlungers();
-		if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
-		// We must remember that we started expecting a plunger that we never sent, so...
-		// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
-		for (uint i = 0; i < (uint)theOutputs.count(); i++)
-			theOutputs[i]->pushPlunger();
-
-		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(theName));
-		while (1)
-		{	pause();
-			thereIsInputForProcessing();
-		}
-	}
-	catch(BailException &) {}
-	catch(int e) {}
-
-	if (MESSAGES) qDebug("Processor stopping (name=%s).", qPrintable(theName));
-
-	processorStopped();
-
-	if (MESSAGES) qDebug("Stopped.");
-}
-
-void Processor::wait()
-{
-	if (theFlags & Cooperative)
-		QTask::wait();
-	else
-		QThread::wait();
 }
 
 void Processor::stop()
 {
-	if (MESSAGES) qDebug("> Processor::stop() (name=%s)", qPrintable(theName));
+	if (MESSAGES) qDebug("> Processor::stop() (name=%s)", qPrintable(name()));
 
 	// This little mechanism is just in case two stop()s are called simultaneously.
 	bool justExit = false;
@@ -768,12 +545,7 @@ void Processor::stop()
 	// when theStopping was set to true and doesn't require all the trapdoor stuff. It
 	// doesn't make our next actions wrong, just redundant.
 
-	thePause.lock();
-	if (thePaused)
-	{	thePaused = false;
-		theUnpaused.wakeAll();
-	}
-	thePause.unlock();
+	getReadyForStopping();
 
 	for (uint i = 0; i < (uint)theInputs.size(); i++)
 		if (theInputs[i])
@@ -816,7 +588,7 @@ bool Processor::confirmTypes()
 		// refresh outputs in case of a reconnection
 		assert(theTypesCache.count() == (uint)theOutputs.size());
 		assert((uint)theSizesCache.count() == (uint)theOutputs.size());
-		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Enforcing outputs minima (from cache):", qPrintable(theName));
+		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Enforcing outputs minima (from cache):", qPrintable(name()));
 		for (uint i = 0; i != theTypesCache.count(); i++)
 			if (theOutputs[i])
 			{	if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
@@ -871,7 +643,7 @@ bool Processor::confirmTypes()
 	theTypesConfirmed = verifyAndSpecifyTypes(inTypes, theTypesCache);
 	if (!theTypesConfirmed)
 	{
-		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Invalid inputs (verifyAndSpecifyTypes() returned false)", qPrintable(theName));
+		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Invalid inputs (verifyAndSpecifyTypes() returned false)", qPrintable(name()));
 		QFastMutexLocker lock(&theErrorSystem);
 		theError = InvalidInputs;
 		theErrorWritten.wakeAll();
@@ -895,7 +667,7 @@ bool Processor::confirmTypes()
 	{	QVector<uint> sizes(theInputs.count());
 		specifyInputSpace(sizes);
 		int ii = 0;
-		if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Enforcing inputs minima:", qPrintable(theName));
+		if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Enforcing inputs minima:", qPrintable(name()));
 		for (QVector<xLConnection *>::Iterator i = theInputs.begin(); i != theInputs.end(); i++, ii++)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d : %d samples", qPrintable(name()), ii, sizes[ii]);
 			// We multiply it by 2 to get the maximum of 2xoutputMin and 2xinputMin.
@@ -909,7 +681,7 @@ bool Processor::confirmTypes()
 	specifyOutputSpace(theSizesCache);
 	if (theTypesConfirmed)
 	{	assert(theTypesCache.count() == (uint)theOutputs.count());
-		if (MESSAGES) qDebug("Processor::confirmInputTypes(): Enforcing outputs minima for %s:", qPrintable(theName));
+		if (MESSAGES) qDebug("Processor::confirmInputTypes(): Enforcing outputs minima for %s:", qPrintable(name()));
 		for (uint i = 0; i < theTypesCache.count(); i++)
 			if (theOutputs[i])
 			{
@@ -929,15 +701,15 @@ bool Processor::confirmTypes()
 void Processor::split(uint sourceIndex)
 {
 	if (isRunning())
-	{	qWarning("*** ERROR: Processor::split: %s[%d]: Cannot change connection states while running.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::split: %s[%d]: Cannot change connection states while running.", qPrintable(name()), sourceIndex);
 		return;
 	}
 	if (sourceIndex >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::split: %s[%d]: Invalid source index to connect from.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::split: %s[%d]: Invalid source index to connect from.", qPrintable(name()), sourceIndex);
 		return;
 	}
 	if (theOutputs[sourceIndex])
-	{	qWarning("*** ERROR: Processor::split: %s[%d]: Cannot split an output that is already connected.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::split: %s[%d]: Cannot split an output that is already connected.", qPrintable(name()), sourceIndex);
 		return;
 	}
 
@@ -947,15 +719,15 @@ void Processor::split(uint sourceIndex)
 void Processor::share(uint sourceIndex, uint bufferSize)
 {
 	if (isRunning())
-	{	qWarning("*** ERROR: Processor::share: %s[%d]: Cannot change connection states while running.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::share: %s[%d]: Cannot change connection states while running.", qPrintable(name()), sourceIndex);
 		return;
 	}
 	if (sourceIndex >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::share: %s[%d]: Invalid source index to connect from.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::share: %s[%d]: Invalid source index to connect from.", qPrintable(name()), sourceIndex);
 		return;
 	}
 	if (theOutputs[sourceIndex])
-	{	qWarning("*** ERROR: Processor::share: %s[%d]: Cannot share an output that is already connected.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::share: %s[%d]: Cannot share an output that is already connected.", qPrintable(name()), sourceIndex);
 		return;
 	}
 
@@ -969,7 +741,7 @@ bool Processor::readyRegisterIn(uint sinkIndex) const
 		return false;
 	}
 	if (theInputs[sinkIndex])
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot connect to an already connected input.", qPrintable(theName), sinkIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot connect to an already connected input.", qPrintable(name()), sinkIndex);
 		return false;
 	}
 	return true;
@@ -978,11 +750,11 @@ bool Processor::readyRegisterIn(uint sinkIndex) const
 const Connection *Processor::connect(uint sourceIndex, Sink *sink, uint sinkIndex, uint bufferSize)
 {
 	if (isRunning())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(name()), sourceIndex);
 		return 0;
 	}
 	if (sourceIndex >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(name()), sourceIndex);
 		return 0;
 	}
 
@@ -1002,7 +774,7 @@ const Connection *Processor::connect(uint sourceIndex, Sink *sink, uint sinkInde
 	}
 	else
 	{	qWarning("*** ERROR: Processor::connect: Output %s[%d] already connected and is neither split\n"
-			   "           nor share()d.", qPrintable(theName), sourceIndex);
+			   "           nor share()d.", qPrintable(name()), sourceIndex);
 		return 0;
 	}
 }
@@ -1010,11 +782,11 @@ const Connection *Processor::connect(uint sourceIndex, Sink *sink, uint sinkInde
 const Connection *Processor::connect(uint sourceIndex, const QString &sinkHost, uint sinkKey, const QString &sinkProcessorName, uint sinkIndex, uint bufferSize)
 {
 	if (isRunning())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(name()), sourceIndex);
 		return 0;
 	}
 	if (sourceIndex >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(theName), sourceIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(name()), sourceIndex);
 		return 0;
 	}
 
@@ -1027,7 +799,7 @@ const Connection *Processor::connect(uint sourceIndex, const QString &sinkHost, 
 
 		if (!s)
 		{	qWarning("*** ERROR: Processor::connect: %s[%d]: This output is already connected and not declared\n"
-				   "           split.", qPrintable(theName), sourceIndex);
+				   "           split.", qPrintable(name()), sourceIndex);
 			return 0;
 		}
 
@@ -1039,29 +811,19 @@ void Processor::disconnect(uint index)
 {
 	if (isRunning())
 	{	qWarning("*** WARNING: Processor::disconnect: %s[%d]: Disconnecting input on a running processor.\n"
-				 "             Stopping first.", qPrintable(theName), index);
+				 "             Stopping first.", qPrintable(name()), index);
 		stop();
 	}
 	if (index >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::disconnect: %s[%d]: Invalid output index to connect from.", qPrintable(theName), index);
+	{	qWarning("*** ERROR: Processor::disconnect: %s[%d]: Invalid output index to connect from.", qPrintable(name()), index);
 		return;
 	}
 	if (!theOutputs[index])
-	{	qWarning("*** ERROR: Processor::disconnect: %s[%d]: Output is not connected.", qPrintable(theName), index);
+	{	qWarning("*** ERROR: Processor::disconnect: %s[%d]: Output is not connected.", qPrintable(name()), index);
 		return;
 	}
 
 	delete theOutputs[index];
-}
-
-void Processor::waitUntilDone()
-{
-	if (!(theFlags & Guarded))
-		qWarning("*** WARNING: Processor::waitUntilDone(): I'll never exit, since I'm not a\n"
-				 "             Guarded Processor-derived object (name=%s).", qPrintable(name()));
-	QFastMutexLocker lock(&theStop);
-	while (!theAllDone)
-		theAllDoneChanged.wait(&theStop);
 }
 
 Connection::Tristate Processor::isGoingYet()
@@ -1142,7 +904,7 @@ void Processor::bail()
 
 void Processor::reset()
 {
-	if (MESSAGES) qDebug("> Processor::reset() [%s]", qPrintable(theName));
+	if (MESSAGES) qDebug("> Processor::reset() [%s]", qPrintable(name()));
 
 	thePlungersStarted = false;
 	thePlungersEnded = false;
@@ -1188,7 +950,7 @@ void Processor::setupIO(uint inputs, uint outputs)
 	else if (theMulti&In && theMulti&Const && !rinputs)
 	{
 		qWarning("*** Processor::setupIO() [%s]: You have specified 0 inputs in setupIO,"
-				 "    but the processor has fixed multiple inputs. SetupIO aborted.", qPrintable(theName));
+				 "    but the processor has fixed multiple inputs. SetupIO aborted.", qPrintable(name()));
 		return;
 	}
 	else if (!(theMulti&In && !(theMulti&Const)) && rinputs == Undefined)
@@ -1203,7 +965,7 @@ void Processor::setupIO(uint inputs, uint outputs)
 	else if (theMulti&Out && theMulti&Const && !routputs)
 	{
 		qWarning("*** Processor::setupIO() [%s]: You have specified 0 outputs in setupIO,"
-				 "    but the processor has fixed multiple outputs. SetupIO aborted.", qPrintable(theName));
+				 "    but the processor has fixed multiple outputs. SetupIO aborted.", qPrintable(name()));
 		return;
 	}
 	else if (!(theMulti&Out && !(theMulti&Const)) && routputs == Undefined)
@@ -1234,6 +996,249 @@ void Processor::setupIO(uint inputs, uint outputs)
 	thePlungedInputs.resize(rinputs);
 
 	theIOSetup = true;
+}
+
+HeavyProcessor::HeavyProcessor(QString const& _type, MultiplicityType _m, uint _flags):
+	QThread(0),
+	Processor(_type, _m),
+	thePaused(false),
+	theFlags(_flags)
+{
+}
+
+void HeavyProcessor::pause()
+{
+	QFastMutexLocker lock(&theStop);
+	if (!theStopping)
+	{	QFastMutexLocker lock(&thePause);
+		thePaused = true;
+	}
+}
+
+void HeavyProcessor::unpause()
+{
+	thePause.lock();
+	theGuardsCrossed = 0;
+	thePaused = false;
+	theUnpaused.wakeAll();
+	thePause.unlock();
+}
+
+void HeavyProcessor::getReadyForStopping()
+{
+	thePause.lock();
+	if (thePaused)
+	{	thePaused = false;
+		theUnpaused.wakeAll();
+	}
+	thePause.unlock();
+}
+
+void HeavyProcessor::run()
+{
+	setThreadProcessor();
+
+	if (!theTypesConfirmed)
+		return;
+
+	// Wait for them to confirm their own types before we start our processing/pushing data.
+	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting for outputs...", qPrintable(name()));
+	for (uint i = 0; i < (uint)theOutputs.size(); i++)
+		if (theOutputs[i])
+		{	if (MESSAGES) qDebug("Processor::run(): (%s) Waiting on output %d...", qPrintable(name()), i);
+			if (!theOutputs[i]->waitUntilReady())
+			{	if (MESSAGES) qDebug("Processor::run(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(name()), i);
+				QFastMutexLocker lock(&theErrorSystem);
+				theError = RecursiveFailure;
+				theErrorData = i;
+				theErrorWritten.wakeAll();
+				if (MESSAGES) qDebug("Processor::run(): (%s) Error recorded. Bailing...", qPrintable(name()));
+				return;
+			}
+		}
+
+	if (MESSAGES) qDebug("Processor::run(): (%s) All tests completed. Releasing lock and starting.", qPrintable(name()));
+	theErrorSystem.lock();
+	theError = NoError;
+	theErrorWritten.wakeAll();
+	theErrorSystem.unlock();
+	for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
+		thePlungedInputs[i] = 0L;
+
+	// Execute processor with exception handler to bail it if it throws an int
+	try
+	{
+		if (!theInputs.count())
+			for (uint i = 0; i < (uint)theOutputs.count(); i++)
+				theOutputs[i]->startPlungers();
+
+		if (MESSAGES) qDebug("Processor[%s]: Plungers primed; starting task...", qPrintable(name()));
+
+		processor();
+
+		if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
+		{	QFastMutexLocker lock(&theStop);
+			theAllDone = true;
+			theAllDoneChanged.wakeAll();
+		}
+
+		if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
+		for (uint i = 0; i < (uint)theOutputs.count(); i++)
+			theOutputs[i]->noMorePlungers();
+		if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
+		// We must remember that we started expecting a plunger that we never sent, so...
+		// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
+		for (uint i = 0; i < (uint)theOutputs.count(); i++)
+			theOutputs[i]->pushPlunger();
+
+		if (MESSAGES) qDebug("Processor[%s]: Finished. Holding until stop()ed...", qPrintable(name()));
+		while (1)
+		{	pause();
+			thereIsInputForProcessing();
+		}
+	}
+	catch(BailException &) {}
+	catch(int e) {}
+
+	if (MESSAGES) qDebug("Processor stopping (name=%s).", qPrintable(name()));
+
+	processorStopped();
+
+	if (MESSAGES) qDebug("Stopped.");
+}
+
+void HeavyProcessor::waitUntilDone()
+{
+	if (!(theFlags & Guarded))
+		qWarning("*** WARNING: Processor::waitUntilDone(): I'll never exit, since I'm not a\n"
+				 "             Guarded Processor-derived object (name=%s).", qPrintable(name()));
+	QFastMutexLocker lock(&theStop);
+	while (!theAllDone)
+		theAllDoneChanged.wait(&theStop);
+}
+
+CoProcessor::CoProcessor(QString const& _type, MultiplicityType _m):
+	Processor(_type, _m)
+{
+}
+
+void CoProcessor::waitUntilDone()
+{
+	//TODO
+}
+
+int CoProcessor::cyclesReady()
+{
+	QVector<uint> mData(numInputs());
+	specifyInputSpace(mData);
+	QVector<uint> rData(numInputs());
+	requireInputSpace(rData);
+	QVector<uint> mSpace(numOutputs());
+	specifyOutputSpace(mSpace);
+
+	uint cycles = UINT_MAX;
+	for (uint i = 0; i < numOutputs(); i++)
+	{
+		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
+		if (bFree < mSpace[i])
+			return 0;
+		else if (mSpace[i] > 0)
+			cycles = min(cycles, bFree / mSpace[i]);
+	}
+	for (uint i = 0; i < numInputs(); i++)
+	{
+		if (!theInputs[i]->require(rData[i], mData[i]))
+			return 0;
+		cycles = min(cycles, max(1u, theInputs[i]->samplesReady() / mData[i]));
+	}
+	return cycles;
+}
+
+int CoProcessor::doWork()
+{
+	int ret = DidWork;
+	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
+	// Same with try/catch.
+	setThreadProcessor();
+	try
+	{
+		if (theStopping)
+			ret = WillNeverWork;
+		else if (theError == Pending)
+		{
+			if (MESSAGES&&0) qDebug("Processor::processCycle(): (%s) Checking outputs...", qPrintable(name()));
+			bool allOk = true;
+			for (uint i = 0; i < (uint)theOutputs.size(); i++)
+			{
+				assert(theOutputs[i]);
+				Connection::Tristate e = theOutputs[i]->isReadyYet();
+				if (e == Connection::Failed)
+				{	if (MESSAGES) qDebug("Processor::processCycle(): (%s) Output %d had some error starting. Recursive failure imminent.", qPrintable(name()), i);
+					QFastMutexLocker lock(&theErrorSystem);
+					theError = RecursiveFailure;
+					theErrorData = i;
+					theErrorWritten.wakeAll();
+					if (MESSAGES) qDebug("Processor::processCycle(): (%s) Error recorded. Bailing...", qPrintable(name()));
+					ret = WillNeverWork;
+					allOk = false;
+					break;
+				}
+				else if (e == Connection::Pending)
+					allOk = false;
+			}
+			if (allOk)
+			{
+				{
+					QFastMutexLocker lock(&theErrorSystem);
+					theError = NoError;
+					theErrorWritten.wakeAll();
+				}
+				for (uint i = 0; i < (uint)thePlungedInputs.count(); i++)
+					thePlungedInputs[i] = 0L;
+				if (!theInputs.count())
+					for (uint i = 0; i < (uint)theOutputs.count(); i++)
+						theOutputs[i]->startPlungers();
+			}
+		}
+		else if (theError == NoError)
+		{
+			ret = canProcess();
+			if (ret > 0)
+				ret = cyclesReady();
+			if (ret > 0)
+			{
+				theGuardsCrossed++;
+				ret = process();
+			}
+
+			if (ret == WillNeverWork)
+			{
+				if (MESSAGES) qDebug("Processor[%s]: Task done.", qPrintable(name()));
+				{	QFastMutexLocker lock(&theStop);
+					theAllDone = true;
+					theAllDoneChanged.wakeAll();
+				}
+
+				if (MESSAGES) qDebug("Processor[%s]: Informing of no more plungers...", qPrintable(name()));
+				for (uint i = 0; i < (uint)theOutputs.count(); i++)
+					theOutputs[i]->noMorePlungers();
+				if (MESSAGES) qDebug("Processor[%s]: Dispatching last plunger...", qPrintable(name()));
+				// We must remember that we started expecting a plunger that we never sent, so...
+				// Send plunger without a corresponding plungerSent(), in order to make it symmetrical
+				for (uint i = 0; i < (uint)theOutputs.count(); i++)
+					theOutputs[i]->pushPlunger();
+			}
+		}
+	}
+	catch(BailException &) { ret = WillNeverWork; }
+	catch(int e) { ret = WillNeverWork; }
+	unsetThreadProcessor();
+	return ret;
+}
+
+void CoProcessor::onStopped()
+{
+	processorStopped();
 }
 
 }

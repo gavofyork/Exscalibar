@@ -21,7 +21,7 @@ using namespace Geddei;
 #include "signaltypes.h"
 using namespace SignalTypes;
 
-class MySource: public Processor
+class MySource: public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -38,10 +38,10 @@ class MySource: public Processor
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 	virtual void specifyOutputSpace(QVector<uint> &o) { o[0] = 10; }
 public:
-	MySource() : Processor("MySource") {}
+	MySource(): HeavyProcessor("MySource") {}
 };
 
-class MySink: public Processor
+class MySink: public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -58,10 +58,10 @@ class MySink: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
-	MySink() : Processor("MySink", NotMulti, Guarded) {}
+	MySink(): HeavyProcessor("MySink", NotMulti, Guarded) {}
 };
 
-class LatencySource: public Processor
+class LatencySource: public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -75,10 +75,10 @@ class LatencySource: public Processor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out) { out[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 public:
-	LatencySource() : Processor("LatencySource") {}
+	LatencySource(): HeavyProcessor("LatencySource") {}
 };
 
-class LatencySink: public Processor
+class LatencySink: public HeavyProcessor
 {
 	int theElapsedSum, theSamples;
 	virtual void processor()
@@ -97,7 +97,7 @@ class LatencySink: public Processor
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
 	float latency() const { return float(theElapsedSum) / float(theSamples); }
-	LatencySink() : Processor("LatencySink", NotMulti, Guarded) {}
+	LatencySink(): HeavyProcessor("LatencySink", NotMulti, Guarded) {}
 };
 
 class PassThrough: public SubProcessor

@@ -50,7 +50,8 @@ class Sink;
 class xLConnection: virtual public Connection
 {
 	friend class Processor;
-	friend class DomProcessor;
+	friend class HeavyProcessor;
+	friend class CoProcessor;
 
 protected:
 	Sink *theSink;  ///< Sink object that anchors thit end of the connection.

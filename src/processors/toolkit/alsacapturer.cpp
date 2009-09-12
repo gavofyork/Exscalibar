@@ -38,7 +38,7 @@ using namespace Geddei;
 #include "wave.h"
 using namespace SignalTypes;
 
-class ALSACapturer: public Processor
+class ALSACapturer: public CoProcessor
 {
 	QString theDevice;
 	uint theChannels;
@@ -72,7 +72,7 @@ class ALSACapturer: public Processor
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSACapturer() : Processor("ALSACapturer", NotMulti, Cooperative), thePcmHandle(0) {}
+	ALSACapturer(): CoProcessor("ALSACapturer", NotMulti), thePcmHandle(0) {}
 };
 
 bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)

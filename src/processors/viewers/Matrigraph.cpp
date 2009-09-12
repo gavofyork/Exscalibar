@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@kde.org			                                               *
+ *   gav@kde.org                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -10,22 +10,22 @@
 
 #define __GEDDEI_BUILD
 
+#include <QRgb>
+
 #include "qfactoryexporter.h"
 #include "buffer.h"
 #include "processor.h"
 using namespace Geddei;
 
-#include "spectrum.h"
+#include "matrix.h"
 using namespace SignalTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
  */
-class Spectroscope: public CoProcessor
+class Matrigraph: public CoProcessor
 {
-	QVector<float> m_last;
-	float m_minAmp;
-	float m_deltaAmp;
+	QImage m_display;
 
 	virtual int process();
 	virtual void processorStopped();
@@ -33,58 +33,55 @@ class Spectroscope: public CoProcessor
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = 1; }
 
 public:
-	Spectroscope(): CoProcessor("Spectroscope", NotMulti) {}
+	Matrigraph(): CoProcessor("Matrigraph", NotMulti) {}
 };
 
-int Spectroscope::process()
+int Matrigraph::process()
 {
-	input(0).readSample().copyTo(m_last.data());
+	BufferData d = input(0).readSample();
+	for (int y = 0; y < m_display.height(); y++)
+		for (int x = 0; x < m_display.width(); x++)
+			m_display.setPixel(QPoint(x, y), (uchar)(d[x + y * m_display.height()] * 255));
 	return DidWork;
 }
 
-bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
+bool Matrigraph::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	_p.setRenderHint(QPainter::Antialiasing, false);
-	_p.translate(0, _s.height());
-	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
-	_p.drawLine(0, 0, _s.width(), 0);
 	if (isRunning())
 	{
-		_p.scale(_s.width() / m_last.size(), 1);
-		_p.setPen(QPen(Qt::black, _s.width() > m_last.size() ? 1 : 0));
-		for (int i = 0; i < m_last.size(); i++)
-			_p.drawLine(QLineF(i, 0, i, -(m_last[i] - m_minAmp) * m_deltaAmp * _s.height()));
+		_p.setRenderHint(QPainter::Antialiasing, false);
+		_p.scale(_s.width() / m_display.width(), _s.height() / m_display.height());
+		_p.drawImage(0, 0, m_display);
 	}
 	return true;
 }
 
-void Spectroscope::processorStopped()
+void Matrigraph::processorStopped()
 {
 }
 
-bool Spectroscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Matrigraph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
 {
-	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
+	if (_inTypes.count() != 1 || !_inTypes[0].isA<Matrix>())
 		return false;
-	m_minAmp = _inTypes[0].asA<Spectrum>().minAmplitude();
-	m_deltaAmp = _inTypes[0].asA<Spectrum>().maxAmplitude() - m_minAmp;
-	m_last.resize(_inTypes[0].asA<Spectrum>().size());
+	m_display = QImage(QSize(_inTypes[0].asA<Matrix>().width(), _inTypes[0].asA<Matrix>().height()), QImage::Format_Indexed8);
+	for (int i = 0; i < 256; i++)
+		m_display.setColor(i, qRgb(i, i, i));
 	return true;
 }
 
-void Spectroscope::initFromProperties(Properties const& _p)
+void Matrigraph::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	this->setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
+	this->setupVisual(128, 128, 1000 / max(1, _p["Refresh Frequency"].toInt()));
 }
 
-PropertiesInfo Spectroscope::specifyProperties() const
+PropertiesInfo Matrigraph::specifyProperties() const
 {
 	return PropertiesInfo("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).");
 }
 
-EXPORT_CLASS(Spectroscope, 0,1,0, Processor);
-
-
+EXPORT_CLASS(Matrigraph, 0,1,0, Processor);

@@ -33,7 +33,7 @@
 
 #include <exscalibar.h>
 
-#define SINGLE_THREADED 1
+//#define SINGLE_THREADED 1
 
 #ifdef SINGLE_THREADED
 

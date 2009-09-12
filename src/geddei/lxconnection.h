@@ -48,6 +48,8 @@ class Source;
 class LxConnection: virtual public Connection, public ScratchOwner
 {
 	friend class Processor;
+	friend class HeavyProcessor;
+	friend class CoProcessor;
 	friend class DomProcessor;
 	friend class Splitter;
 

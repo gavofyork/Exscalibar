@@ -143,11 +143,7 @@ class DLLEXPORT BailException
  * values for those properties. It may specify a visual size and method for
  * drawing in a GUI.
  */
-/*class DLLEXPORT CoProcessor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
-{
-};*/
-
-class DLLEXPORT Processor: protected QThread, protected QTask, virtual public Source, virtual public Sink, public MultiSource, public MultiSink
+class DLLEXPORT Processor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
 {
 public:
 	/**
@@ -167,11 +163,6 @@ public:
 		NotStarted ///< Internal - Indicated the operation has yet to start.
 	};
 
-	enum
-	{	Guarded = 1, ///< Indicates a subclass is able to finish when input EOS is given.
-		Cooperative = 2 ///< Indicates the processor can exist as a fibre rather than a thread.
-	};
-
 private:
 	/**
 	 * Has to be of type Processor ** since it takes ownership of and deletes the data at
@@ -183,7 +174,6 @@ private:
 	/** Basic properties. */
 	QString theName;
 	const QString theType;
-	uint theFlags;
 	int theWidth, theHeight, theRedrawPeriod;
 	ProcessorGroup *theGroup;
 	//@}
@@ -204,6 +194,11 @@ protected:
 	 * manner.
 	 */
 	void bail();
+
+	virtual void start() {}
+	virtual void wait() {}
+
+	virtual void getReadyForStopping() {}
 
 	/** @internal
 	 * Override to execute useful commands for when the processor should be stopped.
@@ -233,18 +228,11 @@ private:
 	bool theTypesConfirmed;
 	//@}
 
-	//@{
-	/** Pausing subsystem. */
-	mutable QFastMutex thePause;
-	QFastWaitCondition theUnpaused;
-	bool thePaused;
-	mutable uint theGuardsCrossed;
 protected:
-	bool guard();
+	mutable uint theGuardsCrossed;
 public:
 	uint guardsCrossed() const { return theGuardsCrossed; }
 private:
-	//@}
 
 	//@{
 	/** Error subsystem. */
@@ -254,10 +242,6 @@ private:
 	int theErrorData;
 	QString theCustomError;
 	//@}
-
-	/** Thread subsystem. @sa threadProcessor() */
-	virtual void run();
-	virtual void onStopped();
 
 public:
 	/** @internal
@@ -310,6 +294,8 @@ private:
 	friend class LRConnection;
 	friend class xLConnectionReal;
 	friend class MLConnection;
+	friend class HeavyProcessor;
+	friend class CoProcessor;
 	QVector<uint> thePlungedInputs;
 	mutable QFastMutex thePlungerSystem;
 	QVector<uint> thePlungersLeft, thePlungersNotified;
@@ -342,6 +328,7 @@ private:
 
 	//@{
 	/** Reimplementations from Source and Sink. */
+protected:
 	virtual void checkExit();
 	//@}
 
@@ -403,45 +390,6 @@ protected:
 	void plunge();
 
 	/**
-	 * Blocks until either:
-	 *
-	 * 1) There will never again be enough input for any processing. In this
-	 * instance, it returns false.
-	 *
-	 * 2) There are at least @a samples samples ready for reading immediately.
-	 * It guarantees that reading this data will not require any more plunging.
-	 * In this case, true is returned.
-	 *
-	 * If there are any plungers to be read immediately, then they are read.
-	 * This is only the case if the next read would cause a plunger to be read.
-	 *
-	 * @param samples The number of samples that there should be on an input
-	 * for reading in order for this to exit true.
-	 * @return true iff a read of @a samples will not block or cause a plunger
-	 * to be read, false iff no more data can *ever* be read.
-	 */
-	bool thereIsInputForProcessing(uint samples);
-
-	/** @overload
-	 * Blocks until either:
-	 *
-	 * 1) There will never again be enough input for any processing. In this
-	 * instance, it returns false.
-	 *
-	 * 2) There are at least specifyInputSpace() samples (for each input)ready
-	 * for reading immediately. It guarantees that reading this data will not
-	 * require any more plunging. In this case, true is returned.
-	 *
-	 * If there are any plungers to be read immediately, then they are read.
-	 * This is only the case if the next read would cause a plunger to be read.
-	 *
-	 * @return true iff a read of @a samples will not block or cause a plunger
-	 * to be read, false iff no more data can *ever* be read.
-	 */
-	bool thereIsInputForProcessing();
-	virtual int canProcess();
-
-	/**
 	 * Call this from initFromProperties to initialise I/O connections.
 	 *
 	 * @param inputs The number of inputs this Processor should have. May be Undefined iff
@@ -477,18 +425,6 @@ protected:
 	 */
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
-
-	/**
-	 * Reimplement to control execution to do processing.
-	 * Use Buffer's waitFor methods to control flow for theInputs/theOutputs.
-	 * This doesn't ever have to return explicitly - typically a
-	 * @code while (thereIsInputForProcessing()) {} @endcode
-	 * loop will do the job fine, though you're free to implement anything you like.
-	 * If there is a main loop, you should add thereIsInputForProcessing() as a guard upon it (it will,
-	 * however, always return true).
-	 */
-	virtual void processor();
-	virtual int process() { return WillNeverWork; }
 
 	/**
 	 * Reimplement to initialise any stuff that processor may need to be open/
@@ -650,7 +586,7 @@ protected:
 	 * @param multi Declares the type of multiplicity this Processor offers. Defaults to
 	 * NotMulti.
 	 */
-	Processor(const QString &type, const MultiplicityType multi = NotMulti, uint flags = 0);
+	Processor(const QString &type, const MultiplicityType multi = NotMulti);
 
 	//@}
 
@@ -662,12 +598,6 @@ public:
 	 * They are generally not used when coding a new type of Processor class.
 	 */
 	//@{
-
-	/**
-	 * Do computation, but do not block.
-	 */
-	int doWork();
-	void wait();
 
 	/**
 	 * Puts the Processor into a gvien ProcessorGroup.
@@ -854,6 +784,8 @@ public:
 	 */
 	bool go();
 
+	virtual bool isRunning() const { return false; }
+
 	/**
 	 * Blocks until processor is active, and gives error information if processor startup
 	 * failed along the way.
@@ -877,7 +809,7 @@ public:
 	 * case, the object is in a "zombie" state. While not yet stopped, it will
 	 * never again process any data.
 	 */
-	void waitUntilDone();
+	virtual void waitUntilDone() {}
 
 	/**
 	 * Get the last error (if any) from starting up.
@@ -919,7 +851,7 @@ public:
 	 *
 	 * @sa unpause() paused()
 	 */
-	void pause();
+	virtual void pause() {}
 
 	/**
 	 * Resumes the processor. This call *must* be called by the same thread as
@@ -929,7 +861,7 @@ public:
 	 *
 	 * @sa pause() paused()
 	 */
-	void unpause();
+	virtual void unpause() {}
 
 	/**
 	 * Get the pause state of the Processor.
@@ -938,16 +870,8 @@ public:
 	 *
 	 * @sa pause() unpause()
 	 */
-	bool paused() const { QFastMutexLocker lock(&thePause); return thePaused; }
+	virtual bool paused() const { return false; }
 
-	/**
-	 * Get the pause state of the Processor.
-	 *
-	 * @return true is the processor is currently paused, false if not.
-	 *
-	 * @sa pause() unpause()
-	 */
-	bool isRunning() const;
 
 	/**
 	 * Make the thing stop doing stuff. i.e. Cancels processor thread.
@@ -1043,6 +967,114 @@ public:
 	 * Simple, virtual, destructor.
 	 */
 	virtual ~Processor();
+};
+
+class DLLEXPORT CoProcessor: public Processor, protected QTask
+{
+public:
+	CoProcessor(const QString &type, const MultiplicityType multi = NotMulti);
+
+	virtual bool isRunning() const { return QTask::isRunning(); }
+	virtual void waitUntilDone();
+
+protected:
+	virtual int process() { return WillNeverWork; }
+	virtual int canProcess() { return CanWork; }
+
+private:
+	virtual void start() { QTask::start(); }
+	virtual void wait() { QTask::wait(); }
+
+	virtual int doWork();
+	virtual void onStopped();
+
+	virtual int cyclesReady();
+};
+
+class DLLEXPORT HeavyProcessor: protected QThread, public Processor
+{
+public:
+	enum
+	{	Guarded = 1 ///< Indicates a subclass is able to finish when input EOS is given.
+	};
+
+	HeavyProcessor(const QString &type, const MultiplicityType multi = NotMulti, uint flags = 0);
+
+	virtual bool isRunning() const { return QThread::isRunning(); }
+	virtual void waitUntilDone();
+
+	virtual void pause();
+	virtual void unpause();
+	virtual bool paused() const { QFastMutexLocker lock(&thePause); return thePaused; }
+
+protected:
+	/**
+	 * Reimplement to control execution to do processing.
+	 * Use Buffer's waitFor methods to control flow for theInputs/theOutputs.
+	 * This doesn't ever have to return explicitly - typically a
+	 * @code while (thereIsInputForProcessing()) {} @endcode
+	 * loop will do the job fine, though you're free to implement anything you like.
+	 * If there is a main loop, you should add thereIsInputForProcessing() as a guard upon it (it will,
+	 * however, always return true).
+	 */
+	virtual void processor() {}
+
+	/**
+	 * Blocks until either:
+	 *
+	 * 1) There will never again be enough input for any processing. In this
+	 * instance, it returns false.
+	 *
+	 * 2) There are at least @a samples samples ready for reading immediately.
+	 * It guarantees that reading this data will not require any more plunging.
+	 * In this case, true is returned.
+	 *
+	 * If there are any plungers to be read immediately, then they are read.
+	 * This is only the case if the next read would cause a plunger to be read.
+	 *
+	 * @param samples The number of samples that there should be on an input
+	 * for reading in order for this to exit true.
+	 * @return true iff a read of @a samples will not block or cause a plunger
+	 * to be read, false iff no more data can *ever* be read.
+	 */
+	bool thereIsInputForProcessing(uint samples);
+
+	/** @overload
+	 * Blocks until either:
+	 *
+	 * 1) There will never again be enough input for any processing. In this
+	 * instance, it returns false.
+	 *
+	 * 2) There are at least specifyInputSpace() samples (for each input)ready
+	 * for reading immediately. It guarantees that reading this data will not
+	 * require any more plunging. In this case, true is returned.
+	 *
+	 * If there are any plungers to be read immediately, then they are read.
+	 * This is only the case if the next read would cause a plunger to be read.
+	 *
+	 * @return true iff a read of @a samples will not block or cause a plunger
+	 * to be read, false iff no more data can *ever* be read.
+	 */
+	bool thereIsInputForProcessing();
+
+	bool guard();
+
+private:
+	virtual void start() { QThread::start(); }
+	virtual void wait() { QThread::wait(); }
+	virtual void getReadyForStopping();
+
+	/** Thread subsystem. @sa threadProcessor() */
+	virtual void run();
+
+	//@{
+	/** Pausing subsystem. */
+	mutable QFastMutex thePause;
+	QFastWaitCondition theUnpaused;
+	bool thePaused;
+	//@}
+
+	uint theFlags;
 };
 
 }

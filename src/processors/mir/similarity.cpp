@@ -25,7 +25,7 @@ using namespace Geddei;
 #include "matrix.h"
 using namespace SignalTypes;
 
-class Similarity : public Processor
+class Similarity : public HeavyProcessor
 {
 	uint theSize, theStep;
 
@@ -52,7 +52,7 @@ protected:
 	virtual void specifyInputSpace(QVector<uint> &samples) { samples[0] = theSize; }
 	virtual void specifyOutputSpace(QVector<uint> &samples) { samples[0] = 1; }
 public:
-	Similarity() : Processor("Similarity") {}
+	Similarity(): HeavyProcessor("Similarity") {}
 };
 
 void Similarity::processor()

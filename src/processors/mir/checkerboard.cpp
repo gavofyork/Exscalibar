@@ -26,7 +26,7 @@ using namespace Geddei;
 #include "matrix.h"
 using namespace SignalTypes;
 
-class Checkerboard : public Processor
+class Checkerboard : public HeavyProcessor
 {
 	uint theSize;
 	float *theBoard;
@@ -43,7 +43,7 @@ public:
 	Checkerboard();
 };
 
-Checkerboard::Checkerboard() : Processor("Checkerboard")
+Checkerboard::Checkerboard(): HeavyProcessor("Checkerboard")
 {
 	theBoard = 0;
 }

@@ -103,7 +103,7 @@ public:
 	QVariant get(const QString &key) const { return theData[key]; }
 
 	Properties stashed() const { Properties ret; foreach (QString k, keys()) ret[":" + k] = get(k); return ret; }
-	Properties unstashed() { Properties ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret[k.mid(1)] = get(k); remove(k); } return ret; }
+	Properties unstash() { Properties ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret[k.mid(1)] = get(k); remove(k); } return ret; }
 	Properties operator+(Properties const& _p) const { Properties ret(_p); ret.theData.unite(theData); return ret; }
 	void defaultFrom(const PropertiesInfo& _i);
 
@@ -263,6 +263,7 @@ public:
 	PropertiesInfo stashed() const { PropertiesInfo ret; foreach (QString k, keys()) ret.set(":" + k, Properties::get(k), theInfo[k].description); return ret; }
 	PropertiesInfo unstashed() { PropertiesInfo ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret.set(k.mid(1), Properties::get(k), theInfo[k].description); remove(k); } return ret; }
 	PropertiesInfo destash() { PropertiesInfo ret = *this; (*this) = ret.unstashed(); return ret; }
+	PropertiesInfo operator+(PropertiesInfo const& _p) const { PropertiesInfo ret(_p); ret.Properties::operator+(*this); ret.theInfo.unite(theInfo); return ret; }
 
 	void remove(QString const& _k) { Properties::remove(_k); theInfo.remove(_k); }
 

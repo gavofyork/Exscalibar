@@ -10,7 +10,7 @@ using namespace Geddei;
 #include "wave.h"
 using namespace SignalTypes;
 
-class Trivial: public Processor
+class Trivial: public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -25,10 +25,10 @@ class Trivial: public Processor
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
-	public: Trivial() : Processor("Trivial") {}
+	public: Trivial(): HeavyProcessor("Trivial") {}
 };
 
-class Trivial2: public Processor
+class Trivial2: public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -37,7 +37,7 @@ class Trivial2: public Processor
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
-	public: Trivial2() : Processor("Trivial2") {}
+	public: Trivial2(): HeavyProcessor("Trivial2") {}
 };
 
 class Multiply: public SubProcessor

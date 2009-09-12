@@ -97,9 +97,20 @@ Processor* DomProcessorItem::reconstructProcessor()
 		return 0;
 	Processor* p = new DomProcessor(cs);
 	PropertiesInfo pi = p->properties();
+	foreach (QString k, pi.keys())
+		qDebug() << k << pi.defaultValue(k);
+	qDebug() << "X";
 	m_properties.defaultFrom(pi.destash());
+	foreach (QString k, pi.keys())
+		qDebug() << k << pi.defaultValue(k);
+	qDebug() << "Y";
 	foreach (SubProcessorItem* i, ordered())
+	{
 		i->m_properties.defaultFrom(pi.destash());
+		foreach (QString k, pi.keys())
+			qDebug() << k << pi.defaultValue(k);
+		qDebug() << "Z";
+	}
 	return p;
 }
 
@@ -145,6 +156,8 @@ SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type,
 SubProcessor* SubProcessorItem::subProcessor() const
 {
 	QList<SubProcessor*> cs;
+	if (!domProcessor())
+		return 0;
 	SubProcessor* cur = domProcessor()->primary();
 	int i = m_index;
 	forever

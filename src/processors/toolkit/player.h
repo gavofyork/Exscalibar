@@ -67,33 +67,39 @@ typedef struct bstdfile bstdfile_t;
  * result in higher throughput, but will increase the minimum buffer size and
  * the overall latency of the system.
  */
-class DLLEXPORT Player: public Processor
+class DLLEXPORT Player: public CoProcessor
 {
-	QString thePath;
-	enum { NoMode, ModeSF, ModeVF, ModeMAD } theMode;
+	QFile m_file;
+	enum { NoMode, ModeSF, ModeVF, ModeMAD } m_mode;
 
 #ifdef HAVE_SNDFILE
-	SNDFILE *theSndFile;
-	SF_INFO m_sfinfo;
-	QVector<float> m_buffer;
+	SNDFILE*				m_sndFile;
+	SF_INFO					m_sfinfo;
+	QVector<float>			m_buffer;
 #endif
 #ifdef HAVE_VORBISFILE
-	OggVorbis_File theVorbisFile;
+	OggVorbis_File			m_vorbisFile;
 #endif
 #ifdef HAVE_MAD
-	FILE *theMadFile;
-	struct mad_stream	Stream;
-	struct mad_frame	Frame;
-	struct mad_synth	Synth;
-	mad_timer_t			Timer;
-	bstdfile_t			*BstdFile;
+	FILE*					m_madFile;
+	struct mad_stream		m_stream;
+	struct mad_frame		m_frame;
+	struct mad_synth		m_synth;
+	mad_timer_t				m_timer;
+	bstdfile_t*				m_bStdFile;
+	uint					m_inputBufferSize;
+	QVector<unsigned char>	m_inputBuffer;
+	unsigned char*			m_guardPointer;
 #endif
-	uint theChannels, theRate, theLength, thePosition, theReadFrames;
+	uint m_channels;
+	uint m_rate;
+	uint m_length;
+	uint m_position;
+	uint m_readFrames;
 
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual bool processorStarted();
 	virtual int process();
-	virtual void processor();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;

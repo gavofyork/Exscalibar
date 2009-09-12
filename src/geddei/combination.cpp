@@ -50,14 +50,14 @@ void Combination::processChunks(const BufferDatas &in, BufferDatas &out, const u
 
 PropertiesInfo Combination::specifyProperties() const
 {
-	return PropertiesInfo(theX->specifyProperties())(theY->specifyProperties());
+	return theX->specifyProperties() + theY->specifyProperties().stashed();
 }
 
-void Combination::initFromProperties(const Properties &p)
+void Combination::initFromProperties(const Properties& _p)
 {
-	// needs some way to deliver to either: namespaces/numeric ids?
+	Properties p = _p;
+	theY->initFromProperties(p.unstash());
 	theX->initFromProperties(p);
-	theY->initFromProperties(p);
 	if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
 	{
 		setupIO(theX->theNumInputs, theY->theNumOutputs, theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);

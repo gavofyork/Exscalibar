@@ -27,7 +27,7 @@ namespace Geddei
 {
 
 DomProcessor::DomProcessor(SubProcessor *primary):
-	Processor("DomProcessor", primary->theMulti, Cooperative),
+	CoProcessor("DomProcessor", primary->theMulti),
 	thePrimary(primary),
 	theCurrentIns(0),
 	theCurrentOuts(0)
@@ -36,7 +36,7 @@ DomProcessor::DomProcessor(SubProcessor *primary):
 }
 
 DomProcessor::DomProcessor(const QString &primaryType):
-	Processor("DomProcessor", (thePrimary = SubProcessorFactory::create(primaryType))->theMulti, Cooperative),
+	CoProcessor("DomProcessor", (thePrimary = SubProcessorFactory::create(primaryType))->theMulti),
 	theCurrentIns(0),
 	theCurrentOuts(0)
 {
@@ -99,6 +99,9 @@ void DomProcessor::haveStoppedNow()
 	if (MESSAGES) qDebug("DomProcessor[%s]: Stopping workers...", qPrintable(theName));
 	foreach (DxCoupling* w, theWorkers)
 		w->stop();
+
+	theCurrentIns.nullify();
+	theCurrentOuts.nullify();
 }
 
 void DomProcessor::specifyInputSpace(QVector<uint> &samples)
@@ -173,7 +176,7 @@ int DomProcessor::canProcess()
 {
 	if (!serviceSubs())
 		return NoWork;
-	return Processor::canProcess();
+	return CanWork;
 }
 
 int DomProcessor::process()
@@ -182,7 +185,7 @@ int DomProcessor::process()
 	for (uint i = 0; i < numInputs(); i++)
 		samples = min(samples, input(i).samplesReady());
 
-	if (samples != theWantSamples)
+	if (samples < theWantSamples)
 	{
 		// stream discontinuity.
 		uint chunks = (samples - theSamplesIn) / theSamplesStep + 1;
@@ -252,7 +255,7 @@ PropertiesInfo DomProcessor::specifyProperties() const
 void DomProcessor::initFromProperties(const Properties &properties)
 {
 	Properties tp = properties;
-	Properties wp = tp.unstashed();
+	Properties wp = tp.unstash();
 	theWeighting = max(0., min(1., tp["Latency/Throughput"].toDouble()));
 	theAlterBuffer = tp["Alter Buffer"].toBool();
 	theOptimalThroughput = tp["Optimal Throughput"].toInt();

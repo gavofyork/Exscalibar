@@ -36,7 +36,7 @@ using namespace SignalTypes;
 
 inline float abs(float a) { return a < 0 ? -a : a; }
 
-class PlungeGenerator : public Processor
+class PlungeGenerator : public HeavyProcessor
 {
 	virtual void processor()
 	{
@@ -51,10 +51,10 @@ class PlungeGenerator : public Processor
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 
 public:
-	PlungeGenerator() : Processor("PlungeGenerator") {}
+	PlungeGenerator(): HeavyProcessor("PlungeGenerator") {}
 };
 
-class PlungeDetector : public Processor
+class PlungeDetector : public HeavyProcessor
 {
 	void processor()
 	{
@@ -72,7 +72,7 @@ class PlungeDetector : public Processor
 		cout << endl;
 	}
 public:
-	PlungeDetector() : Processor("PlungeDetector", NotMulti, true) {}
+	PlungeDetector(): HeavyProcessor("PlungeDetector", NotMulti, true) {}
 };
 
 class Add: public SubProcessor

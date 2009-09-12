@@ -36,23 +36,23 @@
 /** @ingroup Toolkit
  * @author Gav Wood <gav@kde.org>
  * @brief Multiple wav-file playing/queuing source Processor object.
- * 
+ *
  * This plays a series of wav files given though the QStringList property
  * "Filenames".
- * 
+ *
  * The signal of each file will be appended with a plunger. This allows another
  * class to count the plungers and determine the correct file title for any
  * given section of signal with the getTitle() method.
- * 
+ *
  * All files should be the same sampling frequency, number of channels and bits
  * per sample. Those not the same as the first in the list will be ignored.
- * 
+ *
  * A further property, "Frames" determines how many samples of the files are
  * pushed to the output port per iteration. A higher value will typically
  * result in higher throughput, but will increase the minimum buffer size and
  * the overall latency of the system.
  */
-class DLLEXPORT MultiPlayer: public Processor
+class DLLEXPORT MultiPlayer: public HeavyProcessor
 {
 	QStringList thePaths;
 	SNDFILE *theFile;
@@ -72,7 +72,7 @@ class DLLEXPORT MultiPlayer: public Processor
 public:
 	/**
 	 * Get the title of the file of given index.
-	 * 
+	 *
 	 * @param index The index of the file whose title you wish to attain.
 	 * @return The title of the track with index @a index (starting at 0).
 	 */

@@ -36,7 +36,7 @@ using namespace Geddei;
 #include "wave.h"
 using namespace SignalTypes;
 
-class JackCapturer: public Processor
+class JackCapturer: public HeavyProcessor
 {
 	QFastWaitCondition theTransfer;
 	QFastMutex theTransferLock;
@@ -87,7 +87,7 @@ class JackCapturer: public Processor
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 
 public:
-	JackCapturer(): Processor("JackCapturer", NotMulti, Guarded) {}
+	JackCapturer(): HeavyProcessor("JackCapturer", NotMulti, Guarded) {}
 };
 
 PropertiesInfo JackCapturer::specifyProperties() const

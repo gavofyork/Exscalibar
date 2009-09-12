@@ -32,7 +32,7 @@ using namespace SignalTypes;
 
 #ifdef HAVE_SNDFILE
 
-MultiPlayer::MultiPlayer() : Processor("MultiPlayer", OutConst, Guarded)
+MultiPlayer::MultiPlayer(): HeavyProcessor("MultiPlayer", OutConst, Guarded)
 {
 }
 

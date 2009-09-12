@@ -43,7 +43,7 @@ using namespace SignalTypes;
 
 #define MESSAGES 0
 
-Player::Player(QString const& _filename) : Processor("Player", OutConst, Guarded | Cooperative), thePath(_filename), theChannels(0), theRate(0), theLength(0), thePosition(0)
+Player::Player(QString const& _filename): CoProcessor("Player", OutConst), m_file(_filename), m_channels(0), m_rate(0), m_length(0), m_position(0)
 {
 }
 
@@ -51,10 +51,10 @@ bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	QRectF textArea(2, 0, _s.width() - 4, 20);
 	_p.setPen(Qt::black);
-	_p.drawText(textArea, thePath);
+	_p.drawText(textArea, m_file.fileName());
 	textArea.translate(1, 1);
 	_p.setPen(Qt::white);
-	_p.drawText(textArea, thePath);
+	_p.drawText(textArea, m_file.fileName());
 
 	_p.setPen(QColor(160, 160, 160));
 	_p.setBrush(QColor(232, 232, 232));
@@ -62,131 +62,129 @@ bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.drawRect(progressArea);
 	progressArea.adjust(1, 1, -1, -1);
 	bool seg = false;
-	for (uint i = 0; i < theLength; i += 60 * theRate)
+	for (uint i = 0; i < m_length; i += 60 * m_rate)
 	{	seg = !seg;
-		uint ni = i + 60 * theRate;
-		if (ni > theLength) ni = theLength;
-		_p.fillRect(progressArea.x() + int(progressArea.width() * i / theLength), progressArea.y(), int(progressArea.width() * (ni - i) / theLength), progressArea.height(), QColor::fromHsv(0, 0, seg ? 232 : 255));
+		uint ni = i + 60 * m_rate;
+		if (ni > m_length) ni = m_length;
+		_p.fillRect(progressArea.x() + int(progressArea.width() * i / m_length), progressArea.y(), int(progressArea.width() * (ni - i) / m_length), progressArea.height(), QColor::fromHsv(0, 0, seg ? 232 : 255));
 	}
-	_p.fillRect(progressArea.x(), progressArea.y(), progressArea.width() * thePosition / theLength, progressArea.height(), QColor(255, 0, 0, 64));
+	_p.fillRect(progressArea.x(), progressArea.y(), progressArea.width() * m_position / m_length, progressArea.height(), QColor(255, 0, 0, 64));
 	return true;
 }
 
 bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
-	outTypes = Wave(theRate);
+	outTypes = Wave(m_rate);
 	return true;
 }
 
 void Player::specifyOutputSpace(QVector<uint> &samples)
 {
-	for (uint i = 0; i < theChannels; i++)
-		samples[i] = theReadFrames;
+	for (uint i = 0; i < m_channels; i++)
+		samples[i] = m_readFrames;
 }
 
 void Player::initFromProperties(const Properties &p)
 {
-	theReadFrames = p["Frames"].toInt();
-	thePath = p["Filename"].toString();
-	theMode = NoMode;
-	theChannels = 0;
+	m_readFrames = p["Frames"].toInt();
+	m_file.setFileName(p["Filename"].toString());
+	m_mode = NoMode;
+	m_channels = 0;
 
-	qDebug("Opening file %s...", qPrintable(thePath));
+	qDebug("Opening file %s...", qPrintable(m_file.fileName()));
 #ifdef HAVE_VORBISFILE
-	if (thePath.toLower().contains(".ogg"))
+	if (m_file.fileName().toLower().contains(".ogg"))
 	{
-		QFile qfile(thePath);
-		if (!qfile.open(QIODevice::ReadOnly))
-			qWarning("*** WARNING: Cannot open file %s", qPrintable(thePath));
-		else if (ov_open(fdopen(qfile.handle(), "r"), &theVorbisFile, NULL, 0) < 0)
-			qWarning("*** WARNING: File %s does not appear to be an Ogg bitstream.", qPrintable(thePath));
+		if (!m_file.open(QIODevice::ReadOnly))
+			qWarning("*** WARNING: Cannot open file %s", qPrintable(m_file.fileName()));
+		else if (ov_open(fdopen(m_file.handle(), "r"), &m_vorbisFile, NULL, 0) < 0)
+			qWarning("*** WARNING: File %s does not appear to be an Ogg bitstream.", qPrintable(m_file.fileName()));
 		else
 		{
-			vorbis_info *vi = ov_info(&theVorbisFile, -1);
-			theChannels = vi->channels;
-			theRate = vi->rate;
-			theLength = (long)ov_pcm_total(&theVorbisFile, -1);
-			theMode = ModeVF;
-			ov_clear(&theVorbisFile);
+			vorbis_info *vi = ov_info(&m_vorbisFile, -1);
+			m_channels = vi->channels;
+			m_rate = vi->rate;
+			m_length = (long)ov_pcm_total(&m_vorbisFile, -1);
+			m_mode = ModeVF;
+			ov_clear(&m_vorbisFile);
 		}
 	}
 #endif
 #ifdef HAVE_SNDFILE
-	if (thePath.toLower().contains(".wav"))
+	if (m_file.fileName().toLower().contains(".wav"))
 	{
 		SF_INFO sfinfo;
-		if (!(theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &sfinfo)))
-			qWarning("*** WARNING: File %s cannot be read.", qPrintable(thePath));
+		if (!(m_sndFile = sf_open(m_file.fileName().toLocal8Bit(), SFM_READ, &sfinfo)))
+			qWarning("*** WARNING: File %s cannot be read.", qPrintable(m_file.fileName()));
 		else
 		{
-			theLength = sfinfo.frames;
-			theChannels = sfinfo.channels;
-			theRate = sfinfo.samplerate;
-			theMode = ModeSF;
-			sf_close(theSndFile);
+			m_length = sfinfo.frames;
+			m_channels = sfinfo.channels;
+			m_rate = sfinfo.samplerate;
+			m_mode = ModeSF;
+			sf_close(m_sndFile);
 		}
 	}
 #endif
 #ifdef HAVE_MAD
-	if (thePath.toLower().contains(".mp3"))
+	if (m_file.fileName().toLower().contains(".mp3"))
 	{
-	uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
-	unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
-	QFile qfile(thePath);
-	if (!qfile.open(QIODevice::ReadOnly))
-		qWarning("*** WARNING: Cannot open file %s", qPrintable(thePath));
-	else if (!(theMadFile = fdopen(qfile.handle(), "r")))
-		qWarning("*** WARNING: File %s cannot be opened.", qPrintable(thePath));
-	else
-	{
-	mad_stream_init(&Stream);
-	mad_frame_init(&Frame);
-	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(thePath)); return; }
-	theRate = 0;
-	while (!theRate || !theChannels)
-	{
-		if (Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN)
+		m_inputBufferSize = (m_readFrames / 4) * 4 * 5;
+		unsigned char InputBuffer[m_inputBufferSize+MAD_BUFFER_GUARD];
+		if (!m_file.open(QIODevice::ReadOnly))
+			qWarning("*** WARNING: Cannot open file %s", qPrintable(m_file.fileName()));
+		else if (!(m_madFile = fdopen(m_file.handle(), "r")))
+			qWarning("*** WARNING: File %s cannot be opened.", qPrintable(m_file.fileName()));
+		else
 		{
-			size_t ReadSize, Remaining;
-			unsigned char *ReadStart;
-			if (Stream.next_frame)
+			mad_stream_init(&m_stream);
+			mad_frame_init(&m_frame);
+			if (!(m_bStdFile=NewBstdFile(m_madFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(m_file.fileName())); return; }
+			m_rate = 0;
+			while (!m_rate || !m_channels)
 			{
-				Remaining = Stream.bufend-Stream.next_frame;
-				memmove(InputBuffer, Stream.next_frame, Remaining);
-				ReadStart = InputBuffer + Remaining;
-				ReadSize = INPUT_BUFFER_SIZE - Remaining;
-			}
-			else
-				ReadSize=INPUT_BUFFER_SIZE, ReadStart=InputBuffer, Remaining=0;
-			if ((ReadSize = BstdRead(ReadStart, 1, ReadSize, BstdFile)) <= 0) break;
-			if (BstdFileEofP(BstdFile))
-			{
-				memset(ReadStart + ReadSize, 0, MAD_BUFFER_GUARD);
-				ReadSize += MAD_BUFFER_GUARD;
-			}
-			mad_stream_buffer(&Stream, InputBuffer, ReadSize + Remaining);
-			Stream.error = (mad_error)0;
-		}
+				if (m_stream.buffer==NULL || m_stream.error==MAD_ERROR_BUFLEN)
+				{
+					size_t ReadSize, Remaining;
+					unsigned char *ReadStart;
+					if (m_stream.next_frame)
+					{
+						Remaining = m_stream.bufend-m_stream.next_frame;
+						memmove(InputBuffer, m_stream.next_frame, Remaining);
+						ReadStart = InputBuffer + Remaining;
+						ReadSize = m_inputBufferSize - Remaining;
+					}
+					else
+						ReadSize=m_inputBufferSize, ReadStart=InputBuffer, Remaining=0;
+					if ((ReadSize = BstdRead(ReadStart, 1, ReadSize, m_bStdFile)) <= 0) break;
+					if (BstdFileEofP(m_bStdFile))
+					{
+						memset(ReadStart + ReadSize, 0, MAD_BUFFER_GUARD);
+						ReadSize += MAD_BUFFER_GUARD;
+					}
+					mad_stream_buffer(&m_stream, InputBuffer, ReadSize + Remaining);
+					m_stream.error = (mad_error)0;
+				}
 
-		if (mad_frame_decode(&Frame, &Stream))
-		{
-			if (MAD_RECOVERABLE(Stream.error) || Stream.error==MAD_ERROR_BUFLEN) continue; else break;
+				if (mad_frame_decode(&m_frame, &m_stream))
+				{
+					if (MAD_RECOVERABLE(m_stream.error) || m_stream.error==MAD_ERROR_BUFLEN) continue; else break;
+				}
+				m_channels = MAD_NCHANNELS(&m_frame.header);
+				m_rate = m_frame.header.samplerate;
+				m_length = 1;
+			}
+			BstdFileDestroy(m_bStdFile);
+			mad_frame_finish(&m_frame);
+			mad_stream_finish(&m_stream);
+			fclose(m_madFile);
+			m_mode = ModeMAD;
 		}
-		theChannels = MAD_NCHANNELS(&Frame.header);
-		theRate = Frame.header.samplerate;
-		theLength = 1;
-	}
-	BstdFileDestroy(BstdFile);
-	mad_frame_finish(&Frame);
-	mad_stream_finish(&Stream);
-	fclose(theMadFile);
-	theMode = ModeMAD;
-	}
 	}
 #endif
-	qDebug("Mode: %s, Length: %d, Channels: %d, Sampling: %d Hz", theMode==ModeSF ? "Soundfile" : theMode==ModeVF ? "Ogg/Vorbis" : theMode==ModeMAD ? "MP3" : "None", theLength, theChannels, theRate);
-	thePosition = 0;
-	if (theChannels) setupIO(0, theChannels);
+	qDebug("Mode: %s, Length: %d, Channels: %d, Sampling: %d Hz", m_mode==ModeSF ? "Soundfile" : m_mode==ModeVF ? "Ogg/Vorbis" : m_mode==ModeMAD ? "MP3" : "None", m_length, m_channels, m_rate);
+	m_position = 0;
+	if (m_channels) setupIO(0, m_channels);
 	setupVisual(160, 32, 1000);
 }
 
@@ -199,11 +197,41 @@ PropertiesInfo Player::specifyProperties() const
 bool Player::processorStarted()
 {
 #ifdef HAVE_SNDFILE
-	if (theMode == ModeSF)
+	if (m_mode == ModeSF)
 	{
-		theSndFile = sf_open(thePath.toLocal8Bit(), SFM_READ, &m_sfinfo);
-		if (!theSndFile) return false;
-		m_buffer.resize(theReadFrames * theChannels);
+		m_sndFile = sf_open(m_file.fileName().toLocal8Bit(), SFM_READ, &m_sfinfo);
+		if (!m_sndFile) return false;
+		m_buffer.resize(m_readFrames * m_channels);
+		return true;
+	}
+#endif
+#ifdef HAVE_VORBISFILE
+	if (m_mode == ModeVF)
+	{
+		if (!m_file.open(QIODevice::ReadOnly)) return false;
+		if (ov_open(fdopen(m_file.handle(), "r"), &m_vorbisFile, NULL, 0) < 0) return false;
+		return true;
+	}
+#endif
+#ifdef HAVE_MAD
+	if (m_mode == ModeMAD)
+	{
+		if (!m_file.open(QIODevice::ReadOnly)) return false;
+		m_madFile = fdopen(m_file.handle(), "r");
+		m_inputBuffer.resize(m_inputBufferSize+MAD_BUFFER_GUARD);
+		m_guardPointer = 0;
+
+		mad_stream_init(&m_stream);
+		mad_frame_init(&m_frame);
+		mad_synth_init(&m_synth);
+		mad_timer_reset(&m_timer);
+
+		m_bStdFile = NewBstdFile(m_madFile);
+		if (!m_bStdFile)
+		{
+			qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(m_file.fileName()));
+			return false;
+		}
 		return true;
 	}
 #endif
@@ -213,171 +241,154 @@ bool Player::processorStarted()
 int Player::process()
 {
 #ifdef HAVE_SNDFILE
-	if (theMode == ModeSF)
+	if (m_mode == ModeSF)
 	{
-		int in = sf_readf_float(theSndFile, m_buffer.data(), theReadFrames);
+		int in = sf_readf_float(m_sndFile, m_buffer.data(), m_readFrames);
 		if (in > 0)
-		{	thePosition += in;
-			for (uint i = 0; i < theChannels; i++)
+		{
+			assert((uint)in <= m_readFrames);
+			m_position += in;
+			for (uint i = 0; i < m_channels; i++)
 			{	BufferData d = output(i).makeScratchSamples(in);
 				if (!d.isNull())
 					for (int j = 0; j < in; j++)
-						d[j] = m_buffer[j * theChannels + i];
+						d[j] = m_buffer[j * m_channels + i];
 				output(i).push(d);
 			}
-			return DidWork;
 		}
 		else if (in == 0)
-		{
 			return WillNeverWork;
-		}
+		else
+			sf_perror(m_sndFile);
+		return DidWork;
+	}
+#endif
+#ifdef HAVE_VORBISFILE
+	if (m_mode == ModeVF)
+	{
+		float** buffer;
+		int current_section;
+		int in = ov_read_float(&m_vorbisFile, &buffer, m_readFrames, &current_section);
+		if (in == 0)
+			return WillNeverWork;
+		else if (in < 0)
+			qWarning("*** WARNING: Error in bitstream.");
 		else
 		{
-			sf_perror(theSndFile);
-			return DidWork;
+			assert((uint)in <= m_readFrames);
+			m_position += in;
+			for (uint i = 0; i < (uint)m_channels; i++)
+			{	BufferData d = output(i).makeScratchSamples(in/* / m_channels*/);
+				if (!d.isNull())
+					for (uint j = 0; j < (uint)in/* / m_channels*/; j++)
+						d[j] = buffer[i][j];
+				output(i).push(d);
+			}
 		}
+		return DidWork;
+	}
+#endif
+#ifdef HAVE_MAD
+	if (m_mode == ModeMAD)
+	{
+		if (!m_stream.buffer || m_stream.error == MAD_ERROR_BUFLEN)
+		{
+			size_t readSize;
+			size_t remaining;
+			unsigned char* readStart;
+
+			if (m_stream.next_frame!=NULL)
+			{
+				remaining = m_stream.bufend - m_stream.next_frame;
+				memmove(m_inputBuffer.data(), m_stream.next_frame, remaining);
+				readStart = m_inputBuffer.data() + remaining;
+				readSize = m_inputBufferSize - remaining;
+			}
+			else
+			{
+				readSize = m_inputBufferSize;
+				readStart = m_inputBuffer.data();
+				remaining = 0;
+			}
+
+			readSize = BstdRead(readStart, 1, readSize, m_bStdFile);
+			if (readSize <= 0)
+			{
+				if (ferror(m_madFile)) qDebug("*** WARNING: Read error on bit-stream from file %s (%s)", qPrintable(m_file.fileName()), strerror(errno));
+				return DidWork;
+			}
+
+			if (BstdFileEofP(m_bStdFile))
+			{
+				m_guardPointer = readStart + readSize;
+				memset(m_guardPointer, 0, MAD_BUFFER_GUARD);
+				readSize += MAD_BUFFER_GUARD;
+			}
+
+			mad_stream_buffer(&m_stream, m_inputBuffer.data(), readSize + remaining);
+			m_stream.error = (mad_error)0;
+		}
+
+		if (mad_frame_decode(&m_frame, &m_stream))
+		{
+			if (MAD_RECOVERABLE(m_stream.error))
+			{
+				if (m_stream.error != MAD_ERROR_LOSTSYNC || m_stream.this_frame != m_guardPointer)
+					qDebug("*** WARNING: Recoverable frame level error in file %s (%s)", qPrintable(m_file.fileName()), mad_stream_errorstr(&m_stream));
+				return DidWork;
+			}
+			else
+				if (m_stream.error != MAD_ERROR_BUFLEN)
+				{
+					qDebug("*** WARNING: Unrecoverable frame level error in file %s (%s)", qPrintable(m_file.fileName()), mad_stream_errorstr(&m_stream));
+					return WillNeverWork;
+				}
+				else
+					return DidWork;
+		}
+
+		mad_timer_add(&m_timer, m_frame.header.duration);
+		mad_synth_frame(&m_synth, &m_frame);
+		assert(m_synth.pcm.length <= m_readFrames);
+		m_position++;
+		for (uint i = 0; i < m_channels; i++)
+		{
+			BufferData d = output(i).makeScratchSamples(m_synth.pcm.length);
+			if (!d.isNull())
+				for (uint j = 0; j < m_synth.pcm.length; j++)
+					d[j] = float(MadFixedToSshort(m_synth.pcm.samples[i][j])) / 32768.f;
+			output(i).push(d);
+		}
+		return DidWork;
 	}
 	return WillNeverWork;
 #endif
 }
 
-void Player::processor()
-{
-#ifdef HAVE_VORBISFILE
-	if (theMode == ModeVF)
-	{
-		QFile qfile(thePath);
-		if (!qfile.open(QIODevice::ReadOnly)) return;
-		if (ov_open(fdopen(qfile.handle(), "r"), &theVorbisFile, NULL, 0) < 0) return;
-		float **buffer;
-		int in = 0, current_section = 0;
-		while (guard())
-		{
-			in = ov_read_float(&theVorbisFile, &buffer, theReadFrames, &current_section);
-			if (in == 0)
-				break;
-			else if (in < 0)
-				qWarning("*** WARNING: Error in bitstream.");
-			else
-			{
-				thePosition += in;
-				for (uint i = 0; i < (uint)theChannels; i++)
-				{	BufferData d = output(i).makeScratchSamples(in/* / theChannels*/);
-					if (!d.isNull())
-						for (uint j = 0; j < (uint)in/* / theChannels*/; j++)
-							d[j] = buffer[i][j];
-					output(i).push(d);
-				}
-			}
-		}
-	}
-#endif
-#ifdef HAVE_MAD
-	if (theMode == ModeMAD)
-	{
-	QFile qfile(thePath);
-	if (!qfile.open(QIODevice::ReadOnly)) return;
-	theMadFile = fdopen(qfile.handle(), "r");
-	uint INPUT_BUFFER_SIZE = (theReadFrames / 4) * 4 * 5;
-	unsigned char InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD], *GuardPtr=NULL;
-
-	mad_stream_init(&Stream);
-	mad_frame_init(&Frame);
-	mad_synth_init(&Synth);
-	mad_timer_reset(&Timer);
-
-	if (!(BstdFile=NewBstdFile(theMadFile))) { qDebug("*** ERROR: Couldn't create bstdfile on file %s!", qPrintable(thePath)); return; }
-	while (guard())
-	{
-		if (Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN)
-		{
-			size_t			ReadSize, Remaining;
-			unsigned char	*ReadStart;
-
-			if (Stream.next_frame!=NULL)
-			{
-				Remaining=Stream.bufend-Stream.next_frame;
-				memmove(InputBuffer,Stream.next_frame,Remaining);
-				ReadStart=InputBuffer+Remaining;
-				ReadSize=INPUT_BUFFER_SIZE-Remaining;
-			}
-			else
-				ReadSize=INPUT_BUFFER_SIZE, ReadStart=InputBuffer, Remaining=0;
-
-			ReadSize=BstdRead(ReadStart,1,ReadSize,BstdFile);
-			if (ReadSize<=0)
-			{
-				if (ferror(theMadFile)) qDebug("*** WARNING: Read error on bit-stream from file %s (%s)", qPrintable(thePath), strerror(errno));
-				break;
-			}
-
-			if (BstdFileEofP(BstdFile))
-			{
-				GuardPtr=ReadStart+ReadSize;
-				memset(GuardPtr,0,MAD_BUFFER_GUARD);
-				ReadSize+=MAD_BUFFER_GUARD;
-			}
-
-			mad_stream_buffer(&Stream,InputBuffer,ReadSize+Remaining);
-			Stream.error=(mad_error)0;
-		}
-
-		if (mad_frame_decode(&Frame,&Stream))
-		{
-			if (MAD_RECOVERABLE(Stream.error))
-			{
-				if (Stream.error!=MAD_ERROR_LOSTSYNC || Stream.this_frame!=GuardPtr)
-					qDebug("*** WARNING: Recoverable frame level error in file %s (%s)", qPrintable(thePath), mad_stream_errorstr(&Stream));
-				continue;
-			}
-			else
-				if (Stream.error==MAD_ERROR_BUFLEN)
-					continue;
-				else
-				{
-					qDebug("*** WARNING: Unrecoverable frame level error in file %s (%s)", qPrintable(thePath), mad_stream_errorstr(&Stream));
-					break;
-				}
-		}
-
-		mad_timer_add(&Timer,Frame.header.duration);
-		mad_synth_frame(&Synth,&Frame);
-		thePosition++;
-		for (uint i = 0; i < theChannels; i++)
-		{	BufferData d = output(i).makeScratchSamples(Synth.pcm.length);
-			if (!d.isNull())
-				for (uint j = 0; j < Synth.pcm.length; j++)
-					d[j] = float(MadFixedToSshort(Synth.pcm.samples[i][j])) / 32768.f;
-			output(i).push(d);
-		}
-	}
-	}
-#endif
-	plunge();
-	if (MESSAGES) qDebug("Player (%s): Outahere", qPrintable(name()));
-}
-
 void Player::processorStopped()
 {
 #ifdef HAVE_SNDFILE
-	if (theMode == ModeSF)
-		sf_close(theSndFile);
+	if (m_mode == ModeSF)
+		sf_close(m_sndFile);
 #endif
 #ifdef HAVE_VORBISFILE
-	if (theMode == ModeVF)
-		ov_clear(&theVorbisFile);
-#endif
-#ifdef HAVE_MAD
-	if (theMode == ModeMAD)
+	if (m_mode == ModeVF)
 	{
-	BstdFileDestroy(BstdFile);
-	mad_synth_finish(&Synth);
-	mad_frame_finish(&Frame);
-	mad_stream_finish(&Stream);
-	fclose(theMadFile);
+		ov_clear(&m_vorbisFile);
+		m_file.close();
 	}
 #endif
-	thePosition = 0;
+#ifdef HAVE_MAD
+	if (m_mode == ModeMAD)
+	{
+		BstdFileDestroy(m_bStdFile);
+		mad_synth_finish(&m_synth);
+		mad_frame_finish(&m_frame);
+		mad_stream_finish(&m_stream);
+		m_file.close();
+	}
+#endif
+	m_position = 0;
 }
 
 EXPORT_CLASS(Player, 0,2,0, Processor);

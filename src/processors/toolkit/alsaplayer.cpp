@@ -38,7 +38,7 @@ using namespace Geddei;
 #include "wave.h"
 using namespace SignalTypes;
 
-class ALSAPlayer: public Processor
+class ALSAPlayer: public CoProcessor
 {
 	QString theDevice;
 	uint theChannels;
@@ -70,7 +70,7 @@ class ALSAPlayer: public Processor
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSAPlayer() : Processor("ALSAPlayer", NotMulti, Cooperative), thePcmHandle(0) {}
+	ALSAPlayer(): CoProcessor("ALSAPlayer", NotMulti), thePcmHandle(0) {}
 };
 
 bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
@@ -121,7 +121,7 @@ int ALSAPlayer::canProcess()
 	int av = snd_pcm_avail(thePcmHandle);
 	if (av < (int)thePeriodSize)
 		return NoWork;
-	return Processor::canProcess();
+	return CanWork;
 }
 
 int ALSAPlayer::process()

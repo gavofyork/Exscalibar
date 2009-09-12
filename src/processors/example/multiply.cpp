@@ -18,14 +18,14 @@
 #include "buffer.h"
 using namespace Geddei;
 
-class Multiply: public Processor
+class Multiply: public HeavyProcessor
 {
 	int count;
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
-	Multiply() : Processor("Multiply") {}
+	Multiply(): HeavyProcessor("Multiply") {}
 };
 
 void Multiply::processor()

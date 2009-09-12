@@ -26,7 +26,7 @@ using namespace Geddei;
 #include "signaltypes.h"
 using namespace SignalTypes;
 
-class Dumper: public Processor
+class Dumper: public HeavyProcessor
 {
 	QFile theOut;
 	bool theFloats;
@@ -41,7 +41,7 @@ public:
 	Dumper();
 };
 
-Dumper::Dumper(): Processor("Dumper", In, Guarded)
+Dumper::Dumper(): HeavyProcessor("Dumper", In, Guarded)
 {
 }
 
