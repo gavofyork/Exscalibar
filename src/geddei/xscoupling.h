@@ -27,40 +27,14 @@ namespace Geddei
 class SubProcessor;
 class Properties;
 class SignalTypeRefs;
-class RSCoupling;	// hack around, because mixins aren't used for the remote versions.
 
 /** @internal @ingroup Geddei
  * @brief Refinement of a Coupling for RHS attachment to a SubProcessor object.
  * @author Gav Wood <gav@kde.org>
  */
-class xSCoupling: virtual public xxCoupling/*, public QTask*/
+class xSCoupling: virtual public xxCoupling
 {
-	SubProcessor *theSubProc;
-	bool m_isReady;
-	BufferDatas m_ins;
-	BufferDatas m_outs;
-	uint m_chunks;
-
-	// Reimplementations from QTask
-	virtual int canProcess();
-	virtual int process();
-
-	// Reimplementations from xxCoupling
-	friend class RSCoupling;
-	virtual void go();
-	virtual void stop();
-	virtual void stoppingR();
-	virtual void stoppedR();
-	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &p);
-	virtual void transact(const BufferDatas &d, uint chunks);
-	virtual BufferDatas deliverResults(uint *timeTaken);
-	virtual void defineIO(uint inputs, uint outputs);
-	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
-	virtual bool isReady();
-
 protected:
-
 	/**
 	 * Basic constructor.
 	 *
@@ -73,6 +47,8 @@ protected:
 	 * Default destructor.
 	 */
 	virtual ~xSCoupling();
+
+	SubProcessor *theSubProc;
 };
 
 }

@@ -42,17 +42,13 @@ class BufferReader;
  * All overrided commands are essentially just passed down the line
  * with arguments serialised as neccessary.
  */
-class DRCoupling : virtual public DxCoupling
+class DRCoupling: virtual public DxCoupling
 {
 	//* Reimplementations from xxCoupling (used by DxCoupling)
-	virtual void go();
-	virtual void stop();
-	virtual void stoppingR();
-	virtual void stoppedR();
+	virtual void go() {}
+	virtual void stop() {}
 	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &p);
-	virtual void transact(const BufferDatas &d, uint chunks);
-	virtual BufferDatas deliverResults(uint *timeTaken);
 	virtual void defineIO(uint inputs, uint outputs);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
 	virtual bool isReady();

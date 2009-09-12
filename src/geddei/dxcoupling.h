@@ -47,56 +47,7 @@ class BufferReader;
  */
 class DxCoupling : virtual public xxCoupling
 {
-	//* Reimplementations from xxCoupling
-	virtual void stoppingL();
-	virtual void stoppedL();
-
-	/**
-	 * Just checks whether an outgoing transaction is safe to send (i.e. wont result in a blockage).
-	 * Blocks until it's ok.
-	 * @return Returns false if it exitted due to stopping.
-	 * UNSAFE: Needs theDataX to be locked throughout the *entire* transaction, from start to finish.
-	 */
-	bool transactCheckerUNSAFE();
-
-protected:
-	// TODO: Look into moving any accesses to theReaders into this class to get rid of friend.
-	friend class DomProcessor;
-
-	DomProcessor *theDomProcessor;
-	QVector<BufferReader *> theReaders;
-
-	int theLoad;
-	uint theLastTimeTaken;
-
 public:
-	/**
-	 * Skips @a samples from the inputs.
-	 */
-	void skip(uint samples);
-
-	/**
-	 * Skips @a samples from the inputs, gets rid of any plungers immediately after them and
-	 * sends the plunger to the SubProc.
-	 */
-	void skipPlungeAndSend(uint samples);
-
-	/**
-	 * Reads @a samples from the inputs and sends the data to the SubProc.
-	 * @a chunks *must* be the number of chunks that @a samples represents.
-	 */
-	void peekAndSend(uint samples, uint chunks);
-
-	/**
-	 * Conceptually similar to deliverResults, in that it returns the resultant
-	 * data from the last transaction or empty if the last transaction was a
-	 * plunger. However this method adds the benefit of ordering so that it may
-	 * be called *before* the corresponding transaction has been called and will
-	 * still return the correct results (after blocking, of course). This is
-	 * neccessary for its use in DomProcessor::eater.
-	 */
-	BufferDatas returnResults();
-
 	/**
 	 * Basic constructor.
 	 */
@@ -106,6 +57,61 @@ public:
 	 * Default destructor.
 	 */
 	virtual ~DxCoupling();
+
+	/**
+	 * Processes the chunks given asynchronously, returns immediately.
+	 */
+	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks) = 0;
+
+	/**
+	 * @returns true iff another processChunks() operation may commence.
+	 */
+	virtual bool isReady() = 0;
+
+	/**
+	 * Used by LHS to specify the input/output types to the SubProcessor.
+	 * Both are const, since these are already checked as being correct by the
+	 * primary. An extra check can be made to make sure that the outTypes given
+	 * are equal to those received from the verifyAndSpecifyTypes.
+	 *
+	 * @note The call to verifyAndSpecifyTypes from this method *MUST* still
+	 * be made.
+	 *
+	 * @param inTypes The "array" of types that describe the input
+	 * connection(s).
+	 * @param outTypes The "array" of types that describe the output
+	 * connection(s).
+	 */
+	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes) = 0;
+
+	/**
+	 * Used by the LHS to initialise the properties of the SubProcessor.
+	 *
+	 * @param p The Properties object in which the properties are given.
+	 */
+	virtual void initFromProperties(const Properties &p) = 0;
+
+	/**
+	 * Used by the LHS to start the SubProcessor's processing thread.
+	 */
+	virtual void go() = 0;
+
+	/**
+	 * Used by the LHS to stop the SubProcessor's processing thread.
+	 */
+	virtual void stop() = 0;
+
+	/**
+	 * Used by the LHS to (re)define the num of inputs/outputs of the SubProcessor.
+	 *
+	 * @param numInputs The number of inputs for the SubProcessor.
+	 * @param numOutputs The number of outputs for the SubProcessor.
+	 */
+	virtual void defineIO(uint numInputs, uint numOutputs) = 0;
+
+protected:
+	DomProcessor *theDomProcessor;
+	uint theLastTimeTaken;
 };
 
 

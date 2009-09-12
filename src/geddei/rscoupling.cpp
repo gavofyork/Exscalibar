@@ -71,7 +71,7 @@ void RSCoupling::run()
 			int s = theSession.safeReceiveWord<int>();
 			QByteArray a(s, ' ');
 			theSession.receiveChunk((uchar *)a.data(), s);
-			initFromProperties(Properties(a));
+			theSubProc->initFromProperties(Properties(a));
 			if (MESSAGES) qDebug("RSC: InitFromProperties: Done.");
 			break;
 		}
@@ -84,58 +84,12 @@ void RSCoupling::run()
 			SignalTypeRefs outTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < outTypes.count(); i++)
 				outTypes.mutablePtrAt(i) = SignalType::receive(theSession);
-			specifyTypes(inTypes, outTypes);
+
+			SignalTypeRefs dummyOutTypes(outTypes.count());
+			if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
+				qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
+			theSubProc->theOutTypes = outTypes;
 			if (MESSAGES) qDebug("RSC: SpecifyTypes: Done.");
-			break;
-		}
-		case Go:
-			if (MESSAGES) qDebug("RSC: Go: Setting off.");
-			go();
-			theSession.ack();
-			break;
-		case Stop:
-			if (MESSAGES) qDebug("RSC: Stop: Stopping.");
-			stop();
-			theSession.ack();
-			break;
-		case Transact:
-		{
-			if (MESSAGES) qDebug("RSC: Transact...");
-			uint channels = theSession.safeReceiveWord<int>();
-			if (MESSAGES) qDebug("RSC: BufferDatas size = %d", channels);
-			BufferDatas d(channels);
-			for (uint i = 0; i < d.size(); i++)
-			{	uint size = theSession.safeReceiveWord<int>();
-				uint scope = theSession.safeReceiveWord<int>();
-				BufferData *data = new BufferData(size, scope);
-				theSession.safeReceiveWordArray((int *)data->firstPart(), size);
-				d.setData(i, data);
-			}
-			uint chunks = theSession.safeReceiveWord<int>();
-			if (MESSAGES) qDebug("RSC: BufferDatas chunks = %d", chunks);
-			transact(d, chunks);
-			if (MESSAGES) qDebug("RSC: Transact: Done.");
-			break;
-		}
-		case DeliverResults:
-		{
-			if (MESSAGES) qDebug("RSC: DeliverResults...");
-			uint tt;
-			BufferDatas d = deliverResults(&tt);
-			theSession.safeSendWord(d.size());
-			for (uint i = 0; i < d.size(); i++)
-			{	// TODO: maybe take this into BufferData?
-				theSession.safeSendWord(d[i].elements());
-				theSession.safeSendWord(d[i].scope());
-				if (d[i].rollsOver())
-				{	theSession.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeFirstPart());
-					theSession.safeSendWordArray((int *)d[i].secondPart(), d[i].sizeSecondPart());
-				}
-				else
-					theSession.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeOnlyPart());
-			}
-			theSession.safeSendWord(tt);
-			if (MESSAGES) qDebug("RSC: DeliverResults: Done.");
 			break;
 		}
 		case ProcessChunks:
@@ -160,7 +114,7 @@ void RSCoupling::run()
 			}
 			uint chunks = theSession.safeReceiveWord<int>();
 			if (MESSAGES) qDebug("RSC: BufferDatas chunks = %d", chunks);
-			processChunks(ins, outs, chunks);
+			theSubProc->processChunks(ins, outs, chunks);
 			for (uint i = 0; i < ins.size(); i++)
 				if (outs[i].rollsOver())
 				{	theSession.safeSendWordArray((int *)outs[i].firstPart(), outs[i].sizeFirstPart());
@@ -178,21 +132,9 @@ void RSCoupling::run()
 		{
 			uint i = theSession.safeReceiveWord<int>();
 			uint o = theSession.safeReceiveWord<int>();
-			defineIO(i, o);
+			theSubProc->defineIO(i, o);
 			break;
 		}
-		case Stopping:
-			if (MESSAGES) qDebug("RSC: Got stopping command...");
-			stopping();
-			theSession.ack();
-			if (MESSAGES) qDebug("RSC: Relayed.");
-			break;
-		case Stopped:
-			if (MESSAGES) qDebug("RSC: Got stopped command...");
-			stopped();
-			theSession.ack();
-			if (MESSAGES) qDebug("RSC: Relayed.");
-			break;
 		case Close:
 			if (MESSAGES) qDebug("RSC: Got close command. Exiting immediately...");
 			breakOut = true;

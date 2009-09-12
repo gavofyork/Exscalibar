@@ -37,7 +37,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, const MultiplicityType multi, uint flags): QThread(0), theName(""), theType(type), theFlags(flags),
-	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false), theIsActive(false),
+	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), thePaused(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -61,62 +61,6 @@ Processor::~Processor()
 
 	if (MESSAGES) qDebug("Deleted Processor.");
 }
-
-class ProcessorScheduler: public QThread
-{
-public:
-	ProcessorScheduler(): m_robin(0)
-	{
-		start();
-	}
-	static ProcessorScheduler* get() { if (!s_this) s_this = new ProcessorScheduler; return s_this; }
-	void registerTask(Processor* _p) { QFastMutexLocker l(&l_tasks); m_tasks.append(_p); }
-	void unregisterTask(Processor* _p) { QFastMutexLocker l(&l_tasks); m_tasks.removeAll(_p); }
-	void run()
-	{
-		uint sinceLastWorked = 0;
-		forever
-		{
-			l_tasks.lock();
-			if (m_tasks.count() == 0)
-			{
-				l_tasks.unlock();
-				msleep(100);
-				l_tasks.lock();
-			}
-			else if (sinceLastWorked >= (uint)m_tasks.count())
-			{
-				l_tasks.unlock();
-				// Configurable by the processors.
-				msleep(10);	//allows 30 fps
-				l_tasks.lock();
-				sinceLastWorked	= 0;
-			}
-			else
-			{
-				m_robin = (m_robin + 1) % m_tasks.count();
-				int s = m_tasks[m_robin]->processCycle();
-				if (s == Processor::WillNeverWork)
-					m_tasks.removeAt(m_robin);
-				else if (s == Processor::NoWork)
-					sinceLastWorked++;
-				else
-					sinceLastWorked = 0;
-			}
-			l_tasks.unlock();
-			yieldCurrentThread();
-		}
-	}
-
-private:
-	QFastMutex l_tasks;
-	QList<Processor*> m_tasks;
-	int m_robin;
-
-	static ProcessorScheduler* s_this;
-};
-
-ProcessorScheduler* ProcessorScheduler::s_this = 0;
 
 void Processor::startPlungers()
 {
@@ -564,12 +508,7 @@ void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
 
 bool Processor::isRunning() const
 {
-	return (theFlags & Cooperative) ? isActive() : QThread::isRunning();
-}
-
-bool Processor::isActive() const
-{
-	return theIsActive;
+	return (theFlags & Cooperative) ? QTask::isRunning() : QThread::isRunning();
 }
 
 bool Processor::go()
@@ -608,12 +547,9 @@ bool Processor::go()
 			theOutputs[i] = new LxConnectionNull(this, i);
 
 	if (theFlags & Cooperative)
-	{
-		theIsActive = true;
-		ProcessorScheduler::get()->registerTask(this);
-	}
+		QTask::start();
 	else
-		start(NormalPriority);
+		QThread::start(NormalPriority);
 	if (MESSAGES) qDebug("< Processor::go() (name=%s)", qPrintable(theName));
 	return true;
 }
@@ -649,7 +585,7 @@ int Processor::canProcess()
 	return cycles;
 }
 
-int Processor::processCycle()
+int Processor::doWork()
 {
 	if (thePaused)
 		return NoWork;
@@ -724,28 +660,18 @@ int Processor::processCycle()
 	catch(BailException &) { ret = WillNeverWork; }
 	catch(int e) { ret = WillNeverWork; }
 	unsetThreadProcessor();
-	if (ret == WillNeverWork)
-	{
-		theIsActive = false;
-		processorStopped();
-	}
 	return ret;
+}
+
+void Processor::onStopped()
+{
+	processorStopped();
 }
 
 void Processor::run()
 {
 	setThreadProcessor();
-#if 0
-	if (MESSAGES) qDebug("Processor::run(): (%s) Confirming types...", qPrintable(theName));
-	// TODO: Look into reasons why this shouldn't go back in.
-	// currently theTypesConfirmed *never* seems to be falsified after being initially
-	// set to true.
-	/*{	QFastMutexLocker lock(&theConfirming);
-		theTypesConfirmed = false;
-		theTypesCache.clear();
-	}*/
-	if (!confirmTypes()) return;
-#endif
+
 	if (!theTypesConfirmed)
 		return;
 
@@ -818,10 +744,7 @@ void Processor::run()
 void Processor::wait()
 {
 	if (theFlags & Cooperative)
-	{
-		while (isActive())
-			QThread::msleep(1);
-	}
+		QTask::wait();
 	else
 		QThread::wait();
 }

@@ -57,46 +57,6 @@ void DRCoupling::setCredentials(const QString &remoteHost, uint remoteKey, uint 
 	theRemoteSubProcessorKey = remoteSubProcessorKey;
 }
 
-void DRCoupling::go()
-{
-	if (MESSAGES) qDebug("> DRCoupling::go()");
-	QFastMutexLocker lock(&theComm);
-	theRemote.sendByte(Go);
-	theRemote.waitForAck(501);
-	if (MESSAGES) qDebug("< DRCoupling::go()");
-}
-
-void DRCoupling::stop()
-{
-	if (MESSAGES) qDebug("> DRCoupling::stop()");
-	QFastMutexLocker lock(&theComm);
-	if (MESSAGES) qDebug("= DRCoupling::stop(): Sending byte");
-	theRemote.sendByte(Stop);
-	theRemote.waitForAck(502);
-	if (MESSAGES) qDebug("< DRCoupling::stop()");
-}
-
-void DRCoupling::stoppingR()
-{
-	if (MESSAGES) qDebug("> DRCoupling::stoppingR()");
-	// Cant just send byte as caller is a different thread to rest of comms - could clash.
-	QFastMutexLocker lock(&theComm);
-	if (MESSAGES) qDebug("= DRCoupling::stoppingR(): Sending byte");
-	theRemote.sendByte(Stopping);
-	theRemote.waitForAck(503);
-	if (MESSAGES) qDebug("< DRCoupling::stoppingR()");
-}
-
-void DRCoupling::stoppedR()
-{
-	if (MESSAGES) qDebug("> DRCoupling::stoppedR()");
-	QFastMutexLocker lock(&theComm);
-	if (MESSAGES) qDebug("= DRCoupling::stoppedR(): Sending byte");
-	theRemote.sendByte(Stopped);
-	theRemote.waitForAck(504);
-	if (MESSAGES) qDebug("< DRCoupling::stoppedR()");
-}
-
 void DRCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes)
 {
 	if (MESSAGES) qDebug("> DRCoupling::specifyTypes()");
@@ -124,28 +84,6 @@ void DRCoupling::initFromProperties(const Properties &p)
 	theRemote.safeSendWord(sp.size());
 	theRemote.sendChunk((uchar *)sp.data(), sp.size());
 	if (MESSAGES) qDebug("< DRCoupling::initFromProperties()");
-}
-
-void DRCoupling::transact(const BufferDatas &d, uint chunks)
-{
-	if (MESSAGES) qDebug("> DRCoupling::transact() (%d chunks)", chunks);
-	QFastMutexLocker lock(&theComm);
-	theRemote.sendByte(Transact);
-	// Go through each BufferData in d, send each
-	theRemote.safeSendWord(d.size());
-	for (uint i = 0; i < d.size(); i++)
-	{	// TODO: maybe take this into BufferData?
-		theRemote.safeSendWord(d[i].elements());
-		theRemote.safeSendWord(d[i].scope());
-		if (d[i].rollsOver())
-		{	theRemote.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeFirstPart());
-			theRemote.safeSendWordArray((int *)d[i].secondPart(), d[i].sizeSecondPart());
-		}
-		else
-			theRemote.safeSendWordArray((int *)d[i].firstPart(), d[i].sizeOnlyPart());
-	}
-	theRemote.safeSendWord(chunks);
-	if (MESSAGES) qDebug("< DRCoupling::transact()");
 }
 
 void DRCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks)
@@ -195,26 +133,6 @@ bool DRCoupling::isReady()
 	}
 	if (MESSAGES) qDebug("< DRCoupling::isReady(): Returning (isReady=%d)", m_isReady);
 	return m_isReady;
-}
-
-BufferDatas DRCoupling::deliverResults(uint *timeTaken)
-{
-	if (MESSAGES) qDebug("> DRCoupling::deliverResults()");
-	QFastMutexLocker lock(&theComm);
-	theRemote.sendByte(DeliverResults);
-	// Wait for results to be sent.
-	BufferDatas d(theRemote.safeReceiveWord<int>());
-	for (uint i = 0; i < d.size(); i++)
-	{	uint size = theRemote.safeReceiveWord<int>();
-		uint scope = theRemote.safeReceiveWord<int>();
-		BufferData *data = new BufferData(size, scope);
-		theRemote.safeReceiveWordArray((int *)data->firstPart(), size);
-		d.setData(i, data);
-	}
-	uint tt = theRemote.safeReceiveWord<int>();
-	if (timeTaken) *timeTaken = tt;
-	if (MESSAGES) qDebug("< DRCoupling::deliverResults(): Returning %d samples (tt=%d)", d.size() ? d[0].samples() : 0, tt);
-	return d;
 }
 
 void DRCoupling::defineIO(uint inputs, uint outputs)

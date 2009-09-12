@@ -50,10 +50,10 @@ bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.translate(0, _s.height());
 	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
 	_p.drawLine(0, 0, _s.width(), 0);
-	if (isActive())
+	if (isRunning())
 	{
 		_p.scale(_s.width() / m_last.size(), 1);
-		_p.setPen(QPen(Qt::black, 0));
+		_p.setPen(QPen(Qt::black, _s.width() > m_last.size() ? 1 : 0));
 		for (int i = 0; i < m_last.size(); i++)
 			_p.drawLine(QLineF(i, 0, i, -(m_last[i] - m_minAmp) * m_deltaAmp * _s.height()));
 	}

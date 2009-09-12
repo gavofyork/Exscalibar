@@ -7,14 +7,12 @@
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
  ***************************************************************************/
-#ifndef _GEDDEI_RSCOUPLING_H
-#define _GEDDEI_RSCOUPLING_H
+#pragma once
 
-#include <qthread.h>
+#include <QThread>
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "qsocketsession.h"
 #include "xscoupling.h"
 #else
@@ -31,14 +29,8 @@ namespace Geddei
  * @author Gav Wood <gav@kde.org>
  *
  */
-class RSCoupling : public xSCoupling, protected QThread
+class RSCoupling: public xSCoupling, protected QThread
 {
-	QSocketSession theSession;
-	bool theBeingDeleted;
-
-	//* Reimplementation from QThread.
-	virtual void run();
-
 	friend class ProcessorForwarder;
 
 	/**
@@ -50,8 +42,12 @@ class RSCoupling : public xSCoupling, protected QThread
 	 * Simple destructor.
 	 */
 	virtual ~RSCoupling();
+
+	//* Reimplementation from QThread.
+	virtual void run();
+
+	QSocketSession theSession;
+	bool theBeingDeleted;
 };
 
-};
-
-#endif
+}

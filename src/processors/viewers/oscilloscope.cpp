@@ -50,7 +50,7 @@ bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.translate(0, _s.height() / 2);
 	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
 	_p.drawLine(0, 0, _s.width(), 0);
-	if (isActive())
+	if (isRunning())
 	{
 		_p.setPen(QPen(Qt::black, 0));
 		_p.scale(1, _s.height() / 2);

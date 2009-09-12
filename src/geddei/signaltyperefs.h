@@ -50,6 +50,7 @@ class DLLEXPORT SignalTypeRefs
 	friend class RSCoupling;
 	friend class SubProcessor;
 	friend class xSCoupling;
+	friend class DSCoupling;
 	friend class DomProcessor;
 	friend class Combination;
 

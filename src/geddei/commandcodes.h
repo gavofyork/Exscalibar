@@ -31,13 +31,7 @@ enum Command
 	Close,
 	SpecifyTypes,
 	InitFromProperties,
-	Go,
-	Stop,
-	Transact,
-	DeliverResults,
 	ProcessChunks,
-	Stopping,
-	Stopped,
 	DefineIO
 };
 

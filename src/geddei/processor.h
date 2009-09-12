@@ -19,7 +19,7 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
+#include "qtask.h"
 #include "qcleaner.h"
 #include "globals.h"
 #include "bufferdata.h"
@@ -34,6 +34,7 @@
 #include "signaltyperefs.h"
 #include "processorport.h"
 #else
+#include <qtextra/qtask.h>
 #include <qtextra/qcleaner.h>
 #include <geddei/globals.h>
 #include <geddei/bufferdata.h>
@@ -48,6 +49,7 @@
 #include <geddei/signaltyperefs.h>
 #include <geddei/processorport.h>
 #endif
+using namespace QtExtra;
 using namespace Geddei;
 
 namespace Geddei
@@ -145,7 +147,7 @@ class DLLEXPORT BailException
 {
 };*/
 
-class DLLEXPORT Processor: protected QThread, virtual public Source, virtual public Sink, public MultiSource, public MultiSink
+class DLLEXPORT Processor: protected QThread, protected QTask, virtual public Source, virtual public Sink, public MultiSource, public MultiSink
 {
 public:
 	/**
@@ -255,7 +257,7 @@ private:
 
 	/** Thread subsystem. @sa threadProcessor() */
 	virtual void run();
-	void wait();
+	virtual void onStopped();
 
 public:
 	/** @internal
@@ -661,13 +663,11 @@ public:
 	 */
 	//@{
 
-	// Use positive numbers to specify how many cycles work can yet be done.
-	enum { DidWork = -2, WillNeverWork = -1, NoWork = 0 };
-
 	/**
 	 * Do computation, but do not block.
 	 */
-	int processCycle();
+	int doWork();
+	void wait();
 
 	/**
 	 * Puts the Processor into a gvien ProcessorGroup.
@@ -948,7 +948,6 @@ public:
 	 * @sa pause() unpause()
 	 */
 	bool isRunning() const;
-	bool isActive() const;
 
 	/**
 	 * Make the thing stop doing stuff. i.e. Cancels processor thread.

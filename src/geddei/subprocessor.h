@@ -37,6 +37,8 @@ namespace Geddei
 class ProcessorForwarder;
 class DomProcessor;
 class xSCoupling;
+class DSCoupling;
+class RSCoupling;
 
 /** @ingroup Geddei
  * @brief Base class that defines a single stateless Geddei signal data processing object.
@@ -163,6 +165,8 @@ class DLLEXPORT SubProcessor: public QThread
 	//* Association and deletion management.
 	xSCoupling *theCoupling;
 	friend class xSCoupling;
+	friend class DSCoupling;
+	friend class RSCoupling;
 
 	/** @internal
 	 * Use to find associated coupling. Used by ProcessorForwarder for deletion
