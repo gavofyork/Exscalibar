@@ -19,10 +19,9 @@
  ***************************************************************************/
 
 #include <QObject>
-#include <qthread.h>
-#include <qtimer.h>
-#include <qapplication.h>
-//Added by qt3to4:
+#include <QThread>
+#include <QTimer>
+#include <QApplication>
 #include <QEvent>
 
 #include <exscalibar.h>

@@ -87,14 +87,14 @@ void QScheduler::setWorkers(int _n)
 	while (m_workers.count() > _n)
 		delete m_workers.takeLast();
 	while (m_workers.count() < _n)
-		m_workers.append(new QWorker(this));
+		m_workers.append(new QWorker(this, m_workers.count()));
 }
 
-QTask* QScheduler::nextTask(QTask* _last)
+QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 {
-	l_tasks.lock();
+	// Always runs from a QWorker thread.
 
-	int noWork = false;
+	l_tasks.lock();
 
 	if (m_tasks.contains(_last))
 	{
@@ -106,22 +106,30 @@ QTask* QScheduler::nextTask(QTask* _last)
 			_last->releaseGuarantee();
 			_last->onStopped();
 		}
-		else if (_last->m_lastStatus == QTask::NoWork)
+		else if (_last->m_lastStatus < 0)
 		{
-			int redundancy = 0;
-			foreach (QTask* t, m_tasks)
-				if (t->m_lastStatus < 0)
-					redundancy++;
-			noWork = (redundancy == m_tasks.count());
+			_w->m_sinceLastWorked++;
+			_w->m_waitPeriod = qMin(_w->m_waitPeriod, (uint)-_last->m_lastStatus);
+			if (_w->m_sinceLastWorked >= m_tasks.count())
+			{
+				l_tasks.unlock();
+				QWorker::setTerminationEnabled(true);
+//				qDebug("WORKER %d: SLEEPING", _w->m_index);
+				// TODO Configurable by the processors.
+				QThread::msleep(1);//_w->m_waitPeriod);
+				_w->m_waitPeriod = 0;
+				QWorker::setTerminationEnabled(false);
+				l_tasks.lock();
+				_w->m_sinceLastWorked = 0;
+			}
 		}
 		else
-			m_sinceLastWorked = 0;
+			_w->m_sinceLastWorked = 0;
 	}
 
 	QTask* ret = 0;
 	while (!ret)
 	{
-		// Always runs from one a QWorker thread.
 		if (m_tasks.count() == 0)
 		{
 			l_tasks.unlock();
@@ -130,21 +138,8 @@ QTask* QScheduler::nextTask(QTask* _last)
 			QWorker::setTerminationEnabled(false);
 			l_tasks.lock();
 		}
-		else if (noWork)
-		{
-			l_tasks.unlock();
-			QWorker::setTerminationEnabled(true);
-			// TODO Configurable by the processors.
-			QThread::msleep(10);
-			QWorker::setTerminationEnabled(false);
-			l_tasks.lock();
-			m_sinceLastWorked = 0;
-		}
 		else
-		{
-			m_robin = (m_robin + 1) % m_tasks.count();
-			ret = m_tasks[m_robin];
-		}
+			ret = m_tasks[(m_tasks.indexOf(_last) + 1) % m_tasks.count()];
 	}
 	l_tasks.unlock();
 	return ret;

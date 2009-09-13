@@ -249,6 +249,7 @@ PropertiesInfo DomProcessor::specifyProperties() const
 						 ("Latency/Throughput", 0.5, "Throughput to latency optimisation weighting. Towards 0 for low latency at the cost of CPU usage and throughput, towards 1 for high throughput at the cost of memory and latency. { Value >= 0; Value <= 1 }")
 						 ("Alter Buffer", true, "Change buffer size according to optimal configuration.")
 						 ("Optimal Throughput", 262144, "Optimal size of buffer for maximum throughput in elements.")
+						 ("Additional Threads", 0, "Extra threads to use for data parallelism.")
 						 ("Debug", false, "Debug this DomProcessor.");
 }
 
@@ -260,6 +261,8 @@ void DomProcessor::initFromProperties(const Properties &properties)
 	theAlterBuffer = tp["Alter Buffer"].toBool();
 	theOptimalThroughput = tp["Optimal Throughput"].toInt();
 	theDebug = tp["Debug"].toBool();
+	for (int i = 0; i < tp["Additional Threads"].toInt(); i++)
+		createAndAddWorker();
 	thePrimary->initFromProperties(wp);
 	foreach (DxCoupling* w, theWorkers)
 		w->initFromProperties(wp);

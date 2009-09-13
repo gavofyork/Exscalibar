@@ -38,7 +38,7 @@ public:
 
 	static QScheduler* get() { if (!s_this) s_this = new QScheduler; return s_this; }
 
-	QTask* nextTask(QTask* _last);
+	QTask* nextTask(QTask* _last, QWorker* _w);
 
 	void setWorkers(int _n = -1);
 

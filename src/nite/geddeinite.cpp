@@ -253,6 +253,15 @@ void GeddeiNite::on_editRemove_activated()
 		setModified(true);
 		theScene.update();
 	}
+	else if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
+	{
+		DomProcessorItem* dpi = qgraphicsitem_cast<DomProcessorItem*>(theScene.selectedItems()[0]->parentItem());
+		delete theScene.selectedItems()[0];
+		dpi->reorder();
+		dpi->propertiesChanged();
+		setModified(true);
+		theScene.update();
+	}
 }
 
 void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)

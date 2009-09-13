@@ -73,6 +73,8 @@ public:
 	ALSAPlayer(): CoProcessor("ALSAPlayer", NotMulti), thePcmHandle(0) {}
 };
 
+QMutex g_alsaLock;
+
 bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 {
 	return true;
@@ -107,6 +109,7 @@ bool ALSAPlayer::processorStarted()
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
 		qDebug() << "Using rate " << f;
 		m_outData.resize(thePeriodSize * theChannels);
+		snd_pcm_prepare(thePcmHandle);
 		return true;
 	}
 	if (thePcmHandle)
@@ -117,11 +120,12 @@ bool ALSAPlayer::processorStarted()
 
 int ALSAPlayer::canProcess()
 {
-	snd_pcm_prepare(thePcmHandle);
 	int av = snd_pcm_avail(thePcmHandle);
-	if (av < (int)thePeriodSize)
-		return NoWork;
-	return CanWork;
+	if (av >= (int)thePeriodSize)
+		return CanWork;
+	else if (av < 0)
+		snd_pcm_recover(thePcmHandle, av, 0);
+	return NoWork;
 }
 
 int ALSAPlayer::process()
@@ -141,8 +145,8 @@ int ALSAPlayer::process()
 		int pcmreturn = snd_pcm_writei(thePcmHandle, m_outData.data() + written * theChannels, thePeriodSize - written);
 		if (pcmreturn > 0)
 			written += pcmreturn;
-		else
-			snd_pcm_prepare(thePcmHandle);
+		else if (pcmreturn < 0)
+			snd_pcm_recover(thePcmHandle, written, 0);
 	}
 	return DidWork;
 }

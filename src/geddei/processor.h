@@ -154,6 +154,7 @@ public:
 		Pending, ///< Indicates the operation has yet to finish.
 		Custom, ///< Indicates the overridden processorStarted returned false.
 		NotInitialised, ///< Indicates processor was never initialised.
+		TypesNotConfirmed, ///< Indicates the types were not confirmed before starting.
 		InputTypeNull, ///< Indicates an input has been given a null type.
 		InputNotConnected, ///< Indicates an input port was left unconnected.
 		InputsNotHomogeneous, ///< Indicates a MultiIn type Processor has inputs of differing types.
@@ -980,6 +981,7 @@ public:
 protected:
 	virtual int process() { return WillNeverWork; }
 	virtual int canProcess() { return CanWork; }
+	virtual QString taskName() const { return name(); }
 
 private:
 	virtual void start() { QTask::start(); }

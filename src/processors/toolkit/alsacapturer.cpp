@@ -50,6 +50,7 @@ class ALSACapturer: public CoProcessor
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
+	virtual int canProcess();
 	virtual int process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
@@ -74,6 +75,8 @@ class ALSACapturer: public CoProcessor
 public:
 	ALSACapturer(): CoProcessor("ALSACapturer", NotMulti), thePcmHandle(0) {}
 };
+
+extern QMutex g_alsaLock;
 
 bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
@@ -111,12 +114,39 @@ bool ALSACapturer::processorStarted()
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
 		qDebug() << "Using rate " << f;
 		m_inData.resize(thePeriodSize * theChannels);
+		assert(!snd_pcm_nonblock(thePcmHandle, 1));
+		snd_pcm_prepare(thePcmHandle);
 		return true;
 	}
 	if (thePcmHandle)
 		snd_pcm_close(thePcmHandle);
 	thePcmHandle = 0;
 	return false;
+}
+
+int ALSACapturer::canProcess()
+{
+	AGAIN:
+
+	int av = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
+	if (av > 0)
+	{
+		int x = snd_pcm_rewind(thePcmHandle, av);
+		if (x != av)
+		{
+			snd_pcm_recover(thePcmHandle, x, 0);
+			return NoWork;
+		}
+	}
+//	int av = snd_pcm_avail_update(thePcmHandle);
+	if (av >= (int)thePeriodSize)
+		return CanWork;
+	else if (av < 0)
+	{
+		snd_pcm_recover(thePcmHandle, av, 0);
+		goto AGAIN;
+	}
+	return NoWork;
 }
 
 int ALSACapturer::process()
@@ -134,7 +164,11 @@ int ALSACapturer::process()
 			output(c) << d[c];
 		return DidWork;
 	}
-	snd_pcm_prepare(thePcmHandle);
+	else if (count < 0)
+	{
+		snd_pcm_recover(thePcmHandle, count, 0);
+		return DidWork;
+	}
 	return NoWork;
 }
 

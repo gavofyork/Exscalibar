@@ -97,35 +97,46 @@ Processor* DomProcessorItem::reconstructProcessor()
 		return 0;
 	Processor* p = new DomProcessor(cs);
 	PropertiesInfo pi = p->properties();
-	foreach (QString k, pi.keys())
-		qDebug() << k << pi.defaultValue(k);
-	qDebug() << "X";
 	m_properties.defaultFrom(pi.destash());
-	foreach (QString k, pi.keys())
-		qDebug() << k << pi.defaultValue(k);
-	qDebug() << "Y";
 	foreach (SubProcessorItem* i, ordered())
-	{
 		i->m_properties.defaultFrom(pi.destash());
-		foreach (QString k, pi.keys())
-			qDebug() << k << pi.defaultValue(k);
-		qDebug() << "Z";
-	}
 	return p;
+}
+
+void DomProcessorItem::reorder() const
+{
+	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
+
+	uint oc = (uint)spis.count();
+	for (uint i = 0; i < oc; i++)
+	{
+		SubProcessorItem* spi;
+		for (uint j = i;; j++)
+			foreach (spi, spis)
+				if (spi->index() <= j)
+				{
+					spis.removeAll(spi);
+					spi->m_index = i;
+					goto OK;
+				}
+		break;
+		OK: ;
+	}
 }
 
 QList<SubProcessorItem*> DomProcessorItem::ordered() const
 {
 	QList<SubProcessorItem*> ret;
 	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
+
 	for (uint i = 0; i < (uint)spis.count(); i++)
 	{
 		SubProcessorItem* spi;
 		foreach (spi, spis)
 			if (spi->index() == i)
 				goto OK;
-		assert("Indices out of order.");
 		break;
+		assert("Subprocessors out of order");
 		OK:
 		ret << spi;
 	}
@@ -149,6 +160,7 @@ SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type,
 	m_type			(_type),
 	m_index			(_index)
 {
+	_dpi->reorder();
 	_dpi->propertiesChanged();
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
 }
@@ -246,6 +258,7 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 		m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
 		rejig(0, true);
 	}
+	setPos(round(pos().x()) - .5f, round(pos().y()) - .5f);
 }
 
 void ProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
@@ -260,6 +273,7 @@ void ProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
 	m_resizing = false;
 	QGraphicsItem::mouseReleaseEvent(_e);
+	setPos(round(pos().x()) + .5f, round(pos().y()) + .5f);
 }
 
 void ProcessorItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
@@ -379,7 +393,7 @@ void ProcessorItem::rejig(Processor* _old, bool _bootStrap)
 	}
 
 	foreach (OutputItem* i, filter<OutputItem>(childItems()))
-		i->setPos(m_size.width() - cornerSize, cornerSize * 3 / 2 + portLateralMargin / 2 + (portLateralMargin + portSize) * (i->index() + 0.5));
+		i->setPos(m_size.width() - cornerSize + 1.f, cornerSize * 3 / 2 + portLateralMargin / 2 + (portLateralMargin + portSize) * (i->index() + 0.5));
 	m_statusBar->setPos(cornerSize * 2, m_size.height() - statusHeight - statusMargin);
 	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 4, statusHeight));
 	update();

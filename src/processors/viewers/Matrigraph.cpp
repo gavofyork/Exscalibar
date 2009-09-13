@@ -25,7 +25,9 @@ using namespace SignalTypes;
  */
 class Matrigraph: public CoProcessor
 {
-	QImage m_display;
+	mutable QImage m_display;
+	QVector<float> m_last;
+	mutable bool m_isNew;
 
 	virtual int process();
 	virtual void processorStopped();
@@ -41,10 +43,8 @@ public:
 
 int Matrigraph::process()
 {
-	BufferData d = input(0).readSample();
-	for (int y = 0; y < m_display.height(); y++)
-		for (int x = 0; x < m_display.width(); x++)
-			m_display.setPixel(QPoint(x, y), (uchar)(d[x + y * m_display.height()] * 255));
+	input(0).readSample().copyTo(m_last.data());
+	m_isNew = true;
 	return DidWork;
 }
 
@@ -52,6 +52,13 @@ bool Matrigraph::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	if (isRunning())
 	{
+		if (m_isNew)
+		{
+			for (int y = 0; y < m_display.height(); y++)
+				for (int x = 0; x < m_display.width(); x++)
+					m_display.setPixel(QPoint(x, m_display.height() - 1 - y), (uchar)(m_last[x + y * m_display.height()] * 255));
+			m_isNew = false;
+		}
 		_p.setRenderHint(QPainter::Antialiasing, false);
 		_p.scale(_s.width() / m_display.width(), _s.height() / m_display.height());
 		_p.drawImage(0, 0, m_display);
@@ -68,15 +75,17 @@ bool Matrigraph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTyp
 	if (_inTypes.count() != 1 || !_inTypes[0].isA<Matrix>())
 		return false;
 	m_display = QImage(QSize(_inTypes[0].asA<Matrix>().width(), _inTypes[0].asA<Matrix>().height()), QImage::Format_Indexed8);
+	m_last.resize(_inTypes[0].scope());
 	for (int i = 0; i < 256; i++)
 		m_display.setColor(i, qRgb(i, i, i));
+	setupVisual(m_display.width(), m_display.height(), redrawPeriod());
 	return true;
 }
 
 void Matrigraph::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	this->setupVisual(128, 128, 1000 / max(1, _p["Refresh Frequency"].toInt()));
+	setupVisual(128, 128, _p["Refresh Frequency"].toInt() >= 1 ? 1000 / _p["Refresh Frequency"].toInt() : 0);
 }
 
 PropertiesInfo Matrigraph::specifyProperties() const

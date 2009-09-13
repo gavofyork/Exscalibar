@@ -39,8 +39,10 @@ public:
 	static void msleep(uint _ms) { QThread::msleep(_ms); }
 	static void usleep(uint _us) { QThread::msleep(_us); }
 
+	uint index() const { return m_index; }
+
 private:
-	QWorker(QScheduler* _boss);
+	QWorker(QScheduler* _boss, uint _index);
 	~QWorker();
 
 	static void setTerminationEnabled(bool _e) { QThread::setTerminationEnabled(_e); }
@@ -48,6 +50,9 @@ private:
 	virtual void run();
 
 	QScheduler* m_boss;
+	uint m_index;
+	int m_sinceLastWorked;
+	uint m_waitPeriod;
 };
 
 }

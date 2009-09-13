@@ -1,5 +1,11 @@
+BUG: FFT on own won't work with SS.
+Select/delete connections.
+Graph viewer.
+Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
-Delete connections.
+Dynamic properties.
+Scheduling seems a bit shit - update of SSM blocks other processors.
+
 Can't handle 48K rate.
 Processor information - paused, cycles, CPU, samples read, ticker.
 Buffer information.

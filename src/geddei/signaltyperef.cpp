@@ -22,11 +22,13 @@ namespace Geddei
 
 bool SignalTypeRef::operator==(const SignalType &p)
 {
+	assert(thePtr);
 	return thePtr->sameAs(&p);
 }
 
 bool SignalTypeRef::operator==(const SignalTypeRef &p)
 {
+	assert(thePtr);
 	return thePtr->sameAs(p.thePtr);
 }
 
@@ -46,11 +48,13 @@ SignalTypeRef &SignalTypeRef::operator=(const SignalTypeRef &p)
 
 uint SignalTypeRef::scope() const
 {
+	assert(thePtr);
 	return thePtr->scope();
 }
 
 float SignalTypeRef::frequency() const
 {
+	assert(thePtr);
 	return thePtr->frequency();
 }
 

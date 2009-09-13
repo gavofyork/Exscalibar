@@ -28,6 +28,7 @@ using namespace SignalTypes;
 class SelfSimilarity : public SubProcessor
 {
 	uint theSize, theStep, theBandWidth;
+	mutable QVector<float> theMatrix;
 	float(*theDistance)(const float *, const float *, const uint);
 
 	static inline float cosineDistance(const float *x, const float *y, uint bandWidth)
@@ -64,20 +65,18 @@ public:
 
 void SelfSimilarity::processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const
 {
-	float *theMatrix = new float[theSize * theSize];
-
 	// start off by invalidating the whole lot.
 	uint step = theSize;
 
 	for (uint c = 0; c < chunks; c++)
 	{	if (step < theSize)
-			memmove(theMatrix, theMatrix + (theSize * theStep) + theStep, (theSize * (theSize - theStep) - theStep) * sizeof(float));
+			memmove(theMatrix.data(), theMatrix.data() + (theSize * theStep) + theStep, (theSize * (theSize - theStep) - theStep) * sizeof(float));
 		for (uint i = theSize - step; i < theSize; i++)
 		{	const float *d0i = in[0].sample(c * theStep + i).readPointer();
 			for (uint j = 0; j < (i + 1); j++)
 				theMatrix[j*theSize + i] = theMatrix[i*theSize + j] = theDistance(in[0].sample(c * theStep + j).readPointer(), d0i, theBandWidth);
 		}
-		out[0].sample(c).copyFrom(theMatrix);
+		out[0].sample(c).copyFrom(theMatrix.constData());
 		step = theStep;
 	}
 }
@@ -94,6 +93,7 @@ void SelfSimilarity::initFromProperties(const Properties &properties)
 {
 	theSize = properties.get("Size").toInt();
 	theStep = properties.get("Step").toInt();
+	theMatrix.resize(theSize * theSize);
 	if (properties["Distance Function"].toInt() == 0)
 		theDistance = cosineDistance;
 	else if (properties["Distance Function"].toInt() == 1)

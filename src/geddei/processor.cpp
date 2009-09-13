@@ -497,6 +497,15 @@ bool Processor::go()
 		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(name()));
 		return false;
 	}
+	if (!theTypesConfirmed)
+	{
+		if (MESSAGES) qDebug("= Processors::go() (name=%s) Types not confirmed!", qPrintable(name()));
+		QFastMutexLocker lock(&theErrorSystem);
+		theError = TypesNotConfirmed;
+		theErrorWritten.wakeAll();
+		if (MESSAGES) qDebug("< Processors::go() (name=%s)", qPrintable(name()));
+		return false;
+	}
 	assert(!isRunning());
 
 	theErrorSystem.lock();
@@ -514,11 +523,6 @@ bool Processor::go()
 		return false;
 	}
 	theAllDone = false;
-
-	// Fill up any output slots left
-	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		if (!theOutputs[i])
-			theOutputs[i] = new LxConnectionNull(this, i);
 
 	start();
 
@@ -590,11 +594,13 @@ bool Processor::confirmTypes()
 		assert((uint)theSizesCache.count() == (uint)theOutputs.size());
 		if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Enforcing outputs minima (from cache):", qPrintable(name()));
 		for (uint i = 0; i != theTypesCache.count(); i++)
-			if (theOutputs[i])
-			{	if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
-				theOutputs[i]->setType(theTypesCache.ptrAt(i));
-				theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
-			}
+		{
+			if (!theOutputs[i])
+				theOutputs[i] = new LxConnectionNull(this, i);
+			if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
+			theOutputs[i]->setType(theTypesCache.ptrAt(i));
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
+		}
 		return true;
 	}
 
@@ -673,7 +679,7 @@ bool Processor::confirmTypes()
 			// We multiply it by 2 to get the maximum of 2xoutputMin and 2xinputMin.
 			// This is a cheap hack on what we really want which is outputMin+inputMin
 			// For that, we will need a new API call in order to seperate the two enforceMinimum()s.
-			(*i)->enforceMinimum(sizes[ii] * (*i)->type().scope());
+			(*i)->enforceMinimum(sizes[ii] * (*i)->type().scope() * 2);
 		}
 	}
 
@@ -683,15 +689,16 @@ bool Processor::confirmTypes()
 	{	assert(theTypesCache.count() == (uint)theOutputs.count());
 		if (MESSAGES) qDebug("Processor::confirmInputTypes(): Enforcing outputs minima for %s:", qPrintable(name()));
 		for (uint i = 0; i < theTypesCache.count(); i++)
-			if (theOutputs[i])
-			{
-				if (!theTypesCache.populated(i))
-					qFatal("*** FATAL: TypesCache has unpopulated entry (%d in %s). Bailing.", i, qPrintable(name()));
-				if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
-				theOutputs[i]->setType(theTypesCache.ptrAt(i));
-				if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
-				theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
-			}
+		{
+			if (!theOutputs[i])
+				theOutputs[i] = new LxConnectionNull(this, i);
+			if (!theTypesCache.populated(i))
+				qFatal("*** FATAL: TypesCache has unpopulated entry (%d in %s). Bailing.", i, qPrintable(name()));
+			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
+			theOutputs[i]->setType(theTypesCache.ptrAt(i));
+			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
+		}
 	}
 
 	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) All done (%d).", qPrintable(name()), theTypesConfirmed);
@@ -1156,6 +1163,7 @@ int CoProcessor::cyclesReady()
 
 int CoProcessor::doWork()
 {
+	if (MESSAGES&&0) qDebug("Processor[%s]: > doWork()", qPrintable(name()));
 	int ret = DidWork;
 	// TODO: check if canProcess could end up falling through trapdoor; if not then set/unsetThreadProcessor can be moved to go around process().
 	// Same with try/catch.
@@ -1166,7 +1174,7 @@ int CoProcessor::doWork()
 			ret = WillNeverWork;
 		else if (theError == Pending)
 		{
-			if (MESSAGES&&0) qDebug("Processor::processCycle(): (%s) Checking outputs...", qPrintable(name()));
+			if (MESSAGES) qDebug("Processor::processCycle(): (%s) Checking outputs...", qPrintable(name()));
 			bool allOk = true;
 			for (uint i = 0; i < (uint)theOutputs.size(); i++)
 			{
@@ -1204,12 +1212,18 @@ int CoProcessor::doWork()
 		{
 			ret = canProcess();
 			if (ret > 0)
-				ret = cyclesReady();
-			if (ret > 0)
 			{
-				theGuardsCrossed++;
-				ret = process();
+				int cr = cyclesReady();
+				if (cr > 0)
+				{
+					theGuardsCrossed++;
+					ret = process();
+				}
+				else
+					ret = NoWork;
 			}
+			else
+				ret = NoWork;
 
 			if (ret == WillNeverWork)
 			{
@@ -1233,6 +1247,7 @@ int CoProcessor::doWork()
 	catch(BailException &) { ret = WillNeverWork; }
 	catch(int e) { ret = WillNeverWork; }
 	unsetThreadProcessor();
+	if (MESSAGES&&0) qDebug("Processor[%s]: < doWork() [returned %d]", qPrintable(name()), ret);
 	return ret;
 }
 

@@ -129,6 +129,8 @@ bool BufferData::plunger() const
 
 void BufferData::copyFrom(const float *source)
 {
+	if (isNull())
+		return;
 	if (rollsOver())
 	{	memcpy(firstPart(), source, sizeFirstPart() * 4);
 		memcpy(secondPart(), source + sizeFirstPart(), sizeSecondPart() * 4);
@@ -139,6 +141,8 @@ void BufferData::copyFrom(const float *source)
 
 void BufferData::copyTo(float *destination) const
 {
+	if (isNull())
+		return;
 	if (rollsOver())
 	{	memcpy(destination, firstPart(), sizeFirstPart() * 4);
 		memcpy(destination + sizeFirstPart(), secondPart(), sizeSecondPart() * 4);
@@ -149,7 +153,8 @@ void BufferData::copyTo(float *destination) const
 
 void BufferData::copyFrom(const BufferData &data)
 {
-	if (theVisibleSize == Undefined) return;
+	if (isNull())
+		return;
 	if (rollsOver())
 	{	if (data.rollsOver())
 			if (sizeFirstPart() > data.sizeFirstPart())
@@ -178,7 +183,7 @@ void BufferData::copyFrom(const BufferData &data)
 
 BufferData &BufferData::dontRollOver(bool makeCopy)
 {
-	if (rollsOver())
+	if (!isNull() && rollsOver())
 	{	BufferData temp(*this);
 		BufferData *ret = this;
 		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
@@ -189,7 +194,7 @@ BufferData &BufferData::dontRollOver(bool makeCopy)
 
 const BufferData &BufferData::dontRollOver(bool makeCopy) const
 {
-	if (rollsOver())
+	if (!isNull() && rollsOver())
 	{	const BufferData temp(*this);
 		BufferData *ret = (BufferData *)this;
 		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
@@ -257,25 +262,31 @@ void BufferData::debugInfo() const
 const BufferData BufferData::mid(uint start, uint length) const
 {
 	BufferData ret = *this;
-	if (theInfo->theMask == (uint)~0)
-		// wrap around according to size as it's a custom buffer and mask is unavailable.
-		// NOTE: the buffer is theAccessibleSize big (it does not just refer to the
-		//       usable content (as it does with foreign Buffer theDatas)).
-		ret.theOffset = (theOffset + start) % theInfo->theAccessibleSize;
-	else
-		ret.theOffset = (theOffset + start) & theInfo->theMask;	// normally should just wrap around according to mask
-	ret.theVisibleSize = length;
+	if (!isNull())
+	{
+		if (theInfo->theMask == (uint)~0)
+			// wrap around according to size as it's a custom buffer and mask is unavailable.
+			// NOTE: the buffer is theAccessibleSize big (it does not just refer to the
+			//       usable content (as it does with foreign Buffer theDatas)).
+			ret.theOffset = (theOffset + start) % theInfo->theAccessibleSize;
+		else
+			ret.theOffset = (theOffset + start) & theInfo->theMask;	// normally should just wrap around according to mask
+		ret.theVisibleSize = length;
+	}
 	return ret;
 }
 
 BufferData BufferData::mid(uint start, uint length)
 {
 	BufferData ret = *this;
-	if (theInfo->theMask == (uint)~0)
-		ret.theOffset = (theOffset + start) % theInfo->theAccessibleSize;
-	else
-		ret.theOffset = (theOffset + start) & theInfo->theMask;
-	ret.theVisibleSize = length;
+	if (!isNull())
+	{
+		if (theInfo->theMask == (uint)~0)
+			ret.theOffset = (theOffset + start) % theInfo->theAccessibleSize;
+		else
+			ret.theOffset = (theOffset + start) & theInfo->theMask;
+		ret.theVisibleSize = length;
+	}
 	return ret;
 }
 

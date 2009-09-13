@@ -92,7 +92,7 @@ class SubProcessorItem;
 class DomProcessorItem: public ProcessorItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.2), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
+	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 
 	DomProcessor* domProcessor() const;
 
@@ -103,6 +103,8 @@ public:
 
 	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
+
+	void reorder() const;
 
 protected:
 	virtual void rejig(Processor* _old = 0, bool _bootStrap = false);

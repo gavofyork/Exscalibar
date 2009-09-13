@@ -20,13 +20,18 @@
 
 #define __GEDDEI_BUILD
 
+#include <QDateTime>
+
 #include <exscalibar.h>
 
 #include "qworker.h"
 using namespace QtExtra;
 
-QWorker::QWorker(QScheduler* _boss):
-	m_boss(_boss)
+QWorker::QWorker(QScheduler* _boss, uint _index):
+	m_boss				(_boss),
+	m_index				(_index),
+	m_sinceLastWorked	(0),
+	m_waitPeriod		(0)
 {
 	QThread::start();
 }
@@ -41,10 +46,10 @@ void QWorker::run()
 {
 	for (QTask* t = 0;;)
 	{
-		t = m_boss->nextTask(t);
+		t = m_boss->nextTask(t, this);
+		QTime timer = QTime::currentTime();
 		t->attemptProcess();
-		setTerminationEnabled(false);
-		yieldCurrentThread();
-		setTerminationEnabled(true);
+//		if (t->m_lastStatus >= 0)
+//			qDebug("WORKER %d: TIMESLICED TO %s; %d ms, %s", m_index, qPrintable(t->taskName()), timer.elapsed(), t->m_lastStatus >= 0 ? "WORKED" : "NO WORK");
 	}
 }

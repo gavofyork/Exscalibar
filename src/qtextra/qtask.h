@@ -44,7 +44,7 @@ public:
 	// -ve for how long (in us) we will be ignored.
 	// WillNeverWork and we will be ignored forever.
 	// NoWork and we will be ignored until something else completes work.
-	enum { WillNeverWork = INT_MIN, NoWork = -1, DidWork = 0, CanWork = 1 };
+	enum { WillNeverWork = INT_MIN, NoWork = -1, DidWork = 0, NoMoreWork = 0, CanWork = 1, CanStillWork = 1 };
 
 	void start();
 	void stop();
@@ -53,6 +53,7 @@ public:
 
 	virtual int doWork() { return WillNeverWork; }
 	virtual void onStopped() {}
+	virtual QString taskName() const { return QString::number((uint)this); }
 
 private:
 	virtual void attemptProcess();
