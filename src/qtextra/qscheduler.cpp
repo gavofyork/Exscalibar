@@ -94,11 +94,18 @@ QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 {
 	// Always runs from a QWorker thread.
 
+	int ls = 0;
+	if (m_tasks.contains(_last))
+	{
+		_last->l_execution.unlock();
+		ls = _last->m_lastStatus;
+	}
+
 	l_tasks.lock();
 
 	if (m_tasks.contains(_last))
 	{
-		if (_last->m_lastStatus == QTask::WillNeverWork)
+		if (ls == QTask::WillNeverWork)
 		{
 			_last->guaranteeStopped();
 			m_tasks.removeAll(_last);
@@ -106,25 +113,27 @@ QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 			_last->releaseGuarantee();
 			_last->onStopped();
 		}
-		else if (_last->m_lastStatus < 0)
+		else if (ls < 0)
 		{
 			_w->m_sinceLastWorked++;
-			_w->m_waitPeriod = qMin(_w->m_waitPeriod, (uint)-_last->m_lastStatus);
+			_w->m_waitPeriod = qMin((int)_w->m_waitPeriod, -ls);
 			if (_w->m_sinceLastWorked >= m_tasks.count())
 			{
 				l_tasks.unlock();
 				QWorker::setTerminationEnabled(true);
-//				qDebug("WORKER %d: SLEEPING", _w->m_index);
-				// TODO Configurable by the processors.
-				QThread::msleep(1);//_w->m_waitPeriod);
-				_w->m_waitPeriod = 0;
+//				qDebug("WORKER %d: SLEEPING FOR %d ms", _w->m_index, _w->m_waitPeriod);
+				QThread::msleep(_w->m_waitPeriod - 1);
 				QWorker::setTerminationEnabled(false);
 				l_tasks.lock();
+				_w->m_waitPeriod = (int)-QTask::NoWork;
 				_w->m_sinceLastWorked = 0;
 			}
 		}
 		else
+		{
+			_w->m_waitPeriod = (int)-QTask::NoWork;
 			_w->m_sinceLastWorked = 0;
+		}
 	}
 
 	QTask* ret = 0;
@@ -139,7 +148,15 @@ QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 			l_tasks.lock();
 		}
 		else
+		{
 			ret = m_tasks[(m_tasks.indexOf(_last) + 1) % m_tasks.count()];
+			if (!ret->l_execution.tryLock())
+			{
+				ret->m_lastStatus = QTask::ImminentWork;
+				_last = ret;
+				ret = 0;
+			}
+		}
 	}
 	l_tasks.unlock();
 	return ret;

@@ -126,27 +126,25 @@ bool ALSACapturer::processorStarted()
 
 int ALSACapturer::canProcess()
 {
-	AGAIN:
-
-	int av = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
-	if (av > 0)
+	forever
 	{
-		int x = snd_pcm_rewind(thePcmHandle, av);
-		if (x != av)
+		int av = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
+		if (av > 0)
 		{
-			snd_pcm_recover(thePcmHandle, x, 0);
-			return NoWork;
+			int x = snd_pcm_rewind(thePcmHandle, av);
+			if (x != av)
+				av = x;
 		}
-	}
-//	int av = snd_pcm_avail_update(thePcmHandle);
-	if (av >= (int)thePeriodSize)
-		return CanWork;
-	else if (av < 0)
-	{
+	//	int av = snd_pcm_avail_update(thePcmHandle);
+		if (av >= (int)thePeriodSize)
+			return CanWork;
+		else if (av >= 0)
+		{
+			int r = -(int)max(1u, (thePeriodSize - av) * 1000 / theFrequency);
+			return r;
+		}
 		snd_pcm_recover(thePcmHandle, av, 0);
-		goto AGAIN;
 	}
-	return NoWork;
 }
 
 int ALSACapturer::process()

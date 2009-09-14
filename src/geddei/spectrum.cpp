@@ -18,19 +18,23 @@ namespace SignalTypes
 
 bool Spectrum::sameAsBE(const SignalType *cmp) const
 {
-	return SignalType::sameAsBE(cmp) && dynamic_cast<const Spectrum *>(cmp)->theStep == theStep;
+	return SignalType::sameAsBE(cmp) && dynamic_cast<const Spectrum *>(cmp)->theStep == theStep && dynamic_cast<const Spectrum *>(cmp)->theMin == theMin && dynamic_cast<const Spectrum *>(cmp)->theMax == theMax;
 }
 
 void Spectrum::serialise(QSocketSession &sink) const
 {
 	SignalType::serialise(sink);
 	sink.safeSendWord(theStep);
+	sink.safeSendWord(theMin);
+	sink.safeSendWord(theMax);
 }
 
 void Spectrum::deserialise(QSocketSession &source)
 {
 	SignalType::deserialise(source);
 	theStep = source.safeReceiveWord<float>();
+	theMin = source.safeReceiveWord<float>();
+	theMax = source.safeReceiveWord<float>();
 }
 
 }

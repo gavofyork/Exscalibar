@@ -37,7 +37,7 @@ class DLLEXPORT Spectrum: public SignalType
 	virtual void deserialise(QSocketSession &source);
 	virtual uint id() const { return 2; }
 	virtual bool sameAsBE(const SignalType *cmp) const;
-	virtual SignalType *copyBE() const { return new Spectrum(theScope, theFrequency, theStep); }
+	virtual SignalType *copyBE() const { return new Spectrum(theScope, theFrequency, theStep, theMax, theMin); }
 
 protected:
 	float theStep; ///< Step between spectral bands of represented Spectrum.

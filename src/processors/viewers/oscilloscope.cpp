@@ -48,15 +48,15 @@ bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	_p.setRenderHint(QPainter::Antialiasing, false);
 	_p.translate(0, _s.height() / 2);
+	_p.scale(1, _s.height() / 2);
 	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
 	_p.drawLine(0, 0, _s.width(), 0);
+	_p.drawLine(0, .5f, _s.width(), .5f);
+	_p.drawLine(0, -.5f, _s.width(), -.5f);
+	_p.setPen(QPen(Qt::black, 0));
 	if (isRunning())
-	{
-		_p.setPen(QPen(Qt::black, 0));
-		_p.scale(1, _s.height() / 2);
 		for (int i = 2; i < _s.width(); i+=2)
 			_p.drawLine(QLineF(i - 2, m_last[(i - 2) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
-	}
 	return true;
 }
 

@@ -1222,8 +1222,6 @@ int CoProcessor::doWork()
 				else
 					ret = NoWork;
 			}
-			else
-				ret = NoWork;
 
 			if (ret == WillNeverWork)
 			{

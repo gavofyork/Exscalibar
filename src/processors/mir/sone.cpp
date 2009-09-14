@@ -92,7 +92,7 @@ bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 	// TODO: should only take a "stepped spectrum" in.
 	if (!inTypes[0].isA<Spectrum>()) return false;
 //	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes = inTypes;
+	outTypes[0] = Spectrum(inTypes[0].asA<Spectrum>().size(), inTypes[0].asA<Spectrum>().frequency(), inTypes[0].asA<Spectrum>().step(), 60, 0);
 	return true;
 }
 
@@ -109,7 +109,7 @@ class Rhythm: public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 
-	
+
 public:
 	Rhythm() : SubProcessor("Rhythm") {}
 };
@@ -137,7 +137,7 @@ class Histogram: public SubProcessor
 	uint theRows, theColumns, theCount, theStep;
 	float thePeriod, theOverlap;
 	float *theWindow;
-	
+
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
@@ -171,14 +171,14 @@ bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeR
 	theCount = uint(thePeriod * inTypes[0].frequency());
 	theStep = uint(theOverlap * inTypes[0].frequency());
 	setupSamplesIO(theCount, theStep, 1);
-	
+
 	delete [] theWindow;
 	theWindow = new float[theCount];
 	for (uint i = 0; i < theCount; ++i)
 	{
 		theWindow[i] = 1.f;//.5f * (1.f - cos(2.f * M_PI * float(i) / float(theCount - 1)));
 	}
-	
+
 	return true;
 }
 

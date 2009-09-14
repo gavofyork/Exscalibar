@@ -51,7 +51,7 @@ class SelfSimilarity : public SubProcessor
 		float ret = 0.;
 		for (uint i = 0; i < bandWidth; i++)
 			ret += (x[i] - y[i]) * (x[i] - y[i]);
-		return sqrt(ret);
+		return -sqrt(ret);
 	}
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;

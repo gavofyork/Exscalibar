@@ -57,11 +57,5 @@ void QTask::wait() const
 
 void QTask::attemptProcess()
 {
-	if (l_execution.tryLock())
-	{
-		m_lastStatus = doWork();
-		l_execution.unlock();
-	}
-	else
-		m_lastStatus = NoWork;
+	m_lastStatus = doWork();
 }
