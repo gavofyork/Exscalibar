@@ -273,7 +273,7 @@ void ProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
 	m_resizing = false;
 	QGraphicsItem::mouseReleaseEvent(_e);
-	setPos(round(pos().x()) + .5f, round(pos().y()) + .5f);
+	setPos(floor(pos().x()) + .5f, floor(pos().y()) + .5f);
 }
 
 void ProcessorItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
@@ -291,30 +291,54 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		QPointF d = _e->pos() + m_origPosition;
 		prepareGeometryChange();
 		m_size = QSizeF(d.x(), d.y());
-		rejig();
 	}
 	else
 	{
-		QPointF best = QPointF(1.0e99, 1.0e99);
 		QGraphicsItem::mouseMoveEvent(_e);
-		foreach (QGraphicsItem* i, scene()->items())
+	}
+
+	QPointF best = QPointF(1.0e99, 1.0e99);
+	foreach (QGraphicsItem* i, scene()->items())
+	{
+		QList<QPointF> was;
+		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
 		{
-			QPointF wa = QPointF(1.0e99, 1.0e99);
-			if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
+			if ((ci->toProcessor() == this || ci->fromProcessor() == this) && !m_resizing)
+				was << (ci->toProcessor() == this ? 1 : -1) * ci->wouldAdjust();
+		}
+		else if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+		{
+			if (pi != this)
 			{
-				if (ci->toProcessor() == this || ci->fromProcessor() == this)
-					wa = (ci->toProcessor() == this ? 1 : -1) * ci->wouldAdjust();
+				if (!m_resizing)
+				{
+					was << QPointF(pi->pos().x() - pos().x(), pi->pos().y() - pos().y());																				// their left, my left.
+					was << QPointF(pi->pos().x() + pi->m_size.width() - pos().x(), pi->pos().y() + pi->m_size.height() - pos().y());									// their right, my left.
+				}
+				was << QPointF(pi->pos().x() + pi->m_size.width() - pos().x() - m_size.width(), pi->pos().y() + pi->m_size.height() - pos().y() - m_size.height());	// their right, my right.
+				was << QPointF(pi->pos().x() - pos().x() - m_size.width(), pi->pos().y() - pos().y() - m_size.height());											// their left, my right.
 			}
-			else if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
-			{
-				if (pi != this)
-					wa = QPointF(pi->pos().x() - pos().x(), pi->pos().y() - pos().y());
-			}
+		}
+		foreach (QPointF wa, was)
+		{
 			if (fabs(best.x()) > fabs(wa.x()))
 				best.setX(wa.x());
 			if (fabs(best.y()) > fabs(wa.y()))
 				best.setY(wa.y());
 		}
+	}
+
+	if (m_resizing)
+	{
+		qDebug() << best;
+		if (fabs(best.x()) < 5)
+			m_size = m_size + QSizeF(best.x(), 0);
+		if (fabs(best.y()) < 5)
+			m_size = m_size + QSizeF(0, best.y());
+		rejig();
+	}
+	else
+	{
 		if (fabs(best.x()) < 5)
 			setPos(pos() + QPointF(best.x(), 0));
 		if (fabs(best.y()) < 5)

@@ -23,11 +23,24 @@ using namespace SignalTypes;
 
 class DiagonalSum : public SubProcessor
 {
-	uint theSize, theBandwidth;
+	uint theSize;
+	uint theBandwidth;
+	bool m_minimiseLatency;
+	uint m_minWidth;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &/*properties*/) { setupIO(1, 1, 1, 1, 1); }
+	virtual PropertiesInfo specifyProperties() const
+	{
+		return PropertiesInfo	("Minimise Latency", true, "Take only the minimum required amount of data from the closest to present.")
+								("Minimum Width", 16, "The minimum matrix width to be used while minimising latency.");
+	}
+	virtual void initFromProperties(Properties const& _p)
+	{
+		setupIO(1, 1, 1, 1, 1);
+		m_minimiseLatency = _p["Minimise Latency"].toBool();
+		m_minWidth = _p["Minimum Width"].toInt();
+	}
 public:
 	DiagonalSum() : SubProcessor("DiagonalSum") {}
 };
@@ -43,12 +56,20 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 
 void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for (uint offset = 0; offset < theBandwidth; offset++)
-	{	out[0][offset] = 0;
-		for (uint xy = 0; xy < theSize; xy++)
-			out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
-		out[0][offset] /= theSize;
-	}
+	if (m_minimiseLatency)
+		for (uint offset = 0; offset < theBandwidth; offset++)
+		{	out[0][offset] = 0;
+			for (uint xy = theSize - qMax(m_minWidth, offset * 2); xy < theSize; xy++)
+				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
+			out[0][offset] /= qMax(m_minWidth, offset * 2);
+		}
+	else
+		for (uint offset = 0; offset < theBandwidth; offset++)
+		{	out[0][offset] = 0;
+			for (uint xy = 0; xy < theSize; xy++)
+				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
+			out[0][offset] /= theSize;
+		}
 }
 
 EXPORT_CLASS(DiagonalSum, 0,2,0, SubProcessor);

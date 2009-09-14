@@ -119,10 +119,19 @@ QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 			_w->m_waitPeriod = qMin((int)_w->m_waitPeriod, -ls);
 			if (_w->m_sinceLastWorked >= m_tasks.count())
 			{
+				uint wp = _w->m_waitPeriod;
+				foreach (QWorker* w, m_workers)
+					if (w->m_sinceLastWorked < m_tasks.count())
+					{
+						wp = 1;
+						break;
+					}
+					else
+						wp = qMin(wp, w->m_waitPeriod);
 				l_tasks.unlock();
 				QWorker::setTerminationEnabled(true);
-//				qDebug("WORKER %d: SLEEPING FOR %d ms", _w->m_index, _w->m_waitPeriod);
-				QThread::msleep(_w->m_waitPeriod - 1);
+//				qDebug("WORKER %d: SLEEPING FOR %d ms", _w->m_index, wp);
+				QThread::msleep(wp);
 				QWorker::setTerminationEnabled(false);
 				l_tasks.lock();
 				_w->m_waitPeriod = (int)-QTask::NoWork;
@@ -152,7 +161,6 @@ QTask* QScheduler::nextTask(QTask* _last, QWorker* _w)
 			ret = m_tasks[(m_tasks.indexOf(_last) + 1) % m_tasks.count()];
 			if (!ret->l_execution.tryLock())
 			{
-				ret->m_lastStatus = QTask::ImminentWork;
 				_last = ret;
 				ret = 0;
 			}

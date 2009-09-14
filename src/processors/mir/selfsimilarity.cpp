@@ -48,10 +48,12 @@ class SelfSimilarity : public SubProcessor
 
 	static inline float magnitudeDistance(const float *x, const float *y, uint bandWidth)
 	{
-		float ret = 0.;
+		float ret = 0.f;
 		for (uint i = 0; i < bandWidth; i++)
 			ret += (x[i] - y[i]) * (x[i] - y[i]);
-		return -sqrt(ret);
+		if (!isnan(ret))
+			return ret > 0 ? 1.f / (1.f + sqrt(ret)) : 1.f;
+		return 0;
 	}
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;

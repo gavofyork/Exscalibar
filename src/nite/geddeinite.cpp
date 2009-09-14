@@ -171,7 +171,7 @@ void GeddeiNite::slotUpdateProperties()
 			theProperties->setItem(i, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
 		}
 		theProperties->resizeColumnsToContents();
-		theProperties->setEnabled(true);
+		theProperties->setEnabled(!theRunning);
 	}
 	else if (SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(i))
 	{
@@ -183,7 +183,7 @@ void GeddeiNite::slotUpdateProperties()
 			theProperties->setItem(i, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
 		}
 		theProperties->resizeColumnsToContents();
-		theProperties->setEnabled(true);
+		theProperties->setEnabled(!theRunning);
 	}
 /*	else if (i && qgraphicsitem_cast<ConnectionItem*>(i))
 	{
@@ -346,6 +346,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		if (connectAll() && theGroup.go(true))
 		{
 			theProperties->setEnabled(false);
+			theProcessors->setEnabled(false);
 			theScene.onStarted();
 			theRunning = true;
 		}
@@ -367,6 +368,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		theGroup.reset();
 		disconnectAll();
 		theProperties->setEnabled(true);
+		theProcessors->setEnabled(true);
 	}
 	theScene.update();
 }

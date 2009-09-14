@@ -55,14 +55,18 @@ int Spectroscope::process()
 	input(0).readSample().copyTo(m_last.data());
 	if (m_autoScale)
 	{
-		float frameMin = m_last[0];
-		float frameMax = m_last[0];
+		float frameMin = INT_MAX;
+		float frameMax = INT_MIN;
 		foreach (float f, m_last)
-			frameMin = min(f, frameMin), frameMax = max(f, frameMax);
-		m_curMin = lerp(frameMin, m_curMin, m_dropSpeedMin);
-		m_curMax = lerp(frameMax, m_curMax, m_dropSpeedMax);
-		m_minAmp = m_curMin;
-		m_deltaAmp = m_curMax - m_curMin;
+			if (!isnan(f) && !isinf(f))
+				frameMin = min(f, frameMin), frameMax = max(f, frameMax);
+		if (frameMin != (float)INT_MAX && frameMax != (float)INT_MIN)
+		{
+			m_curMin = lerp(frameMin, m_curMin, m_dropSpeedMin);
+			m_curMax = lerp(frameMax, m_curMax, m_dropSpeedMax);
+			m_minAmp = m_curMin;
+			m_deltaAmp = m_curMax - m_curMin;
+		}
 	}
 	return DidWork;
 }

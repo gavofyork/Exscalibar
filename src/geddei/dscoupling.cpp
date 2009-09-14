@@ -33,6 +33,8 @@ int DSCoupling::doWork()
 	if (!m_isReady)
 	{
 		theSubProc->processChunks(m_ins, m_outs, m_chunks);
+		m_ins.nullify();
+		m_outs.nullify();
 		m_isReady = true;
 		return DidWork;
 	}

@@ -25,7 +25,7 @@ using namespace SignalTypes;
  */
 class Matrigraph: public CoProcessor
 {
-	mutable QImage m_display;
+	mutable QPixmap m_display;
 	QVector<float> m_last;
 	mutable bool m_isNew;
 
@@ -54,14 +54,18 @@ bool Matrigraph::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	{
 		if (m_isNew)
 		{
-			for (int y = 0; y < m_display.height(); y++)
-				for (int x = 0; x < m_display.width(); x++)
-					m_display.setPixel(QPoint(x, m_display.height() - 1 - y), (uchar)(m_last[x + y * m_display.height()] * 255));
+			QImage im(m_display.size(), QImage::Format_Indexed8);
+			for (int i = 0; i < 256; i++)
+				im.setColor(i, qRgb(i, i, i));
+			for (int y = 0; y < im.height(); y++)
+				for (int x = 0; x < im.width(); x++)
+					im.setPixel(QPoint(x, im.height() - 1 - y), (uchar)(m_last[x + y * im.height()] * 255));
+			m_display = QPixmap::fromImage(im);
 			m_isNew = false;
 		}
 		_p.setRenderHint(QPainter::Antialiasing, false);
 		_p.scale(_s.width() / m_display.width(), _s.height() / m_display.height());
-		_p.drawImage(0, 0, m_display);
+		_p.drawPixmap(0, 0, m_display);
 	}
 	return true;
 }
@@ -74,10 +78,8 @@ bool Matrigraph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTyp
 {
 	if (_inTypes.count() != 1 || !_inTypes[0].isA<Matrix>())
 		return false;
-	m_display = QImage(QSize(_inTypes[0].asA<Matrix>().width(), _inTypes[0].asA<Matrix>().height()), QImage::Format_Indexed8);
 	m_last.resize(_inTypes[0].scope());
-	for (int i = 0; i < 256; i++)
-		m_display.setColor(i, qRgb(i, i, i));
+	m_display = QPixmap(_inTypes[0].asA<Matrix>().width(), _inTypes[0].asA<Matrix>().height());
 	setupVisual(m_display.width(), m_display.height(), redrawPeriod());
 	return true;
 }
