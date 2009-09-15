@@ -56,7 +56,7 @@ class SelfSimilarity : public SubProcessor
 		return 0;
 	}
 
-	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
@@ -66,10 +66,9 @@ public:
 	SelfSimilarity() : SubProcessor("SelfSimilarity") {}
 };
 
-void SelfSimilarity::processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const
+void SelfSimilarity::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks)
 {
-	// start off by invalidating the whole lot.
-	uint step = theSize;
+	uint step = theStep;	// theSize to invalidate the lot.
 
 	for (uint c = 0; c < chunks; c++)
 	{	if (step < theSize)

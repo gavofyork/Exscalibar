@@ -86,7 +86,7 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="viewSnapToGrid"/>
+    <addaction name="viewDynamicDisplay"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="editMenu"/>
@@ -442,7 +442,7 @@
     <cstring>editFindAction</cstring>
    </property>
   </action>
-  <action name="viewSnapToGrid">
+  <action name="viewDynamicDisplay">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -454,13 +454,13 @@
      <normaloff>image17</normaloff>image17</iconset>
    </property>
    <property name="text">
-    <string>&amp;Snap To Grid</string>
+    <string>&amp;Dynamic display</string>
    </property>
    <property name="iconText">
     <string>Snap To Grid</string>
    </property>
    <property name="name" stdset="0">
-    <cstring>viewSnapToGridAction</cstring>
+    <cstring>viewDynamicDisplayAction</cstring>
    </property>
   </action>
   <action name="editRemove">

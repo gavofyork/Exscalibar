@@ -2,6 +2,7 @@ Select/delete connections.
 Graph viewer.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
+Make SelfSim stateful (possibly have it as a stateful Sub?).
 
 Can't handle 48K rate.
 Processor information - paused, cycles, CPU, samples read, ticker.

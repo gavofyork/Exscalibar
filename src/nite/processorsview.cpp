@@ -13,7 +13,7 @@ ProcessorsView::ProcessorsView(QWidget* _parent): QGraphicsView(_parent)
 {
 }
 
-ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1)
+ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1), m_dynamicDisplay(true)
 {
 }
 
@@ -68,9 +68,10 @@ void ProcessorsScene::onStopped()
 
 void ProcessorsScene::timerEvent(QTimerEvent*)
 {
-	foreach (QGraphicsItem* i, items())
-		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
-			pi->tick();
+	if (m_dynamicDisplay)
+		foreach (QGraphicsItem* i, items())
+			if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+				pi->tick();
 }
 
 void ProcessorsScene::beginConnect(OutputItem* _from)

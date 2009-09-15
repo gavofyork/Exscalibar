@@ -38,6 +38,8 @@ public:
 	void						beginConnect(OutputItem* _from);
 	IncompleteConnectionItem*	incompleteConnectionItem() const { return m_currentConnect; }
 
+	void						setDynamicDisplay(bool _v) { m_dynamicDisplay = _v; }
+
 	void						onStarted();
 	void						onStopped();
 
@@ -55,5 +57,6 @@ private:
 
 	IncompleteConnectionItem*	m_currentConnect;
 	int							m_timerId;
+	bool						m_dynamicDisplay;
 };
 

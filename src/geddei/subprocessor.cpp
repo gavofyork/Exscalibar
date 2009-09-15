@@ -85,6 +85,11 @@ void SubProcessor::processChunks(const BufferDatas &in, BufferDatas &out, uint c
 	}
 }
 
+void SubProcessor::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks)
+{
+	processChunks(in, out, chunks);
+}
+
 void SubProcessor::defineIO(uint numInputs, uint numOutputs)
 {
 	theNumInputs = numInputs;

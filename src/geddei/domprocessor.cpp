@@ -193,7 +193,10 @@ int DomProcessor::process()
 			theCurrentIns.copyData(i, input(i).peekSamples(samples));	// normally would be theWantSamples
 		for (uint i = 0; i < theCurrentOuts.count(); i++)
 			theCurrentOuts.copyData(i, output(i).makeScratchSamples(chunks * theSamplesOut));	// normally would be theWantChunks * theSamplesOut
-		thePrimary->processChunks(theCurrentIns, theCurrentOuts, chunks);
+		if (theWorkers.count())
+			thePrimary->processChunks(theCurrentIns, theCurrentOuts, chunks);
+		else
+			thePrimary->processOwnChunks(theCurrentIns, theCurrentOuts, chunks);
 		for (uint i = 0; i < theCurrentOuts.count(); i++)
 			output(i) << theCurrentOuts[i];
 		theCurrentIns.nullify();
@@ -213,7 +216,9 @@ int DomProcessor::process()
 		{
 			BufferDatas ins = theCurrentIns.samples(i * chunksEach * theSamplesStep, chunksEach * (theSamplesStep - 1) + theSamplesIn);
 			BufferDatas outs = theCurrentOuts.samples(i * chunksEach * theSamplesOut, chunksEach * theSamplesOut);
-			if (i == theWorkers.count())
+			if (!theWorkers.count())
+				thePrimary->processOwnChunks(ins, outs, chunksEach);
+			else if (i == theWorkers.count())
 				thePrimary->processChunks(ins, outs, chunksEach);
 			else
 				theWorkers[i]->processChunks(ins, outs, chunksEach);

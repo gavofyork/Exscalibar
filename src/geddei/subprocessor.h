@@ -193,6 +193,7 @@ protected:
 	 * @sa processChunk()
 	 */
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 
 	/**
 	 * Reimplement to provide property specifications and default values for this

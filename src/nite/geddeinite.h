@@ -27,6 +27,7 @@
 #include <Geddei>
 using namespace Geddei;
 
+#include "processorsview.h"
 #include "ui_geddeinitebase.h"
 
 /** @internal
@@ -63,6 +64,7 @@ private slots:
 	void			on_fileExit_activated() { qApp->exit(); }
 	void			on_editRemove_activated();
 	void			on_toolsDeployPlayer_activated();
+	void			on_viewDynamicDisplay_toggled(bool _dd) { theScene.setDynamicDisplay(_dd); }
 
 private:
 	void			doSave(const QString &filename);
