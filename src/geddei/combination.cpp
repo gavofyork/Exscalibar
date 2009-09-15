@@ -67,6 +67,13 @@ void Combination::initFromProperties(const Properties& _p)
 		qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", qPrintable(theX->theType), theX->theIn, theX->theStep, theX->theOut, qPrintable(theY->theType), theY->theIn, theY->theStep, theY->theOut);
 }
 
+void Combination::updateFromProperties(const Properties& _p)
+{
+	Properties p = _p;
+	theY->updateFromProperties(p.unstash());
+	theX->updateFromProperties(p);
+}
+
 bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	SignalTypeRefs r(1);

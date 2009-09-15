@@ -240,6 +240,25 @@ void SubProcessorItem::focusInEvent(QFocusEvent* _e)
 	QGraphicsItem::focusInEvent(_e);
 }
 
+void SubProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
+{
+	domProcessorItem()->mouseReleaseEvent(_e);
+	domProcessorItem()->setSelected(false);
+	QGraphicsItem::mouseReleaseEvent(_e);
+}
+
+void SubProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
+{
+	domProcessorItem()->mousePressEvent(_e);
+	domProcessorItem()->setSelected(false);
+	QGraphicsItem::mousePressEvent(_e);
+}
+
+void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
+{
+	domProcessorItem()->mouseMoveEvent(_e);
+}
+
 ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name, QSizeF const& _size): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(_size), m_timerId(-1), m_resizing(true)
 {
 	m_statusBar = new QGraphicsRectItem(this);
@@ -330,7 +349,6 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 
 	if (m_resizing)
 	{
-		qDebug() << best;
 		if (fabs(best.x()) < 5)
 			m_size = m_size + QSizeF(best.x(), 0);
 		if (fabs(best.y()) < 5)
@@ -379,7 +397,10 @@ Processor* ProcessorItem::reconstructProcessor()
 void ProcessorItem::propertiesChanged(QString const& _newName)
 {
 	if (m_processor && m_processor->isRunning())
+	{
+		m_processor->update(completeProperties());
 		return;
+	}
 	Processor* old = m_processor;
 	m_processor = reconstructProcessor();
 	if (!m_processor)

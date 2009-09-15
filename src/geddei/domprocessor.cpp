@@ -273,6 +273,19 @@ void DomProcessor::initFromProperties(const Properties &properties)
 		w->defineIO(numInputs(), numOutputs());
 }
 
+void DomProcessor::updateFromProperties(const Properties &properties)
+{
+	Properties tp = properties;
+	Properties wp = tp.unstash();
+	theDebug = tp["Debug"].toBool();
+
+	thePrimary->updateFromProperties(wp);
+	// TODO!!! DxCoupling API for updateFromProperties.
+/*	foreach (DxCoupling* w, theWorkers)
+		w->updateFromProperties(wp);*/
+	theProperties = wp;
+}
+
 }
 
 #undef MESSAGES

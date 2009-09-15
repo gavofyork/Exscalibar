@@ -519,6 +519,7 @@ protected:
 	 * @param properties The given properties.
 	 */
 	virtual void initFromProperties(const Properties &properties) = 0;
+	virtual void updateFromProperties(const Properties &) {}
 
 	/**
 	 * Reimplement to restrict signal types this class can handle, and define signaltypes
@@ -654,6 +655,7 @@ public:
 	 * value is taken from the properties() method.
 	 */
 	void init(const QString &name = "", const Properties &properties = Properties()) { doInit(name, 0, properties); }
+	void update(Properties const& _p) { updateFromProperties(_p); }
 
 	/**
 	 * Checks if the previously called init() has failed.

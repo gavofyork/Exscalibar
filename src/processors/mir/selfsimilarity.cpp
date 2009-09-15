@@ -58,6 +58,7 @@ class SelfSimilarity : public SubProcessor
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 
@@ -96,13 +97,18 @@ void SelfSimilarity::initFromProperties(const Properties &properties)
 	theSize = properties.get("Size").toInt();
 	theStep = properties.get("Step").toInt();
 	theMatrix.resize(theSize * theSize);
+	updateFromProperties(properties);
+	setupIO(1, 1, theSize, theStep, 1);
+}
+
+void SelfSimilarity::updateFromProperties(const Properties &properties)
+{
 	if (properties["Distance Function"].toInt() == 0)
 		theDistance = cosineDistance;
 	else if (properties["Distance Function"].toInt() == 1)
 		theDistance = magnitudeDistance;
 	else
 		qFatal("*** ERROR: Invalid distance function index given.");
-	setupIO(1, 1, theSize, theStep, 1);
 }
 
 PropertiesInfo SelfSimilarity::specifyProperties() const

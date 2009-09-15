@@ -30,6 +30,7 @@ class DLLEXPORT Combination: public SubProcessor
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
+	virtual void updateFromProperties(Properties const&p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QString type() const { return theX->type() + "&" + theY->type(); }
 

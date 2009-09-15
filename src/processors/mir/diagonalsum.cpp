@@ -27,18 +27,25 @@ class DiagonalSum : public SubProcessor
 	uint theBandwidth;
 	bool m_minimiseLatency;
 	uint m_minWidth;
+	float m_alpha;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Minimise Latency", true, "Take only the minimum required amount of data from the closest to present.")
+								("Alpha", 1.0, "Alpha value for the power function.")
 								("Minimum Width", 16, "The minimum matrix width to be used while minimising latency.");
 	}
 	virtual void initFromProperties(Properties const& _p)
 	{
 		setupIO(1, 1, 1, 1, 1);
+		updateFromProperties(_p);
+	}
+	virtual void updateFromProperties(Properties const& _p)
+	{
 		m_minimiseLatency = _p["Minimise Latency"].toBool();
+		m_alpha = _p["Alpha"].toDouble();
 		m_minWidth = _p["Minimum Width"].toInt();
 	}
 public:
@@ -57,19 +64,26 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
 	if (m_minimiseLatency)
-		for (uint offset = 0; offset < theBandwidth; offset++)
-		{	out[0][offset] = 0;
-			for (uint xy = theSize - qMax(m_minWidth, offset * 2); xy < theSize; xy++)
-				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
-			out[0][offset] /= qMax(m_minWidth, offset * 2);
+		for (uint offset = 1; offset < theBandwidth; offset++)
+		{
+			out[0][offset] = 0;
+			float outOf = 0;
+			for (int xy = theSize - 1; xy >= 0; xy--)
+			{
+				float am = pow((float)(xy / offset) / float((theSize - 1) / offset), m_alpha);
+				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)] * am;
+				outOf += am;
+			}
+			out[0][offset] /= outOf;
 		}
 	else
-		for (uint offset = 0; offset < theBandwidth; offset++)
+		for (uint offset = 1; offset < theBandwidth; offset++)
 		{	out[0][offset] = 0;
 			for (uint xy = 0; xy < theSize; xy++)
 				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
 			out[0][offset] /= theSize;
 		}
+	out[0][0] = in[0][0];
 }
 
 EXPORT_CLASS(DiagonalSum, 0,2,0, SubProcessor);

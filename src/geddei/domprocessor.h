@@ -111,6 +111,7 @@ class DLLEXPORT DomProcessor: public CoProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
 	virtual void specifyInputSpace(QVector<uint> &samples);
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 	virtual void requireInputSpace(QVector<uint> &samples);

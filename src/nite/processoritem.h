@@ -149,6 +149,9 @@ private:
 	}
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void focusInEvent(QFocusEvent* _e);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 
 	Properties			m_properties;
 	QString				m_type;

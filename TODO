@@ -2,7 +2,6 @@ Select/delete connections.
 Graph viewer.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
-Dynamic properties.
 
 Can't handle 48K rate.
 Processor information - paused, cycles, CPU, samples read, ticker.

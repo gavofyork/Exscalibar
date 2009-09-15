@@ -242,7 +242,8 @@ protected:
 	 * @param properties The given Properties for the SubProcessor to be initialised
 	 * with.
 	 */
-	virtual void initFromProperties(const Properties &properties) = 0;
+	virtual void initFromProperties(Properties const& _p) { updateFromProperties(_p); }
+	virtual void updateFromProperties(Properties const&) {}
 
 	/**
 	 * Determine the multiplicity of the connection. Only valid after setupIO() has
