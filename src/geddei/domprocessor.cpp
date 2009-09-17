@@ -117,7 +117,8 @@ void DomProcessor::specifyInputSpace(QVector<uint> &samples)
 		uint optimalChunks = (optimalSamples - theSamplesIn) / theSamplesStep;
 
 		// Formulate in terms of whole chunks, make sure it's divisible by the readers, recalculate how many samples.
-		theWantChunks = uint(ceil(exp((log(double(optimalChunks)) - log(double(theWantChunks))) * theWeighting + log(double(theWantChunks))))) / (theWorkers.count() + 1) * (theWorkers.count() + 1);
+		theWantChunks = max(theWantChunks, uint(ceil(exp((log(double(optimalChunks)) - log(double(theWantChunks))) * theWeighting + log(double(theWantChunks))))) / (theWorkers.count() + 1) * (theWorkers.count() + 1));
+
 	}
 
 	theWantSamples = (theWantChunks - 1) * theSamplesStep + theSamplesIn;

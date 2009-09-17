@@ -42,11 +42,11 @@ public:
 	 *
 	 * @param frequency The sampling frequency of the values. That is, the
 	 * inverse of the delay (in signal time) between each value (sample).
-	 * 
+	 *
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	Value(float frequency = 0) : SignalType(1, frequency) {}
+	Value(float frequency = 0, float _max = 1.f, float _min = 0.f) : SignalType(1, frequency, _max, _min) {}
 };
 
 };

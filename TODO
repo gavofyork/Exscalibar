@@ -1,5 +1,6 @@
 Select/delete connections.
 Graph viewer.
+Multiplicity, multi-processor.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
 Make SelfSim stateful (possibly have it as a stateful Sub?).

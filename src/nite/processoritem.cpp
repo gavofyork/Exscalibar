@@ -379,7 +379,7 @@ void ProcessorItem::tick()
 
 void ProcessorItem::timerEvent(QTimerEvent*)
 {
-	update();
+	update(clientArea().adjusted(2, 2, -2, -2));
 }
 
 void ProcessorItem::typesConfirmed()
@@ -543,11 +543,11 @@ void ProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget
 
 	QRectF ca = clientArea();
 	_p->setPen(Qt::NoPen);
-	_p->setBrush(QColor(0, 0, 0, 128));
+	_p->setBrush(QColor(224, 224, 224));
 	_p->drawRect(ca);
 
-	_p->setClipping(true);
-	_p->setClipRect(ca, Qt::IntersectClip);
+//	_p->setClipping(true);
+//	_p->setClipRect(ca, Qt::IntersectClip);
 	_p->translate(ca.topLeft());
 	if (m_processor)
 		m_processor->draw(*_p, ca.size());

@@ -86,7 +86,8 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 	out[0][0] = theOut[0] / float(theSize / 2);
 	for (int i = 1; i < theSize / 2; i++)
 	{
-		out[0][i] = sqrt(theOut[i] * theOut[i] + theOut[theSize - i] * theOut[theSize - i]) / float(theSize / 2);
+		float xsq = theOut[i] * theOut[i] + theOut[theSize - i] * theOut[theSize - i];
+		out[0][i] = xsq > 0 ? sqrt(xsq) / float(theSize / 2) : 0;
 	}
 	out[0][theSize / 2] = theOut[theSize / 2] / float(theSize / 2);
 }

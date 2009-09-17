@@ -41,8 +41,6 @@ class DLLEXPORT Spectrum: public SignalType
 
 protected:
 	float theStep; ///< Step between spectral bands of represented Spectrum.
-	float theMin;
-	float theMax;
 
 public:
 	/**
@@ -52,9 +50,6 @@ public:
 	 * @return The midpoint frequency of band @a band.
 	 */
 	float bandFrequency(uint band) const { return band * theStep; }
-
-	float minAmplitude() const { return theMin; }
-	float maxAmplitude() const { return theMax; }
 
 	/**
 	 * Gets the number of bands in the spectra of the signal to which this
@@ -89,7 +84,7 @@ public:
 	 * @param step The increase in audio frequency (in Hz) per band. It is
 	 * currently assumed that the signal is a monotonically stepped spectrum.
 	 */
-	Spectrum(uint size = 1, float frequency = 0, float step = 1, float _max = 1.f, float _min = 0.f) : SignalType(size, frequency), theStep(step), theMin(_min), theMax(_max) {}
+	Spectrum(uint size = 1, float frequency = 0, float step = 1, float _max = 1.f, float _min = 0.f) : SignalType(size, frequency, _max, _min), theStep(step) {}
 };
 
 };

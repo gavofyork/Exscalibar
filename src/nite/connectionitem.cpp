@@ -8,8 +8,11 @@ ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
 	m_isValid			(true),
 	m_from				(_from)
 {
-	setPen(QPen(m_isValid ? Qt::black : Qt::red, 2));
+	setPen(QPen(m_isValid ? Qt::black : Qt::red, 8));
 	rejigEndPoints();
+	setFlags(ItemIsFocusable | ItemIsSelectable);
+	setCursor(Qt::ArrowCursor);
+	setZValue(-1);
 }
 
 QPointF ConnectionItem::wouldAdjust() const
@@ -30,6 +33,31 @@ void ConnectionItem::rejigEndPoints()
 	p.cubicTo(c1, c2, to);
 	setPath(p);
 }
+
+void ConnectionItem::focusInEvent(QFocusEvent* _e)
+{
+	foreach (QGraphicsItem* i, scene()->selectedItems())
+		if (i != this)
+			i->setSelected(false);
+	setSelected(true);
+	assert(isSelected());
+	update();
+	QGraphicsItem::focusInEvent(_e);
+}
+
+void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
+{
+	if (isSelected())
+	{
+		_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), 8));
+		_p->drawPath(path());
+		_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), 5));
+		_p->drawPath(path());
+	}
+	_p->setPen(QPen(Qt::black, 2));
+	_p->drawPath(path());
+}
+
 
 ProcessorItem* ConnectionItem::fromProcessor() const
 {

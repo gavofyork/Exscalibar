@@ -30,6 +30,10 @@ public:
 	void rejigEndPoints();
 
 private:
+	virtual void focusInEvent(QFocusEvent* _e);
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+
+
 	bool m_isValid;
 	OutputItem* m_from;
 };

@@ -28,6 +28,7 @@ class DLLEXPORT Combination: public SubProcessor
 	mutable BufferData *theResident;
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual void updateFromProperties(Properties const&p);

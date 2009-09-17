@@ -31,7 +31,7 @@ Combination::~Combination()
 	delete theY;
 }
 
-void Combination::processChunks(const BufferDatas &in, BufferDatas &out, const uint ) const
+void Combination::processChunks(const BufferDatas &in, BufferDatas &out, uint) const
 {
 	uint xc = (in[0].samples() - theX->theIn) / theX->theStep + 1;
 	uint samplesNeeded = xc * theX->theOut;
@@ -45,6 +45,23 @@ void Combination::processChunks(const BufferDatas &in, BufferDatas &out, const u
 	d.setData(0, theResident);
 	theX->processChunks(in, d, xc);
 	theY->processChunks(d, out, yc);
+	d.setData(0, 0);
+}
+
+void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint)
+{
+	uint xc = (in[0].samples() - theX->theIn) / theX->theStep + 1;
+	uint samplesNeeded = xc * theX->theOut;
+	uint yc = (samplesNeeded - theY->theIn) / theY->theStep + 1;
+	if (!theResident || theResident->samples() < samplesNeeded)
+	{
+		delete theResident;
+		theResident = new BufferData(samplesNeeded * theInterScope, theInterScope);
+	}
+	BufferDatas d(1);
+	d.setData(0, theResident);
+	theX->processOwnChunks(in, d, xc);
+	theY->processOwnChunks(d, out, yc);
 	d.setData(0, 0);
 }
 

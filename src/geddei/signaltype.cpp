@@ -13,7 +13,7 @@ using namespace SignalTypes;
 namespace Geddei
 {
 
-SignalType::SignalType(uint scope, float frequency)
+SignalType::SignalType(uint scope, float frequency, float _max, float _min): theMin(_min), theMax(_max)
 {
 	theScope = scope;
 	theFrequency = frequency;
@@ -35,13 +35,17 @@ SignalType *SignalType::receive(QSocketSession &source)
 void SignalType::serialise(QSocketSession &sink) const
 {
 	sink.safeSendWord((uint32_t)theScope);
-	sink.safeSendWord((uint32_t)theFrequency);
+	sink.safeSendWord(theFrequency);
+	sink.safeSendWord(theMin);
+	sink.safeSendWord(theMax);
 }
 
 void SignalType::deserialise(QSocketSession &source)
 {
 	theScope = source.safeReceiveWord<int32_t>();
 	theFrequency = source.safeReceiveWord<float>();
+	theMin = source.safeReceiveWord<float>();
+	theMax = source.safeReceiveWord<float>();
 }
 
 SignalType *SignalType::create(uint id)

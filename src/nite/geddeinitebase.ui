@@ -122,10 +122,29 @@
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <property name="margin">
       <number>0</number>
      </property>
+     <item>
+      <widget class="QLabel" name="theType">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="theName"/>
+     </item>
      <item>
       <widget class="QTableWidget" name="theProperties">
        <property name="alternatingRowColors">

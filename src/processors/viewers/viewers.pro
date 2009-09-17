@@ -12,7 +12,8 @@ INCLUDEPATH += $$SRCDIR/qtextra \
 SOURCES += oscilloscope.cpp \
     viewers.cpp \
     spectroscope.cpp \
-    Matrigraph.cpp
+    Matrigraph.cpp \
+    grapher.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp

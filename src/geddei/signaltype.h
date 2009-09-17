@@ -111,6 +111,9 @@ protected:
 	 */
 	float theFrequency;
 
+	float theMin;
+	float theMax;
+
 	/**
 	 * @name Virtual methods for mandatory reimplementation.
 	 *
@@ -209,7 +212,7 @@ protected:
 	 * @param comp The object to be compared to this.
 	 * @return true iff they are equivalent.
 	 */
-	virtual bool sameAsBE(const SignalType *comp) const { return id() == comp->id() && theScope == comp->theScope && theFrequency == comp->theFrequency; }
+	virtual bool sameAsBE(const SignalType *comp) const { return id() == comp->id() && theScope == comp->theScope && theFrequency == comp->theFrequency && comp->theMin == theMin && comp->theMax == theMax; }
 
 	//@}
 
@@ -225,7 +228,7 @@ protected:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	SignalType(uint scope = 1, float frequency = 0);
+	SignalType(uint scope = 1.f, float frequency = 0.f, float _max = 1.f, float _min = 0.f);
 
 public:
 	/**
@@ -239,6 +242,9 @@ public:
 	 * the data represented by this SignalType.
 	 */
 	float frequency() const { return theFrequency; }
+
+	float minAmplitude() const { return theMin; }
+	float maxAmplitude() const { return theMax; }
 
 	/**
 	 * Sets the scope of this SignalType.

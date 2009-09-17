@@ -157,12 +157,22 @@ void GeddeiNite::updateItems()
 	}
 }
 
+void GeddeiNite::on_theName_textChanged(QString const& _nn)
+{
+	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
+	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+		pi->propertiesChanged(_nn);
+}
+
 void GeddeiNite::slotUpdateProperties()
 {
 	theUpdatingProperties = true;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
 	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
 	{
+		theName->setText(pi->processor()->name());
+		theName->setEnabled(!theRunning);
+		theType->setText(pi->processor()->type());
 		Properties const& p(pi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
@@ -175,6 +185,9 @@ void GeddeiNite::slotUpdateProperties()
 	}
 	else if (SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(i))
 	{
+		theName->setText("");
+		theName->setEnabled(false);
+		theType->setText(spi->subProcessor()->type());
 		Properties const& p(spi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
@@ -198,12 +211,16 @@ void GeddeiNite::slotUpdateProperties()
 	}*/
 	else
 	{
+		theName->setText("");
+		theName->setEnabled(false);
+		theType->setText("");
 		theProperties->clear();
 		theProperties->setRowCount(1);
 		theProperties->setEnabled(false);
 	}
 	theUpdatingProperties = false;
 	theProperties->update();
+	theProperties->updateGeometry();
 }
 
 void GeddeiNite::on_fileSave_activated()
@@ -244,7 +261,10 @@ void GeddeiNite::on_fileSaveAs_activated()
 
 void GeddeiNite::on_editRemove_activated()
 {
-	if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+	if (theRunning || theScene.selectedItems().size() != 1)
+		return;
+
+	if (qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
 	{
 		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
 			if (i->fromProcessor() == theScene.selectedItems()[0])
@@ -253,12 +273,18 @@ void GeddeiNite::on_editRemove_activated()
 		setModified(true);
 		theScene.update();
 	}
-	else if (!theRunning && theScene.selectedItems().size() && qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
+	else if (qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
 	{
 		DomProcessorItem* dpi = qgraphicsitem_cast<DomProcessorItem*>(theScene.selectedItems()[0]->parentItem());
 		delete theScene.selectedItems()[0];
 		dpi->reorder();
 		dpi->propertiesChanged();
+		setModified(true);
+		theScene.update();
+	}
+	else if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(theScene.selectedItems()[0]))
+	{
+		delete ci;
 		setModified(true);
 		theScene.update();
 	}
@@ -368,6 +394,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		theGroup.reset();
 		disconnectAll();
 		theProcessors->setEnabled(true);
+		theName->setEnabled(!theName->text().isEmpty());
 	}
 	theScene.update();
 }

@@ -57,6 +57,8 @@ private slots:
 	void			slotUpdateProperties();
 	void			slotChanged() { setModified(true); }
 
+	void			on_theName_textChanged(QString const& _nn);
+
 	void			on_modeRun_toggled(bool testing);
 	void			on_fileOpen_activated();
 	void			on_fileSave_activated();
