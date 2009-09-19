@@ -47,6 +47,8 @@ void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks)
 
 bool Mean::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
+	if (!inTypes.count())
+		return false;
 	outTypes[0] = inTypes[0];
 	theSize = inTypes[0].scope();
 	return true;

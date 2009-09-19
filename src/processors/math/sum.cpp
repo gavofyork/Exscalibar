@@ -25,6 +25,39 @@ using namespace Geddei;
 #include "signaltypes.h"
 using namespace SignalTypes;
 
+class Delta: public SubProcessor
+{
+	virtual void initFromProperties (const Properties &) { setupIO(1, 1, 2, 1, 1); }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
+	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
+	{
+		for (uint i = 0; i < ins[0].scope(); i++)
+			outs[0](0, i) = ins[0](1, i) - ins[0](0, i);
+	}
+public:
+	Delta(): SubProcessor("Delta") {}
+};
+
+EXPORT_CLASS(Delta, 0,1,0, SubProcessor);
+
+class Extract: public SubProcessor
+{
+	uint m_index;
+	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Element Index", 0, "Index of the element to extract."); }
+	virtual void updateFromProperties(Properties const& _p) { m_index = _p["Element Index"].toInt(); }
+	virtual void initFromProperties (const Properties & _p) { setupIO(1, 1, 1, 1, 1); updateFromProperties(_p); }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Value(inTypes[0].frequency(), inTypes[0].asA<SignalType>().maxAmplitude(), inTypes[0].asA<SignalType>().minAmplitude()); return m_index < inTypes[0].scope(); }
+	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
+	{
+		outs[0][0] = ins[0][m_index];
+	}
+public:
+	Extract(): SubProcessor("Extract") {}
+};
+
+EXPORT_CLASS(Extract, 0,1,0, SubProcessor);
+
+
 class Sum: public SubProcessor
 {
 	virtual void initFromProperties (const Properties &);

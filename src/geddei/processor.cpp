@@ -447,6 +447,7 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", qPrintable(p.keys()[i]), qPrintable(p[p.keys()[i]].toString()));
 	theGivenMultiplicity = properties.keys().contains("Multiplicity") ? p["Multiplicity"].toInt() : 0;
 	initFromProperties(p);
+	updateFromProperties(p);
 	if (!theIOSetup)
 	{	qWarning("*** ERROR: Processor::init(): initFromProperties did not setup I/O. Cannot\n"
 				 "           continue. Culprit %s, named %s.", qPrintable(theType), qPrintable(name));

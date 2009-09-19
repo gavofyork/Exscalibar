@@ -241,7 +241,7 @@ void GeddeiNite::on_fileOpen_activated()
 	{	if (theFilename.isEmpty() && !theModified)
 			doLoad(filename);
 		else
-		{	GeddeiNite *g = new GeddeiNite;
+		{	GeddeiNite *g = new GeddeiNite(false);
 			g->doLoad(filename);
 			g->show();
 		}

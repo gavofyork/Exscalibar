@@ -13,7 +13,7 @@ ProcessorsView::ProcessorsView(QWidget* _parent): QGraphicsView(_parent)
 {
 }
 
-ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1), m_dynamicDisplay(true)
+ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1), m_dynamicDisplay(false)
 {
 }
 
