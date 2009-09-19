@@ -48,6 +48,9 @@ class ALSACapturer: public CoProcessor
 	snd_pcm_t *thePcmHandle;
 	QVector<short> m_inData;
 
+	float m_dcOffsetLearnRate;
+	QVector<float> m_inAvg;
+
 	virtual bool processorStarted();
 	virtual void processorStopped();
 	virtual int canProcess();
@@ -61,7 +64,13 @@ class ALSACapturer: public CoProcessor
 		theFrequency = _p["Frequency"].toInt();
 		thePeriodSize = _p["Period Size"].toInt();
 		thePeriods = _p["Periods"].toInt();
+		updateFromProperties(_p);
+		m_inAvg.resize(theChannels);
 		setupIO(0, theChannels);
+	}
+	virtual void updateFromProperties(const Properties &_p)
+	{
+		m_dcOffsetLearnRate = _p["DC Offset Learn Rate"].toDouble();
 	}
 	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
@@ -69,14 +78,13 @@ class ALSACapturer: public CoProcessor
 		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
 								("Channels", 2, "The number of channels to capture.")
 								("Frequency", 44100, "The frequency with which to sample at [in Hz].")
+								("DC Offset Learn Rate", 0.7, "How quickly changes in the DC offset are learned.")
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
 	ALSACapturer(): CoProcessor("ALSACapturer", NotMulti), thePcmHandle(0) {}
 };
-
-extern QMutex g_alsaLock;
 
 bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 {
@@ -112,10 +120,11 @@ bool ALSACapturer::processorStarted()
 	{
 		uint f;
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
-		qDebug() << "Using rate " << f;
 		m_inData.resize(thePeriodSize * theChannels);
 		assert(!snd_pcm_nonblock(thePcmHandle, 1));
 		snd_pcm_prepare(thePcmHandle);
+		for (uint c = 0; c < numOutputs(); c++)
+			m_inAvg[c] = 0.f;
 		return true;
 	}
 	if (thePcmHandle)
@@ -153,13 +162,14 @@ int ALSACapturer::process()
 	if (count > 0)
 	{
 		BufferData d[theChannels];
+		float avg[theChannels];
 		for (uint c = 0; c < theChannels; c++)
-			d[c] = output(c).makeScratchSamples(count);
+			d[c] = output(c).makeScratchSamples(count), avg[c] = 0.f;
 		for (int i = 0; i < count; i++)
 			for (uint c = 0; c < theChannels; c++)
-				d[c][i] = float(m_inData[i * theChannels + c]) / 32768.f;
+				d[c][i] = float(m_inData[i * theChannels + c]) / 32768.f, avg[c] += d[c][i], d[c][i] -= m_inAvg[c];
 		for (uint c = 0; c < theChannels; c++)
-			output(c) << d[c];
+			output(c) << d[c], m_inAvg[c] = m_inAvg[c] * m_dcOffsetLearnRate + avg[c] / (float)count * (1.f - m_dcOffsetLearnRate);
 		return DidWork;
 	}
 	else if (count < 0)

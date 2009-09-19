@@ -7,5 +7,6 @@ SUBDIRS += mir \
 		   toolkit \
 		   example \
 		   math \
-		   viewers
+		   viewers \
+		   aubio
 TEMPLATE = subdirs

@@ -30,8 +30,9 @@ class Checkerboard : public CoProcessor
 {
 	uint theSize;
 	float *theBoard;
-	enum { Check = 0, Positive };
+	enum { Check = 0, Positive, TopRight };
 	uint theSign;
+	bool theTaper;
 	float m_max;
 
 	virtual bool processorStarted();
@@ -40,6 +41,7 @@ class Checkerboard : public CoProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
 
 public:
 	Checkerboard();
@@ -60,10 +62,10 @@ bool Checkerboard::processorStarted()
 	for (uint y = 0; y < theSize; y++)
 		for (uint x = 0; x < theSize; x++)
 		{	float xdist = (float(x) - halfSize) / (float(theSize) - halfSize), ydist = (float(y) - halfSize) / (float(theSize) - halfSize);
-			float sign = theSign == Check ? (xdist * ydist < 0 ? -1 : 1) : 1;
+			float sign = theSign == Check ? (xdist * ydist < 0 ? -1 : 1) : theSign == TopRight ? xdist > 0 && ydist > 0 ? 1 : -1 : 1;
 			float distance = sqrt(sqr(xdist) + sqr(ydist)) / sqrt(2.0);
 			float a = 1.0, b = 1.0, c = 1.0;
-			theBoard[x*theSize + y] = sign * a * exp(-sqr(distance-b) / sqr(c));
+			theBoard[x*theSize + y] = sign * (theTaper ? a * exp(-sqr(distance-b) / sqr(c)) : 1.f);
 			if (sign > 0) m_max += theBoard[x*theSize + y];
 		}
 	return true;
@@ -96,13 +98,20 @@ bool Checkerboard::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 
 void Checkerboard::initFromProperties(const Properties &p)
 {
-	theSign = p["Sign"].toInt();
+	updateFromProperties(p);
 	setupIO(1, 1);
+}
+
+void Checkerboard::updateFromProperties(const Properties &p)
+{
+	theSign = p["Sign"].toInt();
+	theTaper = p["Taper"].toBool();
 }
 
 PropertiesInfo Checkerboard::specifyProperties() const
 {
-	return PropertiesInfo("Sign", Check, "Type of kernel to build. { 0: Checkerboard; 1: Positive }");
+	return PropertiesInfo("Sign", Check, "Type of kernel to build. { 0: Checkerboard; 1: Positive; 2: TopRight }")
+							("Taper", true, "Kernel should have a Gaussian taper.");
 }
 
 EXPORT_CLASS(Checkerboard, 0,2,0, Processor);

@@ -38,7 +38,7 @@ class GeddeiNite: public QMainWindow, public Ui::GeddeiNiteBase
 	Q_OBJECT
 
 public:
-	GeddeiNite();
+	GeddeiNite(bool _autoLoad = true);
 	~GeddeiNite();
 
 	const QString	makeUniqueName(const QString &type);
@@ -60,6 +60,7 @@ private slots:
 	void			on_theName_textChanged(QString const& _nn);
 
 	void			on_modeRun_toggled(bool testing);
+	void			on_fileNew_activated();
 	void			on_fileOpen_activated();
 	void			on_fileSave_activated();
 	void			on_fileSaveAs_activated();

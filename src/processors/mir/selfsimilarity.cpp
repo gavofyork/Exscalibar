@@ -13,6 +13,8 @@
 #include <cmath>
 using namespace std;
 
+#include <stdint.h>
+
 #include "qfactoryexporter.h"
 
 #include "signaltype.h"
@@ -36,14 +38,17 @@ class SelfSimilarity : public SubProcessor
 		double ret = 0., mx = 0., my = 0.;
 
 		for (uint i = 0; i < bandWidth; i++)
-		{	ret += abs(x[i] * y[i]);
+		{
+			ret += abs(x[i] * y[i]);
 			mx += x[i] * x[i];
 			my += y[i] * y[i];
 		}
 		float div = sqrt(mx) * sqrt(my);
-		if (!isnan(div)) if (!isnan(ret / div))
+		if (!isFinite(div) || !isFinite(ret))
+			qDebug() << "BAD NUMBER: " << ret << div << mx << my;
+		if (isFinite(ret) && isFinite(div) && div > 0)
 			return ret / div;
-		return 0;
+		return 1;
 	}
 
 	static inline float magnitudeDistance(const float *x, const float *y, uint bandWidth)
@@ -51,9 +56,16 @@ class SelfSimilarity : public SubProcessor
 		float ret = 0.f;
 		for (uint i = 0; i < bandWidth; i++)
 			ret += (x[i] - y[i]) * (x[i] - y[i]);
-		if (!isnan(ret))
-			return ret > 0 ? 1.f / (1.f + sqrt(ret)) : 1.f;
-		return 0;
+		return ret > 0 ? 1.f / (1.f + sqrt(ret)) : 1.f;
+	}
+
+	static inline float magnitudeGreater(const float *x, const float *y, uint bandWidth)
+	{
+		float xmag = 0.f;
+		float ymag = 0.f;
+		for (uint i = 0; i < bandWidth; i++)
+			xmag += x[i] * x[i], ymag += y[i] * y[i];
+		return sqrt(xmag / (ymag + 1));
 	}
 
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
@@ -106,6 +118,8 @@ void SelfSimilarity::updateFromProperties(const Properties &properties)
 		theDistance = cosineDistance;
 	else if (properties["Distance Function"].toInt() == 1)
 		theDistance = magnitudeDistance;
+	else if (properties["Distance Function"].toInt() == 2)
+		theDistance = magnitudeGreater;
 	else
 		qFatal("*** ERROR: Invalid distance function index given.");
 }
@@ -114,7 +128,7 @@ PropertiesInfo SelfSimilarity::specifyProperties() const
 {
 	return PropertiesInfo("Size", 64, "The size of the block (in samples) from which to create a self-similarity matrix.")
 						 ("Step", 16, "The number of samples between consequent sampling blocks.")
-						 ("Distance Function", 0, "The distance function to be used when calculating the similarity. { 0: Cosine; 1: Magnitude }");
+						 ("Distance Function", 0, "The distance function to be used when calculating the similarity. { 0: Cosine; 1: Magnitude ; 2: MagnitudeGreater }");
 }
 
 EXPORT_CLASS(SelfSimilarity, 0,2,0, SubProcessor);

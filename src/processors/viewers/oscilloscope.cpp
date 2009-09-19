@@ -24,12 +24,14 @@ using namespace SignalTypes;
 class Oscilloscope: public CoProcessor
 {
 	QVector<float> m_last;
+	float m_gain;
 
 	virtual int process();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(Properties const& _p);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
 
@@ -56,7 +58,7 @@ bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.setPen(QPen(Qt::black, 0));
 	if (isRunning())
 		for (int i = 2; i < _s.width(); i+=2)
-			_p.drawLine(QLineF(i - 2, m_last[(i - 2) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
+			_p.drawLine(QLineF(i - 2, m_last[(i - 2) * m_last.size() / (int)_s.width()] * m_gain, i, m_last[i * m_last.size() / (int)_s.width()] * m_gain));
 	return true;
 }
 
@@ -72,13 +74,21 @@ bool Oscilloscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 void Oscilloscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	this->setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
+	setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
 	m_last.resize(_p["Size"].toInt());
+	updateFromProperties(_p);
+}
+
+void Oscilloscope::updateFromProperties(Properties const& _p)
+{
+	m_gain = _p["Gain"].toDouble();
 }
 
 PropertiesInfo Oscilloscope::specifyProperties() const
 {
-	return PropertiesInfo("Size", 1024, "The size of the window's width in samples.")("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).");
+	return PropertiesInfo	("Size", 1024, "The size of the window's width (in samples).")
+							("Refresh Frequency", 30, "The number of times to redraw the wave each second (in Hz).")
+							("Gain", 1.f, "Gain for input signal (x).");
 }
 
 EXPORT_CLASS(Oscilloscope, 0,1,0, Processor);

@@ -59,12 +59,27 @@ public:
 template<class Base>
 QFactory<Base>::QFactory(const QString &libPath) : QLibrary(libPath)
 {
-	load();
-	QStringList provIds;
 	theIds.clear();
+	if (!QLibrary::isLibrary(libPath))
+	{
+		if (MESSAGES) qDebug("%s: Not a library.", qPrintable(libPath));
+		return;
+	}
+	load();
+	if (!isLoaded())
+	{
+		if (MESSAGES) qDebug("%s: Could not load: %s", qPrintable(libPath), qPrintable(errorString()));
+		return;
+	}
+	QStringList provIds;
 	if (MESSAGES) qDebug("Retrieving available classes derived from %s...", typeid(Base).name());
 	if (resolve("getAvailable"))
 		provIds = ((const QStringList &(*)(const QString &))(resolve("getAvailable")))(typeid(Base).name());
+	else
+	{
+		if (MESSAGES) qDebug("%s: Not a Processor plugin.", qPrintable(libPath));
+		return;
+	}
 	if (MESSAGES) qDebug("Found %d candidates.", provIds.count());
 	for (QStringList::const_iterator i = provIds.begin(); i != provIds.end(); i++)
 	{	if (MESSAGES) qDebug("Loading class %s (derived from %s)...", qPrintable((*i)), typeid(Base).name());

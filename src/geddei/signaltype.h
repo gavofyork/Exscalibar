@@ -13,6 +13,11 @@ class QSocketSession;
 namespace Geddei
 {
 
+inline bool isFinite(float const& _f)
+{
+	return (*(uint32_t const*)(&_f)) != 0x7fc00000 && (*(uint32_t const*)(&_f)) != 0xff800000 && (*(uint32_t const*)(&_f)) != 0x7f800000;
+}
+
 /** @ingroup Geddei
  * @brief Base class for describing a signal that may be transferred in a Connection.
  * @author Gav Wood <gav@kde.org>

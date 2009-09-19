@@ -1,9 +1,13 @@
-Select/delete connections.
-Graph viewer.
+RMS.
+Spectrograph.
+Split Matrix kernel multiply from add.
+Linear kernel.
+Arrow kernel or some such.
+128 sample step.
+
 Multiplicity, multi-processor.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
-Make SelfSim stateful (possibly have it as a stateful Sub?).
 
 Can't handle 48K rate.
 Processor information - paused, cycles, CPU, samples read, ticker.

@@ -30,7 +30,7 @@ using namespace std;
 #include "processorsview.h"
 #include "geddeinite.h"
 
-GeddeiNite::GeddeiNite():
+GeddeiNite::GeddeiNite(bool _autoLoad):
 	QMainWindow				(0),
 	theRunning				(false),
 	theConnected			(false),
@@ -54,7 +54,7 @@ GeddeiNite::GeddeiNite():
 	restoreState(s.value("mainwindow/state").toByteArray());
 	restoreGeometry(s.value("mainwindow/geometry").toByteArray());
 
-	if (QFile::exists(s.value("mainwindow/lastproject").toString()))
+	if (QFile::exists(s.value("mainwindow/lastproject").toString()) && _autoLoad)
 		doLoad(s.value("mainwindow/lastproject").toString());
 	statusBar()->showMessage(tr("Ready"), 2000);
 
@@ -246,6 +246,12 @@ void GeddeiNite::on_fileOpen_activated()
 			g->show();
 		}
 	}
+}
+
+void GeddeiNite::on_fileNew_activated()
+{
+	GeddeiNite *g = new GeddeiNite(false);
+	g->show();
 }
 
 void GeddeiNite::on_fileSaveAs_activated()
