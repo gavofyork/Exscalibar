@@ -671,7 +671,9 @@ bool Processor::confirmTypes()
 		// TODO: Enforce the same basic class rule.
 	}
 
-	{	QVector<uint> sizes(theInputs.count());
+	{
+		qDebug() << name();
+		QVector<uint> sizes(theInputs.count());
 		specifyInputSpace(sizes);
 		int ii = 0;
 		if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Enforcing inputs minima:", qPrintable(name()));

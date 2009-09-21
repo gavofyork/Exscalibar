@@ -57,6 +57,24 @@ public:
 
 EXPORT_CLASS(Extract, 0,1,0, SubProcessor);
 
+class Invert: public SubProcessor
+{
+	uint m_min;
+	uint m_max;
+	uint m_scope;
+	virtual void initFromProperties (const Properties & _p) { setupIO(1, 1, 1, 1, 1); }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes; m_min = inTypes[0].asA<SignalType>().minAmplitude(); m_scope = inTypes[0].scope(); m_max = inTypes[0].asA<SignalType>().maxAmplitude(); return true; }
+	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
+	{
+		for (uint i = 0; i < m_scope; i++)
+			outs[0][i] = m_max - ins[0][i] + m_min;
+	}
+public:
+	Invert(): SubProcessor("Invert") {}
+};
+
+EXPORT_CLASS(Invert, 0,1,0, SubProcessor);
+
 
 class Sum: public SubProcessor
 {

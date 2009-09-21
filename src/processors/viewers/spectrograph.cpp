@@ -81,12 +81,13 @@ bool Spectrograph::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		for (int x = 0; x < d.size(); x++)
 			for (int y = 0; y < m_display.height(); y++)
 			{
-				if (d[x][y] < m_min)
+				float l = (d[x][y] - m_min) / m_delta * m_gain;
+				if (l < 0.f)
 					p.setPen(Qt::black);
-				else if (d[x][y] > m_min + m_delta)
+				else if (l > 1.f)
 					p.setPen(Qt::white);
 				else
-					p.setPen(QColor::fromHsv(240 - int((d[x][y] - m_min) / m_delta * m_gain * 240.f), 255, 255));
+					p.setPen(QColor::fromHsv(240 - int(l * 240.f), 255, 255));
 //				p.setPen(QColor::fromHsv((y == m_display.height() - 1) ? 300 : (int)(240.f * y / m_display.height()), 255, 255));
 				p.drawPoint(m_display.width() - d.size() + x, y);
 			}

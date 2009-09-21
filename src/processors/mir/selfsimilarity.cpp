@@ -109,7 +109,8 @@ EXPORT_CLASS(Distance, 0,2,0, SubProcessor);
 
 class SelfSimilarity : public SubProcessor
 {
-	uint theSize, theStep, theBandWidth;
+	uint theSize;
+	uint theBandWidth;
 	mutable QVector<float> theMatrix;
 	float(*theDistance)(const float *, const float *, const uint);
 
@@ -160,7 +161,7 @@ void SelfSimilarity::processOwnChunks(const BufferDatas &in, BufferDatas &out, u
 bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency() / theStep, inTypes[0].frequency());
+	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency(), inTypes[0].frequency());
 	theBandWidth = inTypes[0].scope();
 	return true;
 }
@@ -168,10 +169,9 @@ bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, Signal
 void SelfSimilarity::initFromProperties(const Properties &properties)
 {
 	theSize = properties.get("Size").toInt();
-	theStep = properties.get("Step").toInt();
 	theMatrix.clear();
 	updateFromProperties(properties);
-	setupIO(1, 1, theSize, theStep, 1);
+	setupIO(1, 1, theSize, 1, 1);
 }
 
 void SelfSimilarity::updateFromProperties(const Properties &properties)
