@@ -75,13 +75,7 @@ void Combination::initFromProperties(const Properties& _p)
 	Properties p = _p;
 	theY->initFromProperties(p.unstash());
 	theX->initFromProperties(p);
-	if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
-	{
-		setupIO(theX->theNumInputs, theY->theNumOutputs, theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);
-		if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
-	}
-	else
-		qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", qPrintable(theX->theType), theX->theIn, theX->theStep, theX->theOut, qPrintable(theY->theType), theY->theIn, theY->theStep, theY->theOut);
+	setupIO(theX->theNumInputs, theY->theNumOutputs);
 }
 
 void Combination::updateFromProperties(const Properties& _p)
@@ -96,9 +90,22 @@ bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 	SignalTypeRefs r(1);
 	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
 	{	theInterScope = r[0].scope();
-		return theY->verifyAndSpecifyTypes(r, outTypes);
+		if (!theY->verifyAndSpecifyTypes(r, outTypes))
+			return false;
+		if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
+		{
+			setupSamplesIO(theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);
+			if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
+			return true;
+		}
+		else
+		{
+			qDebug("WARNING: Could not initialise - incompatible SubProcessors: %s(%d, %d, %d) === %s(%d, %d, %d).", qPrintable(theX->theType), theX->theIn, theX->theStep, theX->theOut, qPrintable(theY->theType), theY->theIn, theY->theStep, theY->theOut);
+			return false;
+		}
 	}
-	else return false;
+	else
+		return false;
 }
 
 }
