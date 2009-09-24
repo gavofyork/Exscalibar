@@ -1,11 +1,11 @@
 RMS.
-Spectrograph.
 Split Matrix kernel multiply from add.
 Linear kernel.
 Arrow kernel or some such.
 128 sample step.
 
-Multiplicity, multi-processor.
+Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
+- Should also be trivial to implement Klapuri.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
 

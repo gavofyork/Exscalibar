@@ -70,7 +70,7 @@ class ALSAPlayer: public CoProcessor
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
 public:
-	ALSAPlayer(): CoProcessor("ALSAPlayer", NotMulti), thePcmHandle(0) {}
+	ALSAPlayer(): CoProcessor("ALSAPlayer", InConst), thePcmHandle(0) {}
 };
 
 QMutex g_alsaLock;

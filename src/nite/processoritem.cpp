@@ -259,7 +259,7 @@ void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 	domProcessorItem()->mouseMoveEvent(_e);
 }
 
-ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name, QSizeF const& _size): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(_size), m_timerId(-1), m_resizing(true)
+ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name, QSizeF const& _size): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(_size), m_timerId(-1), m_resizing(false), m_multiplicity(0)
 {
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
@@ -282,10 +282,15 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 
 void ProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
-	m_resizing = QRectF(m_size.width(), m_size.height(), -(statusHeight + cornerSize), -(statusHeight + cornerSize)).contains(_e->pos());
-	if (m_resizing)
-		m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
-	QGraphicsItem::mousePressEvent(_e);
+	if (_e->modifiers() & Qt::ShiftModifier)
+		qobject_cast<ProcessorsScene*>(scene())->beginMultipleConnect(this);
+	else
+	{
+		m_resizing = QRectF(m_size.width(), m_size.height(), -(statusHeight + cornerSize), -(statusHeight + cornerSize)).contains(_e->pos());
+		if (m_resizing)
+			m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
+		QGraphicsItem::mousePressEvent(_e);
+	}
 }
 
 void ProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
@@ -305,6 +310,8 @@ void ProcessorItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
 
 void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
+	if (filter<IncompleteMultipleConnectionItem>(childItems()).count())
+		return;
 	if (m_resizing)
 	{
 		QPointF d = _e->pos() + m_origPosition;
@@ -312,9 +319,7 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		m_size = QSizeF(d.x(), d.y());
 	}
 	else
-	{
 		QGraphicsItem::mouseMoveEvent(_e);
-	}
 
 	QPointF best = QPointF(1.0e99, 1.0e99);
 	foreach (QGraphicsItem* i, scene()->items())
@@ -365,8 +370,12 @@ void ProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 
 	foreach (QGraphicsItem* i, scene()->items())
 		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))
-			if (ci->toProcessor() == this || ci->fromProcessor() == this)
+		{	if (ci->toProcessor() == this || ci->fromProcessor() == this)
 				ci->rejigEndPoints();
+		}
+		else if (MultipleConnectionItem* mci = qgraphicsitem_cast<MultipleConnectionItem*>(i))
+			if (mci->toProcessor() == this || mci->fromProcessor() == this)
+				mci->rejigEndPoints();
 }
 
 void ProcessorItem::tick()
@@ -423,22 +432,34 @@ void ProcessorItem::rejig(Processor* _old, bool _bootStrap)
 	m_size = QSizeF(max(m_size.width(), minWidth), max(m_size.height(), minHeight));
 	update();
 
-	if (_old)
-		foreach (QGraphicsItem* i, childItems())
-			if ((qgraphicsitem_cast<InputItem*>(i) && qgraphicsitem_cast<InputItem*>(i)->index() >= m_processor->numInputs()) ||
-				(qgraphicsitem_cast<OutputItem*>(i) && qgraphicsitem_cast<OutputItem*>(i)->index() >= m_processor->numOutputs()))
-				delete i;
+	QVector<InputItem*> iis(m_processor->multi() & In ? m_multiplicity : m_processor->numInputs(), 0);
+	foreach (InputItem* ii, filter<InputItem>(childItems()))
+		if ((int)ii->index() < iis.count())
+			iis[ii->index()] = ii;
+		else
+			delete ii;
+	for (int i = 0; i < iis.count(); i++)
+		if (!iis[i])
+			iis[i] = new InputItem(i, this);
+	foreach (InputItem* i, iis)
+		i->setPos(cornerSize - i->size().width() - 1.f, cornerSize + cornerSize / 2 + portLateralMargin + (portLateralMargin + portSize) * i->index());
 
-	if (_old || _bootStrap)
-	{
-		for (uint i = _old ? _old->numInputs() : 0; i < m_processor->numInputs(); i++)
-			new InputItem(i, this);
-		for (uint i = _old ? _old->numOutputs() : 0; i < m_processor->numOutputs(); i++)
-			new OutputItem(i, this);
-	}
-
-	foreach (OutputItem* i, filter<OutputItem>(childItems()))
+	QVector<OutputItem*> ois(m_processor->multi() & Out ? m_multiplicity : m_processor->numOutputs(), 0);
+	if (ois.count() == 0 && m_processor->multi())
+{
+	qDebug() << "BP";
+}
+	foreach (OutputItem* oi, filter<OutputItem>(childItems()))
+		if ((int)oi->index() < ois.count())
+			ois[oi->index()] = oi;
+		else
+			delete oi;
+	for (int i = 0; i < ois.count(); i++)
+		if (!ois[i])
+			ois[i] = new OutputItem(i, this);
+	foreach (OutputItem* i, ois)
 		i->setPos(m_size.width() - cornerSize + 1.f, cornerSize * 3 / 2 + portLateralMargin / 2 + (portLateralMargin + portSize) * (i->index() + 0.5));
+
 	m_statusBar->setPos(cornerSize * 2, m_size.height() - statusHeight - statusMargin);
 	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 4, statusHeight));
 	update();
@@ -465,6 +486,22 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 {
 	m_processor->setGroup(_g);
 	bool ret = true;
+	if (filter<MultipleConnectionItem>(childItems()).count())
+	{
+		QList<MultipleConnectionItem*> mcis = filter<MultipleConnectionItem>(childItems());
+		MultipleConnectionItem* mci = mcis[0];
+		if (mci->fromProcessor()->m_processor->MultiSource::deferConnect(m_processor, 1))
+		{
+			mci->setValid(false);
+			ret = false;
+		}
+		else
+		{
+			mci->fromProcessor()->m_processor->MultiSource::connect(m_processor);
+			mci->setValid(true);
+		}
+	}
+	else
 	foreach (InputItem* ii, filter<InputItem>(childItems()))
 	{
 		QList<ConnectionItem*> cis = filter<ConnectionItem>(ii->childItems());
@@ -496,6 +533,11 @@ bool ProcessorItem::connectYourself(ProcessorGroup& _g)
 
 void ProcessorItem::disconnectYourself()
 {
+	if (m_processor->multi() && m_processor->knowMultiplicity())
+		m_multiplicity = m_processor->multiplicity();
+	else
+		m_multiplicity = 0;
+	rejig(0, false);
 	foreach (QGraphicsItem* i, childItems())
 		if (OutputItem* ii = qgraphicsitem_cast<OutputItem*>(i))
 			ii->setInputItem();

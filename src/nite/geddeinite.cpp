@@ -159,6 +159,8 @@ void GeddeiNite::updateItems()
 
 void GeddeiNite::on_theName_textChanged(QString const& _nn)
 {
+	if (theUpdatingProperties)
+		return;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
 	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
 		pi->propertiesChanged(_nn);
@@ -316,14 +318,17 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 
 bool GeddeiNite::connectAll()
 {
+	bool failed = false;
 	foreach (QGraphicsItem* i, theScene.items())
 		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
 			if (!pi->connectYourself(theGroup))
-			{
-				statusBar()->showMessage("Problem creating connections.");
-				disconnectAll();
-				return false;
-			}
+				failed = true;
+	if (failed)
+	{
+		statusBar()->showMessage("Problem creating connections.");
+		disconnectAll();
+		return false;
+	}
 
 	if (!theGroup.confirmTypes())
 	{

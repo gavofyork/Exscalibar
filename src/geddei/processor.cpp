@@ -744,6 +744,12 @@ void Processor::share(uint sourceIndex, uint bufferSize)
 	new LMConnection(this, sourceIndex, bufferSize);
 }
 
+void Processor::connectCheck() const
+{
+	qDebug("Processor::connectCheck: %s: theMulti=%d.", qPrintable(name()), theMulti);
+	assert(theMulti&Out);
+}
+
 bool Processor::readyRegisterIn(uint sinkIndex) const
 {
 	if (sinkIndex >= (uint)theInputs.size())

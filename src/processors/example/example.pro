@@ -18,7 +18,7 @@ SOURCES += add.cpp \
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp
-	OBJECTS_DIR = $$OBJECTS_DIR/math
+	OBJECTS_DIR = $$OBJECTS_DIR/example
 }
 
 TEMPLATE = lib

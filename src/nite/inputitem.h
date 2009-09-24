@@ -12,6 +12,7 @@ public:
 
 	ProcessorItem* processorItem() const;
 	inline uint index() const { return m_index; }
+	inline QSizeF size() const { return m_size; }
 
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);

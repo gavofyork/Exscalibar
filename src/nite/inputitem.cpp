@@ -30,7 +30,6 @@ void InputItem::typesConfirmed()
 	prepareGeometryChange();
 	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
 	m_size = QSizeF(log(1.0 + secs) / log(2) * 16 + 10 + cornerSize, portSize);
-	setPos(cornerSize - m_size.width() - 1.f, cornerSize + cornerSize / 2 + portLateralMargin + (portLateralMargin + portSize) * m_index);
 	update();
 	foreach (QGraphicsItem* i, childItems())
 		if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(i))

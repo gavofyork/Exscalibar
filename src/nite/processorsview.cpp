@@ -13,7 +13,7 @@ ProcessorsView::ProcessorsView(QWidget* _parent): QGraphicsView(_parent)
 {
 }
 
-ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_timerId(-1), m_dynamicDisplay(false)
+ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
 {
 }
 
@@ -79,16 +79,24 @@ void ProcessorsScene::beginConnect(OutputItem* _from)
 	m_currentConnect = new IncompleteConnectionItem(_from);
 }
 
+void ProcessorsScene::beginMultipleConnect(ProcessorItem* _from)
+{
+	m_currentMultipleConnect = new IncompleteMultipleConnectionItem(_from);
+}
+
 void ProcessorsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
 	if (m_currentConnect)
 		m_currentConnect->setTo(_e->scenePos());
+	if (m_currentMultipleConnect)
+		m_currentMultipleConnect->setTo(_e->scenePos());
 	QGraphicsScene::mouseMoveEvent(_e);
 }
 
 void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
 	ConnectionItem* ci = 0;
+	MultipleConnectionItem* mci = 0;
 	if (m_currentConnect)
 	{
 		OutputItem* oi = m_currentConnect->from();
@@ -101,9 +109,31 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 				changed();
 			}
 	}
+	if (m_currentMultipleConnect)
+	{
+		ProcessorItem* op = m_currentMultipleConnect->from();
+		delete m_currentMultipleConnect;
+		m_currentMultipleConnect = 0;
+
+		if (filter<ProcessorItem>(items(_e->scenePos())).count())
+		{
+			ProcessorItem* ip = filter<ProcessorItem>(items(_e->scenePos()))[0];
+			if (filter<MultipleConnectionItem>(ip->childItems()).isEmpty())
+			{
+				foreach (InputItem* ii, filter<InputItem>(ip->childItems()))
+					if (filter<ConnectionItem>(ii->childItems()).count())
+						goto BAD;
+				mci = new MultipleConnectionItem(ip, op);
+				changed();
+				BAD:;
+			}
+		}
+	}
 	QGraphicsScene::mouseReleaseEvent(_e);
 
 	if (ci)
 		ci->rejigEndPoints();
+	if (mci)
+		mci->rejigEndPoints();
 	update();
 }

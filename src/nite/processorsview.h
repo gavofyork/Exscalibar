@@ -26,7 +26,9 @@ public:
 };
 
 class IncompleteConnectionItem;
+class IncompleteMultipleConnectionItem;
 class OutputItem;
+class ProcessorItem;
 
 class ProcessorsScene: public QGraphicsScene
 {
@@ -36,7 +38,9 @@ public:
 	ProcessorsScene();
 
 	void						beginConnect(OutputItem* _from);
+	void						beginMultipleConnect(ProcessorItem* _from);
 	IncompleteConnectionItem*	incompleteConnectionItem() const { return m_currentConnect; }
+	IncompleteMultipleConnectionItem*	incompleteMultipleConnectionItem() const { return m_currentMultipleConnect; }
 
 	void						setDynamicDisplay(bool _v) { m_dynamicDisplay = _v; }
 
@@ -56,6 +60,7 @@ private:
 	virtual void				timerEvent(QTimerEvent*);
 
 	IncompleteConnectionItem*	m_currentConnect;
+	IncompleteMultipleConnectionItem*	m_currentMultipleConnect;
 	int							m_timerId;
 	bool						m_dynamicDisplay;
 };

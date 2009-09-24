@@ -63,6 +63,20 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 
 void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
+	for (uint n = 1; n < theBandwidth; n++)
+	{
+		out[0][n] = 0.f;
+		float wSum = 0.f;
+		for (uint i = n; i < theSize; i++)
+		{
+			float x = float((i - n) / n) / float(theSize / n - 1);
+			float w = pow(x, m_alpha);
+			wSum += w;
+			out[0][n] += w * in[0][i * theSize + i - n];
+		}
+		out[0][n] /= wSum;
+	}
+#if 0
 	if (m_minimiseLatency)
 		for (uint offset = 1; offset < theBandwidth; offset++)
 		{
@@ -83,6 +97,7 @@ void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
 			out[0][offset] /= theSize;
 		}
+#endif
 	out[0][0] = in[0][0];
 }
 

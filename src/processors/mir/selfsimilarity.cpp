@@ -43,6 +43,7 @@ static inline float cosineDistance(const float *x, const float *y, uint bandWidt
 		qDebug() << "BAD NUMBER: " << ret << div << mx << my;
 	if (isFinite(ret) && isFinite(div) && div > 0)
 		return 1.f - ret / div;
+
 	return 1;
 }
 

@@ -85,6 +85,7 @@ private:
 	int					m_timerId;
 	bool				m_resizing;
 	QPointF				m_origPosition;
+	uint				m_multiplicity;
 };
 
 class SubProcessorItem;

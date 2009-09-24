@@ -271,9 +271,10 @@ private:
 
 	//@{
 	/** Reimplementations from Multiplicative. */
+public:
 	bool knowMultiplicity() const { return theIsInitialised; }
-protected:
 	uint multiplicity() const { return theMulti&Out ? numOutputs() : numInputs(); }
+	MultiplicityType multi() const { return theMulti; }
 private:
 	bool initGiven() const { return theIsInitialised || theDeferredInit; }
 	//@}
@@ -281,7 +282,7 @@ private:
 	//@{
 	/** Reimplementations from MultiSource. */
 	virtual ProcessorPort sourcePort(uint i) { return (*this)[i]; }
-	virtual void connectCheck() const { assert(theMulti&Out); }
+	virtual void connectCheck() const;
 	//@}
 
 	//@{

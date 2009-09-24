@@ -62,7 +62,7 @@ class Invert: public SubProcessor
 	uint m_min;
 	uint m_max;
 	uint m_scope;
-	virtual void initFromProperties (const Properties & _p) { setupIO(1, 1, 1, 1, 1); }
+	virtual void initFromProperties (Properties const&) { setupIO(1, 1, 1, 1, 1); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes; m_min = inTypes[0].asA<SignalType>().minAmplitude(); m_scope = inTypes[0].scope(); m_max = inTypes[0].asA<SignalType>().maxAmplitude(); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
