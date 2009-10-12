@@ -1,14 +1,20 @@
-/***************************************************************************
- *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@kde.org			                                               *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- ***************************************************************************/
-
-#define __GEDDEI_BUILD
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "qfactoryexporter.h"
 #include "buffer.h"
@@ -39,6 +45,7 @@ class Spectroscope: public CoProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 
 public:
@@ -108,6 +115,10 @@ void Spectroscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
 	setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
+}
+
+void Spectroscope::updateFromProperties(Properties const& _p)
+{
 	m_autoScale = _p["Auto-scale"].toBool();
 	m_dropSpeedMin = _p["Drop speed (min)"].toDouble();
 	m_dropSpeedMax = _p["Drop speed (max)"].toDouble();

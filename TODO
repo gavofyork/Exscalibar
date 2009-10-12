@@ -1,11 +1,16 @@
+Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
+- Should also be trivial to implement Klapuri.
+- Load/save from Processor.
+- Make graphics better.
+- Need more useful way of determining buffersize (Mean with buffersize of 1 is no good)
+  - Determine by incoming/outgoing buffers.
+
 RMS.
 Split Matrix kernel multiply from add.
 Linear kernel.
 Arrow kernel or some such.
 128 sample step.
 
-Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
-- Should also be trivial to implement Klapuri.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
 

@@ -1,14 +1,20 @@
-/***************************************************************************
- *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@kde.org                                                     *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- ***************************************************************************/
-
-#define __GEDDEI_BUILD
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "qfactoryexporter.h"
 
@@ -73,10 +79,10 @@ bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalType
 {
 	theScope = inTypes[0].scope();
 	outTypes = inTypes[0];
-	
+
 	if (thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].frequency());
 	if (theOverlap != 0.0) theStep = uint(theOverlap * inTypes[0].frequency());
-	
+
 	outTypes[0].asA<SignalType>().setFrequency(inTypes[0].frequency() / (float)theStep);
 	setupSamplesIO(max(theCount, theStep), theStep, 1);
 	return true;
@@ -96,10 +102,10 @@ void DownSample::initFromProperties(const Properties &properties)
 PropertiesInfo DownSample::specifyProperties() const
 {
 	return PropertiesInfo("Spread", 1, "The number of samples from which to calculate the value. A larger number results in a smoother output, a lower number is faster. This should be >= 1 and <= Divisor.")
-	                     ("Divisor", 2, "The sampling frequency divisor.")
+						 ("Divisor", 2, "The sampling frequency divisor.")
 						 ("Period", 0.f, "The period of time to derive each sample from.")
 						 ("Overlap", 0.f, "The period of overlap to leave between successive samples.")
-	                     ("Consolidate", 0, "The method to determine the final sample when Spread > 1. { 0: Average; 1: Max; 2: Min }");
+						 ("Consolidate", 0, "The method to determine the final sample when Spread > 1. { 0: Average; 1: Max; 2: Min }");
 }
 
 EXPORT_CLASS(DownSample, 0,3,0, SubProcessor);

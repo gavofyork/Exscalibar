@@ -1,34 +1,33 @@
-/***************************************************************************
- *   Copyright(C)2004 by Gav Wood                                        *
- *   gav@kde.org                                                     *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *  (at your option)any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
-#define __GEDDEI_BUILD
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <cassert>
 #include <iostream>
 using namespace std;
 
-#include "connectionitem.h"
-#include "processoritem.h"
-#include "processorview.h"
-#include "processorsview.h"
-#include "geddeinite.h"
+#include "ConnectionItem.h"
+#include "MultipleConnectionItem.h"
+#include "ProcessorItem.h"
+#include "DomProcessorItem.h"
+#include "SubProcessorItem.h"
+#include "ProcessorView.h"
+#include "ProcessorsView.h"
+#include "GeddeiNite.h"
 
 GeddeiNite::GeddeiNite(bool _autoLoad):
 	QMainWindow				(0),
@@ -88,6 +87,8 @@ void GeddeiNite::doSave(const QString& _filename)
 		pi->saveYourself(root, doc);
 	foreach (ConnectionItem* ci, filter<ConnectionItem>(theScene.items()))
 		ci->saveYourself(root, doc);
+	foreach (MultipleConnectionItem* ci, filter<MultipleConnectionItem>(theScene.items()))
+		ci->saveYourself(root, doc);
 
 	QFile f(_filename);
 	if (!f.open(QIODevice::WriteOnly))
@@ -123,6 +124,8 @@ void GeddeiNite::doLoad(const QString &filename)
 			DomProcessorItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "connection")
 			ConnectionItem::fromDom(elem, &theScene);
+		else if (elem.tagName() == "multipleconnection")
+			MultipleConnectionItem::fromDom(elem, &theScene);
 	}
 	setModified(true);
 	statusBar()->showMessage("Loaded.", 2000);

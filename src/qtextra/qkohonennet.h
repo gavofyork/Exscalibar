@@ -1,13 +1,22 @@
-/***************************************************************************
-						  kohonennet.h  -  description
-							 -------------------
-	begin                : Sun Jan 9 2000
-	copyright            : (C) 2000 by Gavin James Wood
-	email                : gav@indigoarchive.net
- ***************************************************************************/
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef _QTEXTRA_QKOHONENNET
-#define _QTEXTRA_QKOHENENNET
+#pragma once
 
 #include <QFile>
 #include <QString>
@@ -58,5 +67,3 @@ private:
 };
 
 }
-
-#endif

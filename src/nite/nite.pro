@@ -17,27 +17,31 @@ INCLUDEPATH += ../../src/geddei \
 DEPENDPATH += ../../src/geddei \
 	../../src/qtextra
 FORMS += geddeinitebase.ui
-HEADERS += geddeinite.h \
-	watchprocessor.h \
-	refresher.h \
-	processorview.h \
-	processorsview.h \
-	processoritem.h \
-	inputitem.h \
-	connectionitem.h \
-	outputitem.h \
-	incompleteconnectionitem.h
-SOURCES += geddeinite.cpp \
+HEADERS += GeddeiNite.h \
+	ProcessorView.h \
+	ProcessorsView.h \
+	ProcessorsScene.h \
+	ProcessorItem.h \
+	SubProcessorItem.h \
+	DomProcessorItem.h \
+	InputItem.h \
+	ConnectionItem.h \
+	OutputItem.h \
+	IncompleteConnectionItem.h \
+	MultipleConnectionItem.h
+SOURCES += GeddeiNite.cpp \
 	main.cpp \
-	watchprocessor.cpp \
-	refresher.cpp \
-	processorview.cpp \
-	processorsview.cpp \
-	processoritem.cpp \
-	inputitem.cpp \
-	connectionitem.cpp \
-	outputitem.cpp \
-	incompleteconnectionitem.cpp
+	ProcessorView.cpp \
+	ProcessorsView.cpp \
+	ProcessorsScene.cpp \
+	ProcessorItem.cpp \
+	DomProcessorItem.cpp \
+	SubProcessorItem.cpp \
+	InputItem.cpp \
+	ConnectionItem.cpp \
+	OutputItem.cpp \
+	IncompleteConnectionItem.cpp \
+	MultipleConnectionItem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

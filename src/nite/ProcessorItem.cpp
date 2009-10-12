@@ -1,6 +1,24 @@
-#include "connectionitem.h"
-#include "processorsview.h"
-#include "processoritem.h"
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "ConnectionItem.h"
+#include "ProcessorsView.h"
+#include "ProcessorItem.h"
 
 class PauseItem: public QGraphicsEllipseItem
 {
@@ -57,208 +75,6 @@ public:
 	virtual int type() const { return Type; }
 };
 
-DomProcessorItem::DomProcessorItem(Properties const& _pr, QString const& _name, QSizeF const& _size):
-	ProcessorItem(0, _pr, _name, _size)
-{
-}
-
-DomProcessor* DomProcessorItem::domProcessor() const { return dynamic_cast<DomProcessor*>(processor()); }
-
-QSizeF DomProcessorItem::centreMin() const
-{
-	QSizeF s(0, 0);
-	foreach (SubProcessorItem* i, filter<SubProcessorItem>(childItems()))
-		s = QSizeF(s.width() + i->size().width(), max(s.height(), i->size().height()));
-	return s;
-}
-
-QString DomProcessorItem::composedSubs() const
-{
-	QString ret;
-	foreach (SubProcessorItem* i, ordered())
-		ret += "&" + i->spType();
-	return ret.mid(1);
-}
-
-Properties DomProcessorItem::completeProperties() const
-{
-	Properties ret;
-	QList<SubProcessorItem*> spis = ordered();
-	for (int i = (uint)spis.count() - 1; i >= 0; i--)
-		ret = ret.stashed() + spis[i]->properties();
-	ret = ret.stashed() + properties();
-	return ret;
-}
-
-Processor* DomProcessorItem::reconstructProcessor()
-{
-	QString cs = composedSubs();
-	if (cs.isEmpty())
-		return 0;
-	Processor* p = new DomProcessor(cs);
-	PropertiesInfo pi = p->properties();
-	m_properties.defaultFrom(pi.destash());
-	foreach (SubProcessorItem* i, ordered())
-		i->m_properties.defaultFrom(pi.destash());
-	return p;
-}
-
-void DomProcessorItem::reorder() const
-{
-	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
-
-	uint oc = (uint)spis.count();
-	for (uint i = 0; i < oc; i++)
-	{
-		SubProcessorItem* spi;
-		for (uint j = i;; j++)
-			foreach (spi, spis)
-				if (spi->index() <= j)
-				{
-					spis.removeAll(spi);
-					spi->m_index = i;
-					goto OK;
-				}
-		break;
-		OK: ;
-	}
-}
-
-QList<SubProcessorItem*> DomProcessorItem::ordered() const
-{
-	QList<SubProcessorItem*> ret;
-	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
-
-	for (uint i = 0; i < (uint)spis.count(); i++)
-	{
-		SubProcessorItem* spi;
-		foreach (spi, spis)
-			if (spi->index() == i)
-				goto OK;
-		break;
-		assert("Subprocessors out of order");
-		OK:
-		ret << spi;
-	}
-	return ret;
-}
-
-void DomProcessorItem::rejig(Processor* _old, bool _bootStrap)
-{
-	QPointF cp = clientArea().topLeft();
-	foreach (SubProcessorItem* spi, ordered())
-	{
-		spi->setPos(cp);
-		cp += QPointF(spi->size().width(), 0);
-	}
-	ProcessorItem::rejig(_old, _bootStrap);
-}
-
-SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index, Properties const& _pr):
-	QGraphicsItem	(_dpi),
-	m_properties	(_pr),
-	m_type			(_type),
-	m_index			(_index)
-{
-	_dpi->reorder();
-	_dpi->propertiesChanged();
-	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
-}
-
-SubProcessor* SubProcessorItem::subProcessor() const
-{
-	QList<SubProcessor*> cs;
-	if (!domProcessor())
-		return 0;
-	SubProcessor* cur = domProcessor()->primary();
-	int i = m_index;
-	forever
-	{
-		if (Combination* c = dynamic_cast<Combination*>(cur))
-		{
-			cs.append(c->y());
-			cs.append(c->x());
-		}
-		else
-			if (i)
-				i--;
-			else
-				return cur;
-		if (cs.isEmpty())
-			return 0;
-		cur = cs.takeLast();
-	}
-}
-
-void DomProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w)
-{
-	QPainterPath p;
-	p.addRect(boundingRect());
-	foreach (SubProcessorItem* spi, filter<SubProcessorItem>(childItems()))
-		p.addRect(QRectF(spi->pos(), spi->size()));
-	_p->save();
-	_p->setClipPath(p);
-	ProcessorItem::paint(_p, _o, _w);
-	_p->restore();
-}
-
-void SubProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
-{
-	QRectF ca = QRectF(QPointF(0, 0), size());
-	_p->save();
-	_p->setClipRect(ca);
-	subProcessor()->draw(*_p);
-	_p->restore();
-
-	if (isSelected())
-	{
-		_p->setBrush(Qt::NoBrush);
-		for (int i = 0; i < 5; i+=2)
-		{
-			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
-			_p->drawRect(ca);
-		}
-	}
-}
-
-void SubProcessorItem::setProperty(QString const& _key, QVariant const& _value)
-{
-	m_properties[_key] = _value;
-	prepareGeometryChange();
-	domProcessorItem()->propertiesChanged();
-	update();
-}
-
-void SubProcessorItem::focusInEvent(QFocusEvent* _e)
-{
-	foreach (QGraphicsItem* i, scene()->selectedItems())
-		if (i != this)
-			i->setSelected(false);
-	setSelected(true);
-	assert(isSelected());
-	update();
-	QGraphicsItem::focusInEvent(_e);
-}
-
-void SubProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
-{
-	domProcessorItem()->mouseReleaseEvent(_e);
-	domProcessorItem()->setSelected(false);
-	QGraphicsItem::mouseReleaseEvent(_e);
-}
-
-void SubProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
-{
-	domProcessorItem()->mousePressEvent(_e);
-	domProcessorItem()->setSelected(false);
-	QGraphicsItem::mousePressEvent(_e);
-}
-
-void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
-{
-	domProcessorItem()->mouseMoveEvent(_e);
-}
-
 ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const& _name, QSizeF const& _size): QGraphicsItem(), m_properties(_pr), m_processor(_p), m_size(_size), m_timerId(-1), m_resizing(false), m_multiplicity(0)
 {
 	m_statusBar = new QGraphicsRectItem(this);
@@ -275,7 +91,7 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 	{
 		m_properties.defaultFrom(m_processor->properties());
 		m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
-		rejig(0, true);
+		rejig();
 	}
 	setPos(round(pos().x()) - .5f, round(pos().y()) - .5f);
 }
@@ -419,11 +235,11 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 	}
 
 	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number((uint)this) : _newName, completeProperties());
-	rejig(old, !old);
+	rejig();
 	delete old;
 }
 
-void ProcessorItem::rejig(Processor* _old, bool _bootStrap)
+void ProcessorItem::rejig()
 {
 	double minHeight = cornerSize + cornerSize / 2 + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize) + cornerSize / 2 + cornerSize;
 	minHeight = max(minHeight, cornerSize + centreMin().height() + statusHeight + statusMargin * 2);
@@ -537,7 +353,7 @@ void ProcessorItem::disconnectYourself()
 		m_multiplicity = m_processor->multiplicity();
 	else
 		m_multiplicity = 0;
-	rejig(0, false);
+	rejig();
 	foreach (QGraphicsItem* i, childItems())
 		if (OutputItem* ii = qgraphicsitem_cast<OutputItem*>(i))
 			ii->setInputItem();
@@ -626,51 +442,4 @@ QDomElement ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, 
 	}
 	_root.appendChild(proc);
 	return proc;
-}
-
-void DomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
-{
-	Properties p;
-	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-		if (n.toElement().tagName() == "property")
-			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
-	DomProcessorItem* dpi = new DomProcessorItem(p, _element.attribute("name"), QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble()));
-	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-		if (n.toElement().tagName() == "subprocessor")
-			SubProcessorItem::fromDom(n.toElement(), dpi);
-	dpi->propertiesChanged(_element.attribute("name"));
-	_scene->addItem(dpi);
-	dpi->setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
-}
-
-QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const&) const
-{
-	QDomElement us = ProcessorItem::saveYourself(_root, _doc, "domprocessor");
-	foreach (SubProcessorItem* spi, filter<SubProcessorItem>(childItems()))
-		spi->saveYourself(us, _doc);
-	return us;
-}
-
-void SubProcessorItem::fromDom(QDomElement const& _element, DomProcessorItem* _dpi)
-{
-	Properties p;
-	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-		if (n.toElement().tagName() == "property")
-			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
-	new SubProcessorItem(_dpi, _element.attribute("type"), _element.attribute("index").toInt(), p);
-}
-
-void SubProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
-{
-	QDomElement proc = _doc.createElement("subprocessor");
-	proc.setAttribute("type", m_type);
-	proc.setAttribute("index", m_index);
-	foreach (QString k, m_properties.keys())
-	{
-		QDomElement prop = _doc.createElement("property");
-		proc.appendChild(prop);
-		prop.setAttribute("name", k);
-		prop.setAttribute("value", m_properties[k].toString());
-	}
-	_root.appendChild(proc);
 }

@@ -1,15 +1,22 @@
-/***************************************************************************
- *   Copyright (C) 2003 by Gav Wood                                        *
- *   gav@kde.org                                                     *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- ***************************************************************************/
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef _GEDDEI_PROCESSORPORT_H
-#define _GEDDEI_PROCESSORPORT_H
+#pragma once
 
 namespace Geddei
 {
@@ -123,7 +130,7 @@ public:
 	 * @sa disconnect()
 	 */
 	void connect(const ProcessorPort &input) const;
-	
+
 	void connect(MultiProcessor &input) const;
 
 	/**
@@ -160,13 +167,13 @@ public:
 	 * @sa connect()
 	 */
 	void operator>>=(const ProcessorPort &input) const { connect(input); }
-	
+
 	/**
 	 * Shorthand operator for connecting to a multiprocessor. Does the same as
 	 * the connect() method. This will share the stream and connect each to the
 	 * MultiProcessor's inputs. The MultiProcessor must already know its
 	 * multiplicity.
-	 * 
+	 *
 	 * This port must not already be connected, split or shared.
 	 *
 	 * Example, given P is a Processor subclass object, Q is a MultiProcessor:
@@ -201,5 +208,3 @@ public:
 };
 
 }
-
-#endif
