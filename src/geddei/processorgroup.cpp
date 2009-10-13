@@ -32,53 +32,65 @@ ProcessorGroup::ProcessorGroup(bool adopt) : theAdopt(adopt)
 
 ProcessorGroup::~ProcessorGroup()
 {
-	if (theAdopt) deleteAll();
+	if (theAdopt)
+		deleteAll();
 }
 
 bool ProcessorGroup::exists(const QString &name)
 {
-	return theProcessors.count(name);
+	return theMembers.count(name);
 }
 
 Processor &ProcessorGroup::get(const QString &name)
 {
-	if (theProcessors.count(name))
-		return *(theProcessors[name]);
+	if (theMembers.count(name))
+		return *dynamic_cast<Processor*>(theMembers[name]);
 	else
 	{	qFatal("*** FATAL: Attempting to attain a Processor object that does not exist.\n"
 			   "           You used the non-existant name %s. Bailing.", qPrintable(name));
-		return *((Processor *)(NULL));
+		return *((Processor*)(0));
 	}
 }
 
 DomProcessor &ProcessorGroup::dom(const QString &name)
 {
-	if (theProcessors.count(name))
-		return *dynamic_cast<DomProcessor *>(theProcessors[name]);
+	if (theMembers.count(name))
+		return *dynamic_cast<DomProcessor*>(theMembers[name]);
 	else
-	{	qFatal("*** FATAL: Attempting to attain a Processor object that does not exist.\n"
+	{	qFatal("*** FATAL: Attempting to attain a DomProcessor object that does not exist.\n"
 			   "           You used the non-existant name %s. Bailing.", qPrintable(name));
-		return *((DomProcessor *)(NULL));
+		return *((DomProcessor*)(0));
 	}
 }
 
-void ProcessorGroup::add(Processor *o)
+MultiProcessor &ProcessorGroup::multi(const QString &name)
 {
-	for (QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if (i.value() == o) return;
-		else if (i.key() == o->name())
-			qDebug("*** ERROR: You are using the same name for multiple Processor objects.\n"
-				   "           You have to use a unique name for each object or grouping will not\n"
-				   "           work properly.");
-	theProcessors[o->name()] = o;
+	if (theMembers.count(name))
+		return *dynamic_cast<MultiProcessor*>(theMembers[name]);
+	else
+	{	qFatal("*** FATAL: Attempting to attain a MultiProcessor object that does not exist.\n"
+			   "           You used the non-existant name %s. Bailing.", qPrintable(name));
+		return *((MultiProcessor*)(0));
+	}
+}
+
+void ProcessorGroup::add(Groupable *o)
+{
+	if (theMembers.keys().contains(o->name()))
+		qDebug("*** ERROR: You are using the same name for multiple Processor objects.\n"
+			   "           You have to use a unique name for each object or grouping will not\n"
+			   "           work properly.");
+	else if (theMembers.values().contains(o))
+		return;
+	theMembers[o->name()] = o;
 	o->setGroup(*this);
 }
 
-void ProcessorGroup::remove(Processor *o)
+void ProcessorGroup::remove(Groupable *o)
 {
-	for (QMap<QString, Processor *>::Iterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	for (QMap<QString, Groupable*>::Iterator i = theMembers.begin(); i != theMembers.end(); i++)
 		if (i.value() == o)
-		{	theProcessors.erase(i);
+		{	theMembers.erase(i);
 			o->setNoGroup();
 			return;
 		}
@@ -88,11 +100,12 @@ bool ProcessorGroup::confirmTypes() const
 {
 	bool ret = true;
 	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes()");
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-	{	if (MESSAGES) qDebug("ProcessorGroup::confirmTypes(): Confirming %p...", i.value());
-		if (!i.value()->confirmTypes())
+	foreach (Groupable* i, theMembers.values())
+	{
+		if (MESSAGES) qDebug("ProcessorGroup::confirmTypes(): Confirming %p...", i);
+		if (!i->confirmTypes())
 		{
-			m_errorProc = i.value();
+			m_errorProc = i;
 			ret = false;
 		}
 	}
@@ -101,36 +114,40 @@ bool ProcessorGroup::confirmTypes() const
 
 void ProcessorGroup::deleteAll()
 {
-	QMap<QString, Processor *> theProcessorsBU = theProcessors;
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessorsBU.begin(); i != theProcessorsBU.end(); i++)
-		delete i.value();
-	theProcessors.clear();
+	foreach (Groupable* i, theMembers.values())
+		delete i;
+	theMembers.clear();
 }
 
 void ProcessorGroup::disconnectAll()
 {
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.value()->disconnectAll();
+	foreach (Groupable* i, theMembers.values())
+		i->disconnectAll();
 }
 
-bool ProcessorGroup::go(bool waitUntilGoing) const
+bool ProcessorGroup::go(bool _waitUntilGoing) const
 {
 	bool ret = true;
 //	if (!confirmTypes()) return false;
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if (!i.value()->go()) ret = false;
-	if (ret && waitUntilGoing) return !ProcessorGroup::waitUntilGoing();
+	foreach (Groupable* i, theMembers.values())
+		if (!i->go())
+			ret = false;
+	if (ret && _waitUntilGoing)
+		return !ProcessorGroup::waitUntilGoing();
 	return ret;
 }
 
-Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *errorData) const
+Processor::ErrorType ProcessorGroup::waitUntilGoing(Groupable **errorProc, int *errorData) const
 {
 	Processor::ErrorType ret;
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		if ((ret = i.value()->waitUntilGoing(errorData)) != Processor::NoError)
-		{	if (errorProc) *errorProc = i.value();
-			for (QMap<QString, Processor *>::ConstIterator j = theProcessors.begin(); j != i; j++)
-				j.value()->stop();
+	foreach (Groupable* i, theMembers)
+		if ((ret = i->waitUntilGoing(errorData)) != Processor::NoError)
+		{	if (errorProc) *errorProc = i;
+			foreach (Groupable* j, theMembers)
+				if (j == i)
+					break;
+				else
+					j->stop();
 			return ret;
 		}
 	return Processor::NoError;
@@ -139,12 +156,12 @@ Processor::ErrorType ProcessorGroup::waitUntilGoing(Processor **errorProc, int *
 const QString ProcessorGroup::error() const
 {
 	QString ret;
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
+	foreach (Groupable* i, theMembers)
 	{
-		Processor::ErrorType e = i.value()->errorType();
+		Processor::ErrorType e = i->errorType();
 		if (e != Processor::NoError && e != Processor::RecursiveFailure && e != Processor::Pending)
 		{	if (ret.isEmpty()) ret += "  ";
-			ret += i.value()->name() + ": " + i.value()->error();
+			ret += i->name() + ": " + i->error();
 		}
 	}
 	return ret;
@@ -152,15 +169,16 @@ const QString ProcessorGroup::error() const
 
 void ProcessorGroup::stop(bool resetToo) const
 {
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.value()->stop();
-	if (resetToo) reset();
+	foreach (Groupable* i, theMembers)
+		i->stop();
+	if (resetToo)
+		reset();
 }
 
 void ProcessorGroup::reset() const
 {
-	for (QMap<QString, Processor *>::ConstIterator i = theProcessors.begin(); i != theProcessors.end(); i++)
-		i.value()->reset();
+	foreach (Groupable* i, theMembers)
+		i->reset();
 }
 
 }

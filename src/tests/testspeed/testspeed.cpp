@@ -135,9 +135,9 @@ int main(int argc, char **argv)
 	{
 		(new MySource)->init("o", g);
 		(new MySink)->init("i", g);
-		g["o"][0] >>= g["i"][0];
+		g.get("o")[0] >>= g.get("i")[0];
 		g.go(true);
-		g["i"].waitUntilDone();
+		g.get("i").waitUntilDone();
 		g.stop();
 	}
 	else if (mode == 1)
@@ -145,8 +145,8 @@ int main(int argc, char **argv)
 		(new MySource)->init("o", g);
 		(new MySource)->init("p", g);
 		g.go(true);
-		g["o"].waitUntilDone();
-		g["p"].waitUntilDone();
+		g.get("o").waitUntilDone();
+		g.get("p").waitUntilDone();
 		g.stop();
 	}
 	else if (mode == 2)
@@ -159,10 +159,10 @@ int main(int argc, char **argv)
 				Properties("Latency/Throughput", weight));
 		LatencySink *sink = new LatencySink;
 		sink->init("i", g);
-		g["o"][0] >>= g[links > 0 ? "p0" : "i"][0];
+		g.get("o")[0] >>= g.get(links > 0 ? "p0" : "i")[0];
 		for (int i = 0; i < links; i++)
-			g["p" + QString::number(i)][0] >>=
-				g[i == links - 1 ? "i" : ("p" + QString::number(i+1))][0];
+			g.get("p" + QString::number(i))[0] >>=
+				g.get(i == links - 1 ? "i" : ("p" + QString::number(i+1)))[0];
 
 		uint count = 3;
 		float times[count], ltimes[count];
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 			QTime clock;
 			g.go(true);
 			clock.start();
-			g["i"].waitUntilDone();
+			g.get("i").waitUntilDone();
 			times[t] = clock.elapsed() / 1000.;
 			ltimes[t] = sink->latency() / 1000.;
 			g.stop();
@@ -202,11 +202,11 @@ int main(int argc, char **argv)
 		sink->init("i", g);
 		if (sub)
 		{
-			g["o"][0] >>= g["p"][0];
-			g["p"][0] >>= g["i"][0];
+			g.get("o")[0] >>= g.get("p")[0];
+			g.get("p")[0] >>= g.get("i")[0];
 		}
 		else
-			g["o"][0] >>= g["i"][0];
+			g.get("o")[0] >>= g.get("i")[0];
 		uint count = 3;
 		float times[count], ltimes[count];
 
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
 			QTime clock;
 			g.go(true);
 			clock.start();
-			g["i"].waitUntilDone();
+			g.get("i").waitUntilDone();
 			times[t] = clock.elapsed() / 1000.;
 			ltimes[t] = sink->latency() / 1000.;
 			g.stop();

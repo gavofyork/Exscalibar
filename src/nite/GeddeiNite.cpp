@@ -85,9 +85,9 @@ void GeddeiNite::doSave(const QString& _filename)
 	doc.appendChild(root);
 	foreach (ProcessorItem* pi, filter<ProcessorItem>(theScene.items()))
 		pi->saveYourself(root, doc);
-	foreach (ConnectionItem* ci, filter<ConnectionItem>(theScene.items()))
-		ci->saveYourself(root, doc);
 	foreach (MultipleConnectionItem* ci, filter<MultipleConnectionItem>(theScene.items()))
+		ci->saveYourself(root, doc);
+	foreach (ConnectionItem* ci, filter<ConnectionItem>(theScene.items()))
 		ci->saveYourself(root, doc);
 
 	QFile f(_filename);
@@ -125,22 +125,26 @@ void GeddeiNite::doLoad(const QString &filename)
 		else if (elem.tagName() == "connection")
 			ConnectionItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "multipleconnection")
+		{
 			MultipleConnectionItem::fromDom(elem, &theScene);
+			connectAll();
+			disconnectAll();
+		}
 	}
 	setModified(true);
 	statusBar()->showMessage("Loaded.", 2000);
 	setModified(false);
 }
 
-void GeddeiNite::setModified(bool modified)
+void GeddeiNite::setModified(bool _modified)
 {
-	theModified = modified;
-	if (modified)
+	theModified = _modified;
+	if (_modified)
 	{
 		modeRun->setEnabled(connectAll());
 		disconnectAll();
 	}
-	setWindowTitle((theFilename.isEmpty() ? "Untitled" : theFilename) + (modified ? " [ Modified ]" : "") + " - Geddei Nite");
+	setWindowTitle((theFilename.isEmpty() ? "Untitled" : theFilename) + (_modified ? " [ Modified ]" : "") + " - Geddei Nite");
 }
 
 void GeddeiNite::updateItems()
@@ -148,13 +152,13 @@ void GeddeiNite::updateItems()
 	theProcessors->clear();
 	{	QStringList classes = SubProcessorFactory::available();
 		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
-		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType + 1);
+		{	QListWidgetItem *item = new QListWidgetItem(QIcon(":/Icons/subprocessor.png"), *i, theProcessors, QListWidgetItem::UserType + 1);
 			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		}
 	}
 	{	QStringList classes = ProcessorFactory::available();
 		for (QStringList::iterator i = classes.begin(); i != classes.end(); i++)
-		{	QListWidgetItem *item = new QListWidgetItem(*i, theProcessors, QListWidgetItem::UserType);
+		{	QListWidgetItem *item = new QListWidgetItem(QIcon(":/Icons/processor.png"), *i, theProcessors, QListWidgetItem::UserType);
 			item->setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 		}
 	}
@@ -335,9 +339,9 @@ bool GeddeiNite::connectAll()
 
 	if (!theGroup.confirmTypes())
 	{
-		Processor* p = theGroup.errorProc();
+		Groupable* p = theGroup.errorProc();
 		assert(p);
-		Processor::ErrorType et = p->errorType();
+		Groupable::ErrorType et = p->errorType();
 		int ed = p->errorData();
 		qDebug() << et << ed;
 		statusBar()->showMessage("Problem confirming types.");

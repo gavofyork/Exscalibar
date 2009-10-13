@@ -46,7 +46,6 @@ protected:
 	bool theDeferredInit;
 	Properties theDeferredProperties;
 	QString theDeferredName;
-	ProcessorGroup *theDeferredGroup;
 
 	virtual void setSourceMultiplicity(uint multiplicity) = 0;
 	virtual void setSinkMultiplicity(uint multiplicity) = 0;

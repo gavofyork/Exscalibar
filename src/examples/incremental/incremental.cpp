@@ -101,11 +101,11 @@ int main()
 	SubProcessorFactory::createDom("MFCC")->init("B", g);
 	SubProcessorFactory::createDom("Magnitude")->init("G", g);
 	ProcessorFactory::create("Normalise")->init("N", g);
-	g["P"] >>= g["M"];
-	g["M"][0] >>= g["F"][0];
-	g["F"][0] >>= g["B"][0];
-	g["B"][0] >>= g["G"][0];
-	g["G"][0] >>= g["N"][0];
+	g.get("P") >>= g.get("M");
+	g.get("M")[0] >>= g.get("F")[0];
+	g.get("F")[0] >>= g.get("B")[0];
+	g.get("B")[0] >>= g.get("G")[0];
+	g.get("G")[0] >>= g.get("N")[0];
 	if (g.go())
 	{
 		qDebug("Going!");
@@ -135,17 +135,17 @@ int main()
   (new Printer)->init("P3", group);
   // Now we need to connect them all. Since J splits off into I1 and P1, we
   // have to split() or share() it. share() is far faster, so we do that...
-  group["J"][0].share();
+  group.get("J")[0].share();
   // And connect it...
-  group["J"][0] >>= group["I1"][0];
-  group["J"][0] >>= group["P1"][0];
+  group.get("J")[0] >>= group.get("I1")[0];
+  group.get("J")[0] >>= group.get("P1")[0];
   // Then share() I1's output...
-  group["I1"][0].share();
+  group.get("I1")[0].share();
   // And connect it to I2 and P2...
-  group["I1"][0] >>= group["I2"][0];
-  group["I1"][0] >>= group["P2"][0];
+  group.get("I1")[0] >>= group.get("I2")[0];
+  group.get("I1")[0] >>= group.get("P2")[0];
   // Then finally connect I2 to P3...
-  group["I2"][0] >>= group["P3"][0];
+  group.get("I2")[0] >>= group.get("P3")[0];
   // All connected - we just start them now; we use group.go(), which starts
   // all processor objects in the group at once.
   if (!group.go(true)) qFatal("Couldn't start processors.");

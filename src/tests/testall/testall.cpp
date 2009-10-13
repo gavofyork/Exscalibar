@@ -47,11 +47,11 @@ int main(int argc, char **argv)
 		I->init("I", objects);
 
 		cout << "Connecting..." << endl;
-		objects["O"][0] >>= objects["M"][0];
-		objects["O"][1] >>= objects["M"][1];
-		objects["M"][0] >>= objects["D"][0];
-		objects["D"][0] >>= objects["F"][0];
-		objects["F"][0] >>= objects["I"][0];
+		objects.get("O")[0] >>= objects.get("M")[0];
+		objects.get("O")[1] >>= objects.get("M")[1];
+		objects.get("M")[0] >>= objects.get("D")[0];
+		objects.get("D")[0] >>= objects.get("F")[0];
+		objects.get("F")[0] >>= objects.get("I")[0];
 
 		cout << "Starting objects..." << endl;
 		objects.go();

@@ -30,6 +30,7 @@ class DLLEXPORT Add: public HeavyProcessor
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
+	virtual QString simpleText() const { return "+"; }
 public:
 	Add(): HeavyProcessor("Add") {}
 };

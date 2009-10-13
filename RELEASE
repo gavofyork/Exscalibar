@@ -1,2 +1,9 @@
-Change version: Project->Settings
-Add CHANGELOG entry: /CHANGELOG
+1. Add changelog entry: /debian/changelog
+  a) start with previous version + -next1
+  b) run package.sh
+  c) if build fixes required
+     - just increment -nextN
+     - merge fixes into upstream
+     - goto (b).
+2. Change version properly: system/exscalibar.pc, .h
+

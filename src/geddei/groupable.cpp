@@ -16,25 +16,42 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "multiplicative.h"
+#include <cassert>
+using namespace std;
 
-#define MESSAGES 0
+#include "processorgroup.h"
+#include "groupable.h"
+using namespace Geddei;
 
 namespace Geddei
 {
 
-void Multiplicative::setMultiplicity(uint multiplicity)
+Groupable::Groupable(): theGroup(0)
 {
-	if (MESSAGES) qDebug("Multiplicative::setMultiplicity(%d)", multiplicity);
-	if (theDeferredInit)
-	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
-		theDeferredProperties["Multiplicity"] = multiplicity;
-		doInit(theDeferredName, 0, theDeferredProperties);
-	}
-	setSourceMultiplicity(multiplicity);
-	setSinkMultiplicity(multiplicity);
+}
+
+Groupable::~Groupable()
+{
+	// TODO: THIS MUST BE MUTUALLY EXCLUSIVE TO ANYTHING ACCESSING IT REMOTELY
+	// (I.E. THROUGH GROUP, FOR THE ENTIRE REMOTE ACTION) --- LOCK IN GROUP?
+	setNoGroup();
+	// FINISH MUTUAL EXCLUSIVITY
+}
+
+void Groupable::setGroup(ProcessorGroup &g)
+{
+	if (theGroup == &g) return;
+	if (theGroup) theGroup->remove(this);
+	theGroup = &g;
+	if (theGroup) theGroup->add(this);
+}
+
+void Groupable::setNoGroup()
+{
+	if (!theGroup) return;
+	ProcessorGroup *d = theGroup;
+	theGroup = 0L;
+	if (d) d->remove(this);
 }
 
 }
-
-#undef MESSAGES

@@ -130,7 +130,7 @@ void ProcessorForwarder::incomingConnection(int socket)
 			SubProcessor *sub = SubProcessorFactory::create(type);
 			if (MESSAGES) qDebug("Created SubProcessor at %p", sub);
 			// Return the subProc's pointer for decoupling later...
-			header << ((uint)sub) << endl;
+			header << ((long uint)sub) << endl;
 			new RSCoupling(link, sub);
 			// return here to make sure that link isn't deleted.
 			return;

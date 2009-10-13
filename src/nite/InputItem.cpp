@@ -30,7 +30,7 @@ InputItem::InputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i)
 
 ProcessorItem* InputItem::processorItem() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(parentItem());
+	return static_cast<ProcessorItem*>(parentItem());
 }
 
 QRectF InputItem::boundingRect() const

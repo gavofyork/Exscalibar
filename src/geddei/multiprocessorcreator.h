@@ -49,7 +49,10 @@ namespace Geddei
 class DLLEXPORT MultiProcessorCreator
 {
 	friend class MultiProcessor;
+
+public:
 	virtual Processor *newProcessor() const = 0;
+
 protected:
 	virtual ~MultiProcessorCreator() {}
 };
@@ -64,6 +67,7 @@ protected:
 template<class X>
 class DLLEXPORT BasicCreator: public MultiProcessorCreator
 {
+public:
 	virtual Processor *newProcessor() const { return dynamic_cast<Processor *>(new X); }
 };
 
@@ -77,6 +81,7 @@ class DLLEXPORT BasicCreator: public MultiProcessorCreator
 template<class X>
 class DLLEXPORT BasicSubCreator: public MultiProcessorCreator
 {
+public:
 	virtual Processor *newProcessor() const { return dynamic_cast<Processor *>(new DomProcessor(new X)); }
 };
 
@@ -91,9 +96,10 @@ class DLLEXPORT BasicSubCreator: public MultiProcessorCreator
 class DLLEXPORT FactoryCreator: public MultiProcessorCreator
 {
 	QString theType;
-	virtual Processor *newProcessor() const;
 
 public:
+	virtual Processor *newProcessor() const;
+
 	/**
 	 * Basic constructor. Creates a new FactoryCreator object which will
 	 * function as a MultiProcessorCreator class to produce objects from the
@@ -117,9 +123,10 @@ public:
 class DLLEXPORT SubFactoryCreator: public MultiProcessorCreator
 {
 	QString theType;
-	virtual Processor *newProcessor() const;
 
 public:
+	virtual Processor *newProcessor() const;
+
 	/**
 	 * Basic constructor. Creates a new SubFactoryCreator object which will
 	 * function as a MultiProcessorCreator class to produce DomProcessor objects

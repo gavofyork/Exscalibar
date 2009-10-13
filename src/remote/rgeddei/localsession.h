@@ -73,7 +73,7 @@ class DLLEXPORT LocalSession: private ProcessorForwarder, private ProcessorGroup
 
 	virtual Processor *lookup(uint /*key*/, const QString &name)
 	{
-		return &(this->ProcessorGroup::operator[](name));
+		return &(get(name));
 	}
 
 public:

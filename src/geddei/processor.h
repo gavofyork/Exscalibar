@@ -25,6 +25,7 @@
 #include <QString>
 
 #include <exscalibar.h>
+
 #ifdef __GEDDEI_BUILD
 #include "qtask.h"
 #include "qcleaner.h"
@@ -40,6 +41,7 @@
 #include "multisink.h"
 #include "signaltyperefs.h"
 #include "processorport.h"
+#include "groupable.h"
 #else
 #include <qtextra/qtask.h>
 #include <qtextra/qcleaner.h>
@@ -55,6 +57,7 @@
 #include <geddei/multisink.h>
 #include <geddei/signaltyperefs.h>
 #include <geddei/processorport.h>
+#include <geddei/groupable.h>
 #endif
 using namespace QtExtra;
 using namespace Geddei;
@@ -150,27 +153,8 @@ class DLLEXPORT BailException
  * values for those properties. It may specify a visual size and method for
  * drawing in a GUI.
  */
-class DLLEXPORT Processor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink
+class DLLEXPORT Processor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink, public Groupable
 {
-public:
-	/**
-	 * The various error types that a Processor may trip up on.
-	 */
-	enum ErrorType
-	{	NoError = 0, ///< Indicates no error occured.
-		Pending, ///< Indicates the operation has yet to finish.
-		Custom, ///< Indicates the overridden processorStarted returned false.
-		NotInitialised, ///< Indicates processor was never initialised.
-		TypesNotConfirmed, ///< Indicates the types were not confirmed before starting.
-		InputTypeNull, ///< Indicates an input has been given a null type.
-		InputNotConnected, ///< Indicates an input port was left unconnected.
-		InputsNotHomogeneous, ///< Indicates a MultiIn type Processor has inputs of differing types.
-		OutputsNull, ///< Indicates one or more outputs were left undefined.
-		InvalidInputs, ///< Indicates a false return from verifyAndSpecifyTypes.
-		RecursiveFailure, ///< Indicates a failure of a Processor that this depends on.
-		NotStarted ///< Internal - Indicated the operation has yet to start.
-	};
-
 private:
 	/**
 	 * Has to be of type Processor ** since it takes ownership of and deletes the data at
@@ -183,7 +167,6 @@ private:
 	QString theName;
 	const QString theType;
 	int theWidth, theHeight, theRedrawPeriod;
-	ProcessorGroup *theGroup;
 	//@}
 
 	//@{
@@ -610,23 +593,6 @@ public:
 	//@{
 
 	/**
-	 * Puts the Processor into a gvien ProcessorGroup.
-	 *
-	 * @param g The ProcessorGroup the Processor should become a member of.
-	 *
-	 * @sa setNoGroup()
-	 */
-	void setGroup(ProcessorGroup &g);
-
-	/**
-	 * Resets the group of the object. The processor will not be associated with any group
-	 * after this call.
-	 *
-	 * @sa setGroup()
-	 */
-	void setNoGroup();
-
-	/**
 	 * Returns information about the properties of the object and gives their default values.
 	 *
 	 * @return The processor's properties and their default values.
@@ -843,7 +809,7 @@ public:
 	 *
 	 * @sa errorType
 	 */
-	int errorData() const { QFastMutexLocker lock(&theErrorSystem); return theErrorData; }
+	virtual long int errorData() const { QFastMutexLocker lock(&theErrorSystem); return theErrorData; }
 
 	/**
 	 * Get a string which is a human readable interpretation of the last
@@ -851,7 +817,7 @@ public:
 	 *
 	 * @return The error string.
 	 */
-	const QString error() const;
+	QString error() const;
 
 	/**
 	 * Pauses the processor temporarily. No processing will occur until unpause()
@@ -946,6 +912,7 @@ public:
 	 */
 	bool draw(QPainter& _p, QSizeF const& _s) const;
 	QColor outlineColour() const { return specifyOutlineColour(); }
+	virtual QString simpleText() const { return "?"; }
 
 	/**
 	 * Determine how full the buffer at input @a index is. Used by the Nite for
@@ -963,7 +930,7 @@ public:
 	 *
 	 * @return The name of the Processor.
 	 */
-	const QString &name() const { return theName; }
+	virtual QString name() const { return theName; }
 
 	/**
 	 * Gets the (class-wise) type of the processor.

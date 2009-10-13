@@ -26,6 +26,7 @@ using namespace Geddei;
 #include "ConnectionItem.h"
 #include "IncompleteConnectionItem.h"
 #include "ProcessorItem.h"
+#include "MultiProcessorItem.h"
 #include "ProcessorsView.h"
 
 ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
@@ -44,9 +45,18 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 {
 	if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("Processor:"))
 	{
-		ProcessorItem* i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text().mid(10)));
-		i->setPos(_event->scenePos());
-		addItem(i);
+		if (_event->modifiers() & Qt::ShiftModifier)
+		{
+			MultiProcessorItem* i = new MultiProcessorItem(_event->mimeData()->text().mid(10));
+			i->setPos(_event->scenePos());
+			addItem(i);
+		}
+		else
+		{
+			ProcessorItem* i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text().mid(10)));
+			i->setPos(_event->scenePos());
+			addItem(i);
+		}
 	}
 	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
 	{
@@ -68,6 +78,7 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 	else
 		return;
 	changed();
+	_event->setAccepted(false);
 }
 
 void ProcessorsScene::onStarted()

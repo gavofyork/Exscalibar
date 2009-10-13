@@ -23,9 +23,9 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-#include "processor.h"
+#include "groupable.h"
 #else
-#include <geddei/processor.h>
+#include <geddei/groupable.h>
 #endif
 
 namespace Geddei
@@ -33,6 +33,7 @@ namespace Geddei
 
 class Processor;
 class DomProcessor;
+class MultiProcessor;
 
 /** @ingroup Geddei
  * @brief A class to segment a number of Processor objects into a set.
@@ -47,13 +48,13 @@ class DomProcessor;
  */
 class DLLEXPORT ProcessorGroup
 {
-	mutable Processor* m_errorProc;
+	mutable Groupable* m_errorProc;
 	bool theAdopt;
-	QMap<QString, Processor *> theProcessors;
+	QMap<QString, Groupable*> theMembers;
 
-	friend class Processor;
-	void add(Processor *o);
-	void remove(Processor *o);
+	friend class Groupable;
+	void add(Groupable *o);
+	void remove(Groupable *o);
 
 public:
 	/**
@@ -63,7 +64,7 @@ public:
 	 * @return true iff all types confirm correctly.
 	 */
 	bool confirmTypes() const;
-	Processor* errorProc() const { return m_errorProc; }
+	Groupable* errorProc() const { return m_errorProc; }
 
 	/**
 	 * Start all Processor objects in the group. Note this returns once all have
@@ -90,7 +91,7 @@ public:
 	 * the error arose with.
 	 * @return The Error it failed with or Processor::NoError if all went correctly.
 	 */
-	Processor::ErrorType waitUntilGoing(Processor **errorProc = 0, int *errorData = 0) const;
+	Groupable::ErrorType waitUntilGoing(Groupable **errorProc = 0, int *errorData = 0) const;
 
 	/**
 	 * Returns a QString describing each error that occured. Should only be called
@@ -157,20 +158,29 @@ public:
 	DomProcessor &dom(const QString &name);
 
 	/**
-	 * Get a reference to a named Processor object. It must exist in the group.
+	 * Get a reference to a named MultiProcessor object. It must exist in the
+	 * group.
+	 *
+	 * @param name The name of the MultiProcessor object to be found.
+	 * @return A reference to the MultiProcessor object of name @a name.
+	 */
+	MultiProcessor &multi(const QString &name);
+
+	/**
+	 * Get a reference to a named Groupable object. It must exist in the group.
 	 * This is a convenience method that does the same as get().
 	 *
-	 * @param name The name of the Processor object to be found.
-	 * @return A reference to the Processor object of name @a name.
+	 * @param name The name of the Groupable object to be found.
+	 * @return A reference to the Groupable object of name @a name.
 	 */
-	Processor &operator[](const QString &name) { return get(name); }
+	Groupable &operator[](const QString &name) { return *theMembers[name]; }
 
 	/**
 	 * Get the number of Processor objects in group.
 	 *
 	 * @return The number of Processor objects in the group.
 	 */
-	uint count() const { return theProcessors.count(); }
+	uint count() const { return theMembers.count(); }
 
 	/**
 	 * Default constructor.

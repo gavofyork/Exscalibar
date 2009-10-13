@@ -42,58 +42,52 @@ class ProcessorItem: public QObject, public QGraphicsItem
 
 public:
 	ProcessorItem(Processor* _p, Properties const& _pr = Properties(), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
-	~ProcessorItem()
-	{
-		delete m_processor;
-	}
+	~ProcessorItem() { delete m_processor; }
 
-	Processor* processor() const { return m_processor; }
-	QGraphicsItem* statusBar() const { return m_statusBar; }
-	QRectF clientArea() const;
+	Processor*			processor() const { return m_processor; }
+	QGraphicsItem*		statusBar() const { return m_statusBar; }
+	QRectF				clientArea() const;
 
-	void adjustSize(QSizeF const& _a);
+	void				adjustSize(QSizeF const& _a);
 
-	Properties const& properties() const { return m_properties; }
-	void setProperty(QString const& _key, QVariant const& _value);
+	Properties const&	properties() const { return m_properties; }
+	void				setProperty(QString const& _key, QVariant const& _value);
 
-	bool connectYourself(ProcessorGroup& _group);
-	void typesConfirmed();
-	void disconnectYourself();
+	virtual bool		connectYourself(ProcessorGroup& _group);
+	void				typesConfirmed();
+	virtual void		disconnectYourself();
 
-	void tick();
+	void				tick();
 
-	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "processor") const;
+	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "processor") const;
 
-	virtual QSizeF centreMin() const { return QSizeF(m_processor->width(), m_processor->height()); }
+	virtual QSizeF		centreMin() const { return QSizeF(m_processor->width(), m_processor->height()); }
 
-	virtual QRectF boundingRect() const
-	{
-		return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f));
-	}
-	virtual void focusInEvent(QFocusEvent* _e);
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-	virtual bool sceneEvent(QEvent* _e) { return QGraphicsItem::sceneEvent(_e); }
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e);
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
-	virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* _e);
+	virtual QRectF		boundingRect() const { return QRectF(QPointF(-10, -10), m_size + QSize(20.f, 20.f)); }
+	virtual void		focusInEvent(QFocusEvent* _e);
+	virtual void		paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual bool		sceneEvent(QEvent* _e) { return QGraphicsItem::sceneEvent(_e); }
+	virtual void		mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void		mousePressEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void		mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void		hoverMoveEvent(QGraphicsSceneHoverEvent* _e);
 
 	enum { Type = UserType + 1 };
-	virtual int type() const { return Type; }
+	virtual int			type() const { return Type; }
 
-	virtual void propertiesChanged(QString const& _newName = QString::null);
+	virtual void		propertiesChanged(QString const& _newName = QString::null);
+	virtual void		rejig();
 
 protected:
-	virtual void rejig();
-	virtual Processor* reconstructProcessor();
-	virtual Properties completeProperties() const { return m_properties; }
+	virtual Processor*	reconstructProcessor();
+	virtual Properties	completeProperties() const { return m_properties; }
 
 	Properties			m_properties;
 	Processor*			m_processor;
 
 private:
-	virtual void timerEvent(QTimerEvent*);
+	virtual void		timerEvent(QTimerEvent*);
 
 	QGraphicsRectItem*	m_statusBar;
 	PauseItem*			m_pauseItem;

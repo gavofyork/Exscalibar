@@ -43,7 +43,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, const MultiplicityType multi): theName(""), theType(type),
-	theWidth(32), theHeight(32), theGroup(0), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(32), theHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -62,7 +62,6 @@ Processor::~Processor()
 	for (uint i = 0; i < (uint)theInputs.size(); i++)
 		if (theInputs[i])
 			delete theInputs[i];
-	setNoGroup();
 	// FINISH MUTUAL EXCLUSIVITY
 
 	if (MESSAGES) qDebug("Deleted Processor.");
@@ -428,23 +427,21 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 		return;
 	}
 
+	if (!theDeferredInit && g)
+		setGroup(*g);
+
 	if (theMulti&(In|Out) && !(theMulti&Const))
 		if (!properties.keys().contains("Multiplicity"))
 		{	if (MESSAGES) qDebug("Deferring...");
 			theDeferredInit = true;
 			theDeferredProperties = properties;
 			theDeferredName = name;
-			theDeferredGroup = g;
 			theName = name;
-			theGroup = g;
-			if (theGroup) theGroup->add(this);
 			return;
 		}
 
 	if (MESSAGES) qDebug("Initialising (M=%d)...", properties.keys().contains("Multiplicity") ? properties["Multiplicity"].toInt() : 0);
 	theName = name;
-	theGroup = g;
-	if (theGroup && (!theGroup->exists(theName) || &(theGroup->get(theName)) == this)) theGroup->add(this);
 
 	if (MESSAGES) for (uint i = 0; i < (uint)properties.keys().count(); i++) qDebug("properties[%s] = %s", qPrintable(properties.keys()[i]), qPrintable(properties[properties.keys()[i]].toString()));
 	Properties p = specifyProperties();
@@ -478,10 +475,10 @@ bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	QRectF area(QPointF(0, 0), _s - QSizeF(1, 1));
 	_p.setFont(QFont("Helvetica", _s.height() *4/5, QFont::Black, false));
 	_p.setPen(Qt::black);
-	_p.drawText(area, Qt::AlignCenter, "?");
+	_p.drawText(area, Qt::AlignCenter, simpleText());
 	area.setTopLeft(QPointF(1, 1));
 	_p.setPen(Qt::white);
-	_p.drawText(area, Qt::AlignCenter, "?");
+	_p.drawText(area, Qt::AlignCenter, simpleText());
 	return true;
 }
 
@@ -867,7 +864,7 @@ Processor::ErrorType Processor::waitUntilGoing(int *errorData)
 	return theError;
 }
 
-const QString Processor::error() const
+QString Processor::error() const
 {
 	switch (theError)
 	{
@@ -896,22 +893,6 @@ const QString Processor::error() const
 	default:
 		return QString("Unknown error (code: %1, data %2)").arg(theError).arg(theErrorData);
 	}
-}
-
-void Processor::setGroup(ProcessorGroup &g)
-{
-	if (theGroup == &g) return;
-	if (theGroup) theGroup->remove(this);
-	theGroup = &g;
-	if (theGroup) theGroup->add(this);
-}
-
-void Processor::setNoGroup()
-{
-	if (!theGroup) return;
-	ProcessorGroup *d = theGroup;
-	theGroup = 0L;
-	if (d) d->remove(this);
 }
 
 bool Processor::waitUntilReady()

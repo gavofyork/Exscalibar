@@ -25,10 +25,12 @@
 #include "multisource.h"
 #include "multisink.h"
 #include "properties.h"
+#include "groupable.h"
 #else
 #include <geddei/multisource.h>
 #include <geddei/multisink.h>
 #include <geddei/properties.h>
+#include <geddei/groupable.h>
 #endif
 using namespace Geddei;
 
@@ -75,45 +77,28 @@ class MultiProcessorCreator;
  * parallelism from the standard Geddei tools. It is meant merely as a
  * shortcut to be used in particular situations.
  */
-class DLLEXPORT MultiProcessor: public MultiSource, public MultiSink
+class DLLEXPORT MultiProcessor: public MultiSource, public MultiSink, public Groupable
 {
 	friend class Processor;
 	friend class ProcessorPort;
 
-	MultiProcessorCreator *theCreator;
-	Processor *theSource;
-
-	bool theIsInitialised;
-	QVector<Processor *> theProcessors;
-
-	/**
-	 * @return true iff the quantity of multiplicity is known.
-	 */
-	bool knowMultiplicity() const { return theIsInitialised; }
-
-	/**
-	 * Get the quantity of multiplicity.
-	 *
-	 * @return The quantity of multiplicity. This value is only valid if
-	 * knowMultiplicity() returns true.
-	 */
-	uint multiplicity() const { return theProcessors.count(); }
-
-	/**
-	 * @return true iff init() has been called on this object.
-	 */
-	bool initGiven() const { return theIsInitialised || theDeferredInit; }
-
-	//* Reimplementation from Multiplicative
-	virtual void doInit(const QString &name, ProcessorGroup *g, const Properties &properties);
-
-	//* Reimplementation from MultiSource
-	virtual ProcessorPort sourcePort(uint i) { return (*theProcessors[i])[0]; }
-
-	//* Reimplementation from MultiSink
-	virtual ProcessorPort sinkPort(uint i) { return (*theProcessors[i])[0]; }
-
 public:
+	/**
+	 * Basic constructor. Creates a new MultiProcessor object whose Processor
+	 * constituents are created by the Creator @a c. See MultiProcessorCreator
+	 * and its derivative classes for more information about specifying a
+	 * suitable creator.
+	 *
+	 * @param c The MultiProcessorCreator to be used for creating Processor
+	 * objects in this object.
+	 */
+	MultiProcessor(MultiProcessorCreator *c): Groupable(), theCreator(c), theSource(0), theIsInitialised(false) {}
+
+	/**
+	 * Default destructor.
+	 */
+	~MultiProcessor();
+
 	/**
 	 * Performs basic object construction that cannot otherwise be done in the
 	 * constructor due to shared library limitations. Initialises the object
@@ -146,21 +131,53 @@ public:
 	 */
 	void init(const QString &name = "", const Properties &properties = Properties()) { doInit(name, 0, properties); }
 
-	/**
-	 * Basic constructor. Creates a new MultiProcessor object whose Processor
-	 * constituents are created by the Creator @a c. See MultiProcessorCreator
-	 * and its derivative classes for more information about specifying a
-	 * suitable creator.
-	 *
-	 * @param c The MultiProcessorCreator to be used for creating Processor
-	 * objects in this object.
-	 */
-	MultiProcessor(MultiProcessorCreator *c): theCreator(c), theSource(0), theIsInitialised(false) {}
+	virtual QString name() const;
+	virtual bool confirmTypes();
+	virtual bool go();
+	virtual Processor::ErrorType waitUntilGoing(int *errorData = 0);
+	virtual Connection::Tristate isGoingYet();
+	virtual QString error() const;
+	virtual ErrorType errorType() const;
+	virtual long int errorData() const;
+	virtual void stop();
+	virtual void reset();
+	virtual void disconnectAll();
 
 	/**
-	 * Default destructor.
+	 * @return true iff the quantity of multiplicity is known.
 	 */
-	~MultiProcessor();
+	bool knowMultiplicity() const { return theIsInitialised; }
+
+	/**
+	 * Get the quantity of multiplicity.
+	 *
+	 * @return The quantity of multiplicity. This value is only valid if
+	 * knowMultiplicity() returns true.
+	 */
+	uint multiplicity() const { return theProcessors.count(); }
+
+	Processor* processor(uint _index) const { return theProcessors[_index]; }
+
+private:
+	/**
+	 * @return true iff init() has been called on this object.
+	 */
+	bool initGiven() const { return theIsInitialised || theDeferredInit; }
+
+	//* Reimplementation from Multiplicative
+	virtual void doInit(const QString &name, ProcessorGroup *g, const Properties &properties);
+
+	//* Reimplementation from MultiSource
+	virtual ProcessorPort sourcePort(uint i) { return (*theProcessors[i])[0]; }
+
+	//* Reimplementation from MultiSink
+	virtual ProcessorPort sinkPort(uint i) { return (*theProcessors[i])[0]; }
+
+	MultiProcessorCreator *theCreator;
+	Processor *theSource;
+
+	bool theIsInitialised;
+	QVector<Processor *> theProcessors;
 };
 
 }
