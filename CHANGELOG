@@ -1,3 +1,18 @@
+1.1.1:
+Several minor fixes.
+
+1.1.1pre4:
+Another amd64 fix.
+
+1.1.1pre3:
+Another amd64 fix.
+
+1.1.1pre2:
+Minor amd64 fix.
+
+1.1.1pre1:
+Nothing.
+
 1.1.0:
 New build system (removed configure script).
 Clean compile on GCC 4.3 with Qt 4.5.

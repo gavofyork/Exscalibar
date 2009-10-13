@@ -16,7 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(HAVE_AUBIO) || 1
+#if defined(HAVE_AUBIO)
 
 #include <aubio.h>
 

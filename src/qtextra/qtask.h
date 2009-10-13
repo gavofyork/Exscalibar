@@ -51,7 +51,7 @@ public:
 
 	virtual int doWork() { return WillNeverWork; }
 	virtual void onStopped() {}
-	virtual QString taskName() const { return QString::number((uint)this); }
+	virtual QString taskName() const { return QString::number((long uint)this); }
 
 private:
 	virtual void attemptProcess();

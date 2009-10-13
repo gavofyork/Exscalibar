@@ -20,7 +20,7 @@
 #include "config.h"
 #endif
 
-#if defined(HAVE_ALSA) || 1
+#if defined(HAVE_ALSA)
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 

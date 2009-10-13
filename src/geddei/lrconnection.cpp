@@ -159,7 +159,7 @@ bool LRConnection::waitUntilReady()
 
 Connection::Tristate LRConnection::isReadyYet()
 {
-	Tristate ret;
+	Tristate ret = Failed;
 	if (MESSAGES) qDebug("> LRC::iRY()");
 	if (theSink.isOpen())
 	{	theSink.sendByte(IsReadyYet);

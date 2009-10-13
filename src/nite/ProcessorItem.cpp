@@ -90,7 +90,7 @@ ProcessorItem::ProcessorItem(Processor* _p, Properties const& _pr, QString const
 	if (m_processor)
 	{
 		m_properties.defaultFrom(m_processor->properties());
-		m_processor->init(_name.isEmpty() ? QString::number(uint(this)) : _name, m_properties);
+		m_processor->init(_name.isEmpty() ? QString::number((long uint)(this)) : _name, m_properties);
 		rejig();
 	}
 	setPos(round(pos().x()) - .5f, round(pos().y()) - .5f);
@@ -234,7 +234,7 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 		return;
 	}
 
-	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number((uint)this) : _newName, completeProperties());
+	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number((long uint)this) : _newName, completeProperties());
 	rejig();
 	delete old;
 }

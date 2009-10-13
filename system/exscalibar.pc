@@ -2,6 +2,6 @@ Name: exscalibar
 Description: An extendable, scalable framework for audio information retrieval
 #Requires: qt
 
-Version: 1.1.0
+Version: 1.1.1
 Libs: -L/usr/lib -lqtextra -lgeddei -lrgeddei
 Cflags: -fexceptions -I/usr/include

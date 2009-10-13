@@ -1,0 +1,13 @@
+Source: exscalibar
+Section: science
+Priority: optional
+Maintainer: Gav Wood <gavofyork@gmail.com>
+Build-Depends: debhelper (>= 7), cdbs, libqt4-dev, libfftw3-dev, libsndfile1-dev, libmad0-dev, libasound2-dev, mawk, grep (>= 2.0.0), sed (>= 4.0.0)
+Standards-Version: 3.8.3
+Homepage: http://github.com/gavofyork/Exscalibar/
+
+Package: exscalibar
+Architecture: any
+Depends: libfftw3, libsndfile1, libmad0, libasound2, libqt4
+Description: Audio processing framework
+
