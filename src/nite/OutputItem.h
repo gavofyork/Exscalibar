@@ -25,10 +25,11 @@ class ProcessorItem;
 class OutputItem: public QGraphicsItem
 {
 public:
-	OutputItem(int _i, ProcessorItem* _p);
+	OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size);
 
 	ProcessorItem* processorItem() const;
 	inline uint index() const { return m_index; }
+	inline QSizeF size() const { return m_size; }
 
 	inline InputItem* inputItem() const { return m_inputItem; }
 	inline void setInputItem(InputItem* _ii = 0) { m_inputItem = _ii; }
@@ -47,6 +48,7 @@ private:
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 
+	QSizeF			m_size;
 	uint			m_index;
 	bool			m_hover;
 	InputItem*		m_inputItem;

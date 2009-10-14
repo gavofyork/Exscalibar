@@ -18,31 +18,12 @@
 
 #pragma once
 
-#include <QtGui>
-#include <QtXml>
+#include <QtCore>
 
-class ProcessorItem;
+class BaseItem;
 
-class InputItem: public QGraphicsItem
+class Magnetic
 {
 public:
-	InputItem(int _i, ProcessorItem* _p, QSizeF const& _size);
-
-	ProcessorItem* processorItem() const;
-	inline uint index() const { return m_index; }
-	inline QSizeF size() const { return m_size; }
-
-	virtual QRectF boundingRect() const;
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-	QPointF tip() const;
-
-	void typesConfirmed();
-
-	enum { Type = UserType + 2 };
-	virtual int type() const { return Type; }
-
-private:
-	uint		m_index;
-	QSizeF		m_size;
-	QSizeF		m_baseSize;
+	QList<QPointF> magnetism(BaseItem const*, bool) const { return QList<QPointF>(); }
 };

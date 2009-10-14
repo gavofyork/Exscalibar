@@ -169,15 +169,15 @@ void GeddeiNite::on_theName_textChanged(QString const& _nn)
 	if (theUpdatingProperties)
 		return;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
-	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
-		pi->propertiesChanged(_nn);
+	if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
+		pi->setName(_nn);
 }
 
 void GeddeiNite::slotUpdateProperties()
 {
 	theUpdatingProperties = true;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
-	if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+	if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
 	{
 		theName->setText(pi->processor()->name());
 		theName->setEnabled(!theRunning);
@@ -192,7 +192,7 @@ void GeddeiNite::slotUpdateProperties()
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
 	}
-	else if (SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(i))
+	else if (SubProcessorItem* spi = dynamic_cast<SubProcessorItem*>(i))
 	{
 		theName->setText("");
 		theName->setEnabled(false);
@@ -207,7 +207,7 @@ void GeddeiNite::slotUpdateProperties()
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
 	}
-/*	else if (i && qgraphicsitem_cast<ConnectionItem*>(i))
+/*	else if (i && dynamic_cast<ConnectionItem*>(i))
 	{
 		BobLink *link = dynamic_cast<BobLink *>(theActive);
 		theProperties->setRowCount(2);
@@ -279,7 +279,7 @@ void GeddeiNite::on_editRemove_activated()
 	if (theRunning || theScene.selectedItems().size() != 1)
 		return;
 
-	if (qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+	if (dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]))
 	{
 		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
 			if (i->fromProcessor() == theScene.selectedItems()[0])
@@ -288,16 +288,15 @@ void GeddeiNite::on_editRemove_activated()
 		setModified(true);
 		theScene.update();
 	}
-	else if (qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
+	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
 	{
-		DomProcessorItem* dpi = qgraphicsitem_cast<DomProcessorItem*>(theScene.selectedItems()[0]->parentItem());
+		DomProcessorItem* dpi = dynamic_cast<DomProcessorItem*>(theScene.selectedItems()[0]->parentItem());
 		delete theScene.selectedItems()[0];
 		dpi->reorder();
-		dpi->propertiesChanged();
 		setModified(true);
 		theScene.update();
 	}
-	else if (ConnectionItem* ci = qgraphicsitem_cast<ConnectionItem*>(theScene.selectedItems()[0]))
+	else if (ConnectionItem* ci = dynamic_cast<ConnectionItem*>(theScene.selectedItems()[0]))
 	{
 		delete ci;
 		setModified(true);
@@ -309,14 +308,14 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 {
 	if (theUpdatingProperties || !theScene.selectedItems().size())
 		return;
-	if (qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
+	if (dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
 	{
-		ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(theScene.selectedItems()[0]);
+		ProcessorItem* pi = dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]);
 		pi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
-	else if (qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
+	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
 	{
-		SubProcessorItem* spi = qgraphicsitem_cast<SubProcessorItem*>(theScene.selectedItems()[0]);
+		SubProcessorItem* spi = dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]);
 		spi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
 	if (!theRunning)
@@ -327,7 +326,7 @@ bool GeddeiNite::connectAll()
 {
 	bool failed = false;
 	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
 			if (!pi->connectYourself(theGroup))
 				failed = true;
 	if (failed)
@@ -350,7 +349,7 @@ bool GeddeiNite::connectAll()
 	}
 
 	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
 			pi->typesConfirmed();
 
 	theConnected = true;
@@ -360,7 +359,7 @@ bool GeddeiNite::connectAll()
 void GeddeiNite::disconnectAll()
 {
 	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
 			pi->disconnectYourself();
 	theConnected = false;
 }
@@ -370,7 +369,7 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 	QString filename = QFileDialog::getOpenFileName(this, "Open audio file", "/tmp", "Uncompressed audio (*.wav);;Ogg Vorbis (*.ogg);;FLAC audio (*.flac);;MP3 audio (*.mp3);;All files (*)");
 	if (!filename.isEmpty())
 	{
-		ProcessorItem* pi = new ProcessorItem(ProcessorFactory::create("Player"), Properties("Filename", filename));
+		ProcessorItem* pi = new ProcessorItem("Player", Properties("Filename", filename));
 		theScene.addItem(pi);
 		setModified(true);
 	}

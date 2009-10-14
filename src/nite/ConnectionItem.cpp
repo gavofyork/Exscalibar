@@ -33,17 +33,18 @@ ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
 	setZValue(-1);
 }
 
-QPointF ConnectionItem::wouldAdjust() const
+QList<QPointF> ConnectionItem::magnetism(BaseItem const* _b, bool _moving) const
 {
-	QPointF to = qgraphicsitem_cast<InputItem*>(parentItem())->tip();
-	QPointF from = mapFromItem(m_from, m_from->tip());
-	return QPointF(1e99, from.y() - to.y());
+	QList<QPointF> ret;
+	if ((toProcessor() == dynamic_cast<ProcessorItem const*>(_b) || fromProcessor() == dynamic_cast<ProcessorItem const*>(_b)) && _moving)
+		ret << (toProcessor() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - dynamic_cast<InputItem*>(parentItem())->tip().y());
+	return ret;
 }
 
 void ConnectionItem::rejigEndPoints()
 {
 	QPainterPath p;
-	QPointF to = qgraphicsitem_cast<InputItem*>(parentItem())->tip();
+	QPointF to = dynamic_cast<InputItem*>(parentItem())->tip();
 	QPointF from = mapFromItem(m_from, m_from->tip());
 	p.moveTo(from);
 	QPointF c1((to.x() * 3 + from.x()) / 4.0, from.y());
@@ -79,12 +80,12 @@ void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidge
 
 ProcessorItem* ConnectionItem::fromProcessor() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(m_from->parentItem());
+	return dynamic_cast<ProcessorItem*>(m_from->parentItem());
 }
 
 ProcessorItem* ConnectionItem::toProcessor() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(parentItem()->parentItem());
+	return dynamic_cast<ProcessorItem*>(parentItem()->parentItem());
 }
 
 void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
@@ -101,8 +102,16 @@ void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 			foreach (InputItem* i, filter<InputItem>(pi->childItems()))
 				if (i->index() == (uint)_element.attribute("toindex").toInt())
 					ii = i;
-	if (!ii || !oi)
+	if (!oi)
+	{
+		qDebug() << "Couldn't find processor" << _element.attribute("from");
 		return;
+	}
+	if (!ii)
+	{
+		qDebug() << "Couldn't find processor" << _element.attribute("to");
+		return;
+	}
 	new ConnectionItem(ii, oi);
 }
 
@@ -113,7 +122,7 @@ void ConnectionItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 	proc.setAttribute("from", fromProcessor()->processor()->name());
 	proc.setAttribute("fromindex", m_from->index());
 	proc.setAttribute("to", toProcessor()->processor()->name());
-	proc.setAttribute("toindex", qgraphicsitem_cast<InputItem*>(parentItem())->index());
+	proc.setAttribute("toindex", dynamic_cast<InputItem*>(parentItem())->index());
 
 	_root.appendChild(proc);
 }

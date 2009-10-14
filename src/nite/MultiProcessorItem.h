@@ -24,38 +24,27 @@
 #include <Geddei>
 using namespace Geddei;
 
-class MultiProcessorItem: public QGraphicsItem
+#include "BaseItem.h"
+
+class MultiProcessorItem: public BaseItem
 {
 public:
 	MultiProcessorItem(QString const& _type, Properties const& _pr = Properties(), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 	~MultiProcessorItem();
 
-	enum { Type = UserType + 10 };
+	enum { Type = BaseItem::Type + 2 };
 	virtual int			type() const { return Type; }
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
-	QRectF				clientArea() const;
 
-	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multiprocessor") const;
-
-	virtual bool		connectYourself(ProcessorGroup& _group);
-	void				typesConfirmed();
-	virtual void		disconnectYourself();
-
-	Properties const&	properties() const { return m_properties; }
-	void				setProperty(QString const& _key, QVariant const& _value);
-	virtual void		propertiesChanged(QString const& _newName = QString::null);
-
-	void				setPos(qreal _x, qreal _y) { QGraphicsItem::setPos(round(_x) - .5f, round(_y) - .5f); }
-	void				setPos(QPointF _p) { QGraphicsItem::setPos(round(_p.x()) - .5f, round(_p.y()) - .5f); }
+//	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+//	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multiprocessor") const;
 
 protected:
-	virtual QRectF		boundingRect() const;
-	virtual void		paint(QPainter*, QStyleOptionGraphicsItem const*, QWidget*);
+	virtual void		propertiesChanged(QString const& _newName);
 
+private:
 	FactoryCreator*		m_creator;
 	MultiProcessor*		m_multiProcessor;
-	Properties			m_properties;
 	Processor*			m_processor;
 };

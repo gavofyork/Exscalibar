@@ -19,7 +19,7 @@
 #include "SubProcessorItem.h"
 #include "DomProcessorItem.h"
 
-DomProcessorItem* SubProcessorItem::domProcessorItem() const { return qgraphicsitem_cast<DomProcessorItem*>(parentItem()); }
+DomProcessorItem* SubProcessorItem::domProcessorItem() const { return dynamic_cast<DomProcessorItem*>(parentItem()); }
 DomProcessor* SubProcessorItem::domProcessor() const { return domProcessorItem()->domProcessor(); }
 
 SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index, Properties const& _pr):
@@ -29,7 +29,6 @@ SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type,
 	m_index			(_index)
 {
 	_dpi->reorder();
-	_dpi->propertiesChanged();
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
 }
 
@@ -81,7 +80,7 @@ void SubProcessorItem::setProperty(QString const& _key, QVariant const& _value)
 {
 	m_properties[_key] = _value;
 	prepareGeometryChange();
-	domProcessorItem()->propertiesChanged();
+	domProcessorItem()->subPropertiesChanged();
 	update();
 }
 
@@ -98,21 +97,21 @@ void SubProcessorItem::focusInEvent(QFocusEvent* _e)
 
 void SubProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->mouseReleaseEvent(_e);
+	domProcessorItem()->forwardEvent(_e);
 	domProcessorItem()->setSelected(false);
 	QGraphicsItem::mouseReleaseEvent(_e);
 }
 
 void SubProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->mousePressEvent(_e);
+	domProcessorItem()->forwardEvent(_e);
 	domProcessorItem()->setSelected(false);
 	QGraphicsItem::mousePressEvent(_e);
 }
 
 void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->mouseMoveEvent(_e);
+	domProcessorItem()->forwardEvent(_e);
 }
 
 void SubProcessorItem::fromDom(QDomElement const& _element, DomProcessorItem* _dpi)

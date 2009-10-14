@@ -27,7 +27,7 @@ IncompleteConnectionItem::IncompleteConnectionItem(OutputItem* _from): QGraphics
 
 OutputItem* IncompleteConnectionItem::from() const
 {
-	return qgraphicsitem_cast<OutputItem*>(parentItem());
+	return dynamic_cast<OutputItem*>(parentItem());
 }
 
 void IncompleteConnectionItem::setTo(QPointF _to)
@@ -48,7 +48,7 @@ IncompleteMultipleConnectionItem::IncompleteMultipleConnectionItem(ProcessorItem
 
 ProcessorItem* IncompleteMultipleConnectionItem::from() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<ProcessorItem*>(parentItem());
 }
 
 void IncompleteMultipleConnectionItem::setTo(QPointF _to)

@@ -18,31 +18,21 @@
 
 #pragma once
 
-#include <QtGui>
-#include <QtXml>
+class BaseItem;
 
-class ProcessorItem;
-
-class InputItem: public QGraphicsItem
+class PauseItem: public QGraphicsEllipseItem
 {
 public:
-	InputItem(int _i, ProcessorItem* _p, QSizeF const& _size);
+	PauseItem(QGraphicsItem* _parent, BaseItem* _p, float _s);
 
-	ProcessorItem* processorItem() const;
-	inline uint index() const { return m_index; }
-	inline QSizeF size() const { return m_size; }
+	void tick();
 
-	virtual QRectF boundingRect() const;
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-	QPointF tip() const;
+protected:
+	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 
-	void typesConfirmed();
-
-	enum { Type = UserType + 2 };
+	enum { Type = UserType + 6 };
 	virtual int type() const { return Type; }
 
-private:
-	uint		m_index;
-	QSizeF		m_size;
-	QSizeF		m_baseSize;
+	BaseItem* m_baseItem;
 };

@@ -25,7 +25,7 @@ template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
 {
 	QList<T*> ret;
 	foreach (QGraphicsItem* i, _l)
-		if (T* t = qgraphicsitem_cast<T*>(i))
+		if (T* t = dynamic_cast<T*>(i))
 			ret << t;
 	return ret;
 }

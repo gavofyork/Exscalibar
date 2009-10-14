@@ -69,12 +69,12 @@ void MultipleConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*
 
 ProcessorItem* MultipleConnectionItem::fromProcessor() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(m_from);
+	return dynamic_cast<ProcessorItem*>(m_from);
 }
 
 ProcessorItem* MultipleConnectionItem::toProcessor() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<ProcessorItem*>(parentItem());
 }
 
 void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

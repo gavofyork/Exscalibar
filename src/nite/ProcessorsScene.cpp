@@ -53,7 +53,7 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 		}
 		else
 		{
-			ProcessorItem* i = new ProcessorItem(ProcessorFactory::create(_event->mimeData()->text().mid(10)));
+			ProcessorItem* i = new ProcessorItem(_event->mimeData()->text().mid(10));
 			i->setPos(_event->scenePos());
 			addItem(i);
 		}
@@ -96,7 +96,7 @@ void ProcessorsScene::timerEvent(QTimerEvent*)
 {
 	if (m_dynamicDisplay)
 		foreach (QGraphicsItem* i, items())
-			if (ProcessorItem* pi = qgraphicsitem_cast<ProcessorItem*>(i))
+			if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
 				pi->tick();
 }
 
@@ -128,7 +128,7 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		OutputItem* oi = m_currentConnect->from();
 		delete m_currentConnect;
 		m_currentConnect = 0;
-		if (InputItem* ii = qgraphicsitem_cast<InputItem*>(itemAt(_e->scenePos())))
+		if (InputItem* ii = dynamic_cast<InputItem*>(itemAt(_e->scenePos())))
 			if (!filter<ConnectionItem>(ii->childItems()).count())
 			{
 				ci = new ConnectionItem(ii, oi);

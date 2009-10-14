@@ -31,24 +31,22 @@ class SubProcessorItem;
 class DomProcessorItem: public ProcessorItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
+	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF(0, 0));
 
-	DomProcessor* domProcessor() const;
+	DomProcessor*		domProcessor() const;
+	void				subPropertiesChanged() { propertiesChanged(); }
+	void				reorder();
 
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-
-	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
-	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
-
-	void reorder() const;
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
+	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
 protected:
-	virtual void rejig();
-	virtual QSizeF centreMin() const;
-	virtual Properties completeProperties() const;
-	virtual Processor* reconstructProcessor();
+	virtual void		geometryChanged();
+	virtual QSizeF		centreMin() const;
+	virtual Properties	completeProperties() const;
+	virtual Processor*	reconstructProcessor();
 
 private:
-	QString composedSubs() const;
+	QString				composedSubs() const;
 	QList<SubProcessorItem*> ordered() const;
 };

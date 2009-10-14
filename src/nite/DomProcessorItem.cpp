@@ -19,19 +19,22 @@
 #include "SubProcessorItem.h"
 #include "DomProcessorItem.h"
 
-DomProcessorItem::DomProcessorItem(Properties const& _pr, QString const& _name, QSizeF const& _size):
-	ProcessorItem(0, _pr, _name, _size)
+DomProcessorItem::DomProcessorItem(Properties const& _pr, QSizeF const& _size):
+	ProcessorItem(QString::null, _pr, _size)
 {
 }
 
-DomProcessor* DomProcessorItem::domProcessor() const { return dynamic_cast<DomProcessor*>(processor()); }
+DomProcessor* DomProcessorItem::domProcessor() const
+{
+	return dynamic_cast<DomProcessor*>(processor());
+}
 
 QSizeF DomProcessorItem::centreMin() const
 {
 	QSizeF s(0, 0);
 	foreach (SubProcessorItem* i, filter<SubProcessorItem>(childItems()))
 		s = QSizeF(s.width() + i->size().width(), max(s.height(), i->size().height()));
-	return s;
+	return QSizeF(min(ProcessorItem::centreMin().width(), s.width()), min(ProcessorItem::centreMin().height(), s.height()));
 }
 
 QString DomProcessorItem::composedSubs() const
@@ -59,13 +62,13 @@ Processor* DomProcessorItem::reconstructProcessor()
 		return 0;
 	Processor* p = new DomProcessor(cs);
 	PropertiesInfo pi = p->properties();
-	m_properties.defaultFrom(pi.destash());
+	setDefaultProperties(pi.destash());
 	foreach (SubProcessorItem* i, ordered())
 		i->m_properties.defaultFrom(pi.destash());
 	return p;
 }
 
-void DomProcessorItem::reorder() const
+void DomProcessorItem::reorder()
 {
 	QList<SubProcessorItem*> spis = filter<SubProcessorItem>(childItems());
 
@@ -84,6 +87,7 @@ void DomProcessorItem::reorder() const
 		break;
 		OK: ;
 	}
+	propertiesChanged();
 }
 
 QList<SubProcessorItem*> DomProcessorItem::ordered() const
@@ -105,42 +109,25 @@ QList<SubProcessorItem*> DomProcessorItem::ordered() const
 	return ret;
 }
 
-void DomProcessorItem::rejig()
+void DomProcessorItem::geometryChanged()
 {
-	QPointF cp = clientArea().topLeft();
+	QPointF cp(0, 0);
 	foreach (SubProcessorItem* spi, ordered())
 	{
 		spi->setPos(cp);
 		cp += QPointF(spi->size().width(), 0);
 	}
-	ProcessorItem::rejig();
-}
-
-void DomProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w)
-{
-	QPainterPath p;
-	p.addRect(boundingRect());
-	foreach (SubProcessorItem* spi, filter<SubProcessorItem>(childItems()))
-		p.addRect(QRectF(spi->pos(), spi->size()));
-	_p->save();
-	_p->setClipPath(p);
-	ProcessorItem::paint(_p, _o, _w);
-	_p->restore();
+	ProcessorItem::geometryChanged();
 }
 
 void DomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
-	Properties p;
-	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
-		if (n.toElement().tagName() == "property")
-			p[n.toElement().attribute("name")] = n.toElement().attribute("value");
-	DomProcessorItem* dpi = new DomProcessorItem(p, _element.attribute("name"), QSizeF(_element.attribute("w").toDouble(), _element.attribute("h").toDouble()));
+	DomProcessorItem* dpi = new DomProcessorItem;
+	dpi->importDom(_element, _scene);
 	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())
 		if (n.toElement().tagName() == "subprocessor")
 			SubProcessorItem::fromDom(n.toElement(), dpi);
-	dpi->propertiesChanged(_element.attribute("name"));
-	_scene->addItem(dpi);
-	dpi->setPos(_element.attribute("x").toDouble(), _element.attribute("y").toDouble());
+	dpi->setName(_element.attribute("name"));
 }
 
 QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const&) const

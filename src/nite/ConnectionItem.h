@@ -21,11 +21,13 @@
 #include <QtGui>
 #include <QtXml>
 
+#include "Magnetic.h"
+
 class InputItem;
 class OutputItem;
 class ProcessorItem;
 
-class ConnectionItem: public QGraphicsPathItem
+class ConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
 	ConnectionItem(InputItem* _to, OutputItem* _from);
@@ -36,6 +38,8 @@ public:
 	OutputItem* from() const { return m_from; }
 
 	void setValid(bool _v) { m_isValid = _v; }
+
+	QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
 	QPointF wouldAdjust() const;
 

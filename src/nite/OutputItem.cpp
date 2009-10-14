@@ -20,7 +20,12 @@
 #include "ProcessorItem.h"
 #include "OutputItem.h"
 
-OutputItem::OutputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i), m_hover(false), m_inputItem(0)
+OutputItem::OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size):
+	QGraphicsItem	(_p),
+	m_size			(_size),
+	m_index			(_i),
+	m_hover			(false),
+	m_inputItem		(0)
 {
 	setCursor(Qt::CrossCursor);
 	setAcceptHoverEvents(true);
@@ -29,21 +34,19 @@ OutputItem::OutputItem(int _i, ProcessorItem* _p): QGraphicsItem(_p), m_index(_i
 QPolygonF OutputItem::polygon() const
 {
 	QPolygonF p;
-	double psot = portSize / 2 * (m_hover ? 2 : 1);
-	double cs = cornerSize * (m_hover ? 2 : 1);
+	double psot = m_size.height() / 2;
+	double cs = m_size.width();
 	p.append(QPointF(0, -psot));
 	p.append(QPointF(0, psot));
-	p.append(QPointF(cs, psot));
-	p.append(QPointF(cs + psot, 0));
-	p.append(QPointF(cs, -psot));
+	p.append(QPointF(cs - psot, psot));
+	p.append(QPointF(cs, 0));
+	p.append(QPointF(cs - psot, -psot));
 	return p;
 }
 
 QPointF OutputItem::tip() const
 {
-	double psot = portSize / 2;
-	double cs = cornerSize;
-	return QPointF(cs + psot, 0);
+	return QPointF(m_size.width(), 0);
 }
 
 void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
@@ -74,5 +77,5 @@ void OutputItem::mousePressEvent(QGraphicsSceneMouseEvent*)
 
 ProcessorItem* OutputItem::processorItem() const
 {
-	return qgraphicsitem_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<ProcessorItem*>(parentItem());
 }
