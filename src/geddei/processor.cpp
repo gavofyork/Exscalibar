@@ -43,7 +43,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, const MultiplicityType multi): theName(""), theType(type),
-	theWidth(32), theHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(32), theHeight(32), theMinWidth(32), theMinHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -482,11 +482,13 @@ bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	return true;
 }
 
-void Processor::setupVisual(uint width, uint height, uint redrawPeriod)
+void Processor::setupVisual(uint width, uint height, uint redrawPeriod, uint minWidth, uint minHeight)
 {
 	theWidth = width;
 	theHeight = height;
 	theRedrawPeriod = redrawPeriod;
+	theMinWidth = minWidth;
+	theMinHeight = minHeight;
 }
 
 bool Processor::go()

@@ -97,13 +97,13 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 	m_viewWidthSamples = (uint)(_inTypes[0].frequency() * m_viewWidth);
 	m_min = _inTypes[0].asA<SignalType>().minAmplitude();
 	m_delta = _inTypes[0].asA<SignalType>().maxAmplitude() - _inTypes[0].asA<SignalType>().minAmplitude();
+	setupVisual(m_viewWidthSamples, 20, 30);
 	return _inTypes[0].isA<Value>();
 }
 
 void Grapher::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	setupVisual(32, 20, 30);
 	m_spu = _p["Samples/Update"].toInt();
 	m_viewWidth = _p["View Width"].toDouble();
 	updateFromProperties(_p);

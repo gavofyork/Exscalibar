@@ -34,7 +34,7 @@ QSizeF DomProcessorItem::centreMin() const
 	QSizeF s(0, 0);
 	foreach (SubProcessorItem* i, filter<SubProcessorItem>(childItems()))
 		s = QSizeF(s.width() + i->size().width(), max(s.height(), i->size().height()));
-	return QSizeF(min(ProcessorItem::centreMin().width(), s.width()), min(ProcessorItem::centreMin().height(), s.height()));
+	return QSizeF(max(ProcessorItem::centreMin().width(), s.width()), max(ProcessorItem::centreMin().height(), s.height()));
 }
 
 QString DomProcessorItem::composedSubs() const

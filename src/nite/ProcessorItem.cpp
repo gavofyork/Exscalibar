@@ -72,7 +72,7 @@ Processor* ProcessorItem::reconstructProcessor()
 
 QSizeF ProcessorItem::centreMin() const
 {
-	return QSizeF(m_processor->width(), min((double)m_processor->height(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
 }
 
 void ProcessorItem::propertiesChanged(QString const& _newName)
@@ -92,7 +92,7 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number( (long uint)this) : _newName, completeProperties());
 	delete old;
 
-	geometryChanged();
+	BaseItem::propertiesChanged(_newName);
 }
 
 void ProcessorItem::geometryChanged()
@@ -105,7 +105,7 @@ void ProcessorItem::geometryChanged()
 			delete ii;
 	for (int i = 0; i < iis.count(); i++)
 		if (!iis[i])
-			iis[i] = new InputItem(i, this, QSizeF(4.f, 4.f));
+			iis[i] = new InputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (InputItem* i, iis)
 		i->setPos(-1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
@@ -117,11 +117,11 @@ void ProcessorItem::geometryChanged()
 			delete oi;
 	for (int i = 0; i < ois.count(); i++)
 		if (!ois[i])
-			ois[i] = new OutputItem(i, this, QSizeF(10.f, 4.f));
+			ois[i] = new OutputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (OutputItem* i, ois)
 		i->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
-	positionChanged();
+	BaseItem::geometryChanged();
 }
 
 void ProcessorItem::positionChanged()
@@ -135,6 +135,16 @@ void ProcessorItem::positionChanged()
 			else if (MultipleConnectionItem* mci = dynamic_cast<MultipleConnectionItem*>(i))
 				if (mci->toProcessor() == this || mci->fromProcessor() == this)
 					mci->rejigEndPoints();
+
+	BaseItem::positionChanged();
+}
+
+QList<QPointF> ProcessorItem::magnetism(BaseItem const* _b, bool _moving) const
+{
+	QList<QPointF> ret = BaseItem::magnetism(_b, _moving);
+	if (_b == this && !_moving && processor())
+		ret << QPointF(processor()->width() - centreRect().width(), processor()->height() - centreRect().height());
+	return ret;
 }
 
 bool ProcessorItem::connectYourself(ProcessorGroup& _g)

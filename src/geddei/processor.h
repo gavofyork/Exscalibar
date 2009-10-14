@@ -166,7 +166,7 @@ private:
 	/** Basic properties. */
 	QString theName;
 	const QString theType;
-	int theWidth, theHeight, theRedrawPeriod;
+	int theWidth, theHeight, theRedrawPeriod, theMinWidth, theMinHeight;
 	//@}
 
 	//@{
@@ -404,7 +404,7 @@ protected:
 	 * be redrawn in milliseconds. A value of zero means no explicit redraw.
 	 * @sa setupIO()
 	 */
-	void setupVisual(uint width = 32, uint height = 32, uint redrawPeriod = 0);
+	void setupVisual(uint width, uint height, uint redrawPeriod = 0, uint minWidth = 32, uint minHeight = 32);
 
 	/**
 	 * Reimplement for to define how the processor should be drawn visually.
@@ -880,14 +880,28 @@ public:
 	uint numOutputs() const { return theOutputs.size(); }
 
 	/**
-	 * Gets the width of the processor's image. Used by the Nite for drawing.
+	 * Gets the minimum width of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's width.
+	 */
+	uint minWidth() const { return theMinWidth; }
+
+	/**
+	 * Gets the minimum height of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's height.
+	 */
+	uint minHeight() const { return theMinHeight; }
+
+	/**
+	 * Gets the natural width of the processor's image. Used by the Nite for drawing.
 	 *
 	 * @return The image's width.
 	 */
 	uint width() const { return theWidth; }
 
 	/**
-	 * Gets the height of the processor's image. Used by the Nite for drawing.
+	 * Gets the natural height of the processor's image. Used by the Nite for drawing.
 	 *
 	 * @return The image's height.
 	 */

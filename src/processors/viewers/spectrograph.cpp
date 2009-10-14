@@ -114,6 +114,7 @@ bool Spectrograph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 {
 	m_viewWidthSamples = (uint)(_inTypes[0].frequency() * m_viewWidth);
 	m_display = QPixmap(m_viewWidthSamples, _inTypes[0].scope());
+	setupVisual(m_display.width(), m_display.height(), 30);
 	m_min = _inTypes[0].asA<SignalType>().minAmplitude();
 	m_delta = _inTypes[0].asA<SignalType>().maxAmplitude() - _inTypes[0].asA<SignalType>().minAmplitude();
 	return _inTypes[0].isA<Spectrum>();
@@ -122,7 +123,6 @@ bool Spectrograph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 void Spectrograph::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	setupVisual(32, 32, 30);
 	m_viewWidth = _p["View Width"].toDouble();
 	updateFromProperties(_p);
 }

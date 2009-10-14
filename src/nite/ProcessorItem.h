@@ -57,10 +57,12 @@ public:
 
 protected:
 	virtual QSizeF		centreMin() const;
-//	virtual QSizeF		centrePref() const { return QSizeF(processor()->preferedWidth(), processor()->preferedHeight()); }
+	virtual QSizeF		centrePref() const { return QSizeF(processor()->width(), processor()->height()); }
 	virtual QColor		outlineColour() const { return processor()->outlineColour(); }
-	virtual void		paintCentre(QPainter* _p) { processor()->draw(*_p, centreRect().size()); }
+	virtual void		paintCentre(QPainter* _p) { BaseItem::paintCentre(_p); processor()->draw(*_p, centreRect().size()); }
 	virtual uint		redrawPeriod() const { return processor()->redrawPeriod(); }
+
+	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
 	virtual Processor*	reconstructProcessor();
 	virtual void		geometryChanged();

@@ -39,6 +39,7 @@ class Spectroscope: public CoProcessor
 	bool m_autoScale;
 	float m_dropSpeedMin;
 	float m_dropSpeedMax;
+	int m_refreshFreq;
 
 	virtual int process();
 	virtual void processorStopped();
@@ -108,13 +109,14 @@ bool Spectroscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 	m_curMin = m_minAmp;
 	m_curMax = m_minAmp + m_deltaAmp;
 	m_last.resize(_inTypes[0].asA<Spectrum>().size());
+	setupVisual(m_last.size(), 40, m_refreshFreq);
 	return true;
 }
 
 void Spectroscope::initFromProperties(Properties const& _p)
 {
+	m_refreshFreq = 1000 / max(1, _p["Refresh Frequency"].toInt());
 	setupIO(1, 0);
-	setupVisual(32, 20, 1000 / max(1, _p["Refresh Frequency"].toInt()));
 }
 
 void Spectroscope::updateFromProperties(Properties const& _p)

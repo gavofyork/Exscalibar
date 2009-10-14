@@ -82,16 +82,23 @@ void BaseItem::timerEvent(QTimerEvent*)
 
 void BaseItem::propertiesChanged(QString const&)
 {
+	geometryChanged();
+}
+
+void BaseItem::geometryChanged()
+{
 	prepareGeometryChange();
 	if (!m_size.isValid())
 		m_size = centrePref();
-	m_statusBar->setPos(0, m_size.height() + statusMargin);
+	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(0.f, statusMargin));
 	m_statusBar->setRect(QRectF(0, 0, m_size.width(), statusHeight));
+
+	positionChanged();
 }
 
 QRectF BaseItem::boundingRect() const
 {
-	return outlineRect().adjusted(-8, -8, 8.f, 8.f);
+	return outlineRect().adjusted(-4, -4, 4.f, 4.f);
 }
 
 QRectF BaseItem::outlineRect() const
@@ -133,6 +140,11 @@ void BaseItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 	m_resizing = resizeRect().contains(_e->pos());
 	if (m_resizing)
 		m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
+	else if (!outlineRect().contains(_e->pos()))
+	{
+		_e->setAccepted(false);
+		return;
+	}
 	QGraphicsItem::mousePressEvent(_e);
 }
 
@@ -153,9 +165,11 @@ void BaseItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
 QList<QPointF> BaseItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
+	if (_b == this)
+		return ret;
 
-	QRectF us = outlineRect();
-	QRectF them = _b->outlineRect();
+	QRectF us = outlineRect().translated(pos());
+	QRectF them = _b->outlineRect().translated(_b->pos());
 
 	if (_moving)
 	{
@@ -175,6 +189,7 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
 	if (m_resizing)
 	{
+		prepareGeometryChange();
 		QPointF d = _e->pos() + m_origPosition;
 		m_size = QSizeF(d.x(), d.y());
 	}
@@ -182,20 +197,17 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		QGraphicsItem::mouseMoveEvent(_e);
 
 	QPointF best = QPointF(1.0e99, 1.0e99);
-	Magnetic* m;
-	foreach (QGraphicsItem* i, scene()->items())
-		if (i != this && (m = dynamic_cast<Magnetic*>(i)))
-			foreach (QPointF wa, m->magnetism(this, !m_resizing))
-			{
-				if (fabs(best.x()) > fabs(wa.x()))
-					best.setX(wa.x());
-				if (fabs(best.y()) > fabs(wa.y()))
-					best.setY(wa.y());
-			}
+	foreach (Magnetic const* m, filter<Magnetic>(scene()->items()))
+		foreach (QPointF wa, m->magnetism(this, !m_resizing))
+		{
+			if (fabs(best.x()) > fabs(wa.x()))
+				best.setX(wa.x());
+			if (fabs(best.y()) > fabs(wa.y()))
+				best.setY(wa.y());
+		}
 
 	if (m_resizing)
 	{
-		prepareGeometryChange();
 		if (fabs(best.x()) < 5)
 			m_size = m_size + QSizeF(best.x(), 0);
 		if (fabs(best.y()) < 5)
@@ -233,7 +245,7 @@ void BaseItem::paintOutline(QPainter* _p)
 	if (isSelected())
 	{
 		_p->setPen(QPen(highlightColour(), 0));
-		_p->setBrush(QBrush(highlightColour().lighter()));
+		_p->setBrush(QBrush(highlightColour().lighter(200)));
 		_p->drawRoundedRect(boundingRect(), 3, 3);
 	}
 

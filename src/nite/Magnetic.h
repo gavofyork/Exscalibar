@@ -25,5 +25,5 @@ class BaseItem;
 class Magnetic
 {
 public:
-	QList<QPointF> magnetism(BaseItem const*, bool) const { return QList<QPointF>(); }
+	virtual QList<QPointF> magnetism(BaseItem const*, bool) const { return QList<QPointF>(); }
 };
