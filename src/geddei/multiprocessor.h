@@ -92,7 +92,7 @@ public:
 	 * @param c The MultiProcessorCreator to be used for creating Processor
 	 * objects in this object.
 	 */
-	MultiProcessor(MultiProcessorCreator *c): Groupable(), theCreator(c), theSource(0), theIsInitialised(false) {}
+	MultiProcessor(MultiProcessorCreator *c): Groupable(), theDeferredInit(false), theCreator(c), theSource(0), theIsInitialised(false) {}
 
 	/**
 	 * Default destructor.
@@ -159,11 +159,6 @@ public:
 	Processor* processor(uint _index) const { return theProcessors[_index]; }
 
 private:
-	/**
-	 * @return true iff init() has been called on this object.
-	 */
-	bool initGiven() const { return theIsInitialised || theDeferredInit; }
-
 	//* Reimplementation from Multiplicative
 	virtual void doInit(const QString &name, ProcessorGroup *g, const Properties &properties);
 
@@ -172,6 +167,12 @@ private:
 
 	//* Reimplementation from MultiSink
 	virtual ProcessorPort sinkPort(uint i) { return (*theProcessors[i])[0]; }
+
+	//* Deferred init data
+	bool theDeferredInit;
+	Properties theDeferredProperties;
+	QString theDeferredName;
+	virtual void onMultiplicitySet(uint _m);
 
 	MultiProcessorCreator *theCreator;
 	Processor *theSource;

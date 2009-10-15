@@ -31,8 +31,8 @@ SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi):
 	theType = type;
 	thePrimaryOf = 0;
 	theIn = theStep = theOut = 1;
-	theNumInputs = theMulti & In && !(theMulti & Const) ? Undefined : 1;
-	theNumOutputs = theMulti & Out && !(theMulti & Const) ? Undefined : 1;
+	theNumInputs = (theMulti & In) && !(theMulti & Const) ? Undefined : 1;
+	theNumOutputs = (theMulti & Out) && !(theMulti & Const) ? Undefined : 1;
 	theWidth = 32;
 	theHeight = 32;
 }

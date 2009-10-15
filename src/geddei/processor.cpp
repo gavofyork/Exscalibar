@@ -34,7 +34,7 @@ using namespace std;
 #include "splitter.h"
 using namespace Geddei;
 
-#define MESSAGES 1
+#define MESSAGES 0
 #define pMESSAGES 0
 
 namespace Geddei
@@ -44,7 +44,7 @@ QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
 	theWidth(32), theHeight(32), theMinWidth(32), theMinHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
-	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
+	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
 
@@ -422,24 +422,7 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 {
 	if (MESSAGES) qDebug("Processor::init()");
 
-	if (theIsInitialised)
-	{	qWarning("*** ERROR: Processor::init(): Cannot init once already init()ed.");
-		return;
-	}
-
-	if (!theDeferredInit && g)
-	{
-		theName = name;
-		setGroup(*g);
-	}
-
-	if (theMulti&(In|Out) && !(theMulti&Const))
-		if (!properties.keys().contains("Multiplicity"))
-		{	if (MESSAGES) qDebug("Deferring...");
-			theDeferredInit = true;
-			theDeferredProperties = properties;
-			return;
-		}
+	assert (!theIsInitialised);
 
 	if (MESSAGES) qDebug("Initialising (M=%d)...", properties.keys().contains("Multiplicity") ? properties["Multiplicity"].toInt() : 0);
 
@@ -448,21 +431,30 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", qPrintable(p.keys()[i]), qPrintable(p[p.keys()[i]].toString()));
 	p.set(properties);
 	if (MESSAGES) for (uint i = 0; i < (uint)p.keys().count(); i++) qDebug("p[%s] = %s", qPrintable(p.keys()[i]), qPrintable(p[p.keys()[i]].toString()));
-	theGivenMultiplicity = properties.keys().contains("Multiplicity") ? p["Multiplicity"].toInt() : 0;
+	theHardMultiplicity = properties.keys().contains("Multiplicity") ? p["Multiplicity"].toInt() : 0;
+	if (!theHardMultiplicity) theHardMultiplicity = Undefined;
+	theGivenMultiplicity = theHardMultiplicity;
+
+	theName = name;
+	setGroup(*g);
 	initFromProperties(p);
 	updateFromProperties(p);
+	theIsInitialised = true;
+}
+
+void Processor::onMultiplicitySet(uint _m)
+{
+	theGivenMultiplicity = _m;
 	if (!theIOSetup)
-	{	qWarning("*** ERROR: Processor::init(): initFromProperties did not setup I/O. Cannot\n"
-				 "           continue. Culprit %s, named %s.", qPrintable(theType), qPrintable(name));
-	}
-	else
-		theIsInitialised = true;
-	theDeferredInit = false;
+		setupIO((theMulti&In) && !(theMulti&Const) ? Undefined : numInputs(), (theMulti&Out) && !(theMulti&Const) ? Undefined : numOutputs());
 }
 
 const PropertiesInfo Processor::properties() const
 {
-	return specifyProperties();
+	if (theMulti && !(theMulti&Const))
+		return specifyProperties()("Multiplicity", 0, "Force the multiplicity of the object to be a value [> 0 to force].");
+	else
+		return specifyProperties();
 }
 
 bool Processor::draw(QPainter& _p, QSizeF const& _s) const
@@ -494,7 +486,7 @@ void Processor::setupVisual(uint width, uint height, uint redrawPeriod, uint min
 bool Processor::go()
 {
 	if (MESSAGES) qDebug("> Processor::go() (name=%s)", qPrintable(name()));
-	if (!theIsInitialised)
+	if (!theIsInitialised || !theIOSetup)
 	{
 		if (MESSAGES) qDebug("= Processors::go() (name=%s) Not initialised!", qPrintable(name()));
 		QFastMutexLocker lock(&theErrorSystem);
@@ -640,7 +632,7 @@ bool Processor::confirmTypes()
 	theTypesCache.resize(theOutputs.size());
 
 	// Do a quick check to make sure that we're going by the multiplicity rules
-	if (theMulti&In && inTypes.count())
+	if ((theMulti&In) && inTypes.count())
 	{		if (!inTypes.allSame())
 			{	if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) No input types not homogeneous.", qPrintable(name()));
 				theTypesConfirmed = false;
@@ -662,7 +654,7 @@ bool Processor::confirmTypes()
 	}
 
 	// NOTE: DomProcessor::verifyAndSpecifyTypes depends on this code.
-	if (theMulti&Out && theTypesCache.count())
+	if ((theMulti&Out) && theTypesCache.count())
 	{	if (!theTypesCache.populated(0))
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) No output type specified.", qPrintable(name()));
 			theTypesConfirmed = false;
@@ -942,48 +934,47 @@ void Processor::setupIO(uint inputs, uint outputs)
 		return;
 	}
 
-	for (uint i = 0; i < (uint)theInputs.size(); i++)
-	{
-		delete theInputs[i];
-		theInputs[i] = 0;
-	}
-	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-	{
-		delete theOutputs[i];
-		theOutputs[i] = 0;
-	}
-
 	uint rinputs = inputs;
 	uint routputs = outputs;
 
-	if (theMulti&In && !(theMulti&Const))
+	if ((theMulti&In) && !(theMulti&Const))
 	{	if (rinputs != Undefined)
 			qWarning("*** Processor::setupIO(): You have specified %d inputs in setupIO, but the"
 					 "    processor has non-fixed multiple inputs. Overriding to multiplicity %d.", rinputs, theGivenMultiplicity);
 		rinputs = theGivenMultiplicity;
 	}
-	else if (theMulti&In && theMulti&Const && !rinputs)
+	else if ((theMulti&In) && (theMulti&Const))
 	{
-		qWarning("*** Processor::setupIO() [%s]: You have specified 0 inputs in setupIO,"
-				 "    but the processor has fixed multiple inputs. SetupIO aborted.", qPrintable(name()));
-		return;
+		if (!rinputs)
+		{	qWarning("*** Processor::setupIO() [%s]: You have specified 0 inputs in setupIO,"
+					 "    but the processor has fixed multiple inputs. SetupIO aborted.", qPrintable(name()));
+			return;
+		}
+		theGivenMultiplicity = rinputs;
 	}
-	else if (!(theMulti&In && !(theMulti&Const)) && rinputs == Undefined)
+	else if (!((theMulti&In) && !(theMulti&Const)) && rinputs == Undefined)
 		qFatal("*** Processor::setupIO(): Undefined inputs, when non/fixed Multi.");
 
-	if (theMulti&Out && !(theMulti&Const))
+	if ((theMulti&Out) && !(theMulti&Const))
 	{	if (routputs != Undefined)
 			qWarning("*** Processor::setupIO(): You have specified %d outputs in setupIO, but the"
 					 "    processor has non-fixed multiple outputs. Overriding to multiplicity %d.", routputs, theGivenMultiplicity);
 		routputs = theGivenMultiplicity;
 	}
-	else if (theMulti&Out && theMulti&Const && !routputs)
+	else if ((theMulti&Out) && (theMulti&Const))
 	{
-		qWarning("*** Processor::setupIO() [%s]: You have specified 0 outputs in setupIO,"
-				 "    but the processor has fixed multiple outputs. SetupIO aborted.", qPrintable(name()));
-		return;
+		if (!routputs)
+		{	qWarning("*** Processor::setupIO() [%s]: You have specified 0 outputs in setupIO,"
+					 "    but the processor has fixed multiple outputs. SetupIO aborted.", qPrintable(name()));
+			return;
+		}
+		if (theGivenMultiplicity != Undefined && theGivenMultiplicity != routputs)
+		{	qWarning("*** Processor::setupIO() [%s]: Incompatible multiplicity. Bailing.", qPrintable(name()));
+			return;
+		}
+		theGivenMultiplicity = routputs;
 	}
-	else if (!(theMulti&Out && !(theMulti&Const)) && routputs == Undefined)
+	else if (!((theMulti&Out) && !(theMulti&Const)) && routputs == Undefined)
 		qFatal("*** Processor::setupIO(): Undefined outputs, when not unfixed Multi.");
 
 	if (theMulti == InOutConst)
@@ -998,22 +989,28 @@ void Processor::setupIO(uint inputs, uint outputs)
 	bool wellDefined = true;
 
 	if (rinputs == Undefined)
-		wellDefined = false;
-	else
 	{
-		theInputs.resize(rinputs);
-		for (uint i = 0; i < rinputs; i++)
-			theInputs[i] = 0L;
+		wellDefined = false;
+		rinputs = 0;
 	}
+	uint ois = theInputs.size();
+	for (uint i = rinputs; i < (uint)theInputs.size(); i++)
+		delete theInputs[i];
+	theInputs.resize(rinputs);
+	for (uint i = ois; i < rinputs; i++)
+		theInputs[i] = 0;
 
 	if (routputs == Undefined)
-		wellDefined = false;
-	else
 	{
-		theOutputs.resize(routputs);
-		for (uint i = 0; i < routputs; i++)
-			theOutputs[i] = 0L;
+		wellDefined = false;
+		routputs = 0;
 	}
+	uint oos = theOutputs.size();
+	for (uint i = routputs; i < (uint)theOutputs.size(); i++)
+		delete theOutputs[i];
+	theOutputs.resize(routputs);
+	for (uint i = oos; i < routputs; i++)
+		theOutputs[i] = 0L;
 
 	if (!wellDefined)
 		return;
@@ -1024,6 +1021,28 @@ void Processor::setupIO(uint inputs, uint outputs)
 	thePlungedInputs.resize(rinputs);
 
 	theIOSetup = true;
+}
+
+void Processor::resetMulti()
+{
+	if (theMulti && !(theMulti&Const) && theHardMultiplicity == Undefined)
+	{
+		theIOSetup = false;
+		theGivenMultiplicity = Undefined;
+
+		if (theMulti & In)
+		{
+			for (uint i = 0; i < (uint)theInputs.size(); i++)
+				delete theInputs[i];
+			theInputs.resize(0);
+		}
+		if (theMulti & Out)
+		{
+			for (uint i = 0; i < (uint)theOutputs.size(); i++)
+				delete theOutputs[i];
+			theOutputs.resize(0);
+		}
+	}
 }
 
 HeavyProcessor::HeavyProcessor(QString const& _type, MultiplicityType _m, uint _flags):

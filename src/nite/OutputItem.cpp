@@ -33,6 +33,8 @@ OutputItem::OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size):
 
 bool OutputItem::isConnected() const
 {
+	if (!scene())
+		return false;
 	foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
 		if (i->from() == this)
 			return true;

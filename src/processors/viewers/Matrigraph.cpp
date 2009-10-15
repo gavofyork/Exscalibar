@@ -86,6 +86,7 @@ bool Matrigraph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTyp
 		return false;
 	m_last.resize(_inTypes[0].scope());
 	m_display = QPixmap(_inTypes[0].asA<Matrix>().width(), _inTypes[0].asA<Matrix>().height());
+	m_display.fill(Qt::white);
 	setupVisual(m_display.width(), m_display.height(), redrawPeriod());
 	return true;
 }

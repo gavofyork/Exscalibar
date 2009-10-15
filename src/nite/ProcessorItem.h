@@ -47,7 +47,8 @@ public:
 	void				setTryMulti(bool _m) { m_tryToShowMulti = _m; updateMultiDisplay(); }
 	void				updateMultiDisplay();
 
-	virtual bool		connectYourself(ProcessorGroup& _group);
+	virtual void		prepYourself(ProcessorGroup&);
+	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
 	virtual void		typesConfirmed();
 	virtual void		tick();
@@ -75,6 +76,8 @@ protected:
 	Processor*			m_processor;
 
 private:
+	void				updateMultiplicities();
+
 	QString				m_type;
 	bool				m_tryToShowMulti;
 	uint				m_multiplicity;

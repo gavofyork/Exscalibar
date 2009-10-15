@@ -111,7 +111,11 @@ QRectF BaseItem::resizeRect() const
 	return QRectF(outlineRect().bottomRight(), QSizeF(-(statusHeight + cornerSize), -(statusHeight + cornerSize)));
 }
 
-bool BaseItem::connectYourself(ProcessorGroup&)
+void BaseItem::prepYourself(ProcessorGroup&)
+{
+}
+
+bool BaseItem::connectYourself()
 {
 	if (uint i = redrawPeriod())
 		m_timerId = startTimer(i);

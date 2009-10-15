@@ -302,6 +302,12 @@ void GeddeiNite::on_editRemove_activated()
 		setModified(true);
 		theScene.update();
 	}
+	else if (MultipleConnectionItem* mci = dynamic_cast<MultipleConnectionItem*>(theScene.selectedItems()[0]))
+	{
+		delete mci;
+		setModified(true);
+		theScene.update();
+	}
 }
 
 void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
@@ -324,14 +330,16 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 
 bool GeddeiNite::connectAll()
 {
-	bool failed = false;
-	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
-			if (!pi->connectYourself(theGroup))
-				failed = true;
-	if (failed)
+	QString failed;
+	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+		i->prepYourself(theGroup);
+	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+		if (!i->connectYourself())
+			failed += i->name() + ", ";
+	if (!failed.isEmpty())
 	{
-		statusBar()->showMessage("Problem creating connections.");
+		failed.chop(2);
+		statusBar()->showMessage("Problem creating connections with " + failed, 10000);
 		disconnectAll();
 		return false;
 	}
@@ -342,8 +350,7 @@ bool GeddeiNite::connectAll()
 		assert(p);
 		Groupable::ErrorType et = p->errorType();
 		int ed = p->errorData();
-		qDebug() << et << ed;
-		statusBar()->showMessage("Problem confirming types.");
+		statusBar()->showMessage("Problem confirming types (" + p->name() + ": " + QString("%1[%2]").arg(et).arg(ed) + ")");
 		disconnectAll();
 		return false;
 	}
@@ -358,9 +365,8 @@ bool GeddeiNite::connectAll()
 
 void GeddeiNite::disconnectAll()
 {
-	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
-			pi->disconnectYourself();
+	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+		i->disconnectYourself();
 	theConnected = false;
 }
 

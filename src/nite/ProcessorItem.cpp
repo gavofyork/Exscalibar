@@ -62,6 +62,8 @@ void ProcessorItem::tick()
 
 void ProcessorItem::updateMultiDisplay()
 {
+	updateMultiplicities();
+
 	QList<MultipleInputItem*> miis = filter<MultipleInputItem>(childItems());
 	QList<InputItem*> iis = filter<InputItem>(childItems());
 
@@ -115,11 +117,22 @@ void ProcessorItem::typesConfirmed()
 	foreach (QGraphicsItem* i, childItems())
 		if (InputItem* ii = dynamic_cast<InputItem*>(i))
 			ii->typesConfirmed();
+	updateMultiplicities();
+}
+
+void ProcessorItem::updateMultiplicities()
+{
+	foreach (MultipleInputItem* i, filter<MultipleInputItem>(childItems()))
+		i->setMultiplicity(processor()->numInputs() > 0 ? processor()->numInputs() : Undefined);
+	foreach (MultipleOutputItem* i, filter<MultipleOutputItem>(childItems()))
+		i->setMultiplicity(processor()->numOutputs() > 0 ? processor()->numOutputs() : Undefined);
 }
 
 Processor* ProcessorItem::reconstructProcessor()
 {
-	return ProcessorFactory::create(m_type);
+	Processor* r = ProcessorFactory::create(m_type);
+	setDefaultProperties(r->properties());
+	return r;
 }
 
 QSizeF ProcessorItem::centreMin() const
@@ -142,6 +155,7 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 		return;
 	}
 	m_processor->init(_newName.isEmpty() ? old ? old->name() : QString::number( (long uint)this) : _newName, completeProperties());
+
 	delete old;
 
 	BaseItem::propertiesChanged(_newName);
@@ -149,7 +163,7 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 
 void ProcessorItem::geometryChanged()
 {
-	QVector<InputItem*> iis(m_processor->multi() & In ? m_multiplicity : m_processor->numInputs(), 0);
+	QVector<InputItem*> iis(m_processor->numInputs() == Undefined ? 0 : m_processor->numInputs(), 0);
 	if (m_processor->multi() & In)
 	{
 		MultipleInputItem* mii;
@@ -170,7 +184,7 @@ void ProcessorItem::geometryChanged()
 	foreach (InputItem* i, iis)
 		i->setPos(-1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
-	QVector<OutputItem*> ois(m_processor->multi() & Out ? m_multiplicity : m_processor->numOutputs(), 0);
+	QVector<OutputItem*> ois(m_processor->numOutputs() == Undefined ? 0 : m_processor->numOutputs(), 0);
 	if (m_processor->multi() & Out)
 	{
 		MultipleOutputItem* moi;
@@ -205,7 +219,7 @@ void ProcessorItem::positionChanged()
 					ci->rejigEndPoints();
 			}
 			else if (MultipleConnectionItem* mci = dynamic_cast<MultipleConnectionItem*>(i))
-				if (mci->toProcessor() == this || mci->fromProcessor() == this)
+				if (mci->to()->processorItem() == this || mci->from()->processorItem() == this)
 					mci->rejigEndPoints();
 
 	BaseItem::positionChanged();
@@ -219,61 +233,97 @@ QList<QPointF> ProcessorItem::magnetism(BaseItem const* _b, bool _moving) const
 	return ret;
 }
 
-bool ProcessorItem::connectYourself(ProcessorGroup& _g)
+void ProcessorItem::prepYourself(ProcessorGroup& _g)
 {
+	qDebug() << name() << "Prepping...";
 	m_processor->setGroup(_g);
+	m_processor->disconnectAll();
+	m_processor->resetMulti();
+	BaseItem::prepYourself(_g);
+}
+
+bool ProcessorItem::connectYourself()
+{
+	qDebug() << name() << "Connecting...";
+	qDebug() << processor()->numInputs() << processor()->numOutputs();
+	for (uint i = 0; i < processor()->numInputs(); i++)
+		qDebug() << &processor()->input(i);
+	for (uint i = 0; i < processor()->numOutputs(); i++)
+		qDebug() << &processor()->output(i);
+	bool m = false;
+	foreach (MultipleInputItem* i, filter<MultipleInputItem>(childItems()))
+		if (i->isConnected())
+			m = true;
+
 	bool ret = true;
-	if (filter<MultipleConnectionItem>(childItems()).count())
-	{
-		QList<MultipleConnectionItem*> mcis = filter<MultipleConnectionItem>(childItems());
-		MultipleConnectionItem* mci = mcis[0];
-		if (mci->fromProcessor()->m_processor->MultiSource::deferConnect(m_processor, 1))
+	if (m)
+		foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		{
-			mci->setValid(false);
-			ret = false;
+			QList<MultipleConnectionItem*> mcis = filter<MultipleConnectionItem>(mii->childItems());
+			if (mcis.size() != 1)
+				return false;
+			MultipleConnectionItem* mci = mcis[0];
+
+			if (mci->from()->processorItem()->m_processor->MultiSource::deferConnect(m_processor, 1))
+			{
+				mci->setValid(false);
+				ret = false;
+			}
+			else
+			{
+				mci->from()->processorItem()->m_processor->MultiSource::connect(m_processor);
+				mci->setValid(true);
+			}
 		}
-		else
-		{
-			mci->fromProcessor()->m_processor->MultiSource::connect(m_processor);
-			mci->setValid(true);
-		}
-	}
 	else
-	foreach (InputItem* ii, filter<InputItem>(childItems()))
-	{
-		QList<ConnectionItem*> cis = filter<ConnectionItem>(ii->childItems());
-		if (cis.size() != 1)
-			return false;
-		ConnectionItem* ci = cis[0];
-		if (ci->from()->inputItem())
+		foreach (InputItem* ii, filter<InputItem>(childItems()))
 		{
-			ci->from()->processorItem()->m_processor->disconnect(ci->from()->index());
-			ci->from()->processorItem()->m_processor->split(ci->from()->index());
-			ci->from()->processorItem()->m_processor->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->processor(), ci->from()->inputItem()->index());
-			ci->from()->setInputItem(0);
+			QList<ConnectionItem*> cis = filter<ConnectionItem>(ii->childItems());
+			if (cis.size() != 1)
+				return false;
+			ConnectionItem* ci = cis[0];
+			if (ci->from()->inputItem())
+			{
+				ci->from()->processorItem()->m_processor->disconnect(ci->from()->index());
+				ci->from()->processorItem()->m_processor->split(ci->from()->index());
+				ci->from()->processorItem()->m_processor->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->processor(), ci->from()->inputItem()->index());
+				ci->from()->setInputItem(0);
+			}
+			else if (!ci->from()->processorItem()->m_processor->isConnected(ci->from()->index()))
+				ci->from()->setInputItem(ii);
+			if (ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
+				ci->setValid(true);
+			else
+			{
+				ci->setValid(false);
+				ret = false;
+			}
 		}
-		else if (!ci->from()->processorItem()->m_processor->isConnected(ci->from()->index()))
-			ci->from()->setInputItem(ii);
-		if (ci->from()->processorItem()->m_processor->connect(ci->from()->index(), m_processor, ii->index()))
-			ci->setValid(true);
-		else
-		{
-			ci->setValid(false);
-			ret = false;
-		}
-	}
+	qDebug() << processor()->numInputs() << processor()->numOutputs();
+	for (uint i = 0; i < processor()->numInputs(); i++)
+		qDebug() << &processor()->input(i);
+	for (uint i = 0; i < processor()->numOutputs(); i++)
+		qDebug() << &processor()->output(i);
 	if (!ret) return false;
-	return BaseItem::connectYourself(_g);
+	return BaseItem::connectYourself();
 }
 
 void ProcessorItem::disconnectYourself()
 {
+	qDebug() << name() << "Disconnecting...";
+
 	BaseItem::disconnectYourself();
+	qDebug() << processor()->numInputs() << processor()->numOutputs();
+	for (uint i = 0; i < processor()->numInputs(); i++)
+		qDebug() << &processor()->input(i);
+	for (uint i = 0; i < processor()->numOutputs(); i++)
+		qDebug() << &processor()->output(i);
 
 	if (m_processor->multi() && m_processor->knowMultiplicity())
 		m_multiplicity = m_processor->multiplicity();
 	else
 		m_multiplicity = 0;
+
 	geometryChanged();
 	foreach (QGraphicsItem* i, childItems())
 		if (OutputItem* ii = dynamic_cast<OutputItem*>(i))

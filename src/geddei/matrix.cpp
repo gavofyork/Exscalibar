@@ -46,4 +46,4 @@ void Matrix::deserialise(QSocketSession &source)
 	theHeight = source.safeReceiveWord<uint32_t>();
 }
 
-};
+}

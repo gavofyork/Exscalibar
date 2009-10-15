@@ -16,9 +16,11 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "MultipleInputItem.h"
+#include "MultipleOutputItem.h"
 #include "MultipleConnectionItem.h"
 
-MultipleConnectionItem::MultipleConnectionItem(ProcessorItem* _to, ProcessorItem* _from):
+MultipleConnectionItem::MultipleConnectionItem(MultipleInputItem* _to, MultipleOutputItem* _from):
 	QGraphicsPathItem	(_to),
 	m_isValid			(true),
 	m_from				(_from)
@@ -33,8 +35,8 @@ MultipleConnectionItem::MultipleConnectionItem(ProcessorItem* _to, ProcessorItem
 void MultipleConnectionItem::rejigEndPoints()
 {
 	QPainterPath p;
-	QPointF to = QPointF(0, 0);
-	QPointF from = mapFromItem(m_from, QPointF(0, 0)/*m_from->pos()*/);
+	QPointF to = dynamic_cast<MultipleInputItem*>(parentItem())->tip();
+	QPointF from = mapFromItem(m_from, m_from->tip());
 	p.moveTo(from);
 	QPointF c1((to.x() * 3 + from.x()) / 4.0, from.y());
 	QPointF c2((to.x() + from.x() * 3) / 4.0, to.y());
@@ -66,35 +68,37 @@ void MultipleConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*
 	_p->drawPath(path());
 }
 
-
-ProcessorItem* MultipleConnectionItem::fromProcessor() const
+MultipleInputItem* MultipleConnectionItem::to() const
 {
-	return dynamic_cast<ProcessorItem*>(m_from);
-}
-
-ProcessorItem* MultipleConnectionItem::toProcessor() const
-{
-	return dynamic_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<MultipleInputItem*>(parentItem());
 }
 
 void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
-	ProcessorItem* op = 0;
-	ProcessorItem* ip = 0;
-	foreach (ProcessorItem* pi, filter<ProcessorItem>(_scene->items()))
-		if (pi->processor() && pi->processor()->name() == _element.attribute("from"))
-			op = pi;
-		else if (pi->processor() && pi->processor()->name() == _element.attribute("to"))
-			ip = pi;
-	if (!ip || !op)
+	MultipleOutputItem* moi = 0;
+	MultipleInputItem* mii = 0;
+	foreach (BaseItem* bi, filter<BaseItem>(_scene->items()))
+		if (bi->name() == _element.attribute("from"))
+			foreach (MultipleOutputItem* i, filter<MultipleOutputItem>(bi->childItems()))
+				if (i->index() == _element.attribute("fromindex").toUInt())
+					moi = i; else {}
+		else if (bi->name() == _element.attribute("to"))
+			foreach (MultipleInputItem* i, filter<MultipleInputItem>(bi->childItems()))
+				if (i->index() == _element.attribute("toindex").toUInt())
+					mii = i; else {}
+	if (!moi || !mii)
 		return;
-	new MultipleConnectionItem(ip, op);
+	if (moi->isConnected() || mii->isConnected())
+		return;
+	new MultipleConnectionItem(mii, moi);
 }
 
 void MultipleConnectionItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
 	QDomElement proc = _doc.createElement("multipleconnection");
-	proc.setAttribute("from", fromProcessor()->processor()->name());
-	proc.setAttribute("to", toProcessor()->processor()->name());
+	proc.setAttribute("from", from()->processorItem()->name());
+	proc.setAttribute("fromindex", from()->index());
+	proc.setAttribute("to", to()->processorItem()->name());
+	proc.setAttribute("toindex", to()->index());
 	_root.appendChild(proc);
 }

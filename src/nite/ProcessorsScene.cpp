@@ -24,6 +24,7 @@ using namespace Geddei;
 #include "OutputItem.h"
 #include "MultipleOutputItem.h"
 #include "InputItem.h"
+#include "MultipleInputItem.h"
 #include "ConnectionItem.h"
 #include "IncompleteConnectionItem.h"
 #include "ProcessorItem.h"
@@ -152,24 +153,15 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 				changed();
 			}
 	}
-	if (m_currentMultipleConnect && m_currentMultipleConnect->from()->processorItem())
+	if (m_currentMultipleConnect && m_currentMultipleConnect)
 	{
-		ProcessorItem* op = m_currentMultipleConnect->from()->processorItem();
+		MultipleOutputItem* moi = m_currentMultipleConnect->from();
 		delete m_currentMultipleConnect;
 		m_currentMultipleConnect = 0;
-
-		if (filter<ProcessorItem>(items(_e->scenePos())).count())
+		if (MultipleInputItem* mii = dynamic_cast<MultipleInputItem*>(itemAt(_e->scenePos())))
 		{
-			ProcessorItem* ip = filter<ProcessorItem>(items(_e->scenePos()))[0];
-			if (filter<MultipleConnectionItem>(ip->childItems()).isEmpty())
-			{
-				foreach (InputItem* ii, filter<InputItem>(ip->childItems()))
-					if (filter<ConnectionItem>(ii->childItems()).count())
-						goto BAD;
-				mci = new MultipleConnectionItem(ip, op);
-				changed();
-				BAD:;
-			}
+			mci = new MultipleConnectionItem(mii, moi);
+			changed();
 		}
 	}
 	QGraphicsScene::mouseReleaseEvent(_e);

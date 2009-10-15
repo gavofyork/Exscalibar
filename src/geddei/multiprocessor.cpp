@@ -125,6 +125,15 @@ QString MultiProcessor::error() const
 	return QString::null;
 }
 
+void MultiProcessor::onMultiplicitySet(uint _m)
+{
+	if (theDeferredInit)
+	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
+		theDeferredProperties["Multiplicity"] = _m;
+		doInit(theDeferredName, 0, theDeferredProperties);
+	}
+}
+
 /*
 {
 	return _is_initialised_ && _processors_ composed _confirm_types_ with &&

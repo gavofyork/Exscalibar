@@ -30,11 +30,13 @@ public:
 	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
 	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
+	void setMultiplicity(uint _m);
+
 	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
 	MultiProcessorItem* multiProcessorItem() const;
 
-	bool isConnected() const { return false; }
+	bool isConnected() const;
 
 	inline uint index() const { return m_index; }	// valid only with a valid multiProcessorItem.
 	inline QSizeF size() const { return m_size; }
@@ -49,6 +51,7 @@ public:
 	virtual int type() const { return Type; }
 
 private:
+	uint		m_multiplicity;
 	int			m_index;
 	QSizeF		m_size;
 	QSizeF		m_baseSize;

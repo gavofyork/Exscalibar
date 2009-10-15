@@ -26,11 +26,7 @@ namespace Geddei
 void Multiplicative::setMultiplicity(uint multiplicity)
 {
 	if (MESSAGES) qDebug("Multiplicative::setMultiplicity(%d)", multiplicity);
-	if (theDeferredInit)
-	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
-		theDeferredProperties["Multiplicity"] = multiplicity;
-		doInit(theDeferredName, 0, theDeferredProperties);
-	}
+	onMultiplicitySet(multiplicity);
 	setSourceMultiplicity(multiplicity);
 	setSinkMultiplicity(multiplicity);
 }

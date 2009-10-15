@@ -69,7 +69,7 @@ void DomProcessor::addWorker(SubProcessor *worker)
 
 void DomProcessor::ratify(DxCoupling *c)
 {
-	if (theIsInitialised)
+	if (theIOSetup)
 	{
 		c->initFromProperties(theProperties);
 		c->defineIO(numInputs(), numOutputs());
@@ -246,7 +246,7 @@ bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 	theSamplesOut = thePrimary->theOut;
 
 	// Now we need a quick hack here since if we're a MultiOut, all outTypes==outTypes[0]:
-	if (theMulti&Out && outTypes.count() && outTypes.populated(0))
+	if ((theMulti&Out) && outTypes.count() && outTypes.populated(0))
 		outTypes.setFill(outTypes.ptrAt(0), false);
 
 	if (ret)
@@ -280,9 +280,21 @@ void DomProcessor::initFromProperties(const Properties &properties)
 		w->initFromProperties(wp);
 	theProperties = wp;
 	setupIO(thePrimary->theNumInputs, thePrimary->theNumOutputs);
+	if (theIOSetup)
+		onIOSetup();
+}
+
+void DomProcessor::onIOSetup()
+{
 	thePrimary->defineIO(numInputs(), numOutputs());
 	foreach (DxCoupling* w, theWorkers)
 		w->defineIO(numInputs(), numOutputs());
+}
+
+void DomProcessor::onMultiplicitySet(uint _m)
+{
+	Processor::onMultiplicitySet(_m);
+	onIOSetup();
 }
 
 void DomProcessor::updateFromProperties(const Properties &properties)

@@ -48,7 +48,8 @@ public:
 	virtual QString		name() const { return QString::null; }
 	void				setName(QString const& _name) { propertiesChanged(_name); }
 
-	virtual bool		connectYourself(ProcessorGroup&);
+	virtual void		prepYourself(ProcessorGroup&);
+	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
 	virtual void		typesConfirmed() {}
 

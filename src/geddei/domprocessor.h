@@ -137,6 +137,9 @@ class DLLEXPORT DomProcessor: public CoProcessor
 	 */
 	void addWorker(SubProcessor *worker);
 
+	void onMultiplicitySet(uint _m);
+	void onIOSetup();
+
 public:
 	/**
 	 * Note this will assume the stack has a QFastMutexLocker for theQueueLock in

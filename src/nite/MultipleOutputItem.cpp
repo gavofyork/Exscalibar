@@ -22,6 +22,7 @@
 
 MultipleOutputItem::MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
+	m_multiplicity	(UINT_MAX),
 	m_size			(_size),
 	m_index			(UINT_MAX),
 	m_hover			(false)
@@ -32,12 +33,33 @@ MultipleOutputItem::MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size):
 
 MultipleOutputItem::MultipleOutputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
+	m_multiplicity	(UINT_MAX),
 	m_size			(_size),
 	m_index			(_i),
 	m_hover			(false)
 {
 	setCursor(Qt::CrossCursor);
 	setAcceptHoverEvents(true);
+}
+
+void MultipleOutputItem::setMultiplicity(uint _m)
+{
+	if (m_multiplicity != _m)
+	{
+		prepareGeometryChange();
+		m_multiplicity = _m;
+		update();
+	}
+}
+
+bool MultipleOutputItem::isConnected() const
+{
+	if (!scene())
+		return false;
+	foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+		if (i->from() == this)
+			return true;
+	return false;
 }
 
 ProcessorItem* MultipleOutputItem::processorItem() const
@@ -66,10 +88,14 @@ void MultipleOutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QW
 	_p->setBrush(QColor::fromHsv(40, 128, m_hover ? 255 : 200));
 	double w = m_size.width();
 	double h = m_size.height();
-	_p->drawLine(0, -h * 3 / 4, w - h / 2, -h * 3 / 4);
-	_p->drawLine(0, -h, w - h / 2, -h);
-	_p->drawLine(w - h / 2, -h * 3 / 4, w, -h / 4);
-	_p->drawLine(w - h / 2, -h, w, -h / 2);
+	for (int i = 0; (uint)i < ((m_multiplicity == Undefined) ? 4 : (m_multiplicity - 1)); i++)
+	{
+		if (m_multiplicity == Undefined)
+			_p->setPen(QPen(QColor::fromHsv(0, 0, 0, (4 - i) * 255 / 4), 0));
+		_p->drawLine(0, -h * (i + 3) / 4, w - h / 2, -h * (i + 3) / 4);
+		_p->drawLine(w - h / 2, -h * (i + 3) / 4, w, -h * (i + 1) / 4);
+	}
+	_p->setPen(QPen(Qt::black, 0));
 	QPolygonF p;
 	p.append(QPointF(0, -h / 2));
 	p.append(QPointF(0, h / 2));

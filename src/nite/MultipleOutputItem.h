@@ -29,11 +29,13 @@ public:
 	MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size);
 	MultipleOutputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
+	void setMultiplicity(uint _m);
+
 	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
 	MultiProcessorItem* multiProcessorItem() const;
 
-	bool isConnected() const { return false; }
+	bool isConnected() const;
 
 	inline uint index() const { return m_index; }	// valid only with valid multiProcessorItem
 	inline QSizeF size() const { return m_size; }
@@ -50,6 +52,7 @@ private:
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 
+	uint			m_multiplicity;
 	QSizeF			m_size;
 	uint			m_index;
 	bool			m_hover;

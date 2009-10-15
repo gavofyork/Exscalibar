@@ -24,6 +24,7 @@
 
 MultipleInputItem::MultipleInputItem(ProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
+	m_multiplicity	(UINT_MAX),
 	m_index			(UINT_MAX),
 	m_size			(_size),
 	m_baseSize		(_size)
@@ -32,10 +33,26 @@ MultipleInputItem::MultipleInputItem(ProcessorItem* _p, QSizeF const& _size):
 
 MultipleInputItem::MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
+	m_multiplicity	(UINT_MAX),
 	m_index			(_i),
 	m_size			(_size),
 	m_baseSize		(_size)
 {
+}
+
+void MultipleInputItem::setMultiplicity(uint _m)
+{
+	if (m_multiplicity != _m)
+	{
+		prepareGeometryChange();
+		m_multiplicity = _m;
+		update();
+	}
+}
+
+bool MultipleInputItem::isConnected() const
+{
+	return filter<MultipleConnectionItem>(childItems()).size();
 }
 
 ProcessorItem* MultipleInputItem::processorItem() const
@@ -50,7 +67,7 @@ MultiProcessorItem* MultipleInputItem::multiProcessorItem() const
 
 QRectF MultipleInputItem::boundingRect() const
 {
-	return QRectF(-m_size.width(), -m_size.height(), m_size.width(), m_size.height() * 3 / 2);
+	return QRectF(-m_size.width(), -m_size.height() * (0.5 + 0.25 * ((m_multiplicity == Undefined) ? 6 : m_multiplicity)), m_size.width(), m_size.height() * (1 + 0.25 * ((m_multiplicity == Undefined) ? 6 : m_multiplicity)));
 }
 
 QPointF MultipleInputItem::tip() const
@@ -66,11 +83,17 @@ void MultipleInputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWi
 {
 	_p->setPen(QPen(Qt::black, 0));
 	_p->setBrush(QColor::fromHsv(40, 128, 220));
-	_p->drawLine(0, -m_size.height() * 3 / 4, -m_size.width(), -m_size.height() * 3 / 4);
-	_p->drawLine(0, -m_size.height(), -m_size.width(), -m_size.height());
-	_p->drawLine(-m_size.width(), 0, m_size.height() / 2 - m_size.width(), -m_size.height() / 2);
-	_p->drawLine(-m_size.width(), m_size.height() / 4, m_size.height() / 2 - m_size.width(), -m_size.height() / 4);
-
+	float w = m_size.width();
+	float h = m_size.height();
+	for (int i = 0; (uint)i < ((m_multiplicity == Undefined) ? 4 : (m_multiplicity - 1)); i++)
+	{
+		if (m_multiplicity == Undefined)
+			_p->setPen(QPen(QColor::fromHsv(0, 0, 0, (4 - i) * 255 / 4), 0));
+		_p->drawLine(0, -h * (i + 3) / 4, -w, -h * (i + 3) / 4);
+		if (i < 2)
+			_p->drawLine(-w, -h * (i - 1) / 4, h / 2 - w, -h * (i + 1) / 4);
+	}
+	_p->setPen(QPen(Qt::black, 0));
 	QPolygonF p;
 	p.append(QPointF(m_size.height() / 2 - m_size.width(), 0));
 	p.append(QPointF(-m_size.width(), m_size.height() / 2));

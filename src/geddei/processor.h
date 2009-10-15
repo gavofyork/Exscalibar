@@ -256,17 +256,21 @@ private:
 	//@{
 	/** Multiplicity subsystem. */
 	MultiplicityType theMulti;
+protected:
+	virtual void onMultiplicitySet(uint _m);
+private:
 	uint theGivenMultiplicity;
+	uint theHardMultiplicity;
 	//@}
 
 	//@{
 	/** Reimplementations from Multiplicative. */
 public:
-	bool knowMultiplicity() const { return theIsInitialised; }
-	uint multiplicity() const { return theMulti&Out ? numOutputs() : numInputs(); }
+	void resetMulti();
+	bool knowMultiplicity() const { return theGivenMultiplicity != Undefined ; }
+	uint multiplicity() const { return theGivenMultiplicity; }
 	MultiplicityType multi() const { return theMulti; }
 private:
-	bool initGiven() const { return theIsInitialised || theDeferredInit; }
 	//@}
 
 	//@{
@@ -637,7 +641,7 @@ public:
 	 * @return false if there has been an error with the init(). true if initialisation has
 	 * been deferred or suceeded. Undefined if init() hasn't been called yet.
 	 */
-	bool isInitFailed() const { return !(theIsInitialised || theDeferredInit); }
+	bool isInitFailed() const { return !(theIsInitialised); }
 
 	/**
 	 * Use this method for driving multiple inputs from one output.

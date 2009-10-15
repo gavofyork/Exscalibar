@@ -42,23 +42,19 @@ class ProcessorGroup;
 class Multiplicative
 {
 protected:
-	//* Deferred init data
-	bool theDeferredInit;
-	Properties theDeferredProperties;
-	QString theDeferredName;
-
 	virtual void setSourceMultiplicity(uint multiplicity) = 0;
 	virtual void setSinkMultiplicity(uint multiplicity) = 0;
 
+	virtual void onMultiplicitySet(uint) {}
+
 public:
-	virtual bool initGiven() const = 0;
 	virtual bool knowMultiplicity() const = 0;
 	virtual uint multiplicity() const = 0;
 	virtual void doInit(const QString &name, ProcessorGroup *g = 0, const Properties &properties = Properties()) = 0;
 
 	void setMultiplicity(uint multiplicity);
 
-	Multiplicative() : theDeferredInit(false) {}
+	Multiplicative() {}
 	virtual ~Multiplicative() {}
 };
 
