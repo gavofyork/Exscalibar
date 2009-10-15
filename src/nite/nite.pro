@@ -32,7 +32,9 @@ HEADERS += GeddeiNite.h \
 	MultiProcessorItem.h \
 	BaseItem.h \
 	PauseItem.h \
-	Magnetic.h
+	Magnetic.h \
+	MultipleInputItem.h \
+	MultipleOutputItem.h
 SOURCES += GeddeiNite.cpp \
 	main.cpp \
 	ProcessorView.cpp \
@@ -49,7 +51,9 @@ SOURCES += GeddeiNite.cpp \
 	MultiProcessorItem.cpp \
 	BaseItem.cpp \
 	PauseItem.cpp \
-	Magnetic.cpp
+	Magnetic.cpp \
+	MultipleInputItem.cpp \
+	MultipleOutputItem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

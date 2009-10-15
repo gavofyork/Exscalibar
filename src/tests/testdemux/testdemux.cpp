@@ -75,7 +75,7 @@ public:
 class Add: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = in[0][0] + in[0][2] + in[0][4]; out[0][1] = in[0][1] + in[0][3]; }
-	virtual void initFromProperties(const Properties &) { setupIO(1, 1, 5, 3, 2); }
+	virtual void initFromProperties(const Properties &) { setupSamplesIO(5, 3, 2); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Add() : SubProcessor("Add") {}
@@ -84,7 +84,7 @@ public:
 class Sub: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = (in[0][0] - in[0][1]) + (in[0][2] - in[0][3]); }
-	virtual void initFromProperties(const Properties &) { setupIO(1, 1, 4, 2, 1); }
+	virtual void initFromProperties(const Properties &) { setupSamplesIO(4, 2, 1); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Sub() : SubProcessor("Sub") {}
@@ -93,7 +93,7 @@ public:
 class Diff: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = ::abs(in[0][0] - in[1][0]); }
-	virtual void initFromProperties(const Properties &) { setupIO(2, 1, 1, 1, 1); }
+	virtual void initFromProperties(const Properties &) { setupIO(2, 1); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Diff() : SubProcessor("Diff", InConst) {}

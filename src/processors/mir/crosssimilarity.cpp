@@ -35,7 +35,6 @@ class CrossSimilarity: public SubProcessor
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &/*properties*/) { setupIO(Undefined, 1, 1, 1, 1); }
 
 public:
 	CrossSimilarity(): SubProcessor("CrossSimilarity", In) {}

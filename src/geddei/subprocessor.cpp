@@ -25,20 +25,22 @@ using namespace Geddei;
 namespace Geddei
 {
 
-SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi) : theMulti(multi)
+SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi):
+	theMulti(multi)
 {
 	theType = type;
 	thePrimaryOf = 0;
-	theNumInputs = theNumOutputs = theIn = theStep = theOut = 1;
+	theIn = theStep = theOut = 1;
+	theNumInputs = theMulti & In && !(theMulti & Const) ? Undefined : 1;
+	theNumOutputs = theMulti & Out && !(theMulti & Const) ? Undefined : 1;
 	theWidth = 32;
 	theHeight = 32;
 }
 
-void SubProcessor::setupIO(uint numInputs, uint numOutputs, uint samplesIn, uint samplesStep, uint samplesOut)
+void SubProcessor::setupIO(uint numInputs, uint numOutputs)
 {
 	theNumInputs = numInputs;
 	theNumOutputs = numOutputs;
-	setupSamplesIO(samplesIn, samplesStep, samplesOut);
 }
 
 void SubProcessor::setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut)

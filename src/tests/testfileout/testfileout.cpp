@@ -60,7 +60,7 @@ class Multiply: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = in[0][0] * in[1][0]; }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
-	virtual void initFromProperties(const Properties &) { setupIO(2, 1, 1, 1, 1); }
+	virtual void initFromProperties(const Properties &) { setupIO(2, 1); }
 	public: Multiply(): SubProcessor("Multiply") {}
 };
 

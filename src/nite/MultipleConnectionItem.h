@@ -24,6 +24,7 @@
 class InputItem;
 class OutputItem;
 class ProcessorItem;
+class MultiProcessorItem;
 
 class MultipleConnectionItem: public QGraphicsPathItem
 {
@@ -39,6 +40,10 @@ public:
 
 	ProcessorItem* toProcessor() const;
 	ProcessorItem* fromProcessor() const;
+	MultiProcessorItem* toMultiProcessor() const;
+	MultiProcessorItem* fromMultiProcessor() const;
+	ProcessorItem* toIndex() const;
+	ProcessorItem* fromIndex() const;
 
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;

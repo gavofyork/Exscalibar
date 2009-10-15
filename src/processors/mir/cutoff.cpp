@@ -70,7 +70,6 @@ void CutOff::initFromProperties(const Properties &properties)
 {
 	theFreqFrom = properties.get("Frequency From").toDouble();
 	theFreqTo = properties.get("Frequency To").toDouble();
-	setupIO(1, 1, 1, 1, 1);
 }
 
 PropertiesInfo CutOff::specifyProperties() const

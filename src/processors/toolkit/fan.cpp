@@ -33,7 +33,6 @@ using namespace SignalTypes;
 
 class Fan: public SubProcessor
 {
-	virtual void initFromProperties (const Properties &);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 
@@ -43,11 +42,6 @@ public:
 
 Fan::Fan(): SubProcessor("Fan", Out)
 {
-}
-
-void Fan::initFromProperties(const Properties &)
-{
-	setupIO(1, Undefined, 1, 1, 1);
 }
 
 bool Fan::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)

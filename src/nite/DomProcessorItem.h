@@ -31,7 +31,7 @@ class SubProcessorItem;
 class DomProcessorItem: public ProcessorItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF(0, 0));
+	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
 
 	DomProcessor*		domProcessor() const;
 	void				subPropertiesChanged() { propertiesChanged(); }

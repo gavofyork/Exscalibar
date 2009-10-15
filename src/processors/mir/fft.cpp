@@ -62,7 +62,7 @@ void FFT::initFromProperties(const Properties &p)
 {
 	theStep = p["Step"].toInt();
 	theSize = p["Size"].toInt();
-	setupIO(1, 1, theSize, theStep, 1);
+	setupSamplesIO(theSize, theStep, 1);
 	theIn = (float *)fftwf_malloc(sizeof(float) * theSize);
 	theOut = (float *)fftwf_malloc(sizeof(float) * theSize);
 	thePlan = fftwf_plan_r2r_1d(theSize, theIn, theOut, FFTW_R2HC, p["Optimise"].toBool() ? FFTW_MEASURE : FFTW_ESTIMATE);

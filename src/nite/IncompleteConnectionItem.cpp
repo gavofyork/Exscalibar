@@ -41,14 +41,14 @@ void IncompleteConnectionItem::setTo(QPointF _to)
 	setPath(p);
 }
 
-IncompleteMultipleConnectionItem::IncompleteMultipleConnectionItem(ProcessorItem* _from): QGraphicsPathItem(_from)
+IncompleteMultipleConnectionItem::IncompleteMultipleConnectionItem(MultipleOutputItem* _from): QGraphicsPathItem(_from)
 {
 	setPen(QPen(QColor(0, 0, 0, 128), 2));
 }
 
-ProcessorItem* IncompleteMultipleConnectionItem::from() const
+MultipleOutputItem* IncompleteMultipleConnectionItem::from() const
 {
-	return dynamic_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<MultipleOutputItem*>(parentItem());
 }
 
 void IncompleteMultipleConnectionItem::setTo(QPointF _to)

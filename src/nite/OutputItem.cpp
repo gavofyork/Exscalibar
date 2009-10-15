@@ -31,6 +31,14 @@ OutputItem::OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size):
 	setAcceptHoverEvents(true);
 }
 
+bool OutputItem::isConnected() const
+{
+	foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
+		if (i->from() == this)
+			return true;
+	return false;
+}
+
 QPolygonF OutputItem::polygon() const
 {
 	QPolygonF p;

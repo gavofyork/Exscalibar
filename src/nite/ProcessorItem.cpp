@@ -19,6 +19,8 @@
 #include "ConnectionItem.h"
 #include "ProcessorsView.h"
 #include "ProcessorItem.h"
+#include "MultipleInputItem.h"
+#include "MultipleOutputItem.h"
 
 // TODO: MultipleOutputPort
 // qobject_cast<ProcessorsScene*>(scene())->beginMultipleConnect(this);
@@ -27,10 +29,11 @@ static const double portSize = 8.0;
 static const double portLateralMargin = 4.0;
 
 ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
-	BaseItem		(_pr, _size),
-	m_processor		(0),
-	m_type			(_type),
-	m_multiplicity	(0)
+	BaseItem			(_pr, _size),
+	m_processor			(0),
+	m_type				(_type),
+	m_tryToShowMulti	(false),
+	m_multiplicity		(0)
 {
 	if (!m_type.isEmpty())
 		propertiesChanged();
@@ -55,6 +58,55 @@ void ProcessorItem::tick()
 	foreach (QGraphicsItem* i, childItems())
 		if (InputItem* ii = dynamic_cast<InputItem*>(i))
 			ii->update();
+}
+
+void ProcessorItem::updateMultiDisplay()
+{
+	QList<MultipleInputItem*> miis = filter<MultipleInputItem>(childItems());
+	QList<InputItem*> iis = filter<InputItem>(childItems());
+
+	bool m = m_tryToShowMulti;
+	if (miis.isEmpty())
+		m = false;
+	else if (iis.isEmpty())
+		m = true;
+	else
+	{
+		foreach (MultipleInputItem* i, miis)
+			if (i->isConnected())
+				m = true;
+		foreach (InputItem* i, iis)
+			if (i->isConnected())
+				m = false;
+	}
+
+	foreach (MultipleInputItem* i, miis)
+		i->setVisible(m);
+	foreach (InputItem* i, iis)
+		i->setVisible(!m);
+
+	QList<MultipleOutputItem*> mois = filter<MultipleOutputItem>(childItems());
+	QList<OutputItem*> ois = filter<OutputItem>(childItems());
+
+	m = m_tryToShowMulti;
+	if (mois.isEmpty())
+		m = false;
+	else if (ois.isEmpty())
+		m = true;
+	else
+	{
+		foreach (MultipleOutputItem* i, mois)
+			if (i->isConnected())
+				m = true;
+		foreach (OutputItem* i, ois)
+			if (i->isConnected())
+				m = false;
+	}
+
+	foreach (MultipleOutputItem* i, mois)
+		i->setVisible(m);
+	foreach (OutputItem* i, ois)
+		i->setVisible(!m);
 }
 
 void ProcessorItem::typesConfirmed()
@@ -98,6 +150,15 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 void ProcessorItem::geometryChanged()
 {
 	QVector<InputItem*> iis(m_processor->multi() & In ? m_multiplicity : m_processor->numInputs(), 0);
+	if (m_processor->multi() & In)
+	{
+		MultipleInputItem* mii;
+		if (filter<MultipleInputItem>(childItems()).isEmpty())
+			(mii = new MultipleInputItem(this, QSizeF(10.f, 8.f)))->hide();
+		else
+			mii = filter<MultipleInputItem>(childItems())[0];
+		mii->setPos(-1.f, portLateralMargin * 3 / 2 + mii->size().height() / 2);
+	}
 	foreach (InputItem* ii, filter<InputItem>(childItems()))
 		if ((int)ii->index() < iis.count())
 			iis[ii->index()] = ii;
@@ -110,6 +171,16 @@ void ProcessorItem::geometryChanged()
 		i->setPos(-1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
 	QVector<OutputItem*> ois(m_processor->multi() & Out ? m_multiplicity : m_processor->numOutputs(), 0);
+	if (m_processor->multi() & Out)
+	{
+		MultipleOutputItem* moi;
+		if (filter<MultipleOutputItem>(childItems()).isEmpty())
+			(moi = new MultipleOutputItem(this, QSizeF(10.f, 8.f)))->hide();
+		else
+			moi = filter<MultipleOutputItem>(childItems())[0];
+		moi->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + moi->size().height() / 2);
+	}
+
 	foreach (OutputItem* oi, filter<OutputItem>(childItems()))
 		if ((int)oi->index() < ois.count())
 			ois[oi->index()] = oi;
@@ -121,6 +192,7 @@ void ProcessorItem::geometryChanged()
 	foreach (OutputItem* i, ois)
 		i->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
+	updateMultiDisplay();
 	BaseItem::geometryChanged();
 }
 

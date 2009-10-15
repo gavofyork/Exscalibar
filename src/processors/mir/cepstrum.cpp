@@ -113,16 +113,10 @@ class Cepstrum : public SubProcessor
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &properties);
 
 public:
 	Cepstrum() : SubProcessor("Cepstrum") {}
 };
-
-void Cepstrum::initFromProperties(const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
-}
 
 void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {

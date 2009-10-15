@@ -579,7 +579,7 @@ protected:
 	 * @param multi Declares the type of multiplicity this Processor offers. Defaults to
 	 * NotMulti.
 	 */
-	Processor(const QString &type, const MultiplicityType multi = NotMulti);
+	Processor(const QString &type, MultiplicityType multi = NotMulti);
 
 	//@}
 

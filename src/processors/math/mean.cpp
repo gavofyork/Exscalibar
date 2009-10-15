@@ -34,7 +34,6 @@ class Mean : public SubProcessor
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &) { setupIO(Undefined, 1, 1, 1, 1); }
 
 public:
 	Mean() : SubProcessor("Mean", In) {}

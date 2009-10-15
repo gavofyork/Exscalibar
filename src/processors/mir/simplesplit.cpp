@@ -35,7 +35,6 @@ class SimpleSplit: public SubProcessor
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &properties);
 
 public:
 	SimpleSplit();
@@ -59,11 +58,6 @@ bool SimpleSplit::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 	s.setScope(theWidth);
 	outTypes = s;
 	return true;
-}
-
-void SimpleSplit::initFromProperties(const Properties &)
-{
-	setupIO(1, Undefined, 1, 1, 1);
 }
 
 EXPORT_CLASS(SimpleSplit, 0,1,0, SubProcessor);

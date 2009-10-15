@@ -22,6 +22,7 @@
 using namespace Geddei;
 
 #include "OutputItem.h"
+#include "MultipleOutputItem.h"
 #include "InputItem.h"
 #include "ConnectionItem.h"
 #include "IncompleteConnectionItem.h"
@@ -105,7 +106,7 @@ void ProcessorsScene::beginConnect(OutputItem* _from)
 	m_currentConnect = new IncompleteConnectionItem(_from);
 }
 
-void ProcessorsScene::beginMultipleConnect(ProcessorItem* _from)
+void ProcessorsScene::beginMultipleConnect(MultipleOutputItem* _from)
 {
 	m_currentMultipleConnect = new IncompleteMultipleConnectionItem(_from);
 }
@@ -117,6 +118,22 @@ void ProcessorsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 	if (m_currentMultipleConnect)
 		m_currentMultipleConnect->setTo(_e->scenePos());
 	QGraphicsScene::mouseMoveEvent(_e);
+}
+
+void ProcessorsScene::keyPressEvent(QKeyEvent* _e)
+{
+	if (_e->key() == Qt::Key_Shift)
+		foreach (ProcessorItem* i, filter<ProcessorItem>(items()))
+			i->setTryMulti(true);
+	update();
+}
+
+void ProcessorsScene::keyReleaseEvent(QKeyEvent* _e)
+{
+	if (_e->key() == Qt::Key_Shift)
+		foreach (ProcessorItem* i, filter<ProcessorItem>(items()))
+			i->setTryMulti(false);
+	update();
 }
 
 void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
@@ -135,9 +152,9 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 				changed();
 			}
 	}
-	if (m_currentMultipleConnect)
+	if (m_currentMultipleConnect && m_currentMultipleConnect->from()->processorItem())
 	{
-		ProcessorItem* op = m_currentMultipleConnect->from();
+		ProcessorItem* op = m_currentMultipleConnect->from()->processorItem();
 		delete m_currentMultipleConnect;
 		m_currentMultipleConnect = 0;
 

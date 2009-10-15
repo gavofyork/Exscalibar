@@ -87,7 +87,6 @@ bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 void Bark::initFromProperties(const Properties &)
 {
 	theUsedBins = 20;
-	setupIO(1, 1, 1, 1, 1);
 }
 
 EXPORT_CLASS(Bark, 0,2,0, SubProcessor);

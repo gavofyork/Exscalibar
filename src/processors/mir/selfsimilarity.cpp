@@ -81,7 +81,7 @@ class Distance: public SubProcessor
 		float const* p = in[0].readPointer();
 		out[0][0] = m_distance(p, p + m_scope, m_scope);
 	}
-	virtual void initFromProperties(Properties const&) { setupIO(1, 1, 2, 1, 1); }
+	virtual void initFromProperties(Properties const&) { setupSamplesIO(2, 1, 1); }
 	virtual void updateFromProperties(Properties const& _p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 	{
@@ -178,7 +178,7 @@ void SelfSimilarity::initFromProperties(const Properties &properties)
 	theSize = properties.get("Size").toInt();
 	theMatrix.clear();
 	updateFromProperties(properties);
-	setupIO(1, 1, theSize, 1, 1);
+	setupSamplesIO(theSize, 1, 1);
 }
 
 void SelfSimilarity::updateFromProperties(const Properties &properties)

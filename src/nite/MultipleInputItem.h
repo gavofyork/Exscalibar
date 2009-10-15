@@ -22,17 +22,21 @@
 #include <QtXml>
 
 class ProcessorItem;
+class MultiProcessorItem;
 
-class InputItem: public QGraphicsItem
+class MultipleInputItem: public QGraphicsItem
 {
 public:
-	InputItem(int _i, BaseItem* _p, QSizeF const& _size);
+	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
+	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
+	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
+	MultiProcessorItem* multiProcessorItem() const;
 
-	bool isConnected() const;
+	bool isConnected() const { return false; }
 
-	inline uint index() const { return m_index; }
+	inline uint index() const { return m_index; }	// valid only with a valid multiProcessorItem.
 	inline QSizeF size() const { return m_size; }
 
 	virtual QRectF boundingRect() const;
@@ -41,11 +45,11 @@ public:
 
 	void typesConfirmed();
 
-	enum { Type = UserType + 2 };
+	enum { Type = UserType + 12 };
 	virtual int type() const { return Type; }
 
 private:
-	uint		m_index;
+	int			m_index;
 	QSizeF		m_size;
 	QSizeF		m_baseSize;
 };

@@ -33,7 +33,7 @@ using namespace SignalTypes;
 
 class Delta: public SubProcessor
 {
-	virtual void initFromProperties (const Properties &) { setupIO(1, 1, 2, 1, 1); }
+	virtual void initFromProperties (const Properties &) { setupSamplesIO(2, 1, 1); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
@@ -51,7 +51,6 @@ class Extract: public SubProcessor
 	uint m_index;
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Element Index", 0, "Index of the element to extract."); }
 	virtual void updateFromProperties(Properties const& _p) { m_index = _p["Element Index"].toInt(); }
-	virtual void initFromProperties (const Properties & _p) { setupIO(1, 1, 1, 1, 1); updateFromProperties(_p); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Value(inTypes[0].frequency(), inTypes[0].asA<SignalType>().maxAmplitude(), inTypes[0].asA<SignalType>().minAmplitude()); return m_index < inTypes[0].scope(); }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
@@ -68,7 +67,6 @@ class Invert: public SubProcessor
 	uint m_min;
 	uint m_max;
 	uint m_scope;
-	virtual void initFromProperties (Properties const&) { setupIO(1, 1, 1, 1, 1); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes; m_min = inTypes[0].asA<SignalType>().minAmplitude(); m_scope = inTypes[0].scope(); m_max = inTypes[0].asA<SignalType>().maxAmplitude(); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
@@ -84,7 +82,6 @@ EXPORT_CLASS(Invert, 0,1,0, SubProcessor);
 
 class Sum: public SubProcessor
 {
-	virtual void initFromProperties (const Properties &);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 public:
@@ -93,11 +90,6 @@ public:
 
 Sum::Sum(): SubProcessor("Sum")
 {
-}
-
-void Sum::initFromProperties (const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
 }
 
 bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)

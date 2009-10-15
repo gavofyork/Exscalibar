@@ -31,7 +31,6 @@ class Terhardt : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &properties);
 
 public:
 	float *theMult;
@@ -64,18 +63,12 @@ bool Terhardt::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRe
 	return true;
 }
 
-void Terhardt::initFromProperties(const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
-}
-
 EXPORT_CLASS(Terhardt, 1,0,1, SubProcessor);
 
 class Sone : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &properties);
 
 public:
 	Sone() : SubProcessor("Sone") {}
@@ -102,11 +95,6 @@ bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 	return true;
 }
 
-void Sone::initFromProperties(const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
-}
-
 EXPORT_CLASS(Sone, 1,0,1, SubProcessor);
 /*
 class Rhythm: public SubProcessor
@@ -122,7 +110,7 @@ public:
 
 void Rhythm::initFromProperties(const Properties &)
 {
-	setupIO(1, 1, 64, 4, 1);
+	setupSamplesIO(64, 4, 1);
 }
 
 bool Rhythm::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)

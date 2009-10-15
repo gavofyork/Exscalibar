@@ -42,7 +42,7 @@ namespace Geddei
 
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
-Processor::Processor(const QString &type, const MultiplicityType multi): theName(""), theType(type),
+Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
 	theWidth(32), theHeight(32), theMinWidth(32), theMinHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), thePlungersStarted(false), thePlungersEnded(false)
 {
@@ -428,20 +428,20 @@ void Processor::doInit(const QString &name, ProcessorGroup *g, const Properties 
 	}
 
 	if (!theDeferredInit && g)
+	{
+		theName = name;
 		setGroup(*g);
+	}
 
 	if (theMulti&(In|Out) && !(theMulti&Const))
 		if (!properties.keys().contains("Multiplicity"))
 		{	if (MESSAGES) qDebug("Deferring...");
 			theDeferredInit = true;
 			theDeferredProperties = properties;
-			theDeferredName = name;
-			theName = name;
 			return;
 		}
 
 	if (MESSAGES) qDebug("Initialising (M=%d)...", properties.keys().contains("Multiplicity") ? properties["Multiplicity"].toInt() : 0);
-	theName = name;
 
 	if (MESSAGES) for (uint i = 0; i < (uint)properties.keys().count(); i++) qDebug("properties[%s] = %s", qPrintable(properties.keys()[i]), qPrintable(properties[properties.keys()[i]].toString()));
 	Properties p = specifyProperties();
@@ -936,15 +936,25 @@ void Processor::setupIO(uint inputs, uint outputs)
 {
 	assert(!isRunning());
 
+	if (theIOSetup)
+	{
+		qWarning() << "*** Processor::setupIO(): IO has already been setup! Bailing.";
+		return;
+	}
+
 	for (uint i = 0; i < (uint)theInputs.size(); i++)
-		if (theInputs[i]) delete theInputs[i];
+	{
+		delete theInputs[i];
+		theInputs[i] = 0;
+	}
 	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		if (theOutputs[i]) delete theOutputs[i];
+	{
+		delete theOutputs[i];
+		theOutputs[i] = 0;
+	}
 
-	theInputs.resize(0);
-	theOutputs.resize(0);
-
-	uint rinputs = inputs, routputs = outputs;
+	uint rinputs = inputs;
+	uint routputs = outputs;
 
 	if (theMulti&In && !(theMulti&Const))
 	{	if (rinputs != Undefined)
@@ -959,7 +969,7 @@ void Processor::setupIO(uint inputs, uint outputs)
 		return;
 	}
 	else if (!(theMulti&In && !(theMulti&Const)) && rinputs == Undefined)
-		qFatal("*** Processor::setupIO(): Undefined inputs, when not unfixed Multi.");
+		qFatal("*** Processor::setupIO(): Undefined inputs, when non/fixed Multi.");
 
 	if (theMulti&Out && !(theMulti&Const))
 	{	if (routputs != Undefined)
@@ -983,17 +993,30 @@ void Processor::setupIO(uint inputs, uint outputs)
 					 "    to minimum of the two (%d).", rinputs, routputs, min(rinputs, routputs));
 			rinputs = routputs = min(rinputs, routputs);
 		}
-		if (rinputs == Undefined)
-			qFatal("*** Processor::setupIO(): Undefined outputs, when fixed Multi.");
 	}
 
-	theInputs.resize(rinputs);
-	for (uint i = 0; i < rinputs; i++)
-		theInputs[i] = 0L;
+	bool wellDefined = true;
 
-	theOutputs.resize(routputs);
-	for (uint i = 0; i < routputs; i++)
-		theOutputs[i] = 0L;
+	if (rinputs == Undefined)
+		wellDefined = false;
+	else
+	{
+		theInputs.resize(rinputs);
+		for (uint i = 0; i < rinputs; i++)
+			theInputs[i] = 0L;
+	}
+
+	if (routputs == Undefined)
+		wellDefined = false;
+	else
+	{
+		theOutputs.resize(routputs);
+		for (uint i = 0; i < routputs; i++)
+			theOutputs[i] = 0L;
+	}
+
+	if (!wellDefined)
+		return;
 
 	// We need to size up the plunger stuff.
 	thePlungersLeft.resize(rinputs);

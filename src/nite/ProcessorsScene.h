@@ -33,6 +33,7 @@ template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
 class IncompleteConnectionItem;
 class IncompleteMultipleConnectionItem;
 class OutputItem;
+class MultipleOutputItem;
 class ProcessorItem;
 
 class ProcessorsScene: public QGraphicsScene
@@ -43,7 +44,7 @@ public:
 	ProcessorsScene();
 
 	void						beginConnect(OutputItem* _from);
-	void						beginMultipleConnect(ProcessorItem* _from);
+	void						beginMultipleConnect(MultipleOutputItem* _from);
 	IncompleteConnectionItem*	incompleteConnectionItem() const { return m_currentConnect; }
 	IncompleteMultipleConnectionItem*	incompleteMultipleConnectionItem() const { return m_currentMultipleConnect; }
 
@@ -59,6 +60,9 @@ private:
 	virtual void				dragEnterEvent(QGraphicsSceneDragDropEvent* _event);
 	virtual void				dragMoveEvent(QGraphicsSceneDragDropEvent* _event) { dragEnterEvent(_event); }
 	virtual void				dropEvent(QGraphicsSceneDragDropEvent* _event);
+
+	virtual void				keyPressEvent(QKeyEvent* _e);
+	virtual void				keyReleaseEvent(QKeyEvent* _e);
 
 	virtual void				mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void				mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);

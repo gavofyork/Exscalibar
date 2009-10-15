@@ -39,7 +39,6 @@ class MFCC : public SubProcessor
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual void initFromProperties(const Properties &properties);
 
 public:
 	MFCC() : SubProcessor("MFCC") {}
@@ -82,11 +81,6 @@ bool MFCC::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 	for (uint i = 0; i < BINS + 2; i++)
 		theMarkers[i] = int(toHertz(float(i) * maxMel / float(BINS + 2))) / int(in.step());
 	return true;
-}
-
-void MFCC::initFromProperties(const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
 }
 
 EXPORT_CLASS(MFCC, 0,2,1, SubProcessor);

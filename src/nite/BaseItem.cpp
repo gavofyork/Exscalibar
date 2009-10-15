@@ -227,7 +227,9 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 
 void BaseItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
+	_p->setClipRect(boundingRect());
 	paintOutline(_p);
+	_p->setClipRect(centreRect());
 	paintCentre(_p);
 }
 
@@ -241,7 +243,6 @@ void BaseItem::paintCentre(QPainter* _p)
 
 void BaseItem::paintOutline(QPainter* _p)
 {
-	_p->setClipping(false);
 	if (isSelected())
 	{
 		_p->setPen(QPen(highlightColour(), 0));

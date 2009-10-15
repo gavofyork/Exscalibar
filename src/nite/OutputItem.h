@@ -31,6 +31,8 @@ public:
 	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }
 
+	bool isConnected() const;
+
 	inline InputItem* inputItem() const { return m_inputItem; }
 	inline void setInputItem(InputItem* _ii = 0) { m_inputItem = _ii; }
 

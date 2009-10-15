@@ -93,7 +93,7 @@ void DownSample::initFromProperties(const Properties &properties)
 	theCount = properties.get("Spread").toInt();
 	theStep = properties.get("Divisor").toInt();
 	theConsolidate = properties["Consolidate"].toInt();
-	setupIO(1, 1, max(theCount, theStep), theStep, 1);
+	setupSamplesIO(max(theCount, theStep), theStep, 1);
 }
 
 PropertiesInfo DownSample::specifyProperties() const
@@ -144,7 +144,7 @@ class SuitableSplit: public SubProcessor
 {
 	float theBass, theTreble;
 	int theBand[4];
-	virtual void initFromProperties (const Properties &) { setupIO(1, 3, 1, 1, 1); }
+	virtual void initFromProperties (const Properties &) { setupIO(1, 3); }
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].scope() - 4); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{	cerr << "Sizes: i=" << ins[0].elements() << ", o = " << outs[0].elements() << ", " << outs[1].elements() << ", " << outs[2].elements() << endl;

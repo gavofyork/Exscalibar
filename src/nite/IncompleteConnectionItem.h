@@ -42,10 +42,10 @@ private:
 class IncompleteMultipleConnectionItem: public QGraphicsPathItem
 {
 public:
-	IncompleteMultipleConnectionItem(ProcessorItem* _from);
+	IncompleteMultipleConnectionItem(MultipleOutputItem* _from);
 
 	void setTo(QPointF _to);
-	ProcessorItem* from() const;
+	MultipleOutputItem* from() const;
 
 	enum { Type = UserType + 10 };
 	virtual int type() const { return Type; }

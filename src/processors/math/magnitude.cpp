@@ -33,7 +33,6 @@ using namespace SignalTypes;
 
 class Magnitude: public SubProcessor
 {
-	virtual void initFromProperties(const Properties &);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 
@@ -43,11 +42,6 @@ public:
 
 Magnitude::Magnitude(): SubProcessor("Magnitude")
 {
-}
-
-void Magnitude::initFromProperties(const Properties &)
-{
-	setupIO(1, 1, 1, 1, 1);
 }
 
 bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)

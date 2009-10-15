@@ -19,33 +19,38 @@
 #pragma once
 
 #include <QtGui>
-#include <QtXml>
 
 class ProcessorItem;
+class MultiProcessorItem;
 
-class InputItem: public QGraphicsItem
+class MultipleOutputItem: public QGraphicsItem
 {
 public:
-	InputItem(int _i, BaseItem* _p, QSizeF const& _size);
+	MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size);
+	MultipleOutputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
+	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
+	MultiProcessorItem* multiProcessorItem() const;
 
-	bool isConnected() const;
+	bool isConnected() const { return false; }
 
-	inline uint index() const { return m_index; }
+	inline uint index() const { return m_index; }	// valid only with valid multiProcessorItem
 	inline QSizeF size() const { return m_size; }
 
-	virtual QRectF boundingRect() const;
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	QPointF tip() const;
 
-	void typesConfirmed();
-
-	enum { Type = UserType + 2 };
+	enum { Type = UserType + 13 };
 	virtual int type() const { return Type; }
 
 private:
-	uint		m_index;
-	QSizeF		m_size;
-	QSizeF		m_baseSize;
+	virtual QRectF boundingRect() const;
+	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
+	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
+
+	QSizeF			m_size;
+	uint			m_index;
+	bool			m_hover;
 };

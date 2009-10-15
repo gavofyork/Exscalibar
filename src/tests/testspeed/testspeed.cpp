@@ -108,10 +108,6 @@ public:
 
 class PassThrough: public SubProcessor
 {
-	virtual void initFromProperties(const Properties &)
-	{
-		setupIO(1, 1, 1, 1);
-	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 	{
 		out = in;

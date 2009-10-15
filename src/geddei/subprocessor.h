@@ -295,7 +295,7 @@ protected:
 	 *
 	 * @sa setupVisual()
 	 */
-	void setupIO(uint numInputs = 1, uint numOutputs = 1, uint samplesIn = 1, uint samplesStep = 1, uint samplesOut = 1);
+	void setupIO(uint numInputs, uint numOutputs);
 
 	void setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut);
 

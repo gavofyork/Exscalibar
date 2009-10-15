@@ -34,7 +34,7 @@ class ProcessorItem: public BaseItem
 	friend class OutputItem;
 
 public:
-	ProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF(0, 0));
+	ProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 	~ProcessorItem() { delete m_processor; }
 
 	enum { Type = BaseItem::Type + 1 };
@@ -43,6 +43,9 @@ public:
 	virtual bool		isRunning() const { return processor() && processor()->isRunning(); }
 	virtual float		cyclePoint() const { return (processor()->guardsCrossed() % 36) * 360.0 / 36; }
 	virtual void		togglePause();
+
+	void				setTryMulti(bool _m) { m_tryToShowMulti = _m; updateMultiDisplay(); }
+	void				updateMultiDisplay();
 
 	virtual bool		connectYourself(ProcessorGroup& _group);
 	virtual void		disconnectYourself();
@@ -73,5 +76,6 @@ protected:
 
 private:
 	QString				m_type;
+	bool				m_tryToShowMulti;
 	uint				m_multiplicity;
 };

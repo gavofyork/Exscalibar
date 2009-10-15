@@ -43,11 +43,6 @@ class DiagonalSum : public SubProcessor
 								("Alpha", 1.0, "Alpha value for the power function.")
 								("Minimum Width", 16, "The minimum matrix width to be used while minimising latency.");
 	}
-	virtual void initFromProperties(Properties const& _p)
-	{
-		setupIO(1, 1, 1, 1, 1);
-		updateFromProperties(_p);
-	}
 	virtual void updateFromProperties(Properties const& _p)
 	{
 		m_minimiseLatency = _p["Minimise Latency"].toBool();
