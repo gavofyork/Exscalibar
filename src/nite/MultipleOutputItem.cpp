@@ -62,6 +62,11 @@ bool MultipleOutputItem::isConnected() const
 	return false;
 }
 
+MultiSource* MultipleOutputItem::source() const
+{
+	return processorItem() ? static_cast<MultiSource*>(processorItem()->processor()) : static_cast<MultiSource*>(multiProcessorItem()->multiProcessor());
+}
+
 ProcessorItem* MultipleOutputItem::processorItem() const
 {
 	return dynamic_cast<ProcessorItem*>(parentItem());

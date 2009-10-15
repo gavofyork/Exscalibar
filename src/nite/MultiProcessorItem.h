@@ -37,14 +37,22 @@ public:
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
 
-//	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
-//	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multiprocessor") const;
+	virtual void		prepYourself(ProcessorGroup&);
+	virtual bool		connectYourself();
+	virtual void		disconnectYourself();
+
+	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multiprocessor") const;
+
+	virtual QSizeF		centreMin() const;
 
 protected:
 	virtual void		propertiesChanged(QString const& _newName);
+	virtual void		geometryChanged();
+	virtual void		positionChanged();
 
 private:
-	FactoryCreator*		m_creator;
+	QString				m_type;
 	MultiProcessor*		m_multiProcessor;
 	Processor*			m_processor;
 };

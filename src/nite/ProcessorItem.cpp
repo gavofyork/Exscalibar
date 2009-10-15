@@ -235,7 +235,6 @@ QList<QPointF> ProcessorItem::magnetism(BaseItem const* _b, bool _moving) const
 
 void ProcessorItem::prepYourself(ProcessorGroup& _g)
 {
-	qDebug() << name() << "Prepping...";
 	m_processor->setGroup(_g);
 	m_processor->disconnectAll();
 	m_processor->resetMulti();
@@ -244,12 +243,6 @@ void ProcessorItem::prepYourself(ProcessorGroup& _g)
 
 bool ProcessorItem::connectYourself()
 {
-	qDebug() << name() << "Connecting...";
-	qDebug() << processor()->numInputs() << processor()->numOutputs();
-	for (uint i = 0; i < processor()->numInputs(); i++)
-		qDebug() << &processor()->input(i);
-	for (uint i = 0; i < processor()->numOutputs(); i++)
-		qDebug() << &processor()->output(i);
 	bool m = false;
 	foreach (MultipleInputItem* i, filter<MultipleInputItem>(childItems()))
 		if (i->isConnected())
@@ -264,16 +257,10 @@ bool ProcessorItem::connectYourself()
 				return false;
 			MultipleConnectionItem* mci = mcis[0];
 
-			if (mci->from()->processorItem()->m_processor->MultiSource::deferConnect(m_processor, 1))
-			{
-				mci->setValid(false);
+			Connection::Tristate t = mci->from()->source()->connect(processor());
+			mci->setValid(t != Connection::Failed);
+			if (t == Connection::Failed)
 				ret = false;
-			}
-			else
-			{
-				mci->from()->processorItem()->m_processor->MultiSource::connect(m_processor);
-				mci->setValid(true);
-			}
 		}
 	else
 		foreach (InputItem* ii, filter<InputItem>(childItems()))
@@ -299,11 +286,13 @@ bool ProcessorItem::connectYourself()
 				ret = false;
 			}
 		}
+/*
 	qDebug() << processor()->numInputs() << processor()->numOutputs();
 	for (uint i = 0; i < processor()->numInputs(); i++)
 		qDebug() << &processor()->input(i);
 	for (uint i = 0; i < processor()->numOutputs(); i++)
 		qDebug() << &processor()->output(i);
+*/
 	if (!ret) return false;
 	return BaseItem::connectYourself();
 }
@@ -336,14 +325,12 @@ void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
 	ProcessorItem* pi = new ProcessorItem(_element.attribute("type"));
 	pi->importDom(_element, _scene);
-	pi->setName(_element.attribute("name"));
 }
 
 QDomElement ProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const
 {
 	QDomElement proc = _doc.createElement(_n);
 	proc.setAttribute("type", m_processor->type());
-	proc.setAttribute("name", m_processor->name());
 	BaseItem::exportDom(proc, _doc);
 	_root.appendChild(proc);
 	return proc;

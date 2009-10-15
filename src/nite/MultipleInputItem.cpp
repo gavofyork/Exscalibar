@@ -20,6 +20,7 @@
 
 #include "ConnectionItem.h"
 #include "ProcessorItem.h"
+#include "MultiProcessorItem.h"
 #include "MultipleInputItem.h"
 
 MultipleInputItem::MultipleInputItem(ProcessorItem* _p, QSizeF const& _size):
@@ -38,6 +39,11 @@ MultipleInputItem::MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF cons
 	m_size			(_size),
 	m_baseSize		(_size)
 {
+}
+
+MultiSink* MultipleInputItem::sink() const
+{
+	return processorItem() ? static_cast<MultiSink*>(processorItem()->processor()) : static_cast<MultiSink*>(multiProcessorItem()->multiProcessor());
 }
 
 void MultipleInputItem::setMultiplicity(uint _m)

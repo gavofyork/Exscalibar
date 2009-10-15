@@ -20,6 +20,9 @@
 
 #include <QtGui>
 
+#include <Geddei>
+using namespace Geddei;
+
 class ProcessorItem;
 class MultiProcessorItem;
 
@@ -34,6 +37,8 @@ public:
 	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
 	MultiProcessorItem* multiProcessorItem() const;
+
+	MultiSource* source() const;
 
 	bool isConnected() const;
 

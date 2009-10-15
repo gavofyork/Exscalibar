@@ -21,6 +21,9 @@
 #include <QtGui>
 #include <QtXml>
 
+#include <Geddei>
+using namespace Geddei;
+
 class ProcessorItem;
 class MultiProcessorItem;
 
@@ -31,6 +34,8 @@ public:
 	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
 	void setMultiplicity(uint _m);
+
+	MultiSink* sink() const;
 
 	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;

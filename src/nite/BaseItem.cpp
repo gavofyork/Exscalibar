@@ -90,6 +90,7 @@ void BaseItem::geometryChanged()
 	prepareGeometryChange();
 	if (!m_size.isValid())
 		m_size = centrePref();
+	m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height(), m_size.height()));
 	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(0.f, statusMargin));
 	m_statusBar->setRect(QRectF(0, 0, m_size.width(), statusHeight));
 
@@ -284,6 +285,7 @@ void BaseItem::importDom(QDomElement& _item, QGraphicsScene* _scene)
 	m_size = QSizeF(_item.attribute("w").toDouble(), _item.attribute("h").toDouble());
 	_scene->addItem(this);
 	setPos(_item.attribute("x").toDouble(), _item.attribute("y").toDouble());
+	setName(_item.attribute("name"));
 }
 
 void BaseItem::exportDom(QDomElement& _item, QDomDocument& _doc) const
@@ -292,6 +294,7 @@ void BaseItem::exportDom(QDomElement& _item, QDomDocument& _doc) const
 	_item.setAttribute("y", pos().y());
 	_item.setAttribute("w", m_size.width());
 	_item.setAttribute("h", m_size.height());
+	_item.setAttribute("name", name());
 
 	foreach (QString k, m_properties.keys())
 	{

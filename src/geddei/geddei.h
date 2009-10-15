@@ -23,6 +23,8 @@
 #ifdef __GEDDEI_BUILD
 #include "multiprocessorcreator.h"
 #include "multiprocessor.h"
+#include "multisource.h"
+#include "multisink.h"
 #include "combination.h"
 #include "subprocessor.h"
 #include "processor.h"
@@ -42,6 +44,8 @@
 #else
 #include <geddei/multiprocessorcreator.h>
 #include <geddei/multiprocessor.h>
+#include <geddei/multisource.h>
+#include <geddei/multisink.h>
 #include <geddei/subprocessor.h>
 #include <geddei/combination.h>
 #include <geddei/processor.h>

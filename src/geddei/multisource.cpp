@@ -34,7 +34,7 @@ void MultiSource::disconnect()
 		sourcePort(i) --;
 }
 
-bool MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
+Connection::Tristate MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 {
 	// If our multiplicity is explicitly defined
 	if (knowMultiplicity())
@@ -45,7 +45,7 @@ bool MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 				if (dynamic_cast<Processor *>(this)) qWarning("                                 Name of source: %s", qPrintable(dynamic_cast<Processor *>(this)->name()));
 				if (dynamic_cast<Processor *>(sink)) qWarning("                                 Name of sink:   %s", qPrintable(dynamic_cast<Processor *>(sink)->name()));
 				// TODO: error reporting code.
-				return true;
+				return Connection::Failed;
 			}
 		}
 		else
@@ -58,9 +58,9 @@ bool MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 			theDeferredBufferSize = bufferSize;
 			theDeferredSink = sink;
 			sink->appendDeferral(this);
-			return true;
+			return Connection::Pending;
 		}
-	return false;
+	return Connection::Succeeded;
 }
 
 void MultiSource::setSourceMultiplicity(uint multiplicity)
@@ -72,12 +72,13 @@ void MultiSource::setSourceMultiplicity(uint multiplicity)
 	}
 }
 
-void MultiSource::connect(MultiSink *sink, uint bufferSize)
+Connection::Tristate MultiSource::connect(MultiSink *sink, uint bufferSize)
 {
 	// TODO: Warn & exit.
 	assert(!theConnected);
 
-	if (deferConnect(sink, bufferSize)) return;
+	if (Connection::Tristate t = deferConnect(sink, bufferSize))
+		return t;
 
 	assert(sink->knowMultiplicity());
 	assert(knowMultiplicity());
@@ -92,6 +93,8 @@ void MultiSource::connect(MultiSink *sink, uint bufferSize)
 		sourcePort(i) >>= sink->sinkPort(i);
 	theDeferredConnect = false;
 	sink->removeDeferral(this);
+
+	return Connection::Succeeded;
 }
 
 }

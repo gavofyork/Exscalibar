@@ -22,7 +22,9 @@ using namespace std;
 
 #include "ConnectionItem.h"
 #include "MultipleConnectionItem.h"
+#include "MultipleOutputItem.h"
 #include "ProcessorItem.h"
+#include "MultiProcessorItem.h"
 #include "DomProcessorItem.h"
 #include "SubProcessorItem.h"
 #include "ProcessorView.h"
@@ -279,12 +281,15 @@ void GeddeiNite::on_editRemove_activated()
 	if (theRunning || theScene.selectedItems().size() != 1)
 		return;
 
-	if (dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]))
+	if (BaseItem* bi = dynamic_cast<BaseItem*>(theScene.selectedItems()[0]))
 	{
 		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
-			if (i->fromProcessor() == theScene.selectedItems()[0])
+			if (i->fromProcessor() == bi)
 				delete i;
-		delete theScene.selectedItems()[0];
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(theScene.items()))
+			if (i->from()->processorItem() == theScene.selectedItems()[0] || i->from()->multiProcessorItem() == theScene.selectedItems()[0])
+				delete i;
+		delete bi;
 		setModified(true);
 		theScene.update();
 	}

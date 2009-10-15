@@ -20,10 +20,11 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
+#include "connection.h"
 #include "multiplicative.h"
 #include "processorport.h"
 #else
+#include <geddei/connection.h>
 #include <geddei/multiplicative.h>
 #include <geddei/processorport.h>
 #endif
@@ -80,7 +81,7 @@ public:
 	 * @return true if the connect should be abandoned. false if both
 	 * multiplicative source and sink are ready.
 	 */
-	bool deferConnect(MultiSink *sink, uint bufferSize);
+	Connection::Tristate deferConnect(MultiSink *sink, uint bufferSize);
 
 	/**
 	 * Connect this to a multiplicative sink.
@@ -88,7 +89,7 @@ public:
 	 * @param sink Pointer to the sink to which it is to be connected.
 	 * @param bufferSize A minimum size of the buffer to be employed.
 	 */
-	void connect(MultiSink *sink, uint bufferSize = 1);
+	Connection::Tristate connect(MultiSink *sink, uint bufferSize = 1);
 
 	/**
 	 * Disconnect all outputs from the multiplicitive sink. This must already
