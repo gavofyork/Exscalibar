@@ -46,6 +46,7 @@ public:
 	void				setProperty(QString const& _key, QVariant const& _value);
 	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.
 
+	virtual QString		typeName() const { return QString::null; }
 	virtual QString		name() const { return QString::null; }
 	void				setName(QString const& _name) { propertiesChanged(_name); }
 

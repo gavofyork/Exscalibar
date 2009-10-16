@@ -176,20 +176,20 @@ void GeddeiNite::on_theName_textChanged(QString const& _nn)
 	if (theUpdatingProperties)
 		return;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
-	if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
-		pi->setName(_nn);
+	if (BaseItem* bi = dynamic_cast<BaseItem*>(i))
+		bi->setName(_nn);
 }
 
 void GeddeiNite::slotUpdateProperties()
 {
 	theUpdatingProperties = true;
 	QGraphicsItem* i = theScene.selectedItems().size() ? theScene.selectedItems()[0] : 0;
-	if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
+	if (BaseItem* bi = dynamic_cast<BaseItem*>(i))
 	{
-		theName->setText(pi->processor()->name());
+		theName->setText(bi->name());
 		theName->setEnabled(!theRunning);
-		theType->setText(pi->processor()->type());
-		Properties const& p(pi->properties());
+		theType->setText(bi->typeName());
+		Properties const& p(bi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
 		{
@@ -324,10 +324,10 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 {
 	if (theUpdatingProperties || !theScene.selectedItems().size())
 		return;
-	if (dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
+	if (dynamic_cast<BaseItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
 	{
-		ProcessorItem* pi = dynamic_cast<ProcessorItem*>(theScene.selectedItems()[0]);
-		pi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
+		BaseItem* bi = dynamic_cast<BaseItem*>(theScene.selectedItems()[0]);
+		bi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
 	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
 	{

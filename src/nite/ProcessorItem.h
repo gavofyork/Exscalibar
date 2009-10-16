@@ -53,6 +53,7 @@ public:
 	virtual void		typesConfirmed();
 	virtual void		tick();
 	virtual QString		name() const { return processor()->name(); }
+	virtual QString		typeName() const { return processor()->type(); }
 
 	Processor*			processor() const { return m_processor; }
 

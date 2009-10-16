@@ -35,6 +35,9 @@ public:
 	enum { Type = BaseItem::Type + 2 };
 	virtual int			type() const { return Type; }
 
+	virtual QString		typeName() const { return processor()->type(); }
+	virtual QString		name() const { return multiProcessor()->name(); }
+
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
 	Processor*			processor() const { return m_processor; }
 
