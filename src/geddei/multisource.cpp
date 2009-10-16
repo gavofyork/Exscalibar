@@ -30,6 +30,9 @@ namespace Geddei
 
 void MultiSource::disconnect()
 {
+	while (theDeferreds.size())
+		if (MultiSink* s = theDeferreds.takeLast().s)
+			s->removeDeferral(this);
 	if (knowMultiplicity())
 		for (uint i = 0; i < multiplicity(); i++)
 			for (uint j = 0; j < numMultiOutputs(); j++)
@@ -66,8 +69,17 @@ Connection::Tristate MultiSource::deferConnect(uint _op, MultiSink* _sink, uint 
 void MultiSource::setSourceMultiplicity(uint multiplicity)
 {
 	if (MESSAGES) qDebug("MultiSource::setSourceMultiplicity(%d) DC=%d", multiplicity, theDeferreds.count());
-	foreach (Deferred d, theDeferreds)
-		connect(d.op, d.s, d.ip, d.bs);
+	assert(knowMultiplicity());
+
+	QList<Deferred> ds = theDeferreds;
+	theDeferreds.clear();
+	foreach (Deferred d, ds)
+		if (d.s)
+			connect(d.op, d.s, d.ip, d.bs);
+		else if (d.ip == 0)
+			share(d.op);
+		else if (d.ip == 1)
+			split(d.op);
 }
 
 Connection::Tristate MultiSource::connect(uint _op, MultiSink* _sink, uint _ip, uint _bufferSize)
@@ -91,6 +103,36 @@ Connection::Tristate MultiSource::connect(uint _op, MultiSink* _sink, uint _ip, 
 		sourcePort(i, _op) >>= _sink->sinkPort(i, _ip);
 
 	return Connection::Succeeded;
+}
+
+Connection::Tristate MultiSource::split(uint _op)
+{
+	if (knowMultiplicity())
+	{
+		for (uint i = 0; i < multiplicity(); i++)
+			sourcePort(i, _op).split();
+		return Connection::Succeeded;
+	}
+	else
+	{
+		theDeferreds << Deferred(_op, 0, 1, 0);
+		return Connection::Pending;
+	}
+}
+
+Connection::Tristate MultiSource::share(uint _op)
+{
+	if (knowMultiplicity())
+	{
+		for (uint i = 0; i < multiplicity(); i++)
+			sourcePort(i, _op).share();
+		return Connection::Succeeded;
+	}
+	else
+	{
+		theDeferreds << Deferred(_op, 0, 0, 0);
+		return Connection::Pending;
+	}
 }
 
 }

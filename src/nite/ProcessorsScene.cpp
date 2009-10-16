@@ -157,7 +157,7 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		delete m_currentConnect;
 		m_currentConnect = 0;
 		if (InputItem* ii = dynamic_cast<InputItem*>(itemAt(_e->scenePos())))
-			if (!filter<ConnectionItem>(ii->childItems()).count())
+			if (ii->isVisible() && !filter<ConnectionItem>(ii->childItems()).count())
 			{
 				ci = new ConnectionItem(ii, oi);
 				changed();
@@ -169,10 +169,11 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		delete m_currentMultipleConnect;
 		m_currentMultipleConnect = 0;
 		if (MultipleInputItem* mii = dynamic_cast<MultipleInputItem*>(itemAt(_e->scenePos())))
-		{
-			mci = new MultipleConnectionItem(mii, moi);
-			changed();
-		}
+			if (mii->isVisible() && !filter<MultipleConnectionItem>(mii->childItems()).count())
+			{
+				mci = new MultipleConnectionItem(mii, moi);
+				changed();
+			}
 	}
 	QGraphicsScene::mouseReleaseEvent(_e);
 

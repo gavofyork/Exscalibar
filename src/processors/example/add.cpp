@@ -46,7 +46,7 @@ void Add::processor()
 		const BufferData i0 = input(0).readSamples(samples);
 		const BufferData i1 = input(1).readSamples(samples);
 		BufferData o = output(0).makeScratchSamples(samples);
-		for (uint i = 0; i < o.elements(); i++)
+		for (uint i = 0; i < i0.elements(); i++)
 			o[i] = i0[i] + i1[i];
 		output(0).push(o);
 	}

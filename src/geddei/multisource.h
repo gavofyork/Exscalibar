@@ -40,6 +40,9 @@ struct Deferred
 	Deferred(uint _op, MultiSink* _s, uint _ip, uint _bs):
 		op(_op), s(_s), ip(_ip), bs(_bs) {}
 
+	// s == 0 && ip == 0 -> share
+	// s == 0 && ip == 1 -> split
+
 	uint op;
 	MultiSink* s;
 	uint ip;
@@ -66,6 +69,9 @@ public:
 
 	//* Reimplementation from MultiSource
 	virtual uint numMultiOutputs() const = 0;
+
+	Connection::Tristate share(uint _sourceIndex);
+	Connection::Tristate split(uint _sourceIndex);
 
 	/**
 	 * Test to see if a connect() would defer.

@@ -159,6 +159,18 @@ void MultiProcessorItem::prepYourself(ProcessorGroup& _g)
 {
 	multiProcessor()->setGroup(_g);
 	multiProcessor()->disconnectAll();
+	multiProcessor()->resetMulti();
+
+	foreach (MultipleOutputItem* mii, filter<MultipleOutputItem>(childItems()))
+	{
+		int c = 0;
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+			if (i->from() == mii)
+				c++;
+		if (c > 1)
+			multiProcessor()->MultiSource::split(mii->index());
+	}
+
 	BaseItem::prepYourself(_g);
 }
 
@@ -183,7 +195,6 @@ void MultiProcessorItem::disconnectYourself()
 	BaseItem::disconnectYourself();
 	geometryChanged();
 	m_multiProcessor->disconnectAll();
-	m_multiProcessor->resetMulti();
 	m_multiProcessor->setNoGroup();
 }
 

@@ -238,6 +238,17 @@ void ProcessorItem::prepYourself(ProcessorGroup& _g)
 	m_processor->setGroup(_g);
 	m_processor->disconnectAll();
 	m_processor->resetMulti();
+
+	foreach (MultipleOutputItem* mii, filter<MultipleOutputItem>(childItems()))
+	{
+		int c = 0;
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+			if (i->from() == mii)
+				c++;
+		if (c > 1)
+			m_processor->MultiSource::split(0);
+	}
+
 	BaseItem::prepYourself(_g);
 }
 
