@@ -25,6 +25,16 @@
 namespace Geddei
 {
 
+MultiProcessor::MultiProcessor(MultiProcessorCreator *c):
+	Groupable				(),
+	theDeferredInit			(false),
+	theGivenMultiplicity	(Undefined),
+	theCreator				(c),
+	theSource				(0),
+	theIsInitialised		(false)
+{
+}
+
 MultiProcessor::~MultiProcessor()
 {
 	// delete all processors
@@ -129,9 +139,23 @@ void MultiProcessor::onMultiplicitySet(uint _m)
 {
 	if (theDeferredInit)
 	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
-		theDeferredProperties["Multiplicity"] = _m;
+		theGivenMultiplicity = _m;
 		doInit(theDeferredName, 0, theDeferredProperties);
 	}
+}
+
+void MultiProcessor::resetMulti()
+{
+	stop();
+	reset();
+	disconnectAll();
+	theIsInitialised = false;
+	theDeferredInit = true;
+	theGivenMultiplicity = Undefined;
+	doInit(theDeferredName, 0, theDeferredProperties);
+	foreach (Processor* i, theProcessors)
+		delete i;
+	theProcessors.resize(0);
 }
 
 /*
@@ -150,20 +174,24 @@ void MultiProcessor::doInit(QString const& _name, ProcessorGroup* _g, Properties
 	if (!theDeferredInit && _g)
 		setGroup(*_g);
 
-	if (!_properties.keys().contains("Multiplicity"))
-	{	if (MESSAGES) qDebug("Deferring...");
+	theDeferredName = _name;
+	theDeferredProperties = _properties;
+
+	if (_properties["Multiplicity"].toInt() > 0)
+		theGivenMultiplicity = _properties["Multiplicity"].toInt();
+
+	if (theGivenMultiplicity == Undefined)
+	{
+		if (MESSAGES) qDebug("Deferring...");
 		theDeferredInit = true;
-		theDeferredName = _name;
-		theDeferredProperties = _properties;
 		return;
 	}
 
 	if (MESSAGES) qDebug("Initialising (M=%d)...", _properties["Multiplicity"].toInt());
-	theProcessors.resize(_properties["Multiplicity"].toInt());
-	//qDebug("Multiplicity %d.", theProcessors.count());
+	theProcessors.resize(theGivenMultiplicity);
 	for (uint i = 0; i < (uint)theProcessors.count(); i++)
-	{	theProcessors[i] = theCreator->newProcessor();
-		//qDebug("Processor %d created as %p", i, theProcessors[i]);
+	{
+		theProcessors[i] = theCreator->newProcessor();
 		theProcessors[i]->doInit(_name + QString::number(i), 0, _properties);
 	}
 	theIsInitialised = true;

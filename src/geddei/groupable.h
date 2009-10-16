@@ -80,6 +80,7 @@ public:
 	virtual void stop() = 0;
 	virtual void reset() = 0;
 	virtual void disconnectAll() = 0;
+	virtual void resetMulti() = 0;
 
 	Groupable();
 	virtual ~Groupable();

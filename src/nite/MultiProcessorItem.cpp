@@ -83,6 +83,17 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 	}
 }
 
+void MultiProcessorItem::updateMultiplicities()
+{
+	if (multiProcessor())
+	{
+		foreach (MultipleInputItem* i, filter<MultipleInputItem>(childItems()))
+			i->setMultiplicity(multiProcessor()->multiplicity());
+		foreach (MultipleOutputItem* i, filter<MultipleOutputItem>(childItems()))
+			i->setMultiplicity(multiProcessor()->multiplicity());
+	}
+}
+
 QSizeF MultiProcessorItem::centreMin() const
 {
 	if (m_processor)
@@ -92,6 +103,8 @@ QSizeF MultiProcessorItem::centreMin() const
 
 void MultiProcessorItem::geometryChanged()
 {
+	updateMultiplicities();
+
 	QVector<MultipleInputItem*> miis(1, 0);
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		if ((int)mii->index() < miis.count())
@@ -158,7 +171,14 @@ void MultiProcessorItem::disconnectYourself()
 	BaseItem::disconnectYourself();
 	geometryChanged();
 	m_multiProcessor->disconnectAll();
+	m_multiProcessor->resetMulti();
 	m_multiProcessor->setNoGroup();
+}
+
+void MultiProcessorItem::typesConfirmed()
+{
+	BaseItem::typesConfirmed();
+	updateMultiplicities();
 }
 
 void MultiProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

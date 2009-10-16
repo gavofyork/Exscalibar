@@ -266,7 +266,7 @@ private:
 	//@{
 	/** Reimplementations from Multiplicative. */
 public:
-	void resetMulti();
+	virtual void resetMulti();
 	bool knowMultiplicity() const { return theGivenMultiplicity != Undefined ; }
 	uint multiplicity() const { return theGivenMultiplicity; }
 	MultiplicityType multi() const { return theMulti; }

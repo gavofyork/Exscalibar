@@ -92,7 +92,7 @@ public:
 	 * @param c The MultiProcessorCreator to be used for creating Processor
 	 * objects in this object.
 	 */
-	MultiProcessor(MultiProcessorCreator *c): Groupable(), theDeferredInit(false), theCreator(c), theSource(0), theIsInitialised(false) {}
+	MultiProcessor(MultiProcessorCreator *c);
 
 	/**
 	 * Default destructor.
@@ -142,11 +142,12 @@ public:
 	virtual void stop();
 	virtual void reset();
 	virtual void disconnectAll();
+	virtual void resetMulti();
 
 	/**
 	 * @return true iff the quantity of multiplicity is known.
 	 */
-	bool knowMultiplicity() const { return theIsInitialised; }
+	bool knowMultiplicity() const { return theGivenMultiplicity != Undefined; }
 
 	/**
 	 * Get the quantity of multiplicity.
@@ -154,7 +155,7 @@ public:
 	 * @return The quantity of multiplicity. This value is only valid if
 	 * knowMultiplicity() returns true.
 	 */
-	uint multiplicity() const { return theProcessors.count(); }
+	uint multiplicity() const { return theGivenMultiplicity; }
 
 	Processor* processor(uint _index) const { return theProcessors[_index]; }
 
@@ -172,6 +173,7 @@ private:
 	bool theDeferredInit;
 	Properties theDeferredProperties;
 	QString theDeferredName;
+	uint theGivenMultiplicity;
 	virtual void onMultiplicitySet(uint _m);
 
 	MultiProcessorCreator *theCreator;

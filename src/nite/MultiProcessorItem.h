@@ -41,6 +41,7 @@ public:
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
+	virtual void		typesConfirmed();
 
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "multiprocessor"); }
@@ -54,6 +55,8 @@ protected:
 	virtual void		propertiesChanged(QString const& _newName = QString::null);
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
+
+	void				updateMultiplicities();
 
 	virtual MultiProcessorCreator* newCreator() { return new FactoryCreator(m_type); }
 	virtual void		postCreate() {}
