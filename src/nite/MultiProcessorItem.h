@@ -59,7 +59,7 @@ protected:
 	void				updateMultiplicities();
 
 	virtual MultiProcessorCreator* newCreator() { return new FactoryCreator(m_type); }
-	virtual void		postCreate() {}
+	virtual void		postCreate();
 
 private:
 	QString				m_type;

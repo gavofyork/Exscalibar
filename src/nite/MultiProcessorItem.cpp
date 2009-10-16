@@ -101,11 +101,21 @@ QSizeF MultiProcessorItem::centreMin() const
 	return QSizeF(0, 0);
 }
 
+void MultiProcessorItem::postCreate()
+{
+	PropertiesInfo pi = processor()->properties();
+	pi = pi("Processors Multiplicity", 0, "The number of processors that make this object. (>0 to set, 0 for automatic)");
+	setDefaultProperties(pi);
+}
+
 void MultiProcessorItem::geometryChanged()
 {
-	updateMultiplicities();
+	if (!multiProcessor())
+		return;
 
-	QVector<MultipleInputItem*> miis(1, 0);
+	qDebug() << multiProcessor()->numMultiInputs() << multiProcessor()->numMultiOutputs();
+
+	QVector<MultipleInputItem*> miis(multiProcessor()->numMultiInputs(), 0);
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		if ((int)mii->index() < miis.count())
 			miis[mii->index()] = mii;
@@ -117,7 +127,7 @@ void MultiProcessorItem::geometryChanged()
 	foreach (MultipleInputItem* i, miis)
 		i->setPos(-1.f, 8.f * 3 / 2 + (8.f + i->size().height()) * i->index());
 
-	QVector<MultipleOutputItem*> mois(1, 0);
+	QVector<MultipleOutputItem*> mois(multiProcessor()->numMultiOutputs(), 0);
 	foreach (MultipleOutputItem* moi, filter<MultipleOutputItem>(childItems()))
 		if ((int)moi->index() < mois.count())
 			mois[moi->index()] = moi;
@@ -128,6 +138,8 @@ void MultiProcessorItem::geometryChanged()
 			mois[i] = new MultipleOutputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (MultipleOutputItem* i, mois)
 		i->setPos(centreRect().right() + 1.f, 8.f * 3 / 2 + (8.f + i->size().height()) * i->index());
+
+	updateMultiplicities();
 
 	BaseItem::geometryChanged();
 }
@@ -158,7 +170,7 @@ bool MultiProcessorItem::connectYourself()
 		if (mcis.size() != 1)
 			return false;
 		MultipleConnectionItem* mci = mcis[0];
-		Connection::Tristate t = mci->from()->source()->connect(multiProcessor());
+		Connection::Tristate t = mci->from()->source()->connect(mci->from()->index(), multiProcessor(), mci->to()->index());
 		mci->setValid(t != Connection::Failed);
 		if (t == Connection::Failed)
 			return false;

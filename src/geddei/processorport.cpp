@@ -28,11 +28,11 @@ void ProcessorPort::connect(const ProcessorPort &input) const
 	theParent->connect(thePort, input.theParent, input.thePort, input.theBufferSize);
 }
 
-void ProcessorPort::connect(MultiProcessor &input) const
+void ProcessorPort::connect(MultiProcessor &input, uint _ip) const
 {
 	share();
 	for (uint i = 0; i < input.multiplicity(); i++)
-		connect(input.sourcePort(i));
+		connect(input.sourcePort(i, _ip));
 }
 
 void ProcessorPort::disconnect() const

@@ -275,13 +275,15 @@ private:
 
 	//@{
 	/** Reimplementations from MultiSource. */
-	virtual ProcessorPort sourcePort(uint i) { return (*this)[i]; }
+	virtual ProcessorPort sourcePort(uint _i, uint) { return (*this)[_i]; }
+	virtual uint numMultiOutputs() const { return 1; }
 	virtual void connectCheck() const;
 	//@}
 
 	//@{
 	/** Reimplementation from MultiSink. */
-	virtual ProcessorPort sinkPort(uint i) { return (*this)[i]; }
+	virtual ProcessorPort sinkPort(uint _i, uint) { return (*this)[_i]; }
+	virtual uint numMultiInputs() const { return 1; }
 	//@}
 
 	//@{

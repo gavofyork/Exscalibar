@@ -64,10 +64,13 @@ class DLLEXPORT MultiSink: virtual public Multiplicative
 	void removeDeferral(MultiSource *o) { theDeferrals.removeOne(o); }
 
 public:
+	//* Reimplementation from MultiSink
+	virtual uint numMultiInputs() const = 0;
+
 	/**
 	 * Override to provide the routine for providing a sink port.
 	 */
-	virtual ProcessorPort sinkPort(uint i) = 0;
+	virtual ProcessorPort sinkPort(uint _i, uint _j) = 0;
 };
 
 }

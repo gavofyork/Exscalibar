@@ -257,7 +257,7 @@ bool ProcessorItem::connectYourself()
 				return false;
 			MultipleConnectionItem* mci = mcis[0];
 
-			Connection::Tristate t = mci->from()->source()->connect(processor());
+			Connection::Tristate t = mci->from()->source()->connect(mci->from()->index(), processor(), 0);
 			mci->setValid(t != Connection::Failed);
 			if (t == Connection::Failed)
 				ret = false;

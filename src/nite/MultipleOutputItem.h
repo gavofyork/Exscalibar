@@ -44,7 +44,7 @@ public:
 
 	bool isConnected() const;
 
-	inline uint index() const { return m_index; }	// valid only with valid multiProcessorItem
+	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }
 
 	QPointF tip() const;

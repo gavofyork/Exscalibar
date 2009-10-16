@@ -144,6 +144,12 @@ public:
 	virtual void disconnectAll();
 	virtual void resetMulti();
 
+	//* Reimplementation from MultiSink
+	virtual uint numMultiInputs() const { return theNumMultiInputs; }
+
+	//* Reimplementation from MultiSource
+	virtual uint numMultiOutputs() const { return theNumMultiOutputs; }
+
 	/**
 	 * @return true iff the quantity of multiplicity is known.
 	 */
@@ -164,10 +170,10 @@ private:
 	virtual void doInit(const QString &name, ProcessorGroup *g, const Properties &properties);
 
 	//* Reimplementation from MultiSource
-	virtual ProcessorPort sourcePort(uint i) { return (*theProcessors[i])[0]; }
+	virtual ProcessorPort sourcePort(uint i, uint j) { return (*theProcessors[i])[j]; }
 
 	//* Reimplementation from MultiSink
-	virtual ProcessorPort sinkPort(uint i) { return (*theProcessors[i])[0]; }
+	virtual ProcessorPort sinkPort(uint i, uint j) { return (*theProcessors[i])[j]; }
 
 	//* Deferred init data
 	bool theDeferredInit;
@@ -180,6 +186,8 @@ private:
 	Processor *theSource;
 
 	bool theIsInitialised;
+	uint theNumMultiInputs;
+	uint theNumMultiOutputs;
 	QVector<Processor *> theProcessors;
 };
 

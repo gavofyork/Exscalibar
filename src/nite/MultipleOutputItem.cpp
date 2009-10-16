@@ -24,7 +24,7 @@ MultipleOutputItem::MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
 	m_multiplicity	(UINT_MAX),
 	m_size			(_size),
-	m_index			(UINT_MAX),
+	m_index			(0),
 	m_hover			(false)
 {
 	setCursor(Qt::CrossCursor);

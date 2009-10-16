@@ -35,6 +35,17 @@ namespace Geddei
 
 class MultiSink;
 
+struct Deferred
+{
+	Deferred(uint _op, MultiSink* _s, uint _ip, uint _bs):
+		op(_op), s(_s), ip(_ip), bs(_bs) {}
+
+	uint op;
+	MultiSink* s;
+	uint ip;
+	uint bs;
+};
+
 /** @internal @ingroup Geddei
  * @brief Essentially abstract class to describe a multiplicative source object.
  * @author Gav Wood <gav@kde.org>
@@ -47,32 +58,15 @@ class MultiSink;
  */
 class DLLEXPORT MultiSource: virtual public Multiplicative
 {
-	//* Reimplementations from Multiplicative
-	virtual void setSourceMultiplicity(uint multiplicity);
-
-	//@{
-	/** Deferred connect data. */
-	bool theDeferredConnect, theConnected;
-	uint theDeferredBufferSize;
-	MultiSink *theDeferredSink;
-	//@}
-
-protected:
-	/**
-	 * Override to provide the routine for providing a source port.
-	 *
-	 * @param i The source port to be returned.
-	 * @return A ProcessorPort reference to the given source (output) port.
-	 */
-	virtual ProcessorPort sourcePort(uint i) = 0;
-
-	/**
-	 * Override to provide a check to make sure a connection is possible.
-	 * For the Processor class to check against its flags.
-	 */
-	virtual void connectCheck() const {}
-
 public:
+	/**
+	 * Basic constructor.
+	 */
+	MultiSource(): theConnected(false) {}
+
+	//* Reimplementation from MultiSource
+	virtual uint numMultiOutputs() const = 0;
+
 	/**
 	 * Test to see if a connect() would defer.
 	 *
@@ -81,7 +75,7 @@ public:
 	 * @return true if the connect should be abandoned. false if both
 	 * multiplicative source and sink are ready.
 	 */
-	Connection::Tristate deferConnect(MultiSink *sink, uint bufferSize);
+	Connection::Tristate deferConnect(uint _sourceIndex, MultiSink *sink, uint _sinkIndex, uint bufferSize);
 
 	/**
 	 * Connect this to a multiplicative sink.
@@ -89,7 +83,7 @@ public:
 	 * @param sink Pointer to the sink to which it is to be connected.
 	 * @param bufferSize A minimum size of the buffer to be employed.
 	 */
-	Connection::Tristate connect(MultiSink *sink, uint bufferSize = 1);
+	Connection::Tristate connect(uint _sourceIndex, MultiSink* _sink, uint _sinkIndex, uint bufferSize = 1);
 
 	/**
 	 * Disconnect all outputs from the multiplicitive sink. This must already
@@ -105,7 +99,7 @@ public:
 	 *
 	 * @sa connect()
 	 */
-	void operator>>=(MultiSink &sink) { connect(&sink); }
+	void operator>>=(MultiSink &sink) { connect(0, &sink, 0); }
 
 	/**
 	 * Disconnect all outputs from the multiplicitive sink. This must already
@@ -115,10 +109,30 @@ public:
 	 */
 	void operator--() { disconnect(); }
 
+protected:
 	/**
-	 * Basic constructor.
+	 * Override to provide the routine for providing a source port.
+	 *
+	 * @param i The source port to be returned.
+	 * @return A ProcessorPort reference to the given source (output) port.
 	 */
-	MultiSource() : theDeferredConnect(false), theConnected(false) {}
+	virtual ProcessorPort sourcePort(uint _i, uint _j) = 0;
+
+	/**
+	 * Override to provide a check to make sure a connection is possible.
+	 * For the Processor class to check against its flags.
+	 */
+	virtual void connectCheck() const {}
+
+private:
+	//* Reimplementations from Multiplicative
+	virtual void setSourceMultiplicity(uint multiplicity);
+
+	//@{
+	/** Deferred connect data. */
+	bool theConnected;
+	QList<Deferred> theDeferreds;
+	//@}
 };
 
 }

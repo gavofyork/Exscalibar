@@ -26,7 +26,7 @@
 MultipleInputItem::MultipleInputItem(ProcessorItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
 	m_multiplicity	(UINT_MAX),
-	m_index			(UINT_MAX),
+	m_index			(0),
 	m_size			(_size),
 	m_baseSize		(_size)
 {

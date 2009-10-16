@@ -1,7 +1,7 @@
 Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
-- Number of lines on MultiProc icon's in/out.
-- Splitting/sharing of MultiConnections.
 - >1 MultiPort.
+- Connect single port to multi port.
+- Splitting/sharing of MultiConnections.
 - Should also be trivial to implement Klapuri.
 - Load/save from Processor.
 - Make graphics better.

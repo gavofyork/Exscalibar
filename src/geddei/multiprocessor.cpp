@@ -171,14 +171,34 @@ void MultiProcessor::doInit(QString const& _name, ProcessorGroup* _g, Properties
 	if (MESSAGES) qDebug("MultiProcessor::init()");
 	assert(!theIsInitialised);
 
-	if (!theDeferredInit && _g)
-		setGroup(*_g);
-
 	theDeferredName = _name;
 	theDeferredProperties = _properties;
 
-	if (_properties["Multiplicity"].toInt() > 0)
-		theGivenMultiplicity = _properties["Multiplicity"].toInt();
+	if (!theDeferredInit)
+	{
+		Processor* p = theCreator->newProcessor();
+		if (theDeferredProperties["Multiplicity"] == 0)
+			theDeferredProperties["Multiplicity"] = 1;
+		p->init("", theDeferredProperties);
+		theNumMultiInputs = p->numInputs();
+		theNumMultiOutputs = p->numOutputs();
+		if (theNumMultiInputs == Undefined)
+		{
+			qWarning("Given an Undefined result for number of inputs on a multiproc'd processor (%s).", qPrintable(p->type()));
+			theNumMultiInputs = 0;
+		}
+		if (theNumMultiOutputs == Undefined)
+		{
+			qWarning("Given an undefined result for number of outputs on a multiproc'd processor (%s).", qPrintable(p->type()));
+			theNumMultiOutputs = 0;
+		}
+		delete p;
+		if (_g)
+			setGroup(*_g);
+	}
+
+	if (_properties["Processors Multiplicity"].toInt() > 0)
+		theGivenMultiplicity = _properties["Processors Multiplicity"].toInt();
 
 	if (theGivenMultiplicity == Undefined)
 	{
@@ -187,7 +207,7 @@ void MultiProcessor::doInit(QString const& _name, ProcessorGroup* _g, Properties
 		return;
 	}
 
-	if (MESSAGES) qDebug("Initialising (M=%d)...", _properties["Multiplicity"].toInt());
+	if (MESSAGES) qDebug("Initialising (M=%d)...", theGivenMultiplicity);
 	theProcessors.resize(theGivenMultiplicity);
 	for (uint i = 0; i < (uint)theProcessors.count(); i++)
 	{

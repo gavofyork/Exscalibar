@@ -131,7 +131,7 @@ public:
 	 */
 	void connect(const ProcessorPort &input) const;
 
-	void connect(MultiProcessor &input) const;
+	void connect(MultiProcessor &input, uint _ip = 0) const;
 
 	/**
 	 * Assert that this port represents an output port and delete the

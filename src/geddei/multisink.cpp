@@ -29,6 +29,7 @@ void MultiSink::setSinkMultiplicity(uint multiplicity)
 	QList<MultiSource *> t = theDeferrals;
 	for (QList<MultiSource *>::Iterator i = t.begin(); i != t.end(); i++)
 		(*i)->setMultiplicity(multiplicity);
+	theDeferrals.clear();
 }
 
 }

@@ -30,34 +30,34 @@ namespace Geddei
 
 void MultiSource::disconnect()
 {
-	for (uint i = 0; i < multiplicity(); i++)
-		sourcePort(i) --;
+	if (knowMultiplicity())
+		for (uint i = 0; i < multiplicity(); i++)
+			for (uint j = 0; j < numMultiOutputs(); j++)
+				sourcePort(i, j).disconnect();
 }
 
-Connection::Tristate MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
+Connection::Tristate MultiSource::deferConnect(uint _op, MultiSink* _sink, uint _ip, uint _bufferSize)
 {
 	// If our multiplicity is explicitly defined
 	if (knowMultiplicity())
 		// If the sink's multiplicity is explicitly defined
-		if (sink->knowMultiplicity())
-		{	if (multiplicity() != sink->multiplicity())
-			{	qWarning("*** MultiSource::deferConnect(): Multiplicity incompatibility: Attempting to connect %d outputs to %d inputs!", multiplicity(), sink->multiplicity());
+		if (_sink->knowMultiplicity())
+		{	if (multiplicity() != _sink->multiplicity())
+			{	qWarning("*** MultiSource::deferConnect(): Multiplicity incompatibility: Attempting to connect %d outputs to %d inputs!", multiplicity(), _sink->multiplicity());
 				if (dynamic_cast<Processor *>(this)) qWarning("                                 Name of source: %s", qPrintable(dynamic_cast<Processor *>(this)->name()));
-				if (dynamic_cast<Processor *>(sink)) qWarning("                                 Name of sink:   %s", qPrintable(dynamic_cast<Processor *>(sink)->name()));
+				if (dynamic_cast<Processor *>(_sink)) qWarning("                                 Name of sink:   %s", qPrintable(dynamic_cast<Processor *>(_sink)->name()));
 				// TODO: error reporting code.
 				return Connection::Failed;
 			}
 		}
 		else
-			sink->setMultiplicity(multiplicity());
+			_sink->setMultiplicity(multiplicity());
 	else
-		if (sink->knowMultiplicity())
-			setMultiplicity(sink->multiplicity());
+		if (_sink->knowMultiplicity())
+			setMultiplicity(_sink->multiplicity());
 		else
-		{	theDeferredConnect = true;
-			theDeferredBufferSize = bufferSize;
-			theDeferredSink = sink;
-			sink->appendDeferral(this);
+		{	theDeferreds << Deferred(_op, _sink, _ip, _bufferSize);
+			_sink->appendDeferral(this);
 			return Connection::Pending;
 		}
 	return Connection::Succeeded;
@@ -65,34 +65,30 @@ Connection::Tristate MultiSource::deferConnect(MultiSink *sink, uint bufferSize)
 
 void MultiSource::setSourceMultiplicity(uint multiplicity)
 {
-	if (MESSAGES) qDebug("MultiSource::setSourceMultiplicity(%d) DC=%d", multiplicity, theDeferredConnect);
-	if (theDeferredConnect)
-	{	if (MESSAGES) qDebug("Deferred connect. Connecting...");
-		connect(theDeferredSink, theDeferredBufferSize);
-	}
+	if (MESSAGES) qDebug("MultiSource::setSourceMultiplicity(%d) DC=%d", multiplicity, theDeferreds.count());
+	foreach (Deferred d, theDeferreds)
+		connect(d.op, d.s, d.ip, d.bs);
 }
 
-Connection::Tristate MultiSource::connect(MultiSink *sink, uint bufferSize)
+Connection::Tristate MultiSource::connect(uint _op, MultiSink* _sink, uint _ip, uint _bufferSize)
 {
 	// TODO: Warn & exit.
 	assert(!theConnected);
 
-	if (Connection::Tristate t = deferConnect(sink, bufferSize))
+	if (Connection::Tristate t = deferConnect(_op, _sink, _ip, _bufferSize))
 		return t;
 
-	assert(sink->knowMultiplicity());
+	assert(_sink->knowMultiplicity());
 	assert(knowMultiplicity());
 	connectCheck();
 
-	if (MESSAGES) qDebug("MultiSource::connect(): %d -> %d", multiplicity(), sink->multiplicity());
+	if (MESSAGES) qDebug("MultiSource::connect(): %d -> %d", multiplicity(), _sink->multiplicity());
 
-	if (sink->multiplicity() != multiplicity())
+	if (_sink->multiplicity() != multiplicity())
 		qFatal("MultiProcessor: Error in connecting to sink.");
 
 	for (uint i = 0; i < multiplicity(); i++)
-		sourcePort(i) >>= sink->sinkPort(i);
-	theDeferredConnect = false;
-	sink->removeDeferral(this);
+		sourcePort(i, _op) >>= _sink->sinkPort(i, _ip);
 
 	return Connection::Succeeded;
 }
