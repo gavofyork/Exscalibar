@@ -81,7 +81,7 @@ void Oscilloscope::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
 	m_last.resize(_p["Size"].toInt());
-	setupVisual(m_last.size(), 40, 1000 / max(1, _p["Refresh Frequency"].toInt()));
+	setupVisual(80, 40, 1000 / max(1, _p["Refresh Frequency"].toInt()));
 	updateFromProperties(_p);
 }
 

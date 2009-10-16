@@ -635,7 +635,7 @@ public:
 	 * value is taken from the properties() method.
 	 */
 	void init(const QString &name = "", const Properties &properties = Properties()) { doInit(name, 0, properties); }
-	void update(Properties const& _p) { updateFromProperties(_p); }
+	virtual void update(Properties const& _p) { updateFromProperties(_p); }
 
 	/**
 	 * Checks if the previously called init() has failed.

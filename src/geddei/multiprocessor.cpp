@@ -70,6 +70,20 @@ void MultiProcessor::stop()
 		i->stop();
 }
 
+void MultiProcessor::update(Properties const& _p)
+{
+	foreach (Processor* i, theProcessors)
+		i->update(_p);
+}
+
+bool MultiProcessor::isRunning() const
+{
+	foreach (Processor* i, theProcessors)
+		if (i->isRunning())
+			return true;
+	return false;
+}
+
 void MultiProcessor::reset()
 {
 	foreach (Processor* i, theProcessors)

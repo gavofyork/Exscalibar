@@ -118,9 +118,14 @@ void BaseItem::prepYourself(ProcessorGroup&)
 
 bool BaseItem::connectYourself()
 {
+	return true;
+}
+
+void BaseItem::typesConfirmed()
+{
+	qDebug() << "Redraw period: " << redrawPeriod();
 	if (uint i = redrawPeriod())
 		m_timerId = startTimer(i);
-	return true;
 }
 
 void BaseItem::disconnectYourself()

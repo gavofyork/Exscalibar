@@ -55,7 +55,7 @@ public:
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
-	virtual void		typesConfirmed() {}
+	virtual void		typesConfirmed();
 
 	virtual void		tick();
 

@@ -131,6 +131,8 @@ public:
 	 */
 	void init(const QString &name = "", const Properties &properties = Properties()) { doInit(name, 0, properties); }
 
+	virtual void update(Properties const& _p);
+
 	virtual QString name() const;
 	virtual bool confirmTypes();
 	virtual bool go();
@@ -143,6 +145,7 @@ public:
 	virtual void reset();
 	virtual void disconnectAll();
 	virtual void resetMulti();
+	virtual bool isRunning() const;
 
 	//* Reimplementation from MultiSink
 	virtual uint numMultiInputs() const { return theNumMultiInputs; }

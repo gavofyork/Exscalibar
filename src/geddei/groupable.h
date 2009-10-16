@@ -81,6 +81,8 @@ public:
 	virtual void reset() = 0;
 	virtual void disconnectAll() = 0;
 	virtual void resetMulti() = 0;
+	virtual bool isRunning() const = 0;
+	virtual void update(Properties const& _p) = 0;
 
 	Groupable();
 	virtual ~Groupable();

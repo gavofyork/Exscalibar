@@ -365,9 +365,8 @@ bool GeddeiNite::connectAll()
 		return false;
 	}
 
-	foreach (QGraphicsItem* i, theScene.items())
-		if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
-			pi->typesConfirmed();
+	foreach (BaseItem* bi, filter<BaseItem>(theScene.items()))
+		bi->typesConfirmed();
 
 	theConnected = true;
 	return true;

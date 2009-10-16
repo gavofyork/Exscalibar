@@ -26,6 +26,8 @@ using namespace Geddei;
 
 #include "BaseItem.h"
 
+class ControlsItem;
+
 class MultiProcessorItem: public BaseItem
 {
 public:
@@ -35,11 +37,13 @@ public:
 	enum { Type = BaseItem::Type + 2 };
 	virtual int			type() const { return Type; }
 
-	virtual QString		typeName() const { return processor()->type(); }
+	virtual QString		typeName() const { return m_processor->type(); }
 	virtual QString		name() const { return multiProcessor()->name(); }
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
-	Processor*			processor() const { return m_processor; }
+	Processor*			processor() const;
+
+	void				toggleShowAll() { m_showAll = !m_showAll; }
 
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
@@ -50,7 +54,7 @@ public:
 	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "multiprocessor"); }
 	QDomElement			saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const;
 
-	virtual QSizeF		centreMin() const;
+	virtual QColor		outlineColour() const { return processor() ? processor()->outlineColour() : Qt::black; }
 
 protected:
 	MultiProcessorItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF(0, 0));
@@ -59,13 +63,25 @@ protected:
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
 
+	virtual QSizeF		centreMin() const;
+	virtual QSizeF		centrePref() const;
+	virtual void		paintCentre(QPainter* _p);
+	virtual uint		redrawPeriod() const { return processor()->redrawPeriod(); }
+
 	void				updateMultiplicities();
 
 	virtual MultiProcessorCreator* newCreator() { return new FactoryCreator(m_type); }
 	virtual void		postCreate();
 
+	Processor*			m_processor;
+
 private:
 	QString				m_type;
 	MultiProcessor*		m_multiProcessor;
-	Processor*			m_processor;
+
+	ControlsItem*		m_controls;
+
+	bool				m_showAll;
+	uint				m_rowSize;
+	uint				m_face;
 };

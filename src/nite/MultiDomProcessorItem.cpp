@@ -27,7 +27,7 @@ MultiDomProcessorItem::MultiDomProcessorItem(Properties const& _pr, QSizeF const
 
 void MultiDomProcessorItem::postCreate()
 {
-	PropertiesInfo pi = processor()->properties();
+	PropertiesInfo pi = m_processor->properties();
 	baseItem()->setDefaultProperties(pi.destash());
 	foreach (SubProcessorItem* i, ordered())
 		i->setDefaultProperties(pi.destash());
