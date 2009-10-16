@@ -22,6 +22,7 @@
 MultiDomProcessorItem::MultiDomProcessorItem(Properties const& _pr, QSizeF const& _size):
 	MultiProcessorItem(_pr, _size)
 {
+	propertiesChanged();
 }
 
 void MultiDomProcessorItem::postCreate()
@@ -65,12 +66,11 @@ MultiProcessorCreator* MultiDomProcessorItem::newCreator()
 void MultiDomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
 	MultiDomProcessorItem* dpi = new MultiDomProcessorItem;
-	dpi->MultiProcessorItem::importDom(_element, _scene);
 	dpi->SubsContainer::importDom(_element, _scene);
-	dpi->setName(_element.attribute("name"));
+	dpi->MultiProcessorItem::importDom(_element, _scene);
 }
 
-QDomElement MultiDomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const&) const
+QDomElement MultiDomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
 	QDomElement us = MultiProcessorItem::saveYourself(_root, _doc, "multidomprocessor");
 	SubsContainer::exportDom(us, _doc);

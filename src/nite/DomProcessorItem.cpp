@@ -69,7 +69,7 @@ void DomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 	dpi->setName(_element.attribute("name"));
 }
 
-QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const&) const
+QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
 	QDomElement us = ProcessorItem::saveYourself(_root, _doc, "domprocessor");
 	SubsContainer::exportDom(us, _doc);

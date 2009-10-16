@@ -64,20 +64,30 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 	delete m_multiProcessor;
 	delete m_processor;
 	MultiProcessorCreator* creator = newCreator();
-	m_processor = creator->newProcessor();
-	postCreate();
+	if (creator)
+	{
+		m_processor = creator->newProcessor();
+		postCreate();
 
-	m_processor->init(name, completeProperties());
+		m_processor->init(name, completeProperties());
 
-	m_multiProcessor = new MultiProcessor(creator);
-	m_multiProcessor->init(name, completeProperties());
+		m_multiProcessor = new MultiProcessor(creator);
+		m_multiProcessor->init(name, completeProperties());
 
-	BaseItem::propertiesChanged(_newName);
+		BaseItem::propertiesChanged(_newName);
+	}
+	else
+	{
+		m_multiProcessor = 0;
+		m_processor = 0;
+	}
 }
 
 QSizeF MultiProcessorItem::centreMin() const
 {
-	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+	if (m_processor)
+		return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+	return QSizeF(0, 0);
 }
 
 void MultiProcessorItem::geometryChanged()

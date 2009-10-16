@@ -24,9 +24,10 @@ using namespace std;
 #include "MultipleConnectionItem.h"
 #include "MultipleOutputItem.h"
 #include "ProcessorItem.h"
-#include "MultiProcessorItem.h"
 #include "DomProcessorItem.h"
 #include "SubProcessorItem.h"
+#include "MultiProcessorItem.h"
+#include "MultiDomProcessorItem.h"
 #include "ProcessorView.h"
 #include "ProcessorsView.h"
 #include "GeddeiNite.h"
@@ -85,7 +86,7 @@ void GeddeiNite::doSave(const QString& _filename)
 	QDomDocument doc;
 	QDomElement root = doc.createElement("network");
 	doc.appendChild(root);
-	foreach (ProcessorItem* pi, filter<ProcessorItem>(theScene.items()))
+	foreach (BaseItem* pi, filter<BaseItem>(theScene.items()))
 		pi->saveYourself(root, doc);
 	foreach (MultipleConnectionItem* ci, filter<MultipleConnectionItem>(theScene.items()))
 		ci->saveYourself(root, doc);
@@ -124,6 +125,10 @@ void GeddeiNite::doLoad(const QString &filename)
 			ProcessorItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "domprocessor")
 			DomProcessorItem::fromDom(elem, &theScene);
+		else if (elem.tagName() == "multiprocessor")
+			MultiProcessorItem::fromDom(elem, &theScene);
+		else if (elem.tagName() == "multidomprocessor")
+			MultiDomProcessorItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "connection")
 			ConnectionItem::fromDom(elem, &theScene);
 		else if (elem.tagName() == "multipleconnection")

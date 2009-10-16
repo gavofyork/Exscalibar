@@ -34,7 +34,7 @@ class DomProcessorItem: public ProcessorItem, public SubsContainer
 public:
 	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
 
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
 protected:

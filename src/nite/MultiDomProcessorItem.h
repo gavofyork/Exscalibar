@@ -36,7 +36,7 @@ public:
 
 	virtual DomProcessor*	domProcessor() const;
 
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multidomprocessoritem") const;
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
 protected:

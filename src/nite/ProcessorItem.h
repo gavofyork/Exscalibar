@@ -57,7 +57,8 @@ public:
 	Processor*			processor() const { return m_processor; }
 
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "processor") const;
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "processor"); }
+	QDomElement			saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const;
 
 protected:
 	virtual QSizeF		centreMin() const;

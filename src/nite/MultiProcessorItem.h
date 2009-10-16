@@ -43,7 +43,8 @@ public:
 	virtual void		disconnectYourself();
 
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
-	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multiprocessor") const;
+	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "multiprocessor"); }
+	QDomElement			saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const;
 
 	virtual QSizeF		centreMin() const;
 
