@@ -16,14 +16,14 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "SubsContainer.h"
 #include "SubProcessorItem.h"
-#include "DomProcessorItem.h"
 
-DomProcessorItem* SubProcessorItem::domProcessorItem() const { return dynamic_cast<DomProcessorItem*>(parentItem()); }
-DomProcessor* SubProcessorItem::domProcessor() const { return domProcessorItem()->domProcessor(); }
+SubsContainer* SubProcessorItem::subsContainer() const { return dynamic_cast<SubsContainer*>(parentItem()); }
+DomProcessor* SubProcessorItem::domProcessor() const { return subsContainer()->domProcessor(); }
 
-SubProcessorItem::SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index, Properties const& _pr):
-	QGraphicsItem	(_dpi),
+SubProcessorItem::SubProcessorItem(SubsContainer* _dpi, QString const& _type, int _index, Properties const& _pr):
+	QGraphicsItem	(_dpi->baseItem()),
 	m_properties	(_pr),
 	m_type			(_type),
 	m_index			(_index)
@@ -80,7 +80,7 @@ void SubProcessorItem::setProperty(QString const& _key, QVariant const& _value)
 {
 	m_properties[_key] = _value;
 	prepareGeometryChange();
-	domProcessorItem()->subPropertiesChanged();
+	subsContainer()->subPropertiesChanged();
 	update();
 }
 
@@ -97,24 +97,24 @@ void SubProcessorItem::focusInEvent(QFocusEvent* _e)
 
 void SubProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->forwardEvent(_e);
-	domProcessorItem()->setSelected(false);
+	subsContainer()->baseItem()->forwardEvent(_e);
+	subsContainer()->baseItem()->setSelected(false);
 	QGraphicsItem::mouseReleaseEvent(_e);
 }
 
 void SubProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->forwardEvent(_e);
-	domProcessorItem()->setSelected(false);
+	subsContainer()->baseItem()->forwardEvent(_e);
+	subsContainer()->baseItem()->setSelected(false);
 	QGraphicsItem::mousePressEvent(_e);
 }
 
 void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
-	domProcessorItem()->forwardEvent(_e);
+	subsContainer()->baseItem()->forwardEvent(_e);
 }
 
-void SubProcessorItem::fromDom(QDomElement const& _element, DomProcessorItem* _dpi)
+void SubProcessorItem::fromDom(QDomElement const& _element, SubsContainer* _dpi)
 {
 	Properties p;
 	for (QDomNode n = _element.firstChild(); !n.isNull(); n = n.nextSibling())

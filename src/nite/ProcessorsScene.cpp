@@ -21,14 +21,18 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "OutputItem.h"
-#include "MultipleOutputItem.h"
-#include "InputItem.h"
-#include "MultipleInputItem.h"
-#include "ConnectionItem.h"
 #include "IncompleteConnectionItem.h"
-#include "ProcessorItem.h"
+#include "IncompleteMultipleConnectionItem.h"
+#include "InputItem.h"
+#include "OutputItem.h"
+#include "ConnectionItem.h"
+#include "MultipleInputItem.h"
+#include "MultipleOutputItem.h"
+#include "MultipleConnectionItem.h"
+#include "MultiDomProcessorItem.h"
 #include "MultiProcessorItem.h"
+#include "DomProcessorItem.h"
+#include "ProcessorItem.h"
 #include "ProcessorsView.h"
 
 ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
@@ -63,18 +67,24 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
 	{
 		bool doInit = false;
-		DomProcessorItem* dpi;
+		SubsContainer* dpi;
 		foreach (dpi, filter<DomProcessorItem>(items()))
-			if (dpi->boundingRect().contains(dpi->mapFromScene(_event->scenePos())))
+			if (dpi->baseItem()->boundingRect().contains(dpi->baseItem()->mapFromScene(_event->scenePos())))
+				goto OK;
+		foreach (dpi, filter<MultiDomProcessorItem>(items()))
+			if (dpi->baseItem()->boundingRect().contains(dpi->baseItem()->mapFromScene(_event->scenePos())))
 				goto OK;
 		doInit = true;
-		dpi = new DomProcessorItem;
+		if (_event->modifiers() & Qt::ShiftModifier)
+			dpi = new MultiDomProcessorItem;
+		else
+			dpi = new DomProcessorItem;
 		OK:
-		new SubProcessorItem(dpi, _event->mimeData()->text().mid(13), filter<SubProcessorItem>(dpi->childItems()).count());
+		new SubProcessorItem(dpi, _event->mimeData()->text().mid(13), dpi->subProcessorItems().count());
 		if (doInit)
 		{
-			dpi->setPos(_event->scenePos());
-			addItem(dpi);
+			dpi->baseItem()->setPos(_event->scenePos());
+			addItem(dpi->baseItem());
 		}
 	}
 	else

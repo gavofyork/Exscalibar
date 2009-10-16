@@ -67,6 +67,11 @@ MultiSource* MultipleOutputItem::source() const
 	return processorItem() ? static_cast<MultiSource*>(processorItem()->processor()) : static_cast<MultiSource*>(multiProcessorItem()->multiProcessor());
 }
 
+BaseItem* MultipleOutputItem::baseItem() const
+{
+	return dynamic_cast<BaseItem*>(parentItem());
+}
+
 ProcessorItem* MultipleOutputItem::processorItem() const
 {
 	return dynamic_cast<ProcessorItem*>(parentItem());

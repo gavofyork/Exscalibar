@@ -36,6 +36,7 @@ public:
 	virtual int			type() const { return Type; }
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
+	Processor*			processor() const { return m_processor; }
 
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
@@ -47,9 +48,14 @@ public:
 	virtual QSizeF		centreMin() const;
 
 protected:
-	virtual void		propertiesChanged(QString const& _newName);
+	MultiProcessorItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF(0, 0));
+
+	virtual void		propertiesChanged(QString const& _newName = QString::null);
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
+
+	virtual MultiProcessorCreator* newCreator() { return new FactoryCreator(m_type); }
+	virtual void		postCreate() {}
 
 private:
 	QString				m_type;

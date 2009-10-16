@@ -61,6 +61,11 @@ bool MultipleInputItem::isConnected() const
 	return filter<MultipleConnectionItem>(childItems()).size();
 }
 
+BaseItem* MultipleInputItem::baseItem() const
+{
+	return dynamic_cast<BaseItem*>(parentItem());
+}
+
 ProcessorItem* MultipleInputItem::processorItem() const
 {
 	return dynamic_cast<ProcessorItem*>(parentItem());

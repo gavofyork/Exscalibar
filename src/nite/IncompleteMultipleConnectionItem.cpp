@@ -16,24 +16,26 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "MultipleOutputItem.h"
+#include "IncompleteMultipleConnectionItem.h"
 
-#include <QtGui>
-#include <QtXml>
-
-class OutputItem;
-
-class IncompleteConnectionItem: public QGraphicsPathItem
+IncompleteMultipleConnectionItem::IncompleteMultipleConnectionItem(MultipleOutputItem* _from): QGraphicsPathItem(_from)
 {
-public:
-	IncompleteConnectionItem(OutputItem* _from);
+	setPen(QPen(QColor(0, 0, 0, 128), 2));
+}
 
-	void setTo(QPointF _to);
-	OutputItem* from() const;
+MultipleOutputItem* IncompleteMultipleConnectionItem::from() const
+{
+	return dynamic_cast<MultipleOutputItem*>(parentItem());
+}
 
-	enum { Type = UserType + 5 };
-	virtual int type() const { return Type; }
-
-private:
-	QPointF	m_to;
-};
+void IncompleteMultipleConnectionItem::setTo(QPointF _to)
+{
+	m_to = mapFromScene(_to);
+	QPainterPath p;
+	p.moveTo(QPointF(0, 0));
+	QPointF c1((m_to.x() * 3 + 0) / 4.0, 0);
+	QPointF c2((m_to.x() + 0 * 3) / 4.0, m_to.y());
+	p.cubicTo(c1, c2, m_to);
+	setPath(p);
+}

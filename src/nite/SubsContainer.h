@@ -24,27 +24,35 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "SubsContainer.h"
 #include "ProcessorItem.h"
 
 class SubProcessorItem;
 
-class DomProcessorItem: public ProcessorItem, public SubsContainer
+class SubsContainer
 {
-public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
+	friend class SubProcessorItem;
 
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
-	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+public:
+	SubsContainer();
+
+	virtual DomProcessor* domProcessor() const = 0;
+	virtual BaseItem*	baseItem() = 0;
+	BaseItem const*		baseItem() const { return const_cast<SubsContainer*>(this)->baseItem(); }
+	virtual QList<SubProcessorItem*>	subProcessorItems() const = 0;
+
+	void				reorder();
+	virtual void		propertiesChanged() = 0;
 
 protected:
-	virtual void		geometryChanged();
-	virtual QSizeF		centreMin() const;
-	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
-	virtual Processor*	reconstructProcessor();
+	void				geometryChanged();
+	QSizeF				centreMin() const;
+	Properties			completeProperties() const;
 
-	virtual QList<SubProcessorItem*> subProcessorItems() const;
-	virtual BaseItem*	baseItem() { return this; }
-	virtual DomProcessor*	domProcessor() const;
-	virtual void		propertiesChanged() { ProcessorItem::propertiesChanged(); }
+	QString				composedSubs() const;
+	QList<SubProcessorItem*> ordered() const;
+
+	void				importDom(QDomElement& _item, QGraphicsScene* _scene);
+	void				exportDom(QDomElement& _item, QDomDocument& _doc) const;
+
+	virtual void		subPropertiesChanged() { propertiesChanged(); }
 };

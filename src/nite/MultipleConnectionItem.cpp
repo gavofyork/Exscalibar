@@ -96,9 +96,9 @@ void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _sce
 void MultipleConnectionItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
 	QDomElement proc = _doc.createElement("multipleconnection");
-	proc.setAttribute("from", from()->processorItem()->name());
+	proc.setAttribute("from", from()->baseItem()->name());
 	proc.setAttribute("fromindex", from()->index());
-	proc.setAttribute("to", to()->processorItem()->name());
+	proc.setAttribute("to", to()->baseItem()->name());
 	proc.setAttribute("toindex", to()->index());
 	_root.appendChild(proc);
 }

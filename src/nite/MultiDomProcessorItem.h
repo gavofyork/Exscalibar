@@ -25,26 +25,29 @@
 using namespace Geddei;
 
 #include "SubsContainer.h"
-#include "ProcessorItem.h"
+#include "MultiProcessorItem.h"
 
 class SubProcessorItem;
 
-class DomProcessorItem: public ProcessorItem, public SubsContainer
+class MultiDomProcessorItem: public MultiProcessorItem, public SubsContainer
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
+	MultiDomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
 
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "domprocessor") const;
+	virtual DomProcessor*	domProcessor() const;
+
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n = "multidomprocessoritem") const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
 protected:
 	virtual void		geometryChanged();
 	virtual QSizeF		centreMin() const;
 	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
-	virtual Processor*	reconstructProcessor();
+	virtual void		propertiesChanged() { MultiProcessorItem::propertiesChanged(); }
 
 	virtual QList<SubProcessorItem*> subProcessorItems() const;
 	virtual BaseItem*	baseItem() { return this; }
-	virtual DomProcessor*	domProcessor() const;
-	virtual void		propertiesChanged() { ProcessorItem::propertiesChanged(); }
+
+	virtual MultiProcessorCreator* newCreator();
+	virtual void		postCreate();
 };

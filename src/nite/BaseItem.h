@@ -44,6 +44,7 @@ public:
 
 	Properties const&	properties() const { return m_properties; }
 	void				setProperty(QString const& _key, QVariant const& _value);
+	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.
 
 	virtual QString		name() const { return QString::null; }
 	void				setName(QString const& _name) { propertiesChanged(_name); }
@@ -66,7 +67,6 @@ public:
 	void				forwardEvent(QGraphicsSceneEvent* _e);
 
 protected:
-	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.
 	virtual Properties	completeProperties() const { return m_properties; }
 	virtual void		propertiesChanged(QString const& = QString::null);	// Calls...
 	virtual void		geometryChanged();									// ...which in turn calls...

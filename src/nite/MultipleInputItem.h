@@ -37,6 +37,8 @@ public:
 
 	MultiSink* sink() const;
 
+	BaseItem* baseItem() const;
+
 	// One of these two will return non-zero.
 	ProcessorItem* processorItem() const;
 	MultiProcessorItem* multiProcessorItem() const;

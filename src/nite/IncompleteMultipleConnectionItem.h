@@ -21,17 +21,17 @@
 #include <QtGui>
 #include <QtXml>
 
-class OutputItem;
+class MultipleOutputItem;
 
-class IncompleteConnectionItem: public QGraphicsPathItem
+class IncompleteMultipleConnectionItem: public QGraphicsPathItem
 {
 public:
-	IncompleteConnectionItem(OutputItem* _from);
+	IncompleteMultipleConnectionItem(MultipleOutputItem* _from);
 
 	void setTo(QPointF _to);
-	OutputItem* from() const;
+	MultipleOutputItem* from() const;
 
-	enum { Type = UserType + 5 };
+	enum { Type = UserType + 10 };
 	virtual int type() const { return Type; }
 
 private:

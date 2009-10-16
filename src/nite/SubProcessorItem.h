@@ -24,24 +24,24 @@
 #include <Geddei>
 using namespace Geddei;
 
-class DomProcessorItem;
+class SubsContainer;
 
 class SubProcessorItem: public QGraphicsItem
 {
-	friend class DomProcessorItem;// so it can have its properties populated.
+	friend class SubsContainer;// so it can have its properties populated.
 
 public:
-	SubProcessorItem(DomProcessorItem* _dpi, QString const& _type, int _index = 0, Properties const& _pr = Properties());
+	SubProcessorItem(SubsContainer* _dpi, QString const& _type, int _index = 0, Properties const& _pr = Properties());
 
 	QSizeF size() const { return QSizeF(subProcessor()->width(), subProcessor()->height()); }
 
 	uint index() const { return m_index; }
-	DomProcessorItem* domProcessorItem() const;
+	SubsContainer* subsContainer() const;
 	DomProcessor* domProcessor() const;
 	SubProcessor* subProcessor() const;
 
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
-	static void fromDom(QDomElement const& _element, DomProcessorItem* _dpi);
+	static void fromDom(QDomElement const& _element, SubsContainer* _dpi);
 
 	QString spType() const { return m_type; }
 
@@ -50,6 +50,7 @@ public:
 
 	Properties const& properties() const { return m_properties; }
 	void setProperty(QString const& _key, QVariant const& _value);
+	void setDefaultProperties(PropertiesInfo const& _p) { m_properties.defaultFrom(_p); }
 
 private:
 	virtual QRectF boundingRect() const

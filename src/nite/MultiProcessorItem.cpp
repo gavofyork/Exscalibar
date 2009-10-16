@@ -33,6 +33,14 @@ MultiProcessorItem::MultiProcessorItem(QString const& _type, Properties const& _
 	propertiesChanged(_name);
 }
 
+MultiProcessorItem::MultiProcessorItem(Properties const& _pr, QSizeF const& _size):
+	BaseItem			(_pr, _size),
+	m_type				(QString::null),
+	m_multiProcessor	(0),
+	m_processor			(0)
+{
+}
+
 MultiProcessorItem::~MultiProcessorItem()
 {
 	delete m_multiProcessor;
@@ -55,8 +63,10 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 
 	delete m_multiProcessor;
 	delete m_processor;
-	FactoryCreator* creator = new FactoryCreator(m_type);
+	MultiProcessorCreator* creator = newCreator();
 	m_processor = creator->newProcessor();
+	postCreate();
+
 	m_processor->init(name, completeProperties());
 
 	m_multiProcessor = new MultiProcessor(creator);
