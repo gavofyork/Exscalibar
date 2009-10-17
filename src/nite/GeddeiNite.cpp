@@ -300,9 +300,9 @@ void GeddeiNite::on_editRemove_activated()
 	}
 	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
 	{
-		DomProcessorItem* dpi = dynamic_cast<DomProcessorItem*>(theScene.selectedItems()[0]->parentItem());
+		SubsContainer* sc = dynamic_cast<SubsContainer*>(theScene.selectedItems()[0]->parentItem());
 		delete theScene.selectedItems()[0];
-		dpi->reorder();
+		sc->reorder();
 		setModified(true);
 		theScene.update();
 	}

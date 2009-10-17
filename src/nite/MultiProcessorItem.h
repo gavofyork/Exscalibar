@@ -44,6 +44,11 @@ public:
 	Processor*			processor() const;
 
 	void				toggleShowAll() { m_showAll = !m_showAll; }
+	bool				showingAll() { return m_showAll; }
+	void				decRowSize() { m_rowSize = max(2u, m_rowSize) - 1; }
+	void				incRowSize() { if (multiplicity() != Undefined) m_rowSize = min(multiplicity() - 1u, m_rowSize) + 1; }
+	void				prevFace() { if (multiplicity() != Undefined) m_face = (m_face - 1 + multiplicity()) % multiplicity(); }
+	void				nextFace() { m_face = (m_face + 1) % multiplicity(); }
 
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
@@ -56,6 +61,8 @@ public:
 
 	virtual QColor		outlineColour() const { return processor() ? processor()->outlineColour() : Qt::black; }
 
+	virtual QRectF		boundingRect() const;
+
 protected:
 	MultiProcessorItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF(0, 0));
 
@@ -63,9 +70,12 @@ protected:
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
 
+	uint				multiplicity() { if (multiProcessor() && multiProcessor()->knowMultiplicity()) return multiProcessor()->multiplicity(); return Undefined; }
+
 	virtual QSizeF		centreMin() const;
 	virtual QSizeF		centrePref() const;
 	virtual void		paintCentre(QPainter* _p);
+	virtual void		paintOutline(QPainter* _p);
 	virtual uint		redrawPeriod() const { return processor()->redrawPeriod(); }
 
 	void				updateMultiplicities();
@@ -74,12 +84,11 @@ protected:
 	virtual void		postCreate();
 
 	Processor*			m_processor;
+	ControlsItem*		m_controls;
 
 private:
 	QString				m_type;
 	MultiProcessor*		m_multiProcessor;
-
-	ControlsItem*		m_controls;
 
 	bool				m_showAll;
 	uint				m_rowSize;

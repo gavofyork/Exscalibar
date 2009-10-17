@@ -88,7 +88,7 @@ void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _sce
 					mii = i; else {}
 	if (!moi || !mii)
 		return;
-	if (moi->isConnected() || mii->isConnected())
+	if (mii->isConnected())
 		return;
 	new MultipleConnectionItem(mii, moi);
 }

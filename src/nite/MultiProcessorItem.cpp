@@ -33,28 +33,71 @@ public:
 	void init();
 
 protected:
-	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w) { QGraphicsRectItem::paint(_p, _o, _w); }
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent*)
+	uint whichRect(QPointF _pos) const
 	{
-		setBrush(mpi()->outlineColour().lighter(200));
+		if (rect().contains(_pos))
+			return _pos.x() * 3 / rect().width();
+		return Undefined;
+	}
+	QRectF rectOf(uint _i) const
+	{
+		if (_i != Undefined)
+			return QRectF(rect().left() + rect().width() / 3 * _i, rect().top(), rect().width() / 3, rect().height());
+		return QRectF();
+	}
+	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w)
+	{
+		QGraphicsRectItem::paint(_p, _o, _w);
+		if (m_clickedRect != Undefined)
+			_p->fillRect(rectOf(m_clickedRect).adjusted(0, 0, 0, 1), QBrush(mpi()->outlineColour().lighter(200)));
+		_p->setPen(QPen(QColor::fromHsv(0, 0, 32), 0, Qt::DotLine));
+		for (uint i = 1; i < 3; i++)
+			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft());
+		_p->drawLine(rect().bottomLeft(), rect().bottomRight());
+		_p->setPen(QPen(QColor(Qt::black), 0));
+		_p->drawLines(QVector<QPointF>() << rect().bottomLeft() << rect().topLeft() << rect().topLeft() << rect().topRight() << rect().topRight() << rect().bottomRight());
+	}
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e)
+	{
+		m_clickedRect = whichRect(_e->pos());
+		update();
 	}
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 	{
-		setBrush(mpi()->outlineColour());
-		if (rect().contains(_e->pos()))
-			mpi()->toggleShowAll();
+		if (whichRect(_e->pos()) == m_clickedRect)
+		{
+			if (mpi()->showingAll())
+				switch (m_clickedRect)
+				{
+				case 0: mpi()->decRowSize(); break;
+				case 1: mpi()->toggleShowAll(); break;
+				case 2: mpi()->incRowSize(); break;
+				}
+			else
+				switch (m_clickedRect)
+				{
+				case 0: mpi()->prevFace(); break;
+				case 1: mpi()->toggleShowAll(); break;
+				case 2: mpi()->nextFace(); break;
+				}
+		}
+		m_clickedRect = Undefined;
+		update();
 	}
+	uint m_clickedRect;
 };
 
 ControlsItem::ControlsItem(MultiProcessorItem* _p):
-	QGraphicsRectItem(_p)
+	QGraphicsRectItem	(_p),
+	m_clickedRect		(Undefined)
 {
 	setRect(0, 0, 48, 16);
+	setCursor(Qt::ArrowCursor);
 }
 
 void ControlsItem::init()
 {
-	setPen(QPen(QColor(Qt::black), 0));
+	setPen(Qt::NoPen);
 	setBrush(mpi()->outlineColour());
 }
 
@@ -116,7 +159,8 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 		m_multiProcessor = new MultiProcessor(creator);
 		m_multiProcessor->init(name, completeProperties());
 
-		m_controls->init();
+		if (m_controls)
+			m_controls->init();
 		BaseItem::propertiesChanged(_newName);
 	}
 	else
@@ -151,11 +195,30 @@ QSizeF MultiProcessorItem::centrePref() const
 	return QSizeF(processor()->width(), processor()->height());
 }
 
+QRectF MultiProcessorItem::boundingRect() const
+{
+	return outlineRect().adjusted(-4.f, -12.f, 4.f, 4.f);
+}
+
 Processor* MultiProcessorItem::processor() const
 {
 	if (m_multiProcessor && m_multiProcessor->knowMultiplicity() && m_face < m_multiProcessor->multiplicity() && m_multiProcessor->processor(m_face))
 		return m_multiProcessor->processor(m_face);
 	return m_processor;
+}
+
+void MultiProcessorItem::paintOutline(QPainter* _p)
+{
+	BaseItem::paintOutline(_p);
+	uint m = multiplicity();
+	_p->setPen(QPen(Qt::black, 0));
+	for (int i = 1; i < int((m == Undefined) ? 5 : m); i++)
+	{
+		if (m == Undefined)
+			_p->setPen(QPen(QColor::fromHsv(0, 0, (i - 1) * 255 / 4), 0));
+		_p->drawLine(outlineRect().topLeft() + QPointF(i, -i * 2), outlineRect().topRight() + QPointF(-i, -i * 2));
+		qDebug() << outlineRect().topLeft() + QPointF(i, -i * 2) <<  outlineRect().topRight() + QPointF(-i, -i * 2);
+	}
 }
 
 void MultiProcessorItem::paintCentre(QPainter* _p)
@@ -220,7 +283,8 @@ void MultiProcessorItem::geometryChanged()
 
 	updateMultiplicities();
 
-	m_controls->setPos(outlineRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height()));
+	if (m_controls)
+		m_controls->setPos(outlineRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height()));
 
 	BaseItem::geometryChanged();
 }

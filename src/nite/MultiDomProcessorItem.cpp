@@ -22,6 +22,8 @@
 MultiDomProcessorItem::MultiDomProcessorItem(Properties const& _pr, QSizeF const& _size):
 	MultiProcessorItem(_pr, _size)
 {
+	delete m_controls;
+	m_controls = 0;
 	propertiesChanged();
 }
 
