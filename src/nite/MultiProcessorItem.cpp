@@ -136,6 +136,8 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 {
 	QString name = _newName;
 	if (name.isEmpty())
+		name = this->name();
+	if (name.isEmpty())
 		name = QString::number((long uint)(this));
 
 	// TODO: Need isRunning and update on MultiProcessor.
@@ -143,6 +145,7 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 	{
 		m_multiProcessor->update(completeProperties());
 		m_processor->update(completeProperties());
+		assert(_newName.isEmpty() || _newName == this->name());
 		return;
 	}
 
@@ -154,7 +157,7 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 		m_processor = creator->newProcessor();
 		postCreate();
 
-		m_processor->init(name, completeProperties());
+		m_processor->init(QString::null, completeProperties());
 
 		m_multiProcessor = new MultiProcessor(creator);
 		m_multiProcessor->init(name, completeProperties());

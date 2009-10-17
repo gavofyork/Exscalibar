@@ -45,7 +45,7 @@ MultiProcessor::~MultiProcessor()
 
 QString MultiProcessor::name() const
 {
-	return theDeferredInit ? theDeferredName : theProcessors.count() ? theProcessors[0]->name() : QString::null;
+	return theDeferredName;
 }
 
 bool MultiProcessor::confirmTypes()

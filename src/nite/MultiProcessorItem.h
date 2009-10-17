@@ -38,7 +38,7 @@ public:
 	virtual int			type() const { return Type; }
 
 	virtual QString		typeName() const { return m_processor->type(); }
-	virtual QString		name() const { return multiProcessor()->name(); }
+	virtual QString		name() const { return multiProcessor() ? multiProcessor()->name() : QString::null; }
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
 	Processor*			processor() const;
