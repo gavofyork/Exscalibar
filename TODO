@@ -1,5 +1,7 @@
 Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
 - Connect single port to multi port.
+- Multi proc size properly.
+- Multi-connection magnetic.
 - Should also be trivial to implement Klapuri.
 - Load/save from Processor.
 - Make graphics better.

@@ -54,7 +54,26 @@ protected:
 		for (uint i = 1; i < 3; i++)
 			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft());
 		_p->drawLine(rect().bottomLeft(), rect().bottomRight());
-		_p->setPen(QPen(QColor(Qt::black), 0));
+		if (mpi()->showingAll())
+		{
+			_p->setPen(QPen(QColor(Qt::black), 0));
+			_p->setBrush(QColor(Qt::white));
+			_p->drawRect(rectOf(1).adjusted(5, 5, -5, -5));
+			_p->drawRect(rectOf(0).adjusted(2, 6, -2, -6));
+			_p->drawRect(rectOf(2).adjusted(6, 2, -6, -2));
+		}
+		else
+		{
+			_p->setPen(QPen(QColor(Qt::black), 0));
+			_p->setBrush(QColor(Qt::white));
+			_p->drawText(rectOf(1), QString::number(mpi()->face()), QTextOption(Qt::AlignCenter));
+			QRectF r = rectOf(0).adjusted(5, 5, -5, -5);
+			_p->drawLine(r.topRight(), QPointF(r.left(), r.center().y()));
+			_p->drawLine(r.bottomRight(), QPointF(r.left(), r.center().y()));
+			r = rectOf(2).adjusted(5, 5, -5, -5);
+			_p->drawLine(r.topLeft(), QPointF(r.right(), r.center().y()));
+			_p->drawLine(r.bottomLeft(), QPointF(r.right(), r.center().y()));
+		}
 		_p->drawLines(QVector<QPointF>() << rect().bottomLeft() << rect().topLeft() << rect().topLeft() << rect().topRight() << rect().topRight() << rect().bottomRight());
 	}
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e)
@@ -220,7 +239,6 @@ void MultiProcessorItem::paintOutline(QPainter* _p)
 		if (m == Undefined)
 			_p->setPen(QPen(QColor::fromHsv(0, 0, (i - 1) * 255 / 4), 0));
 		_p->drawLine(outlineRect().topLeft() + QPointF(i, -i * 2), outlineRect().topRight() + QPointF(-i, -i * 2));
-		qDebug() << outlineRect().topLeft() + QPointF(i, -i * 2) <<  outlineRect().topRight() + QPointF(-i, -i * 2);
 	}
 }
 

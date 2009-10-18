@@ -201,7 +201,6 @@ void GeddeiNite::slotUpdateProperties()
 	}
 	else if (SubProcessorItem* spi = dynamic_cast<SubProcessorItem*>(i))
 	{
-		assert(!bi->name().contains("000"));
 		theName->setText("");
 		theName->setEnabled(false);
 		theType->setText(spi->subProcessor()->type());

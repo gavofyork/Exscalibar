@@ -45,6 +45,7 @@ public:
 
 	void				toggleShowAll() { m_showAll = !m_showAll; }
 	bool				showingAll() { return m_showAll; }
+	int					face() { return m_face; }
 	void				decRowSize() { m_rowSize = max(2u, m_rowSize) - 1; }
 	void				incRowSize() { if (multiplicity() != Undefined) m_rowSize = min(multiplicity() - 1u, m_rowSize) + 1; }
 	void				prevFace() { if (multiplicity() != Undefined) m_face = (m_face - 1 + multiplicity()) % multiplicity(); }

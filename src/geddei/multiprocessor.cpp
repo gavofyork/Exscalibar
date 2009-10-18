@@ -20,7 +20,7 @@
 #include "processor.h"
 #include "multiprocessor.h"
 
-#define MESSAGES 0
+#define MESSAGES 1
 
 namespace Geddei
 {
@@ -151,6 +151,7 @@ QString MultiProcessor::error() const
 
 void MultiProcessor::onMultiplicitySet(uint _m)
 {
+	if (MESSAGES) qDebug("MultiProcessor::onMultiplicitySet(%d)", _m);
 	if (theDeferredInit)
 	{	if (MESSAGES) qDebug("Deferred init - reinitialising...");
 		theGivenMultiplicity = _m;
@@ -160,16 +161,20 @@ void MultiProcessor::onMultiplicitySet(uint _m)
 
 void MultiProcessor::resetMulti()
 {
+	if (MESSAGES) qDebug("MultiProcessor::init()");
 	stop();
 	reset();
 	disconnectAll();
-	theIsInitialised = false;
-	theDeferredInit = true;
-	theGivenMultiplicity = Undefined;
-	doInit(theDeferredName, 0, theDeferredProperties);
-	foreach (Processor* i, theProcessors)
-		delete i;
-	theProcessors.resize(0);
+	if (!theDeferredProperties.keys().contains("Processors Multiplicity") || theDeferredProperties["Processors Multiplicity"] == 0)
+	{
+		theIsInitialised = false;
+		theDeferredInit = true;
+		theGivenMultiplicity = Undefined;
+		doInit(theDeferredName, 0, theDeferredProperties);
+		foreach (Processor* i, theProcessors)
+			delete i;
+		theProcessors.resize(0);
+	}
 }
 
 /*
@@ -211,7 +216,7 @@ void MultiProcessor::doInit(QString const& _name, ProcessorGroup* _g, Properties
 			setGroup(*_g);
 	}
 
-	if (_properties["Processors Multiplicity"].toInt() > 0)
+	if (_properties.keys().contains("Processors Multiplicity") && _properties["Processors Multiplicity"].toInt() > 0)
 		theGivenMultiplicity = _properties["Processors Multiplicity"].toInt();
 
 	if (theGivenMultiplicity == Undefined)

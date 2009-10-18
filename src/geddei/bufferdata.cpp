@@ -35,7 +35,7 @@ BufferData &BufferData::fake()
 
 BufferData::BufferData(bool valid) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(valid ? Undefined : 0, 0, valid ? new float[1] : 0, 0, BufferInfo::Ignore, 0, new bool(valid), valid ? BufferInfo::Write : BufferInfo::Read, valid ? BufferInfo::Managed : BufferInfo::Foreign, false);
+	theInfo = new BufferInfo(valid ? Undefined : 0, 0, valid ? new float[1] : 0, 0, BufferInfo::Ignore, 0, valid, valid ? BufferInfo::Write : BufferInfo::Read, valid ? BufferInfo::Managed : BufferInfo::Foreign, false);
 	theOffset = 0;
 	theVisibleSize = valid ? Undefined : 0;
 }

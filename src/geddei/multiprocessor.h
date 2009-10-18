@@ -166,7 +166,7 @@ public:
 	 */
 	uint multiplicity() const { return theGivenMultiplicity; }
 
-	Processor* processor(uint _index) const { return theProcessors[_index]; }
+	Processor* processor(uint _index) const { assert(theIsInitialised); assert(_index < theGivenMultiplicity); assert(_index < (uint)theProcessors.size()); return theProcessors[_index]; }
 
 private:
 	//* Reimplementation from Multiplicative

@@ -58,7 +58,9 @@ int Spectrograph::process()
 	x.resize(d.elements());
 	d.copyTo(x.data());
 	l_points.lock();
-	m_points.push_back(x);
+	m_points.append(x);
+	while ((uint)m_points.size() > m_viewWidthSamples)
+		m_points.removeFirst();
 	l_points.unlock();
 	return DidWork;
 }
@@ -76,7 +78,7 @@ bool Spectrograph::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		QList<QVector<float> > d;
 		l_points.lock();
 		d = m_points;
-		m_points = QList<QVector<float> >();
+		m_points.clear();
 		l_points.unlock();
 
 		QPainter p(&m_display);
