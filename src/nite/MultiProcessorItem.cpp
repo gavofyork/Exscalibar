@@ -50,6 +50,8 @@ protected:
 		QGraphicsRectItem::paint(_p, _o, _w);
 		if (m_clickedRect != Undefined)
 			_p->fillRect(rectOf(m_clickedRect).adjusted(0, 0, 0, 1), QBrush(mpi()->outlineColour().lighter(200)));
+		_p->setPen(mpi()->outlineColour());
+		_p->drawLine(rect().bottomLeft(), rect().bottomRight());
 		_p->setPen(QPen(QColor::fromHsv(0, 0, 32), 0, Qt::DotLine));
 		for (uint i = 1; i < 3; i++)
 			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft());
@@ -205,16 +207,22 @@ void MultiProcessorItem::updateMultiplicities()
 	}
 }
 
+static float const marginWidth = 3.f;
+
 QSizeF MultiProcessorItem::centreMin() const
 {
+	int rows = m_showAll ? (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize) : 1;
+	int cols = m_showAll ? m_rowSize : 1;
 	if (m_processor)
-		return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+		return QSizeF(processor()->minWidth() * cols + (cols - 1) * marginWidth, max((double)processor()->minHeight() * rows + (rows - 1) * marginWidth, portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
 	return QSizeF(0, 0);
 }
 
 QSizeF MultiProcessorItem::centrePref() const
 {
-	return QSizeF(processor()->width(), processor()->height());
+	int rows = m_showAll ? (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize) : 1;
+	int cols = m_showAll ? m_rowSize : 1;
+	return QSizeF(processor()->width() * cols + (cols - 1) * marginWidth, processor()->height() * rows + (rows - 1) * marginWidth);
 }
 
 QRectF MultiProcessorItem::boundingRect() const
@@ -244,26 +252,31 @@ void MultiProcessorItem::paintOutline(QPainter* _p)
 
 void MultiProcessorItem::paintCentre(QPainter* _p)
 {
-	BaseItem::paintCentre(_p);
 	if (m_showAll && multiProcessor() && multiProcessor()->knowMultiplicity())
 	{
 		int rows = (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize);
 		int tw = centreRect().width();
 		int th = centreRect().height();
+		int mw = marginWidth;
 		for (uint i = 0; i < multiProcessor()->multiplicity(); i++)
 		{
 			_p->save();
-			int x = i % m_rowSize * tw / m_rowSize;
-			int y = i / m_rowSize * th / rows;
-			int w = (i % m_rowSize + 1) * tw / m_rowSize - x;
-			int h = (i / m_rowSize + 1) * th / rows - y;
+			int x = i % max(1u, m_rowSize) * (tw + mw) / max(1u, m_rowSize);
+			int y = i / max(1u, m_rowSize) * (th + mw) / rows;
+			int w = (i % max(1u, m_rowSize) + 1) * (tw + mw) / max(1u, m_rowSize) - x - mw;
+			int h = (i / max(1u, m_rowSize) + 1) * (th + mw) / rows - y - mw;
 			_p->translate(x, y);
+			_p->setClipRect(QRectF(0, 0, w, h));
+			_p->fillRect(QRectF(0, 0, w, h), QColor(224, 224, 224));
 			multiProcessor()->processor(i)->draw(*_p, QSizeF(w, h));
 			_p->restore();
 		}
 	}
 	else
+	{
+		BaseItem::paintCentre(_p);
 		processor()->draw(*_p, centreRect().size());
+	}
 }
 
 void MultiProcessorItem::postCreate()
@@ -288,7 +301,7 @@ void MultiProcessorItem::geometryChanged()
 		if (!miis[i])
 			miis[i] = new MultipleInputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (MultipleInputItem* i, miis)
-		i->setPos(-1.f, 8.f * 3 / 2 + (8.f + i->size().height()) * i->index());
+		i->setPos(-1.f, 6.f * 3 / 2 + (8.f + i->size().height()) * i->index());
 
 	QVector<MultipleOutputItem*> mois(multiProcessor()->numMultiOutputs(), 0);
 	foreach (MultipleOutputItem* moi, filter<MultipleOutputItem>(childItems()))
@@ -300,7 +313,7 @@ void MultiProcessorItem::geometryChanged()
 		if (!mois[i])
 			mois[i] = new MultipleOutputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (MultipleOutputItem* i, mois)
-		i->setPos(centreRect().right() + 1.f, 8.f * 3 / 2 + (8.f + i->size().height()) * i->index());
+		i->setPos(centreRect().right() + 1.f, 6.f * 3 / 2 + (8.f + i->size().height()) * i->index());
 
 	updateMultiplicities();
 
@@ -374,12 +387,18 @@ void MultiProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
 	MultiProcessorItem* pi = new MultiProcessorItem(_element.attribute("type"));
 	pi->importDom(_element, _scene);
+	pi->m_showAll = _element.attribute("showAll").toInt();
+	pi->m_rowSize = _element.attribute("rowSize").toUInt();
+	pi->m_face = _element.attribute("face").toUInt();
 }
 
 QDomElement MultiProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const
 {
 	QDomElement proc = _doc.createElement(_n);
 	proc.setAttribute("type", m_processor->type());
+	proc.setAttribute("showAll", m_showAll);
+	proc.setAttribute("rowSize", m_rowSize);
+	proc.setAttribute("face", m_face);
 	BaseItem::exportDom(proc, _doc);
 	_root.appendChild(proc);
 	return proc;

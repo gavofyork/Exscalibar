@@ -228,8 +228,6 @@ void ProcessorItem::positionChanged()
 QList<QPointF> ProcessorItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret = BaseItem::magnetism(_b, _moving);
-	if (_b == this && !_moving && processor())
-		ret << QPointF(processor()->width() - centreRect().width(), processor()->height() - centreRect().height());
 	return ret;
 }
 

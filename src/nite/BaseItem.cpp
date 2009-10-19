@@ -175,6 +175,9 @@ void BaseItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
 QList<QPointF> BaseItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
+	if (_b == this && !_moving)
+		ret << QPointF(centrePref().width() - centreRect().width(), centrePref().height() - centreRect().height());
+
 	if (_b == this)
 		return ret;
 

@@ -46,6 +46,8 @@ public:
 
 	void rejigEndPoints();
 
+	QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
+
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
