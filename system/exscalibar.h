@@ -1,7 +1,7 @@
 #ifndef __EXSCALIBAR_H
 #define __EXSCALIBAR_H
 
-#define EXSCALIBAR_VERSION "1.1.1-next1"
+#define EXSCALIBAR_VERSION "1.1.1-release-next1"
 
 #ifdef _MSC_VER
   #ifdef BUILDING_DLL
