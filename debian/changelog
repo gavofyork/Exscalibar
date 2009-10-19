@@ -1,3 +1,9 @@
+exscalibar (1.1.1-next1) jaunty; urgency=medium
+
+  * First preparation for next release.
+
+ -- Gav Wood <gavofyork@gmail.com>  Tue, 19 Oct 2009 10:53:43 +0200
+
 exscalibar (1.1.1) jaunty; urgency=medium
 
   * Several minor fixes.
