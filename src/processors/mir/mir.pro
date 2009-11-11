@@ -29,7 +29,8 @@ SOURCES += bandwise.cpp \
 		   selfsimilarity.cpp \
 		   similarity.cpp \
 		   simplesplit.cpp \
-		   wavegen.cpp
+		   wavegen.cpp \
+		   weightedsum.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES

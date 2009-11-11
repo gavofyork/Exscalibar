@@ -98,7 +98,7 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 	m_min = _inTypes[0].asA<SignalType>().minAmplitude();
 	m_delta = _inTypes[0].asA<SignalType>().maxAmplitude() - _inTypes[0].asA<SignalType>().minAmplitude();
 	setupVisual(m_viewWidthSamples, 20, 30);
-	return _inTypes[0].isA<Value>();
+	return _inTypes[0].scope() == 1;
 }
 
 void Grapher::initFromProperties(Properties const& _p)

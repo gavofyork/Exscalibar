@@ -25,15 +25,13 @@
 #include "buffer.h"
 using namespace Geddei;
 
-class Rectify: public SubProcessor
+class WeightedSum: public SubProcessor
 {
 public:
-	enum { HalfWaveRectification = 0, FullWaveRectification = 1, SquaredRectification = 2 };
-
-	Rectify(): SubProcessor("Rectify") {}
+	WeightedSum(): SubProcessor("WeightedSum") {}
 
 private:
-	virtual QString simpleText() const { return QChar(0x236D); }
+	virtual QString simpleText() const { return QChar(0x2140); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
@@ -42,33 +40,38 @@ private:
 	int m_type;
 };
 
-PropertiesInfo Rectify::specifyProperties() const
+PropertiesInfo WeightedSum::specifyProperties() const
 {
-	return PropertiesInfo("Type", 0, "Type of rectification. { 0: Half-wave; 1: Full-wave; 2: Square }");
+	return PropertiesInfo("Type", 0, "Type of summation. { 0: Normal; 1: Linear weighted on index }");
 }
 
-void Rectify::updateFromProperties(Properties const& _p)
+void WeightedSum::updateFromProperties(Properties const& _p)
 {
 	m_type = _p.get("Type").toInt();
 }
 
-bool Rectify::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool WeightedSum::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	_outTypes = _inTypes[0];
+	_outTypes = Value(_inTypes[0].frequency());
 	return true;
 }
 
-void Rectify::processChunks(BufferDatas const& _in, BufferDatas& _out, uint) const
+void WeightedSum::processChunks(BufferDatas const& _in, BufferDatas& _out, uint _c) const
 {
-	if (m_type == HalfWaveRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] < 0.f ? 0.f : _in[0][i];
-	else if (m_type == FullWaveRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] < 0.f ? -_in[0][i] : _in[0][i];
-	else if (m_type == SquaredRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] * _in[0][i];
+	if (m_type == 0)
+		for (uint i = 0; i < _c; i++)
+		{
+			_out[0][i] = 0.f;
+			for (uint s = 0; s < _in[0].scope(); s++)
+				_out[0][i] += _in[0](i, s);
+		}
+	else if (m_type == 1)
+		for (uint i = 0; i < _c; i++)
+		{
+			_out[0][i] = 0.f;
+			for (uint s = 0; s < _in[0].scope(); s++)
+				_out[0][i] += _in[0](i, s) * s;
+		}
 }
 
-EXPORT_CLASS(Rectify, 0,3,0, SubProcessor);
+EXPORT_CLASS(WeightedSum, 0,3,0, SubProcessor);
