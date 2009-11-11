@@ -60,6 +60,14 @@ public:
 	float bandFrequency(uint band) const { return band * theStep; }
 
 	/**
+	 * Determines the frequency represented by a specific band.
+	 *
+	 * @param band The band index.
+	 * @return The midpoint frequency of band @a band.
+	 */
+	uint frequencyBand(float _freq) const { return min((uint)(_freq / theStep), (uint)(scope() - 1)); }
+
+	/**
 	 * Gets the number of bands in the spectra of the signal to which this
 	 * type refers.
 	 *

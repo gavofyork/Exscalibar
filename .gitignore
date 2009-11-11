@@ -3,3 +3,4 @@ build/
 .objects/
 .composed.cpp
 *~
+system/exscalibar.pc

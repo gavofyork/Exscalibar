@@ -19,8 +19,8 @@
 #pragma once
 
 #include <exscalibar.h>
-#ifdef __GEDDEI_BUILD
 
+#ifdef __GEDDEI_BUILD
 #include "signaltype.h"
 #else
 #include <geddei/signaltype.h>

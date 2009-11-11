@@ -13,7 +13,8 @@ TARGETDEPS += $$DESTDIR/libqtextra.so $$DESTDIR/libgeddei.so
 LIBS += -lqtextra -lgeddei
 INCLUDEPATH += $$SRCDIR/qtextra $$SRCDIR/geddei
 
-SOURCES += bark.cpp \
+SOURCES += bandwise.cpp \
+		   bark.cpp \
 		   cepstrum.cpp \
 		   checkerboard.cpp \
 		   crosssimilarity.cpp \
@@ -24,6 +25,7 @@ SOURCES += bark.cpp \
 		   mfcc.cpp \
 		   sone.cpp \
 		   mir.cpp \
+		   rectify.cpp \
 		   selfsimilarity.cpp \
 		   similarity.cpp \
 		   simplesplit.cpp \

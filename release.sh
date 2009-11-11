@@ -42,6 +42,6 @@ cd "$archdir"
 echo Cleaning up...
 cd ..
 rm -rf $archdir
-mv /tmp/$archfile "$opwd"
+mv /tmp/$archfile ~
 
 echo "Done."
