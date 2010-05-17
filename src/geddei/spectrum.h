@@ -57,7 +57,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	float bandFrequency(uint band) const { return band * theStep; }
+	float bandFrequency(float _band) const { return _band * theStep; }
 
 	/**
 	 * Determines the frequency represented by a specific band.

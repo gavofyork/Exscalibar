@@ -267,7 +267,7 @@ void MultiProcessorItem::paintCentre(QPainter* _p)
 			int h = (i / max(1u, m_rowSize) + 1) * (th + mw) / rows - y - mw;
 			_p->translate(x, y);
 			_p->setClipRect(QRectF(0, 0, w, h));
-			_p->fillRect(QRectF(0, 0, w, h), QColor(224, 224, 224));
+			_p->fillRect(QRectF(0, 0, w, h), QColor(255, 255, 255));
 			multiProcessor()->processor(i)->draw(*_p, QSizeF(w, h));
 			_p->restore();
 		}

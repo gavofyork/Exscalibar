@@ -262,7 +262,7 @@ protected:
 	 * or the number of inputs in the case of an Input Multiplicitive object. Undefined
 	 * is given otherwise.
 	 */
-	uint multiplicity() const { return theMulti == In ? theNumInputs : theMulti == Out ? theNumOutputs : Undefined; }
+	uint multiplicity() const { return theMulti & In ? theNumInputs : theMulti & Out ? theNumOutputs : Undefined; }
 
 	/**
 	 * Call from initFromProperties(). Use it to set up the number of inputs/outputs,

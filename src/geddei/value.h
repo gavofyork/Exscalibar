@@ -42,7 +42,7 @@ namespace SignalTypes
 class DLLEXPORT Value: public SignalType
 {
 	virtual uint id() const { return 0; }
-	virtual SignalType *copyBE() const { return new Value(theFrequency); }
+	virtual SignalType *copyBE() const { return new Value(theFrequency, theMax, theMin); }
 
 public:
 	/**
@@ -55,6 +55,33 @@ public:
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
 	Value(float frequency = 0, float _max = 1.f, float _min = 0.f) : SignalType(1, frequency, _max, _min) {}
+};
+
+/** @ingroup SignalTypes
+ * @brief A SignalType refinement for describing generic single-value data.
+ * @author Gav Wood <gav@kde.org>
+ *
+ * This class can be used to define a signal stream that comprises samples
+ * of a single element. The meaning of each element is undefined.
+ *
+ * It is the simplest SignalType-derived class.
+ */
+class DLLEXPORT MultiValue: public SignalType
+{
+	virtual uint id() const { return 6; }
+	virtual SignalType *copyBE() const { return new MultiValue(theScope, theFrequency, theMax, theMin); }
+
+public:
+	/**
+	 * The constructor.
+	 *
+	 * @param frequency The sampling frequency of the values. That is, the
+	 * inverse of the delay (in signal time) between each value (sample).
+	 *
+	 * If there is no clear way of defining this, you may choose to use the
+	 * default value of zero, which will serve the purpose of "not applicable".
+	 */
+	MultiValue(float _scope = 1, float frequency = 0, float _max = 1.f, float _min = 0.f) : SignalType(_scope, frequency, _max, _min) {}
 };
 
 }

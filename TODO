@@ -1,3 +1,23 @@
+Better (faster) Grapher.
+Colour schema in MultiValue.
+Value derived from MultiValue.
+
+Graphical glitches.
+Gradients &c.
+Allow dargging of subprocs around.
+
+Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).
+Latch as a Connection that sits between a connection and a processor.
+Automatic splitting when connecting single to multiple.
+Allow connections single to multiplicative & singles.
+Automatic latching when connecting to multiple.
+
+Reload plugins.
+Generalised plugin architecture (e.g. distance function plugins for SSM).
+
+BUG: Update properties while running is silently reset on next run.
+BUG: Referrals in Multiplicative doesn't update when one is deleted.
+
 Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
 - Connect single port to multi port.
 - Should also be trivial to implement Klapuri.
@@ -15,8 +35,6 @@ Arrow kernel or some such.
 Range information & usage.
 Move checkExit(), bail etc. into HeavyProcessor.
 
-Can't handle 48K rate.
-Processor information - paused, cycles, CPU, samples read, ticker.
-Buffer information.
-Connection information.
-
+Scope -> Arity
+Sample -> Vector
+Element -> Real

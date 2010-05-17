@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <limits>
+#include <cmath>
+
 #include <qthread.h>
 #include <qstringlist.h>
 
@@ -39,9 +42,42 @@ namespace Geddei
 			if (i <= uint(1 << l))
 				return l;
 	}
+	inline float lerp(float _a, float _b, float _x)
+	{
+		return (_b - _a) * _x + _a;
+	}
+	inline float sqr(float _x)
+	{
+		return _x * _x;
+	}
+	inline float normalPDFN(float _x, float _m, float _o)
+	{
+		return exp(sqr(_x - _m)/(-2.f * _o * _o));
+	}
+	inline float normalPDF(float _x, float _m, float _o)
+	{
+		return exp(sqr(_x - _m)/(-2.f * _o * _o)) / sqrtf(2.f * M_PI * _o * _o);
+	}
+	inline float normalCDF(float _x, float _m, float _o)
+	{
+		return .5f * (1 + erff((_x - _m) / (M_SQRT2 * _o)));
+	}
+	inline int isInf(float _x)
+	{
+		union { float f; int i; } u;
+		u.f = _x;
+		if (u.i == 2139095040)
+			return 1;
+		if (u.i == -8388608)
+			return -1;
+		return 0;
+	}
 
 	DLLEXPORT const char *getVersion();
 	DLLEXPORT uint getConfig();
 	DLLEXPORT QStringList getPaths();
+
+	static float StreamFalse = -std::numeric_limits<float>::infinity();
+	static float StreamTrue = std::numeric_limits<float>::infinity();
 
 }

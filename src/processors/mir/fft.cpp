@@ -53,6 +53,8 @@ class FFT: public SubProcessor
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual QString simpleText() const { return QChar(0x237c); }
+
 public:
 	FFT() : SubProcessor("FFT") {}
 	~FFT();

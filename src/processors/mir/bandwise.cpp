@@ -41,15 +41,11 @@ private:
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const;
+	virtual QString simpleText() const { return QChar(0x21F6); }
 
 	QVector<uint>	m_bins;
 	uint			m_banding;
 };
-
-inline float lerp(float _a, float _b, float _x)
-{
-	return (_b - _a) * _x + _a;
-}
 
 // REPOT: Move these out to a helper header.
 

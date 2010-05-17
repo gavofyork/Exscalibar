@@ -48,8 +48,11 @@ void initRandom()
 	QFile fin("/dev/random");
 	if (fin.open(QIODevice::ReadOnly))
 	{
-		uint a = fin.getch(), b = fin.getch(), c = fin.getch();
-		srand(a + b * 256 + c * 65536);
+		char a, b, c;
+		fin.getChar(&a);
+		fin.getChar(&b);
+		fin.getChar(&c);
+		srand((uchar)a + (uchar)b * 256 + (uchar)c * 65536);
 	}
 }
 
@@ -79,7 +82,7 @@ void QKohonenNet::writeCod(QString const& file)
 
 void QKohonenNet::init(uint width, uint height, QFeatures const& _f)
 {
-	resize(width, height, _f.eigenVectors().ncols());
+	resize(width, height, _f.eigenVectors().Ncols());
 
 	for (uint y = 0; y < theHeight; y++)
 		for (uint x = 0; x < theWidth; x++)
@@ -102,7 +105,7 @@ void QKohonenNet::init(uint width, uint height, uint dims)
 
 uint QKohonenNet::train(const Matrix &data, uint width, uint height, uint iterations, double alpha, double diameter, double k, bool const _randomOrder, bool const _batch, bool const _verbose)
 {
-	init(width, height, data.ncols());
+	init(width, height, data.Ncols());
 	return learn(data, iterations, alpha, diameter, k, _randomOrder, _batch, _verbose);
 }
 
@@ -117,12 +120,12 @@ bool QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 	int index = 0;
 	for (uint t = 0; t < iterations; t++, curItem++)
 	{
-		if (curItem >= data.nrows())
+		if (curItem >= data.Nrows())
 		{	curItem = 0;
 			diameter *= lambda;
 			alpha *= lambda;
 		}
-		index = _randomOrder ? random() % data.nrows() : curItem;
+		index = _randomOrder ? random() % data.Nrows() : curItem;
 		update(data[index], alpha, diameter);
 	}
 	return true;
@@ -146,7 +149,7 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 					avgFitCount[x][y] = 0;
 				}
 
-			for (int d = 0; d < data.nrows(); ++d)
+			for (int d = 0; d < data.Nrows(); ++d)
 			{	uint x, y;
 				closest(data[d], x, y);
 				for (uint i = 0; i < theDimensions; ++i)
@@ -198,16 +201,16 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 	}
 	else
 	{
-		uint perm[data.nrows()];
-		for (int i = 0; i < data.nrows(); ++i) perm[i] = i;
-		for (int i = 0, d = 1; i < data.nrows(); ++i, d = random()%data.nrows())
+		uint perm[data.Nrows()];
+		for (int i = 0; i < data.Nrows(); ++i) perm[i] = i;
+		for (int i = 0, d = 1; i < data.Nrows(); ++i, d = random()%data.Nrows())
 			perm[i] ^= perm[d] ^= perm[i] ^= perm[d];
 		while (++t < iterations)
 		{
 			alpha *= lambda;
 			diameter *= lambda;
-			for (int i = 0; i < data.nrows(); ++i)
-				update(data[_randomOrder ? random() % data.nrows() : perm[i]], alpha, diameter);
+			for (int i = 0; i < data.Nrows(); ++i)
+				update(data[_randomOrder ? random() % data.Nrows() : perm[i]], alpha, diameter);
 		}
 	}
 	return t;
@@ -215,9 +218,9 @@ uint QKohonenNet::learn(const Matrix &data, uint iterations, double alpha, doubl
 
 ReturnMatrix QKohonenNet::project(const Matrix &data)
 {
-	Matrix s(data.nrows(), 2);
+	Matrix s(data.Nrows(), 2);
 
-	for (int i = 0; i < data.nrows(); i++)
+	for (int i = 0; i < data.Nrows(); i++)
 	{
 		uint x, y;
 		closest(data[i], x, y);
@@ -225,7 +228,7 @@ ReturnMatrix QKohonenNet::project(const Matrix &data)
 		s[i][1] = float(y) / float(theHeight - 1);
 	}
 
-	s.release();
+	s.Release();
 	return s;
 }
 

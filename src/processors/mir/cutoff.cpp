@@ -39,6 +39,7 @@ class CutOff : public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual QString simpleText() const { return QChar(0x2702); }
 
 	void processSamples(const BufferData &in, BufferData &out, uint chunks);
 

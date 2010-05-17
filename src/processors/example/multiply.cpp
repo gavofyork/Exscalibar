@@ -30,6 +30,7 @@ class Multiply: public HeavyProcessor
 	virtual void processor();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void initFromProperties(const Properties &properties);
+	virtual QString simpleText() const { return QChar(0x00D7); }
 public:
 	Multiply(): HeavyProcessor("Multiply") {}
 };

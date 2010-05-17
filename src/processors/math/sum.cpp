@@ -40,6 +40,7 @@ class Delta: public SubProcessor
 		for (uint i = 0; i < ins[0].scope(); i++)
 			outs[0](0, i) = ins[0](1, i) - ins[0](0, i);
 	}
+	virtual QString simpleText() const { return QChar(0x2206); }
 public:
 	Delta(): SubProcessor("Delta") {}
 };
@@ -56,6 +57,7 @@ class Extract: public SubProcessor
 	{
 		outs[0][0] = ins[0][m_index];
 	}
+	virtual QString simpleText() const { return QChar(0x2198); }
 public:
 	Extract(): SubProcessor("Extract") {}
 };
@@ -73,6 +75,7 @@ class Invert: public SubProcessor
 		for (uint i = 0; i < m_scope; i++)
 			outs[0][i] = m_max - ins[0][i] + m_min;
 	}
+	virtual QString simpleText() const { return QChar(0x21F5); }
 public:
 	Invert(): SubProcessor("Invert") {}
 };
@@ -84,6 +87,7 @@ class Sum: public SubProcessor
 {
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
+	virtual QString simpleText() const { return QChar(0x2211); }
 public:
 	Sum();
 };

@@ -1,0 +1,63 @@
+class _NAME_ : public CoProcessor
+{
+public:
+	_NAME_();
+
+private:
+	virtual bool processorStarted();
+	virtual int process();
+	virtual void processorStopped();
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
+	virtual QString simpleText() const { return QChar(0x21FB); }
+};
+
+_NAME_::_NAME_(): CoProcessor("_NAME_")
+{
+}
+
+bool _NAME_::processorStarted()
+{
+	return true;
+}
+
+int _NAME_::process()
+{
+	const BufferData in = input(0).readSample();
+	BufferData out = output(0).makeScratchSample();
+	out[0] = in[0];
+	output(0).push(out);
+	return DidWork;
+}
+
+void _NAME_::processorStopped()
+{
+}
+
+bool _NAME_::verifyAndSpecifyTypes(SignalTypeRefs const& inTypes, SignalTypeRefs& outTypes)
+{
+	outTypes[0] = inTypes[0];
+	return outTypes[0].isA<Spectrum>();
+}
+
+void _NAME_::initFromProperties(Properties const& p)
+{
+	updateFromProperties(p);
+	setupIO(1, 1);
+}
+
+void _NAME_::updateFromProperties(Properties const&)
+{
+}
+
+PropertiesInfo _NAME_::specifyProperties() const
+{
+	return PropertiesInfo
+			("Example", false, "Example description. { Units }")
+}
+
+EXPORT_CLASS(_NAME_, 0,1,0, Processor);
+
+

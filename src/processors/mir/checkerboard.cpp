@@ -58,8 +58,6 @@ Checkerboard::Checkerboard(): CoProcessor("Checkerboard")
 	theBoard = 0;
 }
 
-inline float sqr(float a) { return a * a; }
-
 bool Checkerboard::processorStarted()
 {
 	float halfSize = theSize / 2;
@@ -120,4 +118,4 @@ PropertiesInfo Checkerboard::specifyProperties() const
 							("Taper", true, "Kernel should have a Gaussian taper.");
 }
 
-EXPORT_CLASS(Checkerboard, 0,2,0, Processor);
+EXPORT_CLASS(Checkerboard, 0,2,0, CoProcessor);

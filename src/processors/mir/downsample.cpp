@@ -31,6 +31,7 @@ class DownSample : public SubProcessor
 	enum { Mean = 0, Max, Min };
 	uint theConsolidate;
 
+	virtual QString simpleText() const { return QChar(0x290B); }
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;

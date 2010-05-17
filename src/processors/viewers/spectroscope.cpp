@@ -53,11 +53,6 @@ public:
 	Spectroscope(): CoProcessor("Spectroscope", NotMulti) {}
 };
 
-inline float lerp(float _a, float _b, float _x)
-{
-	return (_a - _b) * _x + _b;
-}
-
 int Spectroscope::process()
 {
 	input(0).readSample().copyTo(m_last.data());

@@ -18,6 +18,7 @@ SOURCES += exp.cpp \
 		   magnitude.cpp \
 		   sum.cpp \
 		   log.cpp \
+		   rotate.cpp \
 		   math.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {

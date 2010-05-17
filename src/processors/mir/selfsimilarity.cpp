@@ -126,6 +126,7 @@ class SelfSimilarity : public SubProcessor
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
+	virtual QString simpleText() const { return QChar(0x2258); }
 
 public:
 	SelfSimilarity() : SubProcessor("SelfSimilarity") {}

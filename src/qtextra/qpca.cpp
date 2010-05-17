@@ -29,13 +29,16 @@ using namespace QtExtra;
 ReturnMatrix QtExtra::readDump(const QString &_fn, uint const _dims)
 {
 	QFile f(_fn);
-	if (!f.open(QIODevice::ReadOnly)) { Matrix m(0, 0); m.release(); return m; }
+	if (!f.open(QIODevice::ReadOnly)) { Matrix m(0, 0); m.Release(); return m; }
 	uint count = f.size() / _dims;
 	Matrix s(count, _dims);
 	for (uint r = 0; r < count; ++r)
 		for (uint c = 0; c < _dims; ++c)
-			s[r][c] = float(f.getch()) / 255.f;
-	s.release();
+		{	char ch;
+			f.getChar(&ch);
+			s(r, c) = float(ch) / 255.f;
+		}
+	s.Release();
 	return s;
 }
 
@@ -43,18 +46,18 @@ void QtExtra::writeDump(const QString &_fn, const Matrix &_values)
 {
 	QFile o(_fn);
 	if (!o.open(QIODevice::WriteOnly)) return;
-	for (int s = 0; s < _values.nrows(); ++s)
-		for (int f = 0; f < _values.ncols(); ++f)
-			o.putch(uchar(qClamp(_values[s][f]) * 255.f));
+	for (int s = 0; s < _values.Nrows(); ++s)
+		for (int f = 0; f < _values.Ncols(); ++f)
+			o.putChar(uchar(qClamp(_values(s, f)) * 255.f));
 }
 
 void QFeatures::pca(const Matrix &_values)
 {
-	uint dims = _values.ncols();
-	uint samples = _values.nrows();
+	uint dims = _values.Ncols();
+	uint samples = _values.Nrows();
 
 	// get means
-	m_means.resize(dims);
+	m_means.ReSize(dims);
 	for (uint x = 0; x < dims; x++)
 	{
 		m_means[x] = 0.f;
@@ -83,7 +86,7 @@ void QFeatures::pca(const Matrix &_values)
 	}
 
 	// get eigenvalues
-	eigenvalues(covariance, m_eigenValues, m_eigenVectors);
+	EigenValues(covariance, m_eigenValues, m_eigenVectors);
 	// reverse order so biggest = first
 	for (uint f = 0; f < dims / 2; f++)
 	{	for (uint d = 0; d < dims; d++)
@@ -97,24 +100,24 @@ void QFeatures::pca(const Matrix &_values)
 	}
 }
 
-ReturnMatrix QFeatures::project(const Matrix &_values, const uint _count, bool const _normalise, bool const _clamp)
+ReturnMatrix QFeatures::project(const Matrix &_values, const uint _count, bool const _normalise, bool const _clamp) const
 {
 	Matrix features;
-	features.resize(_values.ncols(), _count);
+	features.ReSize(_values.Ncols(), _count);
 	for (uint f = 0; f < _count; f++)
-		for (int d = 0; d < _values.ncols(); d++)
+		for (int d = 0; d < _values.Ncols(); d++)
 			features[d][f] = m_eigenVectors[d][f];
 
 	Matrix v = _values.t();
-	for (int d = 0; d < m_means.ncols(); d++)
-		v.row(d + 1) -= m_means[d];
+	for (int d = 0; d < m_means.Ncols(); d++)
+		v.Row(d + 1) -= m_means[d];
 	Matrix ret = (features.t() * v).t();
 
 	// normalise and bound by -ing mean, /ing by SD, /2 +.5, max(0, min(1, x))
 	if (_normalise)
 	{
-		uint samples = _values.nrows();
-		for (int x = 0; x < ret.ncols(); x++)
+		uint samples = _values.Nrows();
+		for (int x = 0; x < ret.Ncols(); x++)
 		{
 			float mean = 0.f;
 			for (uint s = 0; s < samples; s++)
@@ -133,23 +136,23 @@ ReturnMatrix QFeatures::project(const Matrix &_values, const uint _count, bool c
 					ret[s][x] = max(0., min(1., ret[s][x]));
 		}
 	}
-	ret.release();
+	ret.Release();
 	return ret;
 }
 
-ReturnMatrix QFeatures::extrapolate(const Matrix &_projected)
+ReturnMatrix QFeatures::extrapolate(const Matrix &_projected) const
 {
 	Matrix features;
-	features.resize(m_eigenValues.ncols(), _projected.ncols());
-	for (int f = 0; f < features.nrows(); f++)
-		for (int d = 0; d < features.ncols(); d++)
+	features.ReSize(m_eigenValues.Ncols(), _projected.Ncols());
+	for (int f = 0; f < features.Nrows(); f++)
+		for (int d = 0; d < features.Ncols(); d++)
 			features[d][f] = m_eigenVectors[d][f];
 
 	Matrix v = (features * _projected.t());
-	for (int d = 0; d < m_means.ncols(); d++)
-		v.row(d + 1) += m_means[d];
+	for (int d = 0; d < m_means.Ncols(); d++)
+		v.Row(d + 1) += m_means[d];
 	v = v.t();
-	v.release();
+	v.Release();
 	return v;
 }
 
@@ -160,18 +163,18 @@ void QFeatures::readVec(const QString &_fn)
 	if (!f.open(QIODevice::ReadOnly)) return;
 
 	uint dims;
-	f.readBlock(reinterpret_cast<char*>(&dims), sizeof(uint));
-	m_means.resize(dims);
-	f.readBlock(reinterpret_cast<char*>(m_means.data()), sizeof(Real) * dims);
+	f.read(reinterpret_cast<char*>(&dims), sizeof(uint));
+	m_means.ReSize(dims);
+	f.read(reinterpret_cast<char*>(m_means.Store()), sizeof(Real) * dims);
 	if (!f.atEnd())
 	{
-		m_eigenVectors.resize(dims, dims);
-		f.readBlock(reinterpret_cast<char*>(m_eigenVectors.data()), sizeof(Real) * dims * dims);
-		m_eigenValues.resize(dims);
-		f.readBlock(reinterpret_cast<char*>(m_eigenValues.data()), sizeof(Real) * dims);
+		m_eigenVectors.ReSize(dims, dims);
+		f.read(reinterpret_cast<char*>(m_eigenVectors.Store()), sizeof(Real) * dims * dims);
+		m_eigenValues.ReSize(dims);
+		f.read(reinterpret_cast<char*>(m_eigenValues.Store()), sizeof(Real) * dims);
 	}
-	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().toLatin1());
+	if (f.error() != QFile::NoError)
+		qDebug("File error: %s", qPrintable(f.errorString()));
 	f.close();
 }
 
@@ -183,11 +186,11 @@ void QFeatures::writeVec(const QString &_fn)
 
 	fout.precision(20);
 
-	qDebug("Writing (fr=%d, fc=%d, mc=%d)", m_features.nrows(), m_features.ncols(), m_means.ncols());
+	qDebug("Writing (fr=%d, fc=%d, mc=%d)", m_features.Nrows(), m_features.Ncols(), m_means.Ncols());
 
 
-	uint dims = m_features.nrows();
-	uint count = m_features.ncols();
+	uint dims = m_features.Nrows();
+	uint count = m_features.Ncols();
 
 	if (f.status() != IO_Ok)
 		qDebug("File error: %s", f.errorString().toLatin1());
@@ -211,11 +214,11 @@ void QFeatures::writeVec(const QString &_fn)
 			fout << m_features[f][v] << endl << flush;
 	*/
 
-	uint dims = m_eigenValues.nrows();
-	f.writeBlock(reinterpret_cast<char*>(&dims), sizeof(uint));
-	f.writeBlock(reinterpret_cast<char*>(m_means.data()), sizeof(Real) * dims);
-	f.writeBlock(reinterpret_cast<char*>(m_eigenVectors.data()), sizeof(Real) * dims * dims);
-	f.writeBlock(reinterpret_cast<char*>(m_eigenValues.data()), sizeof(Real) * dims);
-	if (f.status() != IO_Ok)
-		qDebug("File error: %s", f.errorString().toLatin1());
+	uint dims = m_eigenValues.Nrows();
+	f.write(reinterpret_cast<char*>(&dims), sizeof(uint));
+	f.write(reinterpret_cast<char*>(m_means.Store()), sizeof(Real) * dims);
+	f.write(reinterpret_cast<char*>(m_eigenVectors.Store()), sizeof(Real) * dims * dims);
+	f.write(reinterpret_cast<char*>(m_eigenValues.Store()), sizeof(Real) * dims);
+	if (f.error() != QFile::NoError)
+		qDebug("File error: %s", qPrintable(f.errorString()));
 }

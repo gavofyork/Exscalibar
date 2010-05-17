@@ -49,6 +49,8 @@ class DiagonalSum : public SubProcessor
 		m_alpha = _p["Alpha"].toDouble();
 		m_minWidth = _p["Minimum Width"].toInt();
 	}
+	virtual QString simpleText() const { return QChar(0x21F1); }
+
 public:
 	DiagonalSum() : SubProcessor("DiagonalSum") {}
 };

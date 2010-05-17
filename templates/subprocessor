@@ -1,0 +1,34 @@
+class _NAME_ : public SubProcessor
+{
+public:
+	_NAME_() : SubProcessor("_NAME_") {}
+
+private:
+	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties(const Properties &properties);
+	virtual QString simpleText() const { return QChar(0x290B); }
+};
+
+void _NAME_::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
+{
+}
+
+bool _NAME_::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+{
+	return true;
+}
+
+void _NAME_::initFromProperties(const Properties &properties)
+{
+	setupIO(1, 1);
+}
+
+PropertiesInfo _NAME_::specifyProperties() const
+{
+	return PropertiesInfo("Spread", 1, "");
+}
+
+EXPORT_CLASS(_NAME_, 0,3,0, SubProcessor);
+

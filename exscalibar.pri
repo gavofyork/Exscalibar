@@ -30,7 +30,8 @@ QMAKE_CXXFLAGS_RELEASE += -DRELEASE \
 -fomit-frame-pointer \
 -pipe \
 -fexceptions \
--Os
+-Os \
+-I.
 
 QMAKE_CXXFLAGS_DEBUG += -DDEBUG \
 -g3 \
@@ -41,7 +42,8 @@ QMAKE_CXXFLAGS_DEBUG += -DDEBUG \
 -Wall \
 -fexceptions \
 -fvisibility-inlines-hidden \
--fvisibility=hidden
+-fvisibility=hidden \
+-I.
 
 include("$$PWD/packageconfig.prf")
 

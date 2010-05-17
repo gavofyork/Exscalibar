@@ -250,7 +250,7 @@ void BaseItem::paintCentre(QPainter* _p)
 {
 	QRectF ca = centreRect();
 	_p->setPen(Qt::NoPen);
-	_p->setBrush(QColor(224, 224, 224));
+	_p->setBrush(QColor(255, 255, 255));
 	_p->drawRect(ca);
 }
 

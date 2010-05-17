@@ -1,8 +1,8 @@
 Building the Exscalibar software
 --------------------------------
 
-Exscalibar is developed under Linux on the x86 platform. However Qt, its only
-required dependancy is multiplatform. Qt version 4.0 or above is required.
+Exscalibar is developed under Linux on the x86 platform. However Qt, one of two
+required dependancies is multiplatform. Qt version 4.0 or above is required. Newmat, the other required dependency should also be cross-platform.
 
 The qmake file requires a Unix environment with grep, sed and awk available.
 

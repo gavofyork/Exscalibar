@@ -22,7 +22,10 @@
 
 #include <qstring.h>
 
+#define SETUP_C_SUBSCRIPTS
+#include <newmat/newmat.h>
 #include <newmat/newmatap.h>
+using namespace NEWMAT;
 
 namespace QtExtra
 {
@@ -33,18 +36,26 @@ inline float qClamp(float const _v, float const _min = 0.f, float const _max = 1
 }
 
 ReturnMatrix DLLEXPORT readDump(const QString &_fn, uint const _dims);
-void DLLEXPORT writeDump(const QString &_fn, const Matrix &_values);
+void DLLEXPORT writeDump(const QString &_fn, const NEWMAT::Matrix &_values);
 
 class DLLEXPORT QFeatures
 {
 public:
+	QFeatures() {}
+	QFeatures(NEWMAT::Matrix const& _eigenVectors):
+		m_means(RowVector(_eigenVectors.Ncols())), m_eigenValues(DiagonalMatrix(_eigenVectors.Ncols())), m_eigenVectors(_eigenVectors) {}
+	QFeatures(RowVector const& _means, DiagonalMatrix const& _eigenValues, NEWMAT::Matrix const& _eigenVectors):
+		m_means(_means), m_eigenValues(_eigenValues), m_eigenVectors(_eigenVectors) {}
+
+	bool				isEmpty() const { return !m_eigenVectors.Nrows(); }
+
 	const DiagonalMatrix&eigenValues() const { return m_eigenValues; }
-	const Matrix &		eigenVectors() const { return m_eigenVectors; }
+	const NEWMAT::Matrix &		eigenVectors() const { return m_eigenVectors; }
 	const RowVector &	means() const { return m_means; }
 
-	void				pca(const Matrix &_values);
-	ReturnMatrix		project(const Matrix &_values, const uint _count, bool const _normalise = true, bool const _clamp = true);
-	ReturnMatrix		extrapolate(const Matrix &_projected);
+	void				pca(const NEWMAT::Matrix &_values);
+	ReturnMatrix		project(const NEWMAT::Matrix &_values, const uint _count, bool const _normalise = true, bool const _clamp = true) const;
+	ReturnMatrix		extrapolate(const NEWMAT::Matrix &_projected) const;
 
 	void				readVec(QString const& _fn);
 	void				writeVec(QString const& _fn);
@@ -52,7 +63,7 @@ public:
 private:
 	RowVector			m_means;
 	DiagonalMatrix		m_eigenValues;
-	Matrix				m_eigenVectors;
+	NEWMAT::Matrix				m_eigenVectors;
 };
 
 }

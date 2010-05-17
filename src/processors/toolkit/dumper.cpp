@@ -36,8 +36,10 @@ class Dumper: public HeavyProcessor
 {
 	QFile theOut;
 	bool theFloats;
+	bool theText;
+	bool theCommas;
 
-	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Floats", false, "Use binary floats instead of bytes."); }
+	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Commas", false, "Separate values by commas")("Output", "/tmp/data", "The filename in to which data should be written.")("Binary", true, "Write data in binary (false for text)")("Floats", false, "Use binary floats instead of bytes."); }
 	virtual void initFromProperties(const Properties &p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
 	virtual void processor();
@@ -54,6 +56,8 @@ Dumper::Dumper(): HeavyProcessor("Dumper", In, Guarded)
 void Dumper::initFromProperties(const Properties &p)
 {
 	theOut.setFileName(p["Output"].toString());
+	theText = !p["Binary"].toBool();
+	theCommas = p["Commas"].toBool();
 	theFloats = p["Floats"].toBool();
 
 	setupIO(Undefined, 0);
@@ -67,11 +71,17 @@ bool Dumper::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
 void Dumper::processor()
 {
 	theOut.open(QIODevice::Truncate|QIODevice::WriteOnly);
+	QTextStream ts;
+	if (theText)
+		ts.setDevice(&theOut);
 	while (thereIsInputForProcessing(1))
+	{
 		for (uint i = 0; i < numInputs(); i++)
 		{	const BufferData d = input(i).readSample();
 			for (uint j = 0; j < d.elements(); j++)
-				if (theFloats)
+				if (theText)
+					ts << d[j] << (theCommas ? "," : " ");
+				else if (theFloats)
 				{
 					unsigned char* dc = (unsigned char*)&(d[j]);
 					theOut.putChar(dc[0]);
@@ -81,7 +91,12 @@ void Dumper::processor()
 				}
 				else
 					theOut.putChar(int(min(max(0.f, d[j]), 1.f) * 255));
+			if (theText)
+				ts << "\t";
 		}
+		if (theText)
+			ts << endl;
+	}
 }
 
 void Dumper::processorStopped()

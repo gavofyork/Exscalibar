@@ -20,7 +20,7 @@
 #include "processor.h"
 #include "multiprocessor.h"
 
-#define MESSAGES 1
+#define MESSAGES 0
 
 namespace Geddei
 {

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <iostream>
 using namespace std;
 

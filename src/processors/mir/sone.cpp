@@ -31,6 +31,7 @@ class Terhardt : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual QString simpleText() const { return "T"; }
 
 public:
 	float *theMult;
@@ -69,6 +70,7 @@ class Sone : public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual QString simpleText() const { return "S"; }
 
 public:
 	Sone() : SubProcessor("Sone") {}

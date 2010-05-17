@@ -3,8 +3,6 @@
 # Subdir relative project main directory: ./src/remote
 # Target is a subdirs project
 
-include( ../../global.pro )
-
 TEMPLATE = subdirs
 SUBDIRS += rgeddei \
            nodeserver \

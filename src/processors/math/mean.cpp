@@ -34,7 +34,7 @@ class Mean : public SubProcessor
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-
+	virtual QString simpleText() const { return QChar(0x2A0F); }
 public:
 	Mean() : SubProcessor("Mean", In) {}
 };

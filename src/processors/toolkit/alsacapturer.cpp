@@ -42,11 +42,15 @@ class ALSACapturer: public CoProcessor
 	uint thePeriodSize;
 	uint thePeriods;
 	uint theFrequency;
+	enum { NormDisabled = 0, NormMax, NormRMS };
+	int m_normalisation;
 	snd_pcm_t *thePcmHandle;
 	QVector<short> m_inData;
 
 	float m_dcOffsetLearnRate;
 	QVector<float> m_inAvg;
+
+	float m_max;
 
 	virtual bool processorStarted();
 	virtual void processorStopped();
@@ -68,14 +72,16 @@ class ALSACapturer: public CoProcessor
 	virtual void updateFromProperties(const Properties &_p)
 	{
 		m_dcOffsetLearnRate = _p["DC Offset Learn Rate"].toDouble();
+		m_normalisation = _p["Volume Normalisation"].toInt();
 	}
 	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
 								("Channels", 2, "The number of channels to capture.")
-								("Frequency", 44100, "The frequency with which to sample at [in Hz].")
+								("Frequency", 44100, "The frequency with which to sample at { Hz }.")
 								("DC Offset Learn Rate", 0.7, "How quickly changes in the DC offset are learned.")
+								("Volume Normalisation", 1, "How volume is normalised. { 0: Disabled; 1: Max; 2: RMS }")
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
@@ -92,6 +98,8 @@ bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs 
 
 bool ALSACapturer::processorStarted()
 {
+	m_max = 0.f;
+
 	snd_pcm_hw_params_t *hwparams;
 	snd_pcm_hw_params_alloca(&hwparams);
 	thePcmHandle = 0;
@@ -163,8 +171,15 @@ int ALSACapturer::process()
 		for (uint c = 0; c < theChannels; c++)
 			d[c] = output(c).makeScratchSamples(count), avg[c] = 0.f;
 		for (int i = 0; i < count; i++)
+			m_max = max(m_max, fabsf(m_inData[i]));
+		float divisor = (m_normalisation == NormMax) ? m_max : 32768.f;
+		for (int i = 0; i < count; i++)
 			for (uint c = 0; c < theChannels; c++)
-				d[c][i] = float(m_inData[i * theChannels + c]) / 32768.f, avg[c] += d[c][i], d[c][i] -= m_inAvg[c];
+			{
+				d[c][i] = float(m_inData[i * theChannels + c]) / divisor;
+				avg[c] += d[c][i];
+				d[c][i] -= m_inAvg[c];
+			}
 		for (uint c = 0; c < theChannels; c++)
 			output(c) << d[c], m_inAvg[c] = m_inAvg[c] * m_dcOffsetLearnRate + avg[c] / (float)count * (1.f - m_dcOffsetLearnRate);
 		return DidWork;
