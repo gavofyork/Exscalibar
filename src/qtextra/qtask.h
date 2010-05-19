@@ -53,6 +53,9 @@ public:
 	virtual void onStopped() {}
 	virtual QString taskName() const { return QString::number((long uint)this); }
 
+	double timeInTask() const { return m_totalTime; }
+	uint tasksComplete() { return m_taskCount; }
+
 private:
 	virtual void attemptProcess();
 	void guaranteeStopped() { l_execution.lock(); }
@@ -62,6 +65,8 @@ private:
 	QScheduler* m_scheduler;
 
 	int m_lastStatus;
+	uint m_taskCount;
+	double m_totalTime;
 };
 
 }

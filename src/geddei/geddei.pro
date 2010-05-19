@@ -106,7 +106,8 @@ SOURCES += buffer.cpp \
 	processorport.cpp \
 	signaltyperef.cpp \
 	globals.cpp \
-	groupable.cpp
+	groupable.cpp \
+    value.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

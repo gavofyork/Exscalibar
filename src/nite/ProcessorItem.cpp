@@ -117,6 +117,8 @@ void ProcessorItem::typesConfirmed()
 	foreach (QGraphicsItem* i, childItems())
 		if (InputItem* ii = dynamic_cast<InputItem*>(i))
 			ii->typesConfirmed();
+		else if (MultipleInputItem* ii = dynamic_cast<MultipleInputItem*>(i))
+			ii->typesConfirmed();
 	updateMultiplicities();
 }
 

@@ -93,7 +93,8 @@ bool Sone::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 	// TODO: should only take a "stepped spectrum" in.
 	if (!inTypes[0].isA<Spectrum>()) return false;
 //	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes[0] = Spectrum(inTypes[0].asA<Spectrum>().size(), inTypes[0].asA<Spectrum>().frequency(), inTypes[0].asA<Spectrum>().step(), 60, 0);
+	outTypes[0] = inTypes[0];
+	outTypes[0].asA<Spectrum>().setRange(60, 0);
 	return true;
 }
 

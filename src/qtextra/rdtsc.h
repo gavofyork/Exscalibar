@@ -16,48 +16,28 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sys/time.h>
+#pragma once
 
-#include "qscheduler.h"
-#include "qworker.h"
-#include "qtask.h"
-#include "rdtsc.h"
-using namespace QtExtra;
+#include <exscalibar.h>
 
-QTask::QTask():
-	m_scheduler(0),
-	m_lastStatus(WillNeverWork)
+namespace QtExtra
 {
+
+typedef unsigned long long realTime;
+
+inline realTime rdtsc()
+{
+	unsigned long low;
+	unsigned long high;
+	__asm__ __volatile__("rdtsc" : "=a" (low), "=d" (high));
+	return ((unsigned long long)high << 32) | low;
 }
 
-QTask::~QTask()
+extern realTime g_rdtscTPS;
+
+inline double rdtscElapsed(realTime _start)
 {
-	if (m_scheduler)
-		m_scheduler->inDestructor(this);
+	return double(rdtsc() - _start) / double(g_rdtscTPS);
 }
 
-void QTask::start()
-{
-	QScheduler::get()->registerTask(this);
-	m_taskCount = 0;
-	m_totalTime = 0.0;
-}
-
-void QTask::stop()
-{
-	m_scheduler->unregisterTask(this);
-}
-
-void QTask::wait() const
-{
-	while (m_scheduler)
-		QWorker::msleep(1);
-}
-
-void QTask::attemptProcess()
-{
-	unsigned long long s = rdtsc();
-	m_lastStatus = doWork();
-	m_totalTime += rdtscElapsed(s);
-	m_taskCount++;
 }

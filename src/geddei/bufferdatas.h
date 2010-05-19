@@ -98,6 +98,14 @@ public:
 	 */
 	BufferDatas samples(uint index, uint amount);
 
+	inline BufferDatas samples(uint index) { if (!theCount) return *this; return samples(index, theData[0]->samples() - index); }
+	inline BufferDatas leftSamples(uint amount) { if (!theCount) return *this; return samples(0, amount); }
+	inline BufferDatas rightSamples(uint amount) { if (!theCount) return *this; return samples(theData[0]->samples() - amount, amount); }
+
+	inline BufferDatas const samples(uint index) const { if (!theCount) return *this; return samples(index, theData[0]->samples() - index); }
+	inline BufferDatas const leftSamples(uint amount) const { if (!theCount) return *this; return samples(0, amount); }
+	inline BufferDatas const rightSamples(uint amount) const { if (!theCount) return *this; return samples(theData[0]->samples() - amount, amount); }
+
 	/** @internal
 	 * Discards all BufferData objects from the array and resizes it to
 	 * @a count.

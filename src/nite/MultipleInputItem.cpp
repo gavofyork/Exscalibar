@@ -88,6 +88,11 @@ QPointF MultipleInputItem::tip() const
 
 void MultipleInputItem::typesConfirmed()
 {
+	if (processorItem())
+		m_typeInfo = processorItem()->processor()->input(0).type().info();
+	else
+		m_typeInfo = multiProcessorItem()->processor()->input(m_index).type().info();
+	m_typeInfo = QString("<div><b>Multiple Connection</b></div><div>Arity: %1</div>").arg(m_multiplicity) + m_typeInfo;
 }
 
 void MultipleInputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)

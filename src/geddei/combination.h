@@ -30,11 +30,18 @@ namespace Geddei
 
 class DLLEXPORT Combination: public SubProcessor
 {
-	SubProcessor *theX, *theY;
+public:
+	Combination(SubProcessor *x, SubProcessor *y);
+	~Combination();
 
-	uint theInterScope;
-	mutable BufferData *theResident;
+	SubProcessor* x() const { return theX; }
+	SubProcessor* y() const { return theY; }
 
+	void resetTime() { m_totalTimeX = m_totalTimeY = 0; }
+	double totalTimeX() const { return m_totalTimeX; }
+	double totalTimeY() const { return m_totalTimeY; }
+
+private:
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual PropertiesInfo specifyProperties() const;
@@ -43,12 +50,14 @@ class DLLEXPORT Combination: public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual QString type() const { return theX->type() + "&" + theY->type(); }
 
-public:
-	SubProcessor* x() const { return theX; }
-	SubProcessor* y() const { return theY; }
+	SubProcessor *theX;
+	SubProcessor *theY;
 
-	Combination(SubProcessor *x, SubProcessor *y);
-	~Combination();
+	mutable double m_totalTimeX;
+	mutable double m_totalTimeY;
+
+	uint theInterScope;
+	mutable BufferData *theResident;
 };
 
 }

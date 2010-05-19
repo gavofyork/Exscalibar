@@ -12,7 +12,8 @@ SOURCES += qtextra.cpp \
 	qtask.cpp \
 	qscheduler.cpp \
 	qworker.cpp \
-	qkohonennet.cpp
+	qkohonennet.cpp \
+    rdtsc.cpp
 HEADERS += qcleaner.h \
 	qfactory.h \
 	qfactoryexporter.h \
@@ -27,7 +28,8 @@ HEADERS += qcleaner.h \
 	qscheduler.h \
 	qworker.h \
 	qpca.h \
-	qkohonennet.h
+	qkohonennet.h \
+    rdtsc.h
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

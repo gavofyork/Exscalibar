@@ -58,6 +58,12 @@ uint SignalTypeRef::scope() const
 	return thePtr->scope();
 }
 
+QString SignalTypeRef::info() const
+{
+	assert(thePtr);
+	return thePtr->info();
+}
+
 float SignalTypeRef::frequency() const
 {
 	assert(thePtr);

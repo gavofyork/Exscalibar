@@ -20,8 +20,12 @@
 #include <iostream>
 using namespace std;
 
+#include "qscheduler.h"
+#include "qtask.h"
+
 #include "ConnectionItem.h"
 #include "MultipleConnectionItem.h"
+#include "MultipleInputItem.h"
 #include "MultipleOutputItem.h"
 #include "ProcessorItem.h"
 #include "DomProcessorItem.h"
@@ -214,17 +218,6 @@ void GeddeiNite::slotUpdateProperties()
 		theProperties->resizeColumnsToContents();
 		theProperties->setEnabled(true);
 	}
-/*	else if (i && dynamic_cast<ConnectionItem*>(i))
-	{
-		BobLink *link = dynamic_cast<BobLink *>(theActive);
-		theProperties->setRowCount(2);
-		theProperties->setItem(0, 0, new QTableWidgetItem(QString::number(link->bufferSize())));
-		theProperties->setVerticalHeaderItem(0, new QTableWidgetItem("Buffer Size"));
-		theProperties->setItem(1, 0, new QTableWidgetItem(QString::number(link->proximity())));
-		theProperties->setVerticalHeaderItem(1, new QTableWidgetItem("Proximity"));
-		theProperties->resizeColumnsToContents();
-		theProperties->setEnabled(true);
-	}*/
 	else
 	{
 		theName->setText("");
@@ -237,6 +230,18 @@ void GeddeiNite::slotUpdateProperties()
 	theUpdatingProperties = false;
 	theProperties->update();
 	theProperties->updateGeometry();
+	if (i && dynamic_cast<ConnectionItem*>(i))
+	{
+		ConnectionItem* link = dynamic_cast<ConnectionItem*>(i);
+		theLinkInfo->setHtml(link->to()->typeInfo());
+	}
+	else if (i && dynamic_cast<MultipleConnectionItem*>(i))
+	{
+		MultipleConnectionItem* link = dynamic_cast<MultipleConnectionItem*>(i);
+		theLinkInfo->setHtml(link->to()->typeInfo());
+	}
+	else
+		theLinkInfo->setHtml(QString("No connection selected."));
 }
 
 void GeddeiNite::on_fileSave_activated()
@@ -406,6 +411,9 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		{
 			theProcessors->setEnabled(false);
 			theScene.onStarted();
+			m_ourTimer = startTimer(500);
+			m_startTime = rdtsc();
+			theScheduled->startUpdating();
 			theRunning = true;
 		}
 		else
@@ -420,6 +428,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 	}
 	else if (!running && theRunning)
 	{
+		theScheduled->stopUpdating();
 		theScene.onStopped();
 		theRunning = false;
 		theGroup.stop(false);
@@ -427,8 +436,61 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 		disconnectAll();
 		theProcessors->setEnabled(true);
 		theName->setEnabled(!theName->text().isEmpty());
+		killTimer(m_ourTimer);
 	}
 	theScene.update();
+}
+
+void GeddeiNite::timerEvent(QTimerEvent*)
+{
+	double elapsed = rdtscElapsed(m_startTime);
+	theTasks->clear();
+	double total = 0;
+	QList<QTask*> ts = QScheduler::get()->tasks();
+
+	foreach (QTask* t, ts)
+		total += t->timeInTask();
+	float c = 1.f / ts.count();
+	float i = -c;
+
+	foreach (QTask* t, ts)
+	{
+		QColor col = QColor::fromHsvF(i += c, 0.4, 1);
+
+		CoProcessor* cop = dynamic_cast<CoProcessor*>(t);
+		QTreeWidgetItem* it = new QTreeWidgetItem(QStringList()
+												  << (cop ? cop->type() : "n/a")
+												  << t->taskName()
+												  << QString::number(t->timeInTask() / total * 100, 'g', 3)
+												  << QString::number(t->timeInTask() / elapsed * 100, 'g', 3));
+		it->setBackgroundColor(0, col);
+		theTasks->addTopLevelItem(it);
+		if (cop && cop->type() == "DomProcessor")
+		{
+			QList<QPair<SubProcessor*, double> > ss;
+			ss << qMakePair<SubProcessor*, double>(static_cast<DomProcessor*>(cop)->primary(), t->timeInTask());
+			double remainder = t->timeInTask();
+			while (ss.count())
+			{
+				QPair<SubProcessor*, double> s = ss.takeLast();
+				if (Combination* c = dynamic_cast<Combination*>(s.first))
+					ss << qMakePair(c->y(), c->totalTimeY()) << qMakePair(c->x(), c->totalTimeX());
+				else
+				{
+					it->addChild(new QTreeWidgetItem(QStringList()
+						<< s.first->type()
+						<< ""
+						<< QString::number(s.second / total * 100, 'g', 3)
+						<< QString::number(s.second / elapsed * 100, 'g', 3)
+						));
+					remainder -= s.second;
+				}
+			}
+			it->setText(2, QString::number(remainder / total * 100, 'g', 3));
+			it->setText(3, QString::number(remainder / elapsed * 100, 'g', 3));
+		}
+	}
+	theTasks->expandAll();
 }
 
 void GeddeiNite::closeEvent(QCloseEvent *e)

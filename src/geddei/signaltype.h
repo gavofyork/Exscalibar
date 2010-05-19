@@ -266,6 +266,8 @@ public:
 	 */
 	float frequency() const { return theFrequency; }
 
+	virtual QString info() const { return QString("<div><b>SignalType</b></div><div>Frequency: %1 Hz</div><div>Scope: %2</div><div>Range: %3-%4</div>").arg(theFrequency).arg(theScope).arg(theMin).arg(theMax); }
+
 	float minAmplitude() const { return theMin; }
 	float maxAmplitude() const { return theMax; }
 
@@ -282,6 +284,8 @@ public:
 	 * @param frequency The new frequency.
 	 */
 	void setFrequency(float frequency) { theFrequency = frequency; }
+
+	void setRange(float _max, float _min) { theMin = min(_min, _max); theMax = max(_min, _max); }
 
 	/**
 	 * Get the number of samples represented by the given number of elements.

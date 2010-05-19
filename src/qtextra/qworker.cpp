@@ -20,6 +20,7 @@
 
 #include <exscalibar.h>
 
+#include "qtask.h"
 #include "qworker.h"
 using namespace QtExtra;
 
@@ -27,7 +28,8 @@ QWorker::QWorker(QScheduler* _boss, uint _index):
 	m_boss				(_boss),
 	m_index				(_index),
 	m_sinceLastWorked	(0),
-	m_waitPeriod		(0)
+	m_waitPeriod		(0),
+	m_timeSlices		(10000)
 {
 	QThread::start();
 }
@@ -38,14 +40,19 @@ QWorker::~QWorker()
 	QThread::wait();
 }
 
+void QWorker::beginAgain()
+{
+	m_timeSlices.clear();
+}
+
 void QWorker::run()
 {
 	for (QTask* t = 0;;)
 	{
 		t = m_boss->nextTask(t, this);
-		QTime timer = QTime::currentTime();
+		double s = QScheduler::currentTime();
 		t->attemptProcess();
-//		if (t->m_lastStatus >= 0)
-//			qDebug("WORKER %d: TIMESLICED TO %s; %d ms, %s", m_index, qPrintable(t->taskName()), timer.elapsed(), t->m_lastStatus >= 0 ? "WORKED" : "NO WORK");
+		double e = QScheduler::currentTime();
+		m_timeSlices.shift(TimeSlice(t, s, e));
 	}
 }

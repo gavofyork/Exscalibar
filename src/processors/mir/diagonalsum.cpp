@@ -31,23 +31,17 @@ class DiagonalSum : public SubProcessor
 {
 	uint theSize;
 	uint theBandwidth;
-	bool m_minimiseLatency;
-	uint m_minWidth;
 	float m_alpha;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("Minimise Latency", true, "Take only the minimum required amount of data from the closest to present.")
-								("Alpha", 1.0, "Alpha value for the power function.")
-								("Minimum Width", 16, "The minimum matrix width to be used while minimising latency.");
+		return PropertiesInfo	("Alpha", 1.0, "Alpha value for the power function.");
 	}
 	virtual void updateFromProperties(Properties const& _p)
 	{
-		m_minimiseLatency = _p["Minimise Latency"].toBool();
 		m_alpha = _p["Alpha"].toDouble();
-		m_minWidth = _p["Minimum Width"].toInt();
 	}
 	virtual QString simpleText() const { return QChar(0x21F1); }
 
@@ -60,7 +54,7 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();
 	theBandwidth = theSize / 2;
-	outTypes[0] = Spectrum(theBandwidth, inTypes[0].frequency(), inTypes[0].asA<SquareMatrix>().pitch());
+	outTypes[0] = PeriodSteppedSpectrum(theBandwidth, inTypes[0].frequency(), inTypes[0].asA<SquareMatrix>().pitch());
 	return true;
 }
 
@@ -79,6 +73,7 @@ void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 		}
 		out[0][n] /= wSum;
 	}
+	out[0][0] = 0.f;
 #if 0
 	if (m_minimiseLatency)
 		for (uint offset = 1; offset < theBandwidth; offset++)
@@ -100,8 +95,8 @@ void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 				out[0][offset] += in[0][(xy + (xy*theSize) + offset) % (theSize * theSize)];
 			out[0][offset] /= theSize;
 		}
-#endif
 	out[0][0] = in[0][0];
+#endif
 }
 
 EXPORT_CLASS(DiagonalSum, 0,2,0, SubProcessor);

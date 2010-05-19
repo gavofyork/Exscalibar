@@ -72,10 +72,9 @@ float toHertz(float mel) { return 700.0 * (exp(mel / 1127.01048 - 1.0)); }
 
 bool MFCC::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	// TODO: should only take a "stepped spectrum" in.
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes[0] = Spectrum(CEPSTRA, in.frequency(), 1);
+	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
+	const FreqSteppedSpectrum &in = inTypes[0].asA<FreqSteppedSpectrum>();
+	outTypes[0] = Spectrum(CEPSTRA, in.frequency());
 
 	float maxMel = toMel(in.nyquist());
 	for (uint i = 0; i < BINS + 2; i++)

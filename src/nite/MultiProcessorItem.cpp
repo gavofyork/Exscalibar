@@ -381,6 +381,8 @@ void MultiProcessorItem::typesConfirmed()
 {
 	BaseItem::typesConfirmed();
 	updateMultiplicities();
+	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
+		mii->typesConfirmed();
 }
 
 void MultiProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

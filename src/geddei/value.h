@@ -20,6 +20,9 @@
 
 #include <exscalibar.h>
 
+#include <QVector>
+#include <QColor>
+
 #ifdef __GEDDEI_BUILD
 #include "signaltype.h"
 #else
@@ -45,6 +48,8 @@ class DLLEXPORT Value: public SignalType
 	virtual SignalType *copyBE() const { return new Value(theFrequency, theMax, theMin); }
 
 public:
+	virtual QString info() const { return QString("<div><b>Value</b></div>") + SignalType::info(); }
+
 	/**
 	 * The constructor.
 	 *
@@ -54,7 +59,7 @@ public:
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	Value(float frequency = 0, float _max = 1.f, float _min = 0.f) : SignalType(1, frequency, _max, _min) {}
+	Value(float frequency = 1, float _max = 1.f, float _min = 0.f) : SignalType(1, frequency, _max, _min) {}
 };
 
 /** @ingroup SignalTypes
@@ -68,10 +73,20 @@ public:
  */
 class DLLEXPORT MultiValue: public SignalType
 {
-	virtual uint id() const { return 6; }
-	virtual SignalType *copyBE() const { return new MultiValue(theScope, theFrequency, theMax, theMin); }
-
 public:
+	struct Config
+	{
+		int index;
+		QColor fore;
+		QColor back;
+		float min;
+		float max;
+		float conversion;
+		QString units;
+
+		Config(QColor _f = Qt::black, QColor _b = Qt::transparent, float _max = 1.f, float _min = 0.f, int _i = -1, float _c = 1.f, QString const& _u = QString::null): index(_i), fore(_f), back(_b), min(std::min(_min, _max)), max(std::max(_min, _max)), conversion(_c), units(_u) {}
+	};
+
 	/**
 	 * The constructor.
 	 *
@@ -81,7 +96,29 @@ public:
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	MultiValue(float _scope = 1, float frequency = 0, float _max = 1.f, float _min = 0.f) : SignalType(_scope, frequency, _max, _min) {}
+	MultiValue(float _scope = 1, float _frequency = 1, float _max = 1.f, float _min = 0.f, QVector<Config> const& _c = QVector<Config>(), int _l = 0);
+	MultiValue(float _scope, float _frequency, QVector<Config> const& _c, int _l = 0);
+
+/*	inline void setConfig(int _e, Config const& _c) { m_config[_e] = _c; if (_c.index == -1) m_config[_e].index = _e; }
+	inline Config config(int _e) const { return m_config[_e]; }
+	inline void setConfig(QVector<Config> const& _c) { m_config = _c; normalise(); }
+*/	inline QVector<Config> const& config() const { return m_config; }
+
+	inline int labeled() const { return m_labeled; }
+
+	virtual QString info() const { return QString("<div><b>MultiValue</b></div>") + SignalType::info(); }
+
+protected:
+	virtual uint id() const { return 6; }
+	virtual void serialise(QSocketSession &sink) const;
+	virtual void deserialise(QSocketSession &source);
+	virtual SignalType* copyBE() const { return new MultiValue(theScope, theFrequency, theMax, theMin, m_config); }
+
+	void updateMM();
+	void normalise();
+
+	int m_labeled;
+	QVector<Config> m_config;
 };
 
 }

@@ -5,7 +5,7 @@
 PACKAGES = "sndfile:1.0.0" \
     "alsa:0.9"
 include(../../exscalibar.pri)
-QT += xml
+QT += xml webkit
 INSTALLS += target
 target.path = $$PREFIX/bin
 TARGETDEPS += $$DESTDIR/libqtextra.so \
@@ -16,7 +16,7 @@ INCLUDEPATH += ../../src/geddei \
     ../../src/qtextra
 DEPENDPATH += ../../src/geddei \
     ../../src/qtextra
-FORMS += geddeinitebase.ui
+FORMS += GeddeiNiteBase.ui
 HEADERS += GeddeiNite.h \
     ProcessorView.h \
     ProcessorsView.h \
@@ -37,7 +37,8 @@ HEADERS += GeddeiNite.h \
     MultipleOutputItem.h \
     SubsContainer.h \
     MultiDomProcessorItem.h \
-    IncompleteMultipleConnectionItem.h
+    IncompleteMultipleConnectionItem.h \
+    scheduled.h
 SOURCES += GeddeiNite.cpp \
     main.cpp \
     ProcessorView.cpp \
@@ -59,7 +60,8 @@ SOURCES += GeddeiNite.cpp \
     MultipleOutputItem.cpp \
     SubsContainer.cpp \
     MultiDomProcessorItem.cpp \
-    IncompleteMultipleConnectionItem.cpp
+    IncompleteMultipleConnectionItem.cpp \
+    scheduled.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp

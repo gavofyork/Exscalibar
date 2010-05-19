@@ -67,10 +67,9 @@ void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 
 bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	// TODO: should only take a "stepped spectrum" in.
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes[0] = Spectrum(theUsedBins, in.frequency(), 1);
+	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
+	const FreqSteppedSpectrum &in = inTypes[0].asA<FreqSteppedSpectrum>();
+	outTypes[0] = Spectrum(theUsedBins, in.frequency());
 
 	bandWidth = in.size();
 	uint o = 0;

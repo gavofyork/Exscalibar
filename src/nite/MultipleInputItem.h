@@ -52,7 +52,9 @@ public:
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	QPointF tip() const;
 
-	void typesConfirmed();
+	virtual void typesConfirmed();
+
+	QString const& typeInfo() const { return m_typeInfo; }
 
 	enum { Type = UserType + 12 };
 	virtual int type() const { return Type; }
@@ -62,4 +64,5 @@ private:
 	int			m_index;
 	QSizeF		m_size;
 	QSizeF		m_baseSize;
+	QString		m_typeInfo;
 };

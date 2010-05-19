@@ -86,10 +86,9 @@ void Bandwise::initFromProperties(Properties const& _p)
 
 bool Bandwise::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	// TODO: should only take a "stepped spectrum" in.
-	if (!inTypes[0].isA<Spectrum>())
+	if (!inTypes[0].isA<FreqSteppedSpectrum>())
 		return false;
-	const Spectrum &in = inTypes[0].asA<Spectrum>();
+	const FreqSteppedSpectrum &in = inTypes[0].asA<FreqSteppedSpectrum>();
 
 	// need to populate m_bins with numbers of bands for each output spectrum
 
@@ -116,7 +115,7 @@ bool Bandwise::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRe
 	}
 
 	for (int i = 0; i < m_bins.count(); i++)
-		outTypes[i] = Spectrum(max(1u, m_bins[i]), in.frequency(), in.step(), in.maxAmplitude(), in.minAmplitude());	// Wrong - doesn't give first band's freq offset.
+		outTypes[i] = FreqSteppedSpectrum(max(1u, m_bins[i]), in.frequency(), in.step(), in.maxAmplitude(), in.minAmplitude());	// Wrong - doesn't give first band's freq offset.
 
 	return true;
 }

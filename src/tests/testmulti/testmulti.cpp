@@ -124,7 +124,7 @@ class SpectrumSource: public HeavyProcessor
 	}
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
 	{
-		outTypes[0] = Spectrum(theWidth, 1, 1);
+		outTypes[0] = Spectrum(theWidth, 1);
 		return true;
 	}
 	virtual PropertiesInfo specifyProperties() const

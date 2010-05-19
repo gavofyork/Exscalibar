@@ -169,7 +169,7 @@ void SelfSimilarity::processOwnChunks(const BufferDatas &in, BufferDatas &out, u
 bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency(), inTypes[0].frequency());
+	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency(), 1.f / inTypes[0].frequency());
 	theBandWidth = inTypes[0].scope();
 	return true;
 }

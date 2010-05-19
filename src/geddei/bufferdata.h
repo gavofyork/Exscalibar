@@ -364,7 +364,7 @@ public:
 	 *
 	 * @return The number of samples in the data.
 	 */
-	uint samples() const { return theVisibleSize / theInfo->theScope; }
+	uint samples() const { return theInfo->theScope ? theVisibleSize / theInfo->theScope : 0; }
 
 	/**
 	 * Get another BufferData object referencing some portion of elements in
@@ -455,6 +455,7 @@ public:
 	 * specific samples from this object's data.
 	 */
 	const BufferData samples(uint index, uint amount) const;
+	const BufferData samples(uint index) const { return samples(index, samples() - index); }
 
 	/** @overload
 	 * Returns a new (shared data) BufferData object that points to specific
@@ -473,6 +474,12 @@ public:
 	 * specific samples from this object's data.
 	 */
 	BufferData samples(uint index, uint amount);
+	BufferData samples(uint index) { return samples(index, samples() - index); }
+
+	inline BufferData leftSamples(uint _amount) { return samples(0, _amount); }
+	inline BufferData rightSamples(uint _amount) { return samples(samples() - _amount, _amount); }
+	inline BufferData const leftSamples(uint _amount) const { return samples(0, _amount); }
+	inline BufferData const rightSamples(uint _amount) const { return samples(samples() - _amount, _amount); }
 
 	/**
 	 * Tests for validity (invalid means it should never be used).

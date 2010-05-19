@@ -18,46 +18,23 @@
 
 #include <sys/time.h>
 
-#include "qscheduler.h"
-#include "qworker.h"
-#include "qtask.h"
 #include "rdtsc.h"
 using namespace QtExtra;
 
-QTask::QTask():
-	m_scheduler(0),
-	m_lastStatus(WillNeverWork)
+namespace QtExtra
 {
+
+static realTime getRdtscTPS()
+{
+	timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	unsigned long long tsn = ts.tv_sec * 1000000000ull + ts.tv_nsec;
+	unsigned long long ret = rdtsc();
+	while ((ts.tv_sec * 1000000000ull + ts.tv_nsec) - tsn < 100000000ull)
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (rdtsc() - ret) * 10ull;
 }
 
-QTask::~QTask()
-{
-	if (m_scheduler)
-		m_scheduler->inDestructor(this);
-}
+DLLEXPORT realTime g_rdtscTPS = getRdtscTPS();
 
-void QTask::start()
-{
-	QScheduler::get()->registerTask(this);
-	m_taskCount = 0;
-	m_totalTime = 0.0;
-}
-
-void QTask::stop()
-{
-	m_scheduler->unregisterTask(this);
-}
-
-void QTask::wait() const
-{
-	while (m_scheduler)
-		QWorker::msleep(1);
-}
-
-void QTask::attemptProcess()
-{
-	unsigned long long s = rdtsc();
-	m_lastStatus = doWork();
-	m_totalTime += rdtscElapsed(s);
-	m_taskCount++;
 }

@@ -16,48 +16,32 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sys/time.h>
+#pragma once
 
-#include "qscheduler.h"
-#include "qworker.h"
-#include "qtask.h"
-#include "rdtsc.h"
-using namespace QtExtra;
+#include <QWidget>
 
-QTask::QTask():
-	m_scheduler(0),
-	m_lastStatus(WillNeverWork)
+namespace QtExtra
 {
+class QTask;
 }
 
-QTask::~QTask()
+/** @internal
+ * @author Gav Wood <gav@kde.org>
+ */
+class Scheduled : public QWidget
 {
-	if (m_scheduler)
-		m_scheduler->inDestructor(this);
-}
+    Q_OBJECT
 
-void QTask::start()
-{
-	QScheduler::get()->registerTask(this);
-	m_taskCount = 0;
-	m_totalTime = 0.0;
-}
+public:
+    explicit Scheduled(QWidget *parent = 0);
 
-void QTask::stop()
-{
-	m_scheduler->unregisterTask(this);
-}
+	void startUpdating();
+	void stopUpdating();
 
-void QTask::wait() const
-{
-	while (m_scheduler)
-		QWorker::msleep(1);
-}
+private:
+	virtual void paintEvent(QPaintEvent*);
+	virtual void timerEvent(QTimerEvent*);
 
-void QTask::attemptProcess()
-{
-	unsigned long long s = rdtsc();
-	m_lastStatus = doWork();
-	m_totalTime += rdtscElapsed(s);
-	m_taskCount++;
-}
+	int m_timer;
+};
+

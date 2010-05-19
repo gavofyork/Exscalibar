@@ -55,15 +55,15 @@ void CutOff::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunk
 
 bool CutOff::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &s = inTypes[0].asA<Spectrum>();
+	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
+	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();
 
 	float base = 0;
 	theSize = s.size();
 	theFrom = ::min(s.size(), (uint)::max(0, (int)round((theFreqFrom - base) / s.step())));
 	theTo = ::min(s.size(), (uint)::max(0, (int)round((theFreqTo - base) / s.step())));
 
-	outTypes[0] = Spectrum(theTo - theFrom, s.frequency(), s.step());
+	outTypes[0] = FreqSteppedSpectrum(theTo - theFrom, s.frequency(), s.step());
 	return true;
 }
 

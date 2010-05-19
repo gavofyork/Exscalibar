@@ -42,6 +42,13 @@ QScheduler::~QScheduler()
 void QScheduler::registerTask(QTask* _p)
 {
 	QFastMutexLocker l(&l_tasks);
+	if (m_tasks.isEmpty())
+	{
+		m_startRdtsc = rdtsc();
+		QFastMutexLocker l(&l_workers);
+		foreach (QWorker* w, m_workers)
+			w->beginAgain();
+	}
 	m_tasks.append(_p);
 	_p->m_scheduler = this;
 	_p->m_lastStatus = QTask::DidWork;
@@ -78,7 +85,7 @@ void QScheduler::clearTasks()
 void QScheduler::setWorkers(int _n)
 {
 	if (_n == -1)
-		_n = QThread::idealThreadCount();
+		_n = 1;//QThread::idealThreadCount();
 
 	while (m_workers.count() > _n)
 		delete m_workers.takeLast();

@@ -44,6 +44,8 @@ class DLLEXPORT Wave: public SignalType
 	virtual SignalType *copyBE() const { return new Wave(theFrequency); }
 
 public:
+	virtual QString info() const { return QString("<div><b>Wave</b></div>") + SignalType::info(); }
+
 	/**
 	 * The constructor.
 	 *
@@ -52,7 +54,7 @@ public:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	Wave(float frequency = 0) : SignalType(1, frequency) {}
+	Wave(float frequency = 0) : SignalType(1, frequency, 1.f, -1.f) {}
 };
 
 }

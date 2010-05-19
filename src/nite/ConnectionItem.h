@@ -35,6 +35,7 @@ public:
 	enum { Type = UserType + 4 };
 	virtual int type() const { return Type; }
 
+	InputItem* to() const;
 	OutputItem* from() const { return m_from; }
 
 	void setValid(bool _v) { m_isValid = _v; }
@@ -54,7 +55,6 @@ public:
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-
 
 	bool m_isValid;
 	OutputItem* m_from;

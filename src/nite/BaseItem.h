@@ -31,6 +31,7 @@ class PauseItem;
 class BaseItem: public QObject, public QGraphicsItem, public Magnetic
 {
 	Q_OBJECT
+	Q_INTERFACES(QGraphicsItem)
 
 public:
 	BaseItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());

@@ -28,16 +28,43 @@ namespace QtExtra
 
 class QScheduler;
 
+template<class T>
+class DLLEXPORT QRing
+{
+public:
+	inline QRing(int _size): m_data(_size), m_capacity(_size), m_start(0), m_count(0) {}
+
+	inline T const& operator[](int _i) const { return m_data[(m_start + _i) % m_capacity]; }
+	inline T& operator[](int _i) { return m_data[(m_start + _i) % m_capacity]; }
+
+	inline int count() const { return m_count; }
+	inline void shift(T const& _t) { if (m_count < m_capacity) { m_data[(m_start + m_count) % m_capacity] = _t; m_count++; } else { m_data[m_start] = _t; m_start = (m_start + 1) % m_capacity; } }
+	inline T unshift() { T ret; if (m_count > 0) { ret = m_data[m_start]; m_start = (m_start + 1) % m_capacity; } return ret; }
+
+	inline void clear() { m_count = 0; m_start = 0; }
+
+private:
+	QVarLengthArray<T> m_data;
+	int m_capacity;
+	int m_start;
+	int m_count;
+};
+
 class DLLEXPORT QWorker: private QThread
 {
 	friend class QScheduler;
 
 public:
+	struct TimeSlice { QTask* task; double start; double stop; TimeSlice(QTask* t = 0, double s = 0.0, double e = 0.0): task(t), start(s), stop(e){} };
+
 	static void sleep(uint _s) { QThread::msleep(_s); }
 	static void msleep(uint _ms) { QThread::msleep(_ms); }
 	static void usleep(uint _us) { QThread::msleep(_us); }
 
 	uint index() const { return m_index; }
+
+	QRing<TimeSlice> const& timeSlices() const { return m_timeSlices; }
+	void beginAgain();
 
 private:
 	QWorker(QScheduler* _boss, uint _index);
@@ -51,6 +78,8 @@ private:
 	uint m_index;
 	int m_sinceLastWorked;
 	uint m_waitPeriod;
+
+	QRing<TimeSlice> m_timeSlices;
 };
 
 }

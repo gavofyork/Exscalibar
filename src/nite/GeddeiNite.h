@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <QtWebKit>
 #include <QtGui>
 #include <Geddei>
 using namespace Geddei;
@@ -51,6 +52,7 @@ private slots:
 	void			slotPropertyChanged(QTableWidgetItem* _i);
 	void			slotUpdateProperties();
 	void			slotChanged() { setModified(true); }
+	void			timerEvent(QTimerEvent*);
 
 	void			on_theName_textChanged(QString const& _nn);
 
@@ -70,6 +72,9 @@ private:
 	bool			connectAll();
 	void			disconnectAll();
 	void			updateItems();
+
+	int				m_ourTimer;
+	unsigned long long m_startTime;
 
 	ProcessorsScene	theScene;
 	ProcessorGroup	theGroup;

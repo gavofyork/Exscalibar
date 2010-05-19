@@ -254,7 +254,7 @@ void StaticValue::processorStopped()
 {
 }
 
-bool StaticValue::verifyAndSpecifyTypes(SignalTypeRefs const& inTypes, SignalTypeRefs& outTypes)
+bool StaticValue::verifyAndSpecifyTypes(SignalTypeRefs const&, SignalTypeRefs& outTypes)
 {
 	outTypes[0] = Value(1, 0, m_value);
 	return true;
@@ -287,11 +287,14 @@ class Peakify : public SubProcessor
 public:
 	Peakify() : SubProcessor("Peakify") {}
 
+	int m_algorithm;
+
 private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
+	virtual void updateFromProperties(const Properties &properties);
 	virtual QString simpleText() const { return QChar(0x234F); }
 };
 
@@ -299,34 +302,54 @@ void Peakify::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
 	BufferData const in = ins[0];
 	BufferData out = outs[0];
-	int peak = 0;
-	out[0] = in[0];
-	for (int i = 1; i < in.scope(); i++)
-		if (peak > -1)
-			if (in[i] < in[i - 1])	// roll down.
-			{
-				out[peak] += in[i];
-				out[i] = 0;
-			}
-			else					// out of the trough.
-			{
-				peak = -1;
-				out[i] = in[i];
-			}
-		else
-			if (in[i] > in[i - 1])	// climb up.
-			{
-				out[i] = out[i - 1] + in[i];
-				out[i - 1] = 0;
-			}
-			else					// over the hill.
-			{
-				peak = i - 1;
-				out[peak] += in[i];
-				out[i] = 0;
-			}
 
-	out[0] = 0;
+	if (m_algorithm == 0)
+	{
+		out[0] = in[0];
+		int peak = 0;
+		for (uint i = 1; i < in.scope(); i++)
+			if (peak > -1)
+				if (in[i] < in[i - 1])	// roll down.
+				{
+					out[peak] += in[i];
+					out[i] = 0;
+				}
+				else					// out of the trough.
+				{
+					peak = -1;
+					out[i] = in[i];
+				}
+			else
+				if (in[i] > in[i - 1])	// climb up.
+				{
+					out[i] = out[i - 1] + in[i];
+					out[i - 1] = 0;
+				}
+				else					// over the hill.
+				{
+					peak = i - 1;
+					out[peak] += in[i];
+					out[i] = 0;
+				}
+		out[0] = 0;
+	}
+	else if (m_algorithm == 1)
+	{
+		out[0] = 0;
+		out[1] = 0;
+		out[2] = 0;
+		out[in.scope() - 1] = 0;
+		float off = in[0];
+		for (uint i = 2; i < in.scope(); i++)
+			off = min(off, in[i]);
+		for (uint i = 3; i < in.scope() - 1; i++)
+			if (in[i] > in[i - 1] && in[i] > in[i + 1]) // peak
+				out[i] = (in[i] + max(in[i - 1], in[i + 1])) / 2.f - off;
+			else
+				out[i] = 0;
+	}
+	else
+		out.copyFrom(in);
 }
 
 bool Peakify::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
@@ -337,14 +360,19 @@ bool Peakify::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRef
 	return true;
 }
 
-void Peakify::initFromProperties(const Properties &properties)
+void Peakify::initFromProperties(const Properties &)
 {
 	setupIO(1, 1);
 }
 
+void Peakify::updateFromProperties(Properties const& _p)
+{
+	m_algorithm = _p["Algorithm"].toInt();
+}
+
 PropertiesInfo Peakify::specifyProperties() const
 {
-	return PropertiesInfo();
+	return PropertiesInfo("Algorithm", 1, "Algorithm to use for peak finding. { 0: Area; 1: Altitude }");
 }
 
 EXPORT_CLASS(Peakify, 0,3,0, SubProcessor);
@@ -386,7 +414,7 @@ bool PeakExtract::processorStarted()
 {
 	// Arrayify according to multiplicity
 	m_balls.resize(multiplicity());
-	for (int i = 0; i < multiplicity(); i++)
+	for (uint i = 0; i < multiplicity(); i++)
 	{
 		m_balls[i].position = input(0).type().scope() / 2;
 		m_balls[i].inertia = 0;
@@ -395,7 +423,7 @@ bool PeakExtract::processorStarted()
 	return true;
 }
 
-static float dist(float _a, float _b, float _w)
+static float dist(float _a, float _b, float)
 {
 	float r = fabsf(_a - _b);
 	return r;//min(r, _w - r);
@@ -409,8 +437,8 @@ int PeakExtract::process()
 	in[s - 1] = 0;
 
 	QList<int> ordered;
-	for (int b = 0; b < multiplicity(); b++)
-		for (int c = 0; c <= b; c++)
+	for (uint b = 0; b < multiplicity(); b++)
+		for (uint c = 0; c <= b; c++)
 			if (c == b || m_balls[b].inertia > m_balls[ordered[c]].inertia)
 			{	ordered.insert(c, b);
 				break;
@@ -431,17 +459,16 @@ int PeakExtract::process()
 				maxFactor = f;
 			}
 		}
-		if (maxPeak)
-		{
-			m_balls[b].position = Geddei::lerp(m_balls[b].position, m_balls[b].position + (maxPeak > m_balls[b].position ? 1 : -1), pow(1 - m_balls[b].inertia, m_weight));
-			//* (in[maxPeak] - max(in[floor(m_position)], in[ceil(m_position)]))
-			m_balls[b].inertia = Geddei::lerp(m_balls[b].inertia, max(in[(int)floor(m_balls[b].position)], in[(int)ceil(m_balls[b].position)]) / max(.001f, in[maxPeak]), m_inertiaFactor);
-			in[maxPeak] = 0;
-		}
+		if (!maxPeak)
+			maxPeak = rand() % input(0).type().scope();
+		m_balls[b].position = Geddei::lerp(m_balls[b].position, m_balls[b].position + (maxPeak > m_balls[b].position ? 1 : -1), pow(1 - m_balls[b].inertia, m_weight));
+		//* (in[maxPeak] - max(in[floor(m_position)], in[ceil(m_position)]))
+		m_balls[b].inertia = Geddei::lerp(m_balls[b].inertia, max(in[(int)floor(m_balls[b].position)], in[(int)ceil(m_balls[b].position)]) / max(.001f, in[maxPeak]), m_inertiaFactor);
+		in[maxPeak] = 0;
 		BufferData out = output(b).makeScratchSample(true);
-		out[0] = s - 1 - m_balls[b].position;//input(0).type().asA<Spectrum>().bandFrequency(m_balls[b].position);
-		out[1] = m_balls[b].inertia * (s - 1);
-		out[2] = (maxPeak > 0) ? s - 1 - maxPeak/*input(0).type().asA<Spectrum>().bandFrequency(maxPeak)*/ : Geddei::StreamFalse;
+		out[0] = input(0).type().asA<Spectrum>().bandFrequency(m_balls[b].position);
+		out[1] = m_balls[b].inertia;
+		out[2] = (maxPeak > 0) ? input(0).type().asA<Spectrum>().bandFrequency(maxPeak) : Geddei::StreamFalse;
 		o++;
 	}
 	return DidWork;
@@ -455,8 +482,13 @@ bool PeakExtract::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 {
 	if (!inTypes[0].isA<Spectrum>())
 		return false;
-	for (int i = 0; i < multiplicity(); i++)
-		outTypes[i] = MultiValue(3, inTypes[0].frequency(), inTypes[0].scope() - 1, 0/*inTypes[0].asA<Spectrum>().bandFrequency(1), inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1)*/);
+	// inTypes[0].asA<Spectrum>().bandFrequency(1)
+	// inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1)
+	for (uint i = 0; i < multiplicity(); i++)
+		outTypes[i] = MultiValue(3, inTypes[0].frequency(), QVector<MultiValue::Config>()
+								 << MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
+								 << MultiValue::Config(QColor(0, 0, 0, 64), Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(1), inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1), 2, 60.f, "bpm")
+								 << MultiValue::Config(Qt::black, Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1), inTypes[0].asA<Spectrum>().bandFrequency(1), 0, 60.f, "bpm"), 2);
 	return true;
 }
 

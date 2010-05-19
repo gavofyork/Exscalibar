@@ -78,8 +78,8 @@ Cepstrum::~Cepstrum()
 
 bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &s = inTypes[0].asA<Spectrum>();
+	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
+	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();
 
 	theSize = s.size();
 	if (theIn) fftwf_free(theIn);
@@ -89,7 +89,7 @@ bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRe
 	theOut = (float *)fftwf_malloc(sizeof(float) * theSize);
 	thePlan = fftwf_plan_r2r_1d(theSize, theIn, theOut, theType == 0 ? FFTW_REDFT00 : theType == 1 ? FFTW_REDFT10 : theType == 2 ? FFTW_REDFT01 : FFTW_REDFT11, theOptimise ? FFTW_MEASURE : FFTW_ESTIMATE);
 
-	outTypes[0] = Spectrum(s.size() / 2, s.frequency(), s.step());
+	outTypes[0] = FreqSteppedSpectrum(s.size() / 2, s.frequency(), s.step());
 	return true;
 }
 
@@ -130,11 +130,11 @@ void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 
 bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &s = inTypes[0].asA<Spectrum>();
+	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
+	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();
 
 	theSize = s.scope();
-	outTypes[0] = Spectrum(s.size() / 2, s.frequency(), s.step());
+	outTypes[0] = FreqSteppedSpectrum(s.size() / 2, s.frequency(), s.step());
 	return true;
 }
 

@@ -41,6 +41,8 @@ public:
 
 	void typesConfirmed();
 
+	QString const& typeInfo() const { return m_typeInfo; }
+
 	enum { Type = UserType + 2 };
 	virtual int type() const { return Type; }
 
@@ -48,4 +50,5 @@ private:
 	uint		m_index;
 	QSizeF		m_size;
 	QSizeF		m_baseSize;
+	QString		m_typeInfo;
 };

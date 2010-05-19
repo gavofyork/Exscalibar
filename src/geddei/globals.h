@@ -28,10 +28,18 @@
 
 namespace Geddei
 {
-
 	enum { FFTW = 1, GAT = 2, LIBSNDFILE = 4, ALSA = 8, LIBVORBISFILE = 16, LIBMAD = 32 };
 	enum MultiplicityType { NotMulti = 0, In = 1, Out = 2, InOut = 3, Const = 4, InConst = 5, OutConst = 6, InOutConst = 7 };
 	static uint Undefined = (uint)-1;
+
+	static const float StreamFalse = -std::numeric_limits<float>::infinity();
+	static const float StreamTrue = std::numeric_limits<float>::infinity();
+
+	inline void StreamDummy()
+	{
+		(void)StreamFalse;
+		(void)StreamTrue;
+	}
 
 	DLLEXPORT void sleep(uint secs);
 	DLLEXPORT void usleep(uint usecs);
@@ -76,8 +84,4 @@ namespace Geddei
 	DLLEXPORT const char *getVersion();
 	DLLEXPORT uint getConfig();
 	DLLEXPORT QStringList getPaths();
-
-	static float StreamFalse = -std::numeric_limits<float>::infinity();
-	static float StreamTrue = std::numeric_limits<float>::infinity();
-
 }

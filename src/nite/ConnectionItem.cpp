@@ -77,6 +77,10 @@ void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidge
 	_p->drawPath(path());
 }
 
+InputItem* ConnectionItem::to() const
+{
+	return dynamic_cast<InputItem*>(parentItem());
+}
 
 ProcessorItem* ConnectionItem::fromProcessor() const
 {

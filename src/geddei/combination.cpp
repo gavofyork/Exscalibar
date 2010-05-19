@@ -17,6 +17,8 @@
  */
 
 #include <qdatetime.h>
+#include "qtask.h"
+#include "rdtsc.h"
 
 #include "domprocessor.h"
 #include "combination.h"
@@ -49,26 +51,60 @@ void Combination::processChunks(const BufferDatas &in, BufferDatas &out, uint) c
 	}
 	BufferDatas d(1);
 	d.setData(0, theResident);
+	unsigned long long s = rdtsc();
 	theX->processChunks(in, d, xc);
+	m_totalTimeX += rdtscElapsed(s);
+
+	s = rdtsc();
 	theY->processChunks(d, out, yc);
+	m_totalTimeY += rdtscElapsed(s);
 	d.setData(0, 0);
 }
 
 void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint)
 {
-	uint xc = (in[0].samples() - theX->theIn) / theX->theStep + 1;
-	uint samplesNeeded = xc * theX->theOut;
-	uint yc = (samplesNeeded - theY->theIn) / theY->theStep + 1;
-	if (!theResident || theResident->samples() < samplesNeeded)
+	if (out[0].isNull())
+		return;
+	uint yc = out[0].samples() / theY->theOut;
+	uint interSamples = theY->theIn + theY->theStep * (yc - 1);
+	uint cachedSamples = theY->theIn - theY->theStep;
+	float cache[cachedSamples * theInterScope];
+
+	if (theResident)
 	{
-		delete theResident;
-		theResident = new BufferData(samplesNeeded * theInterScope, theInterScope);
+		assert(theResident->samples() > theY->theIn - theY->theStep);
+
+		// copy the last cachedSamples samples to the cache.
+		theResident->rightSamples(cachedSamples).copyTo(cache);
+
+		if (theResident->samples() < interSamples)
+		{
+			delete theResident;
+			theResident = 0;
+		}
 	}
+	else
+		cachedSamples = 0;
+	if (!theResident)
+		theResident = new BufferData(interSamples * theInterScope, theInterScope);
+
 	BufferDatas d(1);
-	d.setData(0, theResident);
-	theX->processOwnChunks(in, d, xc);
+
+	uint xc = (interSamples - cachedSamples) / theX->theOut;
+
+	d.copyData(0, theResident->samples(cachedSamples));
+	BufferDatas aIn = in.rightSamples((xc - 1) * theX->theStep + theX->theIn);
+
+	unsigned long long s = rdtsc();
+	theX->processOwnChunks(aIn, d, xc);
+	m_totalTimeX += rdtscElapsed(s);
+
+	theResident->leftSamples(cachedSamples).copyFrom(cache);
+	d.copyData(0, *theResident);
+
+	s = rdtsc();
 	theY->processOwnChunks(d, out, yc);
-	d.setData(0, 0);
+	m_totalTimeY += rdtscElapsed(s);
 }
 
 PropertiesInfo Combination::specifyProperties() const
@@ -93,15 +129,19 @@ void Combination::updateFromProperties(const Properties& _p)
 
 bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
+	resetTime();
 	SignalTypeRefs r(1);
 	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
-	{	theInterScope = r[0].scope();
+	{
+		theInterScope = r[0].scope();
 		if (!theY->verifyAndSpecifyTypes(r, outTypes))
 			return false;
 		if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
 		{
 			setupSamplesIO(theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);
 			if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
+			delete theResident;
+			theResident = 0;
 			return true;
 		}
 		else

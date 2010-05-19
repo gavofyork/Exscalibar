@@ -175,6 +175,8 @@ public:
 	 */
 	float frequency() const;
 
+	QString info() const;
+
 	/**
 	 * Assignment operator. This will turn us into a copy of the SignalType
 	 * given. We will automatically become the true class of @a p, not just

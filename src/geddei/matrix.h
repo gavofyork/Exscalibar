@@ -78,6 +78,8 @@ public:
 	 */
 	float pitchHeight() const { return thePitchHeight; }
 
+	virtual QString info() const { return QString("<div><b>Matrix</b></div><div>Dimensions: %1x%2</div><div>Pitch: %3x%4 s</div>").arg(theWidth).arg(theHeight).arg(thePitchWidth).arg(thePitchHeight) + SignalType::info(); }
+
 	/**
 	 * Constrictor for a new matrix whose row size is equal to column size.
 	 *
@@ -106,7 +108,7 @@ public:
 class DLLEXPORT SquareMatrix: public Matrix
 {
 	virtual uint id() const { return 4; }
-	virtual SignalType *copyBE() const { return new SquareMatrix(theWidth, theFrequency); }
+	virtual SignalType *copyBE() const { return new SquareMatrix(theWidth, theFrequency, thePitchWidth); }
 
 public:
 	/**
@@ -117,6 +119,8 @@ public:
 	 * @return The number of elements in every row and column of the matrix.
 	 */
 	uint size() const { return theWidth; }
+
+	virtual QString info() const { return QString("<div><b>SquareMatrix</b></div>") + Matrix::info(); }
 
 	/**
 	 * Get the frequency represented by the progression of elements in either

@@ -29,7 +29,7 @@ using namespace SignalTypes;
 namespace Geddei
 {
 
-SignalType::SignalType(uint scope, float frequency, float _max, float _min): theMin(_min), theMax(_max)
+SignalType::SignalType(uint scope, float frequency, float _max, float _min): theMin(min(_min, _max)), theMax(max(_min, _max))
 {
 	theScope = scope;
 	theFrequency = frequency;

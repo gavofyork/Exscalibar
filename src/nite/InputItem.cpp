@@ -52,6 +52,7 @@ void InputItem::typesConfirmed()
 	prepareGeometryChange();
 	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
 	m_size = QSizeF(log(1.0 + secs) / log(2) * 16 + m_baseSize.width(), m_baseSize.height());
+	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->m_processor->input(m_index).type().info();
 	update();
 	foreach (QGraphicsItem* i, childItems())
 		if (ConnectionItem* ci = dynamic_cast<ConnectionItem*>(i))

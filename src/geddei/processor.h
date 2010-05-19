@@ -967,7 +967,7 @@ public:
 	virtual ~Processor();
 };
 
-class DLLEXPORT CoProcessor: public Processor, protected QTask
+class DLLEXPORT CoProcessor: public Processor, public QTask
 {
 public:
 	CoProcessor(const QString &type, const MultiplicityType multi = NotMulti);
