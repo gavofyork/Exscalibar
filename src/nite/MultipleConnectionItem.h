@@ -36,7 +36,7 @@ public:
 	enum { Type = UserType + 9 };
 	virtual int type() const { return Type; }
 
-	MultipleInputItem* to() const;
+	MultipleInputItem* to() const { return m_to; }
 	MultipleOutputItem* from() const { return m_from; }
 
 	void setValid(bool _v) { m_isValid = _v; }
@@ -54,4 +54,5 @@ private:
 
 	bool m_isValid;
 	MultipleOutputItem* m_from;
+	MultipleInputItem* m_to;
 };

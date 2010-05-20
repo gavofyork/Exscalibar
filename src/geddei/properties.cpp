@@ -69,11 +69,18 @@ void Properties::deserialise(QByteArray &data)
 	fromBuffer(buffer);
 }
 
-const QString PropertiesInfo::description(const QString &key) const
+QString PropertiesInfo::description(const QString &key) const
 {
 	if (!theInfo.contains(key))
 		return "";
 	return theInfo[key].description;
+}
+
+bool PropertiesInfo::isDynamic(const QString &key) const
+{
+	if (!theInfo.contains(key))
+		return false;
+	return theInfo[key].isDynamic;
 }
 
 }

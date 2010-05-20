@@ -21,10 +21,12 @@
 #include "MultipleConnectionItem.h"
 
 MultipleConnectionItem::MultipleConnectionItem(MultipleInputItem* _to, MultipleOutputItem* _from):
-	QGraphicsPathItem	(_to),
+	QGraphicsPathItem	(0),
 	m_isValid			(true),
-	m_from				(_from)
+	m_from				(_from),
+	m_to				(_to)
 {
+	_to->scene()->addItem(this);
 	setPen(QPen(m_isValid ? Qt::black : Qt::red, 8));
 	rejigEndPoints();
 	setFlags(ItemIsFocusable | ItemIsSelectable);
@@ -35,7 +37,7 @@ MultipleConnectionItem::MultipleConnectionItem(MultipleInputItem* _to, MultipleO
 void MultipleConnectionItem::rejigEndPoints()
 {
 	QPainterPath p;
-	QPointF to = dynamic_cast<MultipleInputItem*>(parentItem())->tip();
+	QPointF to = mapFromItem(m_to, m_to->tip());
 	QPointF from = mapFromItem(m_from, m_from->tip());
 	p.moveTo(from);
 	QPointF c1((to.x() * 3 + from.x()) / 4.0, from.y());
@@ -72,13 +74,8 @@ QList<QPointF> MultipleConnectionItem::magnetism(BaseItem const* _b, bool _movin
 {
 	QList<QPointF> ret;
 	if ((to()->multiProcessorItem() == dynamic_cast<MultiProcessorItem const*>(_b) || from()->multiProcessorItem() == dynamic_cast<MultiProcessorItem const*>(_b)) && _moving)
-		ret << (to()->multiProcessorItem() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - dynamic_cast<MultipleInputItem*>(parentItem())->tip().y());
+		ret << (to()->multiProcessorItem() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y());
 	return ret;
-}
-
-MultipleInputItem* MultipleConnectionItem::to() const
-{
-	return dynamic_cast<MultipleInputItem*>(parentItem());
 }
 
 void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

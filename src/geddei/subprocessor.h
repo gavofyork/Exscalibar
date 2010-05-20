@@ -319,7 +319,7 @@ protected:
 	 * @sa setupVisual()
 	 */
 	virtual void paintProcessor(QPainter& _p) const;
-
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 96, 160); }
 	virtual QString simpleText() const { return "S"; }
 
 	/**

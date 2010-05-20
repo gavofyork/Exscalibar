@@ -85,6 +85,10 @@ class ALSACapturer: public CoProcessor
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
+/*	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const
+	{
+	}*/
+
 public:
 	ALSACapturer(): CoProcessor("ALSACapturer", OutConst), thePcmHandle(0) {}
 };

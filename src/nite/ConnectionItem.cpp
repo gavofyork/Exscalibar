@@ -22,10 +22,12 @@
 #include "ConnectionItem.h"
 
 ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
-	QGraphicsPathItem	(_to),
+	QGraphicsPathItem	(0),
 	m_isValid			(true),
-	m_from				(_from)
+	m_from				(_from),
+	m_to				(_to)
 {
+	_to->scene()->addItem(this);
 	setPen(QPen(m_isValid ? Qt::black : Qt::red, 8));
 	rejigEndPoints();
 	setFlags(ItemIsFocusable | ItemIsSelectable);
@@ -37,14 +39,14 @@ QList<QPointF> ConnectionItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
 	if ((toProcessor() == dynamic_cast<ProcessorItem const*>(_b) || fromProcessor() == dynamic_cast<ProcessorItem const*>(_b)) && _moving)
-		ret << (toProcessor() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - dynamic_cast<InputItem*>(parentItem())->tip().y());
+		ret << (toProcessor() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y());
 	return ret;
 }
 
 void ConnectionItem::rejigEndPoints()
 {
 	QPainterPath p;
-	QPointF to = dynamic_cast<InputItem*>(parentItem())->tip();
+	QPointF to = mapFromItem(m_to, m_to->tip());
 	QPointF from = mapFromItem(m_from, m_from->tip());
 	p.moveTo(from);
 	QPointF c1((to.x() * 3 + from.x()) / 4.0, from.y());
@@ -77,11 +79,6 @@ void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidge
 	_p->drawPath(path());
 }
 
-InputItem* ConnectionItem::to() const
-{
-	return dynamic_cast<InputItem*>(parentItem());
-}
-
 ProcessorItem* ConnectionItem::fromProcessor() const
 {
 	return dynamic_cast<ProcessorItem*>(m_from->parentItem());
@@ -89,7 +86,7 @@ ProcessorItem* ConnectionItem::fromProcessor() const
 
 ProcessorItem* ConnectionItem::toProcessor() const
 {
-	return dynamic_cast<ProcessorItem*>(parentItem()->parentItem());
+	return dynamic_cast<ProcessorItem*>(m_to->parentItem());
 }
 
 void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
@@ -126,7 +123,7 @@ void ConnectionItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 	proc.setAttribute("from", fromProcessor()->processor()->name());
 	proc.setAttribute("fromindex", m_from->index());
 	proc.setAttribute("to", toProcessor()->processor()->name());
-	proc.setAttribute("toindex", dynamic_cast<InputItem*>(parentItem())->index());
+	proc.setAttribute("toindex", m_to->index());
 
 	_root.appendChild(proc);
 }

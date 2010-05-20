@@ -239,11 +239,11 @@ void ProcessorItem::prepYourself(ProcessorGroup& _g)
 	m_processor->disconnectAll();
 	m_processor->resetMulti();
 
-	foreach (MultipleOutputItem* mii, filter<MultipleOutputItem>(childItems()))
+	foreach (MultipleOutputItem* moi, filter<MultipleOutputItem>(childItems()))
 	{
 		int c = 0;
 		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
-			if (i->from() == mii)
+			if (i->from() == moi)
 				c++;
 		if (c > 1)
 			m_processor->MultiSource::split(0);
@@ -263,7 +263,11 @@ bool ProcessorItem::connectYourself()
 	if (m)
 		foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		{
-			QList<MultipleConnectionItem*> mcis = filter<MultipleConnectionItem>(mii->childItems());
+			QList<MultipleConnectionItem*> mcis;
+			foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+				if (i->to() == mii)
+					mcis << i;
+
 			if (mcis.size() != 1)
 				return false;
 			MultipleConnectionItem* mci = mcis[0];
@@ -276,7 +280,10 @@ bool ProcessorItem::connectYourself()
 	else
 		foreach (InputItem* ii, filter<InputItem>(childItems()))
 		{
-			QList<ConnectionItem*> cis = filter<ConnectionItem>(ii->childItems());
+			QList<ConnectionItem*> cis;
+			foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
+				if (i->to() == ii)
+					cis << i;
 			if (cis.size() != 1)
 				return false;
 			ConnectionItem* ci = cis[0];

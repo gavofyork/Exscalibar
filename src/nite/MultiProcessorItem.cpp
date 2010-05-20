@@ -357,7 +357,10 @@ bool MultiProcessorItem::connectYourself()
 {
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 	{
-		QList<MultipleConnectionItem*> mcis = filter<MultipleConnectionItem>(mii->childItems());
+		QList<MultipleConnectionItem*> mcis;
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(mii->childItems()))
+			if (i->to() == mii)
+				mcis << i;
 		if (mcis.size() != 1)
 			return false;
 		MultipleConnectionItem* mci = mcis[0];

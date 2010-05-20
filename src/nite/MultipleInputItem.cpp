@@ -90,7 +90,7 @@ void MultipleInputItem::typesConfirmed()
 {
 	if (processorItem() && processorItem()->processor()->numInputs())
 		m_typeInfo = processorItem()->processor()->input(0).type().info();
-	else if (multiProcessorItem() && multiProcessorItem()->processor()->numInputs() > m_index)
+	else if (multiProcessorItem() && (int)multiProcessorItem()->processor()->numInputs() > m_index)
 		m_typeInfo = multiProcessorItem()->processor()->input(m_index).type().info();
 	m_typeInfo = QString("<div><b>Multiple Connection</b></div><div>Arity: %1</div>").arg(m_multiplicity) + m_typeInfo;
 }

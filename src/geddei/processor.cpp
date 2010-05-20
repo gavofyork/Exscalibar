@@ -34,8 +34,8 @@ using namespace std;
 #include "splitter.h"
 using namespace Geddei;
 
-#define MESSAGES 1
-#define pMESSAGES 1
+#define MESSAGES 0
+#define pMESSAGES 0
 
 namespace Geddei
 {
@@ -464,13 +464,23 @@ bool Processor::draw(QPainter& _p, QSizeF const& _s) const
 
 bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	QRectF area(QPointF(0, 0), _s - QSizeF(1, 1));
-	_p.setFont(QFont("Helvetica", _s.height() *4/5, QFont::Black, false));
-	_p.setPen(Qt::black);
+	QRectF area(QPointF(0, 0), _s);
+	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
+	g.setColorAt(0, specifyOutlineColour().lighter(125));
+	g.setColorAt(1, specifyOutlineColour().darker(150));
+	_p.fillRect(area, g);
+
+	_p.setFont(QFont("Helvetica", min(_s.width(), _s.height()) * 3 / 5, QFont::Black, false));
+
+	_p.setPen(QColor(0, 0, 0, 192));
+	_p.drawText(area.translated(0, 1), Qt::AlignCenter, simpleText());
+
+	QLinearGradient g2(0, 0, 0, height());
+	g2.setColorAt(0.25, Qt::white);
+	g2.setColorAt(0.75, Qt::lightGray);
+	_p.setPen(QPen(QBrush(g2), 1));
 	_p.drawText(area, Qt::AlignCenter, simpleText());
-	area.setTopLeft(QPointF(1, 1));
-	_p.setPen(Qt::white);
-	_p.drawText(area, Qt::AlignCenter, simpleText());
+
 	return true;
 }
 

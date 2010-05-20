@@ -1,16 +1,10 @@
-Better (faster) Grapher.
-Colour schema in MultiValue.
-Value derived from MultiValue.
-
-Graphical glitches.
 Bigger ports.
 Show future link.
-Links to be in background (no longer owned by port).
 Shadow on processors according to colour.
-Inner gradient & text shadow.
 Change MultiPort to M.
 Gradients &c.
 Allow dragging of subprocs around.
+Graphical glitches.
 
 Allow properties to be declared run-time and edited within processor.
 

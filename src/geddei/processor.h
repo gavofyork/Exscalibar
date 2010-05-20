@@ -422,6 +422,7 @@ protected:
 	 * @return true if @a _s was honoured. false if setupVisual() was honoured.
 	 */
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual QString simpleText() const { return "?"; }
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 
 	/**
@@ -932,7 +933,6 @@ public:
 	 */
 	bool draw(QPainter& _p, QSizeF const& _s) const;
 	QColor outlineColour() const { return specifyOutlineColour(); }
-	virtual QString simpleText() const { return "?"; }
 
 	/**
 	 * Determine how full the buffer at input @a index is. Used by the Nite for

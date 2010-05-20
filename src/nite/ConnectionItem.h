@@ -35,7 +35,7 @@ public:
 	enum { Type = UserType + 4 };
 	virtual int type() const { return Type; }
 
-	InputItem* to() const;
+	InputItem* to() const { return m_to; }
 	OutputItem* from() const { return m_from; }
 
 	void setValid(bool _v) { m_isValid = _v; }
@@ -58,4 +58,5 @@ private:
 
 	bool m_isValid;
 	OutputItem* m_from;
+	InputItem* m_to;
 };
