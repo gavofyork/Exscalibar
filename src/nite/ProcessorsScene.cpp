@@ -35,7 +35,7 @@ using namespace Geddei;
 #include "ProcessorItem.h"
 #include "ProcessorsView.h"
 
-ProcessorsScene::ProcessorsScene(): m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
+ProcessorsScene::ProcessorsScene(QObject* _p): QGraphicsScene(_p), m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
 {
 }
 

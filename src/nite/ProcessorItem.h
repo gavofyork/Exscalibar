@@ -75,6 +75,8 @@ protected:
 	virtual void		positionChanged();
 	virtual void		propertiesChanged(QString const& _newName = QString::null);
 
+	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(m_processor); }
+
 	Processor*			m_processor;
 
 private:

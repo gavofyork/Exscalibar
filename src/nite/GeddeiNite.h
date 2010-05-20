@@ -43,6 +43,8 @@ public:
 	bool			tested() const { return theTested; }
 	bool			connected() const { return theConnected; }
 
+	QColor			myColour(QTask* _me) const { return m_colourMap.value(_me, QColor(0, 0, 0)); }
+
 	ProcessorGroup&	group() { return theGroup; }
 
 protected:
@@ -80,6 +82,8 @@ private:
 	ProcessorGroup	theGroup;
 
 	QString			theFilename;
+
+	QMap<QTask*, QColor> m_colourMap;
 
 	bool			theUpdatingProperties;
 	bool			theRunning;

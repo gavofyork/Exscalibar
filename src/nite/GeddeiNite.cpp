@@ -38,6 +38,7 @@ using namespace std;
 
 GeddeiNite::GeddeiNite(bool _autoLoad):
 	QMainWindow				(0),
+	theScene				(this),
 	theRunning				(false),
 	theConnected			(false),
 	theIgnoreNext			(false),
@@ -415,6 +416,12 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 			m_startTime = rdtsc();
 			theScheduled->startUpdating();
 			theRunning = true;
+
+			QList<QTask*> ts = QScheduler::get()->tasks();
+			float c = 1.f / ts.count();
+			float i = -c;
+			foreach (QTask* t, ts)
+				m_colourMap[t] = QColor::fromHsvF(i += c, 1, 1);
 		}
 		else
 		{
@@ -428,6 +435,7 @@ void GeddeiNite::on_modeRun_toggled(bool running)
 	}
 	else if (!running && theRunning)
 	{
+		m_colourMap.clear();
 		theScheduled->stopUpdating();
 		theScene.onStopped();
 		theRunning = false;
@@ -450,13 +458,10 @@ void GeddeiNite::timerEvent(QTimerEvent*)
 
 	foreach (QTask* t, ts)
 		total += t->timeInTask();
-	float c = 1.f / ts.count();
-	float i = -c;
 
 	foreach (QTask* t, ts)
 	{
-		QColor col = QColor::fromHsvF(i += c, 0.4, 1);
-
+		QColor col = QColor::fromHsvF(myColour(t).hueF(), 0.4, 1);
 		CoProcessor* cop = dynamic_cast<CoProcessor*>(t);
 		QTreeWidgetItem* it = new QTreeWidgetItem(QStringList()
 												  << (cop ? cop->type() : "n/a")

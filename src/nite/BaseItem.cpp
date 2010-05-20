@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GeddeiNite.h"
 #include "PauseItem.h"
 #include "BaseItem.h"
 
@@ -263,7 +264,8 @@ void BaseItem::paintOutline(QPainter* _p)
 		float cornerRadius = round(marginSize() * (isSelected() ? 1.25f : 1.25f));
 		float adj = round(marginSize() / (isSelected() ? 4.f : 2.f));
 		QRectF br = boundingRect().adjusted(adj, adj, -adj, -adj);
-		QColor shadow = isSelected() ? QColor(0,0,0) : QColor(64,64,64);
+		GeddeiNite* gn = qobject_cast<GeddeiNite*>(scene()->parent());
+		QColor shadow = gn->myColour(primaryTask()).darker(isSelected() ? 400 : 300);
 
 		_p->translate(0.5f, 0.5f + round(marginSize() / (isSelected() ? 5.f : 6.f)));
 		{
@@ -315,24 +317,14 @@ void BaseItem::paintOutline(QPainter* _p)
 	}
 	{
 		QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
-		cg.setColorAt(0, outlineColour().darker(300));
-		cg.setColorAt(1, outlineColour().darker(400));
+		cg.setColorAt(0, outlineColour().darker(250));
+		cg.setColorAt(1, outlineColour().darker(350));
 		_p->setPen(QPen(cg, 1));
 		_p->drawRoundedRect(outlineRect(), 3, 3);
-		cg.setColorAt(0, outlineColour().lighter(200));
+		cg.setColorAt(0, outlineColour().lighter(175));
 		cg.setColorAt(1, outlineColour().darker(150));
 		_p->setPen(QPen(cg, 1));
 		_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
-		/*
-		_p->setPen(QPen(QColor(255,255,255,64), 1));
-		_p->drawLine(outlineRect().topLeft(), outlineRect().topRight());
-		_p->setPen(QPen(QColor(255,255,255,32), 1));
-		_p->drawLine(outlineRect().topLeft(), outlineRect().bottomLeft());
-		_p->setPen(QPen(QColor(0,0,0,32), 1));
-		_p->drawLine(outlineRect().bottomRight(), outlineRect().topRight());
-		_p->setPen(QPen(QColor(0,0,0,64), 1));
-		_p->drawLine(outlineRect().bottomRight(), outlineRect().bottomLeft());
-		*/
 	}
 
 	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));

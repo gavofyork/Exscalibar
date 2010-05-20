@@ -475,9 +475,9 @@ bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.setPen(QColor(0, 0, 0, 192));
 	_p.drawText(area.translated(0, 1), Qt::AlignCenter, simpleText());
 
-	QLinearGradient g2(0, 0, 0, height());
-	g2.setColorAt(0.25, Qt::white);
-	g2.setColorAt(0.75, Qt::lightGray);
+	QLinearGradient g2(0, (_s.height() - min(_s.width(), _s.height())) / 2, 0, min(_s.width(), _s.height()));
+	g2.setColorAt(.35f, Qt::white);
+	g2.setColorAt(.65f, Qt::lightGray);
 	_p.setPen(QPen(QBrush(g2), 1));
 	_p.drawText(area, Qt::AlignCenter, simpleText());
 

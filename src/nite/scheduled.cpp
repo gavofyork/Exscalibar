@@ -23,6 +23,7 @@
 #include "qworker.h"
 using namespace QtExtra;
 
+#include "GeddeiNite.h"
 #include "scheduled.h"
 
 Scheduled::Scheduled(QWidget *parent) :
@@ -43,15 +44,8 @@ void Scheduled::stopUpdating()
 void Scheduled::paintEvent(QPaintEvent*)
 {
 	QPainter p(this);
+	GeddeiNite* gn = qobject_cast<GeddeiNite*>(topLevelWidget());
 
-	QHash<QTask*, QColor> cols;
-	QList<QTask*> ts = QScheduler::get()->tasks();
-	float c = 1.f / ts.count();
-	float i = -c;
-	foreach (QTask* t, ts)
-		cols[t] = QColor::fromHsvF(i += c, 0.75, 0.75);
-
-//	double now = QScheduler::currentTime();
 	QList<QWorker*> ws = QScheduler::get()->workers();
 	float duration = .001f;
 	p.scale(width() / duration, height() / float(ws.count()));
@@ -76,7 +70,7 @@ void Scheduled::paintEvent(QPaintEvent*)
 				if (now - tss[i].start > duration)
 					break;
 				else
-					p.fillRect(QRectF(now - tss[i].start, y, tss[i].stop - tss[i].start, 1.f), cols[tss[i].task]);
+					p.fillRect(QRectF(now - tss[i].start, y, tss[i].stop - tss[i].start, 1.f), gn->myColour(tss[i].task));
 			y++;
 		}
 }

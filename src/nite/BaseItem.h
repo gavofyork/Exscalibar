@@ -43,6 +43,8 @@ public:
 	void				setPos(qreal _x, qreal _y) { QGraphicsItem::setPos(floor(_x) + .5f, floor(_y) + .5f); }
 	void				setPos(QPointF _p) { QGraphicsItem::setPos(floor(_p.x()) + .5f, floor(_p.y()) + .5f); }
 
+	virtual QTask*		primaryTask() const { return 0; }
+
 	Properties const&	properties() const { return m_properties; }
 	void				setProperty(QString const& _key, QVariant const& _value);
 	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.

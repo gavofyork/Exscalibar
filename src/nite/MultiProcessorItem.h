@@ -87,6 +87,8 @@ protected:
 	Processor*			m_processor;
 	ControlsItem*		m_controls;
 
+	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(m_multiProcessor->processor(0)); }
+
 private:
 	QString				m_type;
 	MultiProcessor*		m_multiProcessor;
