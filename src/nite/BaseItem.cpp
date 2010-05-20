@@ -257,6 +257,28 @@ void BaseItem::paintCentre(QPainter* _p)
 {
 }
 
+QBrush BaseItem::fillBrush() const
+{
+	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+	cg.setColorAt(0, outlineColour().lighter(125));
+	cg.setColorAt(1, outlineColour().darker(150));
+	return QBrush(cg);
+}
+QPen BaseItem::innerPen() const
+{
+	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+	cg.setColorAt(0, outlineColour().lighter(175));
+	cg.setColorAt(1, outlineColour().darker(150));
+	return QPen(cg, 1);
+}
+QPen BaseItem::outerPen() const
+{
+	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+	cg.setColorAt(0, outlineColour().darker(250));
+	cg.setColorAt(1, outlineColour().darker(350));
+	return QPen(cg, 1);
+}
+
 void BaseItem::paintOutline(QPainter* _p)
 {
 	_p->save();
@@ -302,30 +324,12 @@ void BaseItem::paintOutline(QPainter* _p)
 		}
 	}
 	_p->restore();
-/*	if (isSelected())
-	{
-		_p->setPen(QPen(highlightColour(), 0));
-		_p->setBrush(QBrush(highlightColour().lighter(200)));
-		_p->drawRoundedRect(boundingRect(), 3, 3);
-	}*/
 
-	{
-		QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
-		cg.setColorAt(0, outlineColour().lighter(125));
-		cg.setColorAt(1, outlineColour().darker(150));
-		_p->fillRect(outlineRect().adjusted(1, 1, -1, -1), QBrush(cg));
-	}
-	{
-		QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
-		cg.setColorAt(0, outlineColour().darker(250));
-		cg.setColorAt(1, outlineColour().darker(350));
-		_p->setPen(QPen(cg, 1));
-		_p->drawRoundedRect(outlineRect(), 3, 3);
-		cg.setColorAt(0, outlineColour().lighter(175));
-		cg.setColorAt(1, outlineColour().darker(150));
-		_p->setPen(QPen(cg, 1));
-		_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
-	}
+	_p->fillRect(outlineRect().adjusted(1, 1, -1, -1), fillBrush());
+	_p->setPen(outerPen());
+	_p->drawRoundedRect(outlineRect(), 3, 3);
+	_p->setPen(innerPen());
+	_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
 
 	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
 	QRectF o = outlineRect().adjusted(1, 1, -1, -1);

@@ -29,6 +29,7 @@ public:
 	InputItem(int _i, BaseItem* _p, QSizeF const& _size);
 
 	ProcessorItem* processorItem() const;
+	BaseItem* baseItem() const;
 
 	bool isConnected() const;
 

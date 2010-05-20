@@ -32,6 +32,11 @@ ProcessorItem* InputItem::processorItem() const
 	return dynamic_cast<ProcessorItem*>(parentItem());
 }
 
+BaseItem* InputItem::baseItem() const
+{
+	return dynamic_cast<BaseItem*>(parentItem());
+}
+
 bool InputItem::isConnected() const
 {
 	return filter<ConnectionItem>(childItems()).size();
@@ -50,8 +55,9 @@ QPointF InputItem::tip() const
 void InputItem::typesConfirmed()
 {
 	prepareGeometryChange();
-	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
-	m_size = QSizeF(log(1.0 + secs) / log(2) * 16 + m_baseSize.width(), m_baseSize.height());
+/*	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
+	m_size = QSizeF(log(1.0 + secs) / log(2) * 16 + m_baseSize.width(), m_baseSize.height());*/
+	m_size = m_baseSize;
 	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->m_processor->input(m_index).type().info();
 	update();
 	foreach (QGraphicsItem* i, childItems())
@@ -61,19 +67,43 @@ void InputItem::typesConfirmed()
 
 void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(QColor::fromHsv(40, 128, 220));
-	QPolygonF p;
-	p.append(QPointF(m_size.height() / 2 - m_size.width(), 0));
-	p.append(QPointF(-m_size.width(), m_size.height() / 2));
-	p.append(QPointF(0, m_size.height() / 2));
-	p.append(QPointF(0, -m_size.height() / 2));
-	p.append(QPointF(-m_size.width(), -m_size.height() / 2));
-	_p->drawPolygon(p);
-
+	_p->setPen(baseItem()->outerPen());
+	_p->translate(0, -pos().y());
+	{
+		QPolygonF p;
+		p.append(QPointF(-1, -m_size.height() / 2));
+		p.append(QPointF(-m_size.width(), -m_size.height() / 2));
+		p.append(QPointF(m_size.height() / 2 - m_size.width(), 0));
+		p.append(QPointF(-m_size.width(), m_size.height() / 2));
+		p.append(QPointF(-1, m_size.height() / 2));
+		_p->drawPolyline(p.translated(0, pos().y()));
+	}
+	{
+		QPolygonF p;
+		p.append(QPointF(0.5, -m_size.height() / 2 + 1));
+		p.append(QPointF(-m_size.width() + 2, -m_size.height() / 2 + 1));
+		p.append(QPointF(m_size.height() / 2 - m_size.width() + 2, 0));
+		p.append(QPointF(-m_size.width() + 2, m_size.height() / 2 - 1));
+		p.append(QPointF(0.5, m_size.height() / 2 - 1));
+		_p->setPen(Qt::NoPen);
+		_p->setBrush(baseItem()->fillBrush());
+		_p->drawPolygon(p.translated(0, pos().y()));
+	}
+	{
+		QPolygonF p;
+		p.append(QPointF(0, -m_size.height() / 2 + 1));
+		p.append(QPointF(-m_size.width() + 2, -m_size.height() / 2 + 1));
+		p.append(QPointF(m_size.height() / 2 - m_size.width() + 2, 0));
+		p.append(QPointF(-m_size.width() + 2, m_size.height() / 2 - 1));
+		p.append(QPointF(0, m_size.height() / 2 - 1));
+		_p->setPen(baseItem()->innerPen());
+		_p->setBrush(Qt::NoBrush);
+		_p->drawPolyline(p.translated(0, pos().y()));
+	}
+/*
 	if (processorItem()->m_processor->isRunning())	//  a bit unsafe, since the processor could stop & get reset between these two.
 	{
 		double fill = processorItem()->m_processor->input(m_index).filled();
 		_p->fillRect(QRectF(0, -m_size.height() / 4, -(m_size.width() - m_baseSize.width()) * fill, m_size.height() / 2) , QColor(Qt::darkRed));
-	}
+	}*/
 }

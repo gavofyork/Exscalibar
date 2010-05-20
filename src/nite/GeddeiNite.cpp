@@ -231,18 +231,12 @@ void GeddeiNite::slotUpdateProperties()
 	theUpdatingProperties = false;
 	theProperties->update();
 	theProperties->updateGeometry();
+	QString html = "Nothing selected.";
 	if (i && dynamic_cast<ConnectionItem*>(i))
-	{
-		ConnectionItem* link = dynamic_cast<ConnectionItem*>(i);
-		theLinkInfo->setHtml(link->to()->typeInfo());
-	}
+		html = dynamic_cast<ConnectionItem*>(i)->to()->typeInfo();
 	else if (i && dynamic_cast<MultipleConnectionItem*>(i))
-	{
-		MultipleConnectionItem* link = dynamic_cast<MultipleConnectionItem*>(i);
-		theLinkInfo->setHtml(link->to()->typeInfo());
-	}
-	else
-		theLinkInfo->setHtml(QString("No connection selected."));
+		html = dynamic_cast<MultipleConnectionItem*>(i)->to()->typeInfo();
+	theLinkInfo->setHtml("<div style=\"font-size: 8pt\">" + html + "</div>");
 }
 
 void GeddeiNite::on_fileSave_activated()

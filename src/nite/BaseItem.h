@@ -74,6 +74,10 @@ public:
 
 	void				forwardEvent(QGraphicsSceneEvent* _e);
 
+	QBrush				fillBrush() const;
+	QPen				outerPen() const;
+	QPen				innerPen() const;
+
 protected:
 	virtual Properties	completeProperties() const { return m_properties; }
 	virtual void		propertiesChanged(QString const& = QString::null);	// Calls...

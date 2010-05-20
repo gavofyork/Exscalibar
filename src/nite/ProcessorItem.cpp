@@ -187,7 +187,7 @@ void ProcessorItem::geometryChanged()
 		if (!iis[i])
 			iis[i] = new InputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (InputItem* i, iis)
-		i->setPos(-1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
+		i->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
 	QVector<OutputItem*> ois(m_processor->numOutputs() == Undefined ? 0 : m_processor->numOutputs(), 0);
 	if (m_processor->multi() & Out)
@@ -209,7 +209,7 @@ void ProcessorItem::geometryChanged()
 		if (!ois[i])
 			ois[i] = new OutputItem(i, this, QSizeF(10.f, 8.f));
 	foreach (OutputItem* i, ois)
-		i->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
+		i->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
 	updateMultiDisplay();
 	BaseItem::geometryChanged();

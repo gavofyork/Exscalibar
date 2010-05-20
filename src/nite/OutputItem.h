@@ -28,6 +28,7 @@ public:
 	OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size);
 
 	ProcessorItem* processorItem() const;
+	BaseItem* baseItem() const;
 	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }
 
