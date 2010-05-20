@@ -3,8 +3,18 @@ Colour schema in MultiValue.
 Value derived from MultiValue.
 
 Graphical glitches.
+Bigger ports.
+Show future link.
+Links to be in background (no longer owned by port).
+Shadow on processors according to colour.
+Inner gradient & text shadow.
+Change MultiPort to M.
 Gradients &c.
-Allow dargging of subprocs around.
+Allow dragging of subprocs around.
+
+Allow properties to be declared run-time and edited within processor.
+
+ALSACapturer to have squares for buffers & hollow for missed.
 
 Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).
 Latch as a Connection that sits between a connection and a processor.

@@ -72,7 +72,7 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 
 	if (theResident)
 	{
-		assert(theResident->samples() > theY->theIn - theY->theStep);
+		assert(theResident->samples() > cachedSamples);
 
 		// copy the last cachedSamples samples to the cache.
 		theResident->rightSamples(cachedSamples).copyTo(cache);
@@ -87,6 +87,7 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 		cachedSamples = 0;
 	if (!theResident)
 		theResident = new BufferData(interSamples * theInterScope, theInterScope);
+	theResident->leftSamples(cachedSamples).copyFrom(cache);
 
 	BufferDatas d(1);
 
@@ -99,7 +100,6 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 	theX->processOwnChunks(aIn, d, xc);
 	m_totalTimeX += rdtscElapsed(s);
 
-	theResident->leftSamples(cachedSamples).copyFrom(cache);
 	d.copyData(0, *theResident);
 
 	s = rdtsc();

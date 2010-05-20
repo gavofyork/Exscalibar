@@ -366,6 +366,8 @@ public:
 	 */
 	uint samples() const { return theInfo->theScope ? theVisibleSize / theInfo->theScope : 0; }
 
+	uint checksum() const { uint ret = 0; for (uint i = 0; i < elements(); i++) ret += *(uint const*)&(operator[](i)); return ret; }
+
 	/**
 	 * Get another BufferData object referencing some portion of elements in
 	 * this one.

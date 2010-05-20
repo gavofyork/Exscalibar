@@ -221,7 +221,7 @@ int DomProcessor::process()
 			theCurrentOuts.copyData(i, output(i).makeScratchSamples(theWantChunks * theSamplesOut));
 		for (int i = 0; i <= theWorkers.count(); i++)
 		{
-			BufferDatas ins = theCurrentIns.samples(i * chunksEach * theSamplesStep, chunksEach * (theSamplesStep - 1) + theSamplesIn);
+			BufferDatas ins = theCurrentIns.samples(i * chunksEach * theSamplesStep, (chunksEach - 1) * theSamplesStep + theSamplesIn);
 			BufferDatas outs = theCurrentOuts.samples(i * chunksEach * theSamplesOut, chunksEach * theSamplesOut);
 			if (!theWorkers.count())
 				thePrimary->processOwnChunks(ins, outs, chunksEach);

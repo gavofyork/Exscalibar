@@ -34,8 +34,8 @@ using namespace std;
 #include "splitter.h"
 using namespace Geddei;
 
-#define MESSAGES 0
-#define pMESSAGES 0
+#define MESSAGES 1
+#define pMESSAGES 1
 
 namespace Geddei
 {

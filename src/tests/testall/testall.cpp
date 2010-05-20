@@ -22,10 +22,121 @@ using namespace std;
 #include "geddei.h"
 using namespace Geddei;
 
+#include "signaltypes.h"
+using namespace SignalTypes;
+
 #include "monitor.h"
+
+class OneTwo: public CoProcessor
+{
+public:
+	OneTwo(): CoProcessor("OneTwo"){}
+
+	virtual void initFromProperties(const Properties &)
+	{
+		setupIO(0, 1);
+	}
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+	{
+		n = 0;
+		outTypes[0] = Value();
+		return true;
+	}
+	virtual int process()
+	{
+		BufferData d = output(0).makeScratchSample(true);
+		d[0] = n;
+		n = ++n % 65536;
+		return CanWork;
+	}
+	virtual int canProcess()
+	{
+		return CanWork;
+	}
+
+private:
+	int n;
+};
+
+class TSA: public SubProcessor
+{
+public:
+	TSA() : SubProcessor("TSA") {}
+
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks)
+	{
+		for (uint i = 0; i < chunks; i++)
+			out[0].sample(i).copyFrom(in[0].mid(i * 1024, 2048));
+	}
+
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	{
+		outTypes[0] = FreqSteppedSpectrum(2048, 1);
+		return true;
+	}
+	virtual void initFromProperties(const Properties &properties)
+	{
+		setupIO(1, 1);
+		setupSamplesIO(2048, 1024, 1);
+	}
+};
+
+class Transparent: public SubProcessor
+{
+public:
+	Transparent() : SubProcessor("Transparent") {}
+
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks)
+	{
+		out[0][0] = in[0][0];
+	}
+
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	{
+		outTypes = inTypes;
+		return true;
+	}
+	virtual void initFromProperties(const Properties &properties)
+	{
+		setupIO(1, 1);
+		setupSamplesIO(64, 1, 1);
+	}
+};
+
+void othertest()
+{
+	ProcessorGroup objects;
+	(new OneTwo)->init("O", objects);
+	(new DomProcessor(new Combination(new TSA, new Transparent)))->init("D", objects);
+	Monitor *I = (new Monitor);
+	I->init("I", objects);
+	objects.get("O")[0] >>= objects.get("D")[0];
+	objects.get("D")[0] >>= objects.get("I")[0];
+
+	cout << "Confirming types..." << endl;
+	objects.confirmTypes();
+
+	cout << "Starting objects..." << endl;
+	objects.go();
+
+	cout << "Waiting for a little bit..." << endl;
+	I->waitUntilDone();
+
+	cout << "Stopping objects..." << endl;
+	objects.stop();
+
+	cout << "Disconnecting..." << endl;
+	objects.disconnectAll();
+
+	cout << "Monitor: " << I->elementsProcessed() << endl << endl << endl << endl;
+	delete I;
+
+	objects.deleteAll();
+}
 
 int main(int argc, char **argv)
 {
+	othertest();
 /*	QStringList procs = ProcessorFactory::available();
 	cout << "Processors:" << endl;
 	for (QStringList::iterator i = procs.begin(); i != procs.end(); i++)
