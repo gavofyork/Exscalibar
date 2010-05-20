@@ -42,6 +42,7 @@ protected:
 	virtual QSizeF		centreMin() const;
 	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
 	virtual Processor*	reconstructProcessor();
+	virtual void		paintCentre(QPainter* _p);
 
 	virtual QList<SubProcessorItem*> subProcessorItems() const;
 	virtual BaseItem*	baseItem() { return this; }

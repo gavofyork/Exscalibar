@@ -85,7 +85,7 @@ void QScheduler::clearTasks()
 void QScheduler::setWorkers(int _n)
 {
 	if (_n == -1)
-		_n = 1;//QThread::idealThreadCount();
+		_n = QThread::idealThreadCount();
 
 	while (m_workers.count() > _n)
 		delete m_workers.takeLast();

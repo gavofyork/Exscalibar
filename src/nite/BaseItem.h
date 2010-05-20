@@ -64,6 +64,8 @@ public:
 	virtual float		cyclePoint() const { return 0; }
 	virtual void		togglePause() {}
 
+	virtual float		marginSize() const;
+
 	QRectF				centreRect() const { return QRectF(QPointF(0, 0), m_size); }
 	virtual QRectF		outlineRect() const;
 	virtual QRectF		boundingRect() const;

@@ -32,7 +32,7 @@ Scheduled::Scheduled(QWidget *parent) :
 
 void Scheduled::startUpdating()
 {
-	m_timer = startTimer(30);
+	m_timer = startTimer(5000);
 }
 
 void Scheduled::stopUpdating()
@@ -51,21 +51,34 @@ void Scheduled::paintEvent(QPaintEvent*)
 	foreach (QTask* t, ts)
 		cols[t] = QColor::fromHsvF(i += c, 0.75, 0.75);
 
-	double now = QScheduler::currentTime();
+//	double now = QScheduler::currentTime();
 	QList<QWorker*> ws = QScheduler::get()->workers();
-	float duration = 2.f;
+	float duration = .001f;
 	p.scale(width() / duration, height() / float(ws.count()));
 	int y = 0;
+	double now = 0.0;
 	foreach (QWorker* w, ws)
 	{
 		QRing<QWorker::TimeSlice> const& tss = w->timeSlices();
-		for (int i = tss.count() - 1; i > 0; i--)
-			if (now - tss[i].stop > duration)
-				break;
+		if (tss.count())
+		{
+			if (now == 0.0)
+				now = tss[tss.count() - 1].stop;
 			else
-				p.fillRect(QRectF(now - tss[i].start, y, tss[i].stop - tss[i].start, 1.f), cols[tss[i].task]);
-		y++;
+				now = max(tss[tss.count() - 1].stop, now);
+		}
 	}
+	if (now != 0.0)
+		foreach (QWorker* w, ws)
+		{
+			QRing<QWorker::TimeSlice> const& tss = w->timeSlices();
+			for (int i = tss.count() - 1; i > 0; i--)
+				if (now - tss[i].start > duration)
+					break;
+				else
+					p.fillRect(QRectF(now - tss[i].start, y, tss[i].stop - tss[i].start, 1.f), cols[tss[i].task]);
+			y++;
+		}
 }
 
 void Scheduled::timerEvent(QTimerEvent*)

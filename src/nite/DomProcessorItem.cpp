@@ -46,6 +46,11 @@ void DomProcessorItem::geometryChanged()
 	ProcessorItem::geometryChanged();
 }
 
+void DomProcessorItem::paintCentre(QPainter* _p)
+{
+	paintFrames(_p);
+}
+
 Processor* DomProcessorItem::reconstructProcessor()
 {
 	QString cs = composedSubs();

@@ -25,7 +25,7 @@
 // TODO: MultipleOutputPort
 // qobject_cast<ProcessorsScene*>(scene())->beginMultipleConnect(this);
 
-static const double portSize = 8.0;
+static const double portSize = 16.0;
 static const double portLateralMargin = 4.0;
 
 ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):

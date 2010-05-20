@@ -465,10 +465,10 @@ bool Processor::draw(QPainter& _p, QSizeF const& _s) const
 bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	QRectF area(QPointF(0, 0), _s);
-	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
+/*	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
 	g.setColorAt(0, specifyOutlineColour().lighter(125));
 	g.setColorAt(1, specifyOutlineColour().darker(150));
-	_p.fillRect(area, g);
+	_p.fillRect(area, g);*/
 
 	_p.setFont(QFont("Helvetica", min(_s.width(), _s.height()) * 3 / 5, QFont::Black, false));
 

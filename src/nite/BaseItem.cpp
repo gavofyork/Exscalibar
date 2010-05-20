@@ -91,15 +91,21 @@ void BaseItem::geometryChanged()
 	if (!m_size.isValid())
 		m_size = centrePref();
 	m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height(), m_size.height()));
-	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(0.f, statusMargin));
-	m_statusBar->setRect(QRectF(0, 0, m_size.width(), statusHeight));
+	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(cornerSize * 2.f, statusMargin));
+	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 5.f, statusHeight));
 
 	positionChanged();
 }
 
+float BaseItem::marginSize() const
+{
+	return 10.f;
+}
+
 QRectF BaseItem::boundingRect() const
 {
-	return outlineRect().adjusted(-4, -4, 4.f, 4.f);
+	float ms = marginSize();
+	return outlineRect().adjusted(-ms, -ms, ms, ms);
 }
 
 QRectF BaseItem::outlineRect() const
@@ -248,27 +254,89 @@ void BaseItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 
 void BaseItem::paintCentre(QPainter* _p)
 {
-	QRectF ca = centreRect();
-	_p->setPen(Qt::NoPen);
-	_p->setBrush(QColor(255, 255, 255));
-	_p->drawRect(ca);
 }
 
 void BaseItem::paintOutline(QPainter* _p)
 {
-	if (isSelected())
+	_p->save();
+	{
+		float cornerRadius = round(marginSize() * (isSelected() ? 1.25f : 1.25f));
+		float adj = round(marginSize() / (isSelected() ? 4.f : 2.f));
+		QRectF br = boundingRect().adjusted(adj, adj, -adj, -adj);
+		QColor shadow = isSelected() ? QColor(0,0,0) : QColor(64,64,64);
+
+		_p->translate(0.5f, 0.5f + round(marginSize() / (isSelected() ? 5.f : 6.f)));
+		{
+			QRadialGradient cg(0, 0, cornerRadius, 0, 0);
+			cg.setColorAt(0.f, shadow);
+			cg.setColorAt(1.f, Qt::transparent);
+			#define CORNER(name, xs, ys) \
+			{ \
+				cg.setCenter(br.translated(xs * cornerRadius, ys * cornerRadius).name()); \
+				cg.setFocalPoint(cg.center()); \
+				_p->fillRect(QRectF(br.name(), QSizeF(xs * cornerRadius, ys * cornerRadius)), QBrush(cg)); \
+			}
+			CORNER(topLeft, +1, +1)
+			CORNER(topRight, -1, +1)
+			CORNER(bottomLeft, +1, -1)
+			CORNER(bottomRight, -1, -1)
+			#undef CORNER
+		}
+		{
+			QLinearGradient cg;
+			cg.setColorAt(0.f, shadow);
+			cg.setColorAt(1.f, Qt::transparent);
+			#define EDGE(name, x, y, xs, ys) \
+			{ \
+				cg.setStart(br.translated(y * cornerRadius, x * cornerRadius).name()); \
+				cg.setFinalStop(br.name()); \
+				_p->fillRect(QRectF(br.translated(x * cornerRadius, y * cornerRadius).name(), QSizeF(xs * cornerRadius, ys * cornerRadius)), QBrush(cg)); \
+			}
+			EDGE(topLeft, 1, 0, br.width() - 2, 1)
+			EDGE(bottomRight, -1, 0, -br.width() + 2, -1)
+			EDGE(topLeft, 0, 1, 1, br.height() - 2)
+			EDGE(bottomRight, 0, -1, -1, -br.height() + 2)
+			#undef EDGE
+		}
+	}
+	_p->restore();
+/*	if (isSelected())
 	{
 		_p->setPen(QPen(highlightColour(), 0));
 		_p->setBrush(QBrush(highlightColour().lighter(200)));
 		_p->drawRoundedRect(boundingRect(), 3, 3);
+	}*/
+
+	{
+		QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+		cg.setColorAt(0, outlineColour().lighter(125));
+		cg.setColorAt(1, outlineColour().darker(150));
+		_p->fillRect(outlineRect().adjusted(1, 1, -1, -1), QBrush(cg));
+	}
+	{
+		QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+		cg.setColorAt(0, outlineColour().darker(300));
+		cg.setColorAt(1, outlineColour().darker(400));
+		_p->setPen(QPen(cg, 1));
+		_p->drawRoundedRect(outlineRect(), 3, 3);
+		cg.setColorAt(0, outlineColour().lighter(200));
+		cg.setColorAt(1, outlineColour().darker(150));
+		_p->setPen(QPen(cg, 1));
+		_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
+		/*
+		_p->setPen(QPen(QColor(255,255,255,64), 1));
+		_p->drawLine(outlineRect().topLeft(), outlineRect().topRight());
+		_p->setPen(QPen(QColor(255,255,255,32), 1));
+		_p->drawLine(outlineRect().topLeft(), outlineRect().bottomLeft());
+		_p->setPen(QPen(QColor(0,0,0,32), 1));
+		_p->drawLine(outlineRect().bottomRight(), outlineRect().topRight());
+		_p->setPen(QPen(QColor(0,0,0,64), 1));
+		_p->drawLine(outlineRect().bottomRight(), outlineRect().bottomLeft());
+		*/
 	}
 
-	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(outlineColour());
-	_p->drawRect(outlineRect());
-
-	_p->setPen(QPen(outlineColour().darker(), 1));
-	QRectF o = outlineRect();
+	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
+	QRectF o = outlineRect().adjusted(1, 1, -1, -1);
 	for (int i = 0; i < 4; i++)
 	{
 		double mp = cornerSize * 2.f * (4.0 - i) / 4.0;
@@ -281,6 +349,16 @@ void BaseItem::paintOutline(QPainter* _p)
 	{
 		double mp = (statusHeight + cornerSize) * (4.0 - i) / 4.0;
 		_p->drawLine(o.right() - statusMargin, o.bottom() - mp, o.right() - mp, o.bottom() - statusMargin);
+	}
+
+	if (isSelected())
+	{
+		_p->setBrush(Qt::NoBrush);
+		for (int i = 0; i < 5; i+=2)
+		{
+			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
+			_p->drawRect(outlineRect());
+		}
 	}
 }
 

@@ -56,12 +56,6 @@ DomProcessor::~DomProcessor()
 	assert(theWorkers.isEmpty());
 }
 
-bool DomProcessor::paintProcessor(QPainter& _p, QSizeF const& _s) const
-{
-	_p.fillRect(QRectF(QPointF(0, 0), _s), QBrush(Qt::black, Qt::Dense4Pattern));
-	return true;
-}
-
 void DomProcessor::addWorker(SubProcessor *worker)
 {
 	theWorkers.append(new DSCoupling(this, worker));

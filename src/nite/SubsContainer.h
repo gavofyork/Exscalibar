@@ -47,6 +47,9 @@ protected:
 	void				geometryChanged();
 	QSizeF				centreMin() const;
 	Properties			completeProperties() const;
+	virtual float		margin() const { return 5.f; }
+	virtual float		padding() const { return 2.f; }
+	void				paintFrames(QPainter*) const;
 
 	QString				composedSubs() const;
 	QList<SubProcessorItem*> ordered() const;

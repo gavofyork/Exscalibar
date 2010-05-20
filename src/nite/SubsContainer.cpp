@@ -25,10 +25,29 @@ SubsContainer::SubsContainer()
 
 QSizeF SubsContainer::centreMin() const
 {
-	QSizeF s(0, 0);
+	QSizeF s(-margin(), 0);
 	foreach (SubProcessorItem* i, subProcessorItems())
-		s = QSizeF(s.width() + i->size().width(), max(s.height(), i->size().height()));
-	return s;
+		s = QSizeF(s.width() + i->size().width() + margin(), max(s.height(), i->size().height()));
+	return s + QSizeF(padding() * 2, padding() * 2);
+}
+
+void SubsContainer::paintFrames(QPainter* _p) const
+{
+	QPointF cp(padding(), padding());
+	_p->save();
+	_p->translate(.5f, .5f);
+	foreach (SubProcessorItem* spi, ordered())
+	{
+		QLinearGradient g(spi->pos(), spi->pos() + QPointF(0, spi->size().height()));
+		g.setColorAt(0, Qt::transparent);
+		g.setColorAt(1, QColor(255, 255, 255, 64));
+		_p->setPen(QPen(QBrush(g), 1));
+		_p->drawRoundedRect(QRectF(spi->pos(), spi->size()).adjusted(-2, -2, 1, 1), 3, 3);
+		_p->setPen(QColor(0, 0, 0, 128));
+		_p->drawRoundedRect(QRectF(spi->pos(), spi->size()).adjusted(-1, -1, 0, 0), 1.5, 1.5);
+		cp += QPointF(spi->size().width() + margin(), 0);
+	}
+	_p->restore();
 }
 
 QString SubsContainer::composedSubs() const
@@ -92,11 +111,11 @@ QList<SubProcessorItem*> SubsContainer::ordered() const
 
 void SubsContainer::geometryChanged()
 {
-	QPointF cp(0, 0);
+	QPointF cp(padding() + .5f, padding() + .5f);
 	foreach (SubProcessorItem* spi, ordered())
 	{
 		spi->setPos(cp);
-		cp += QPointF(spi->size().width(), 0);
+		cp += QPointF(spi->size().width() + margin(), 0);
 	}
 }
 
