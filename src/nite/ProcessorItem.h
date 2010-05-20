@@ -80,6 +80,7 @@ protected:
 private:
 	void				updateMultiplicities();
 
+	bool				m_propertiesDirty;
 	QString				m_type;
 	bool				m_tryToShowMulti;
 	uint				m_multiplicity;

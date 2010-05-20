@@ -147,8 +147,11 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 	if (m_processor && m_processor->isRunning())
 	{
 		m_processor->update(completeProperties());
+		m_propertiesDirty = true;
 		return;
 	}
+
+	m_propertiesDirty = false;
 	Processor* old = m_processor;
 	m_processor = reconstructProcessor();
 	if (!m_processor)
@@ -337,6 +340,9 @@ void ProcessorItem::disconnectYourself()
 			ii->setInputItem();
 	m_processor->disconnectAll();
 	m_processor->setNoGroup();
+
+	if (m_propertiesDirty)
+		propertiesChanged();
 }
 
 void ProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)

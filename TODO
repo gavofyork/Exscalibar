@@ -19,7 +19,6 @@ Automatic latching when connecting to multiple.
 Reload plugins.
 Generalised plugin architecture (e.g. distance function plugins for SSM).
 
-BUG: Update properties while running is silently reset on next run.
 BUG: Referrals in Multiplicative doesn't update when one is deleted.
 
 Multiplicity, multi-processor (then 3-band Bark summation on FFT for 8-channel spectral output).
