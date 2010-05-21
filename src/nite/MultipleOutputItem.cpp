@@ -84,7 +84,7 @@ MultiProcessorItem* MultipleOutputItem::multiProcessorItem() const
 
 QRectF MultipleOutputItem::boundingRect() const
 {
-	return QRectF(0, -m_size.height(), m_size.width(), m_size.height() * 3 / 2);
+	return QRectF(0, -m_size.height() / 2, m_size.width(), m_size.height());
 }
 
 QPointF MultipleOutputItem::tip() const
@@ -94,25 +94,55 @@ QPointF MultipleOutputItem::tip() const
 
 void MultipleOutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(QColor::fromHsv(40, 128, m_hover ? 255 : 200));
-	double w = m_size.width();
-	double h = m_size.height();
-	for (int i = 0; (uint)i < ((m_multiplicity == Undefined) ? 4 : (m_multiplicity - 1)); i++)
+	double psot = m_size.height() / 2;
+	double cs = m_size.width();
+
+	_p->save();
+	_p->translate(0, -pos().y());
 	{
-		if (m_multiplicity == Undefined)
-			_p->setPen(QPen(QColor::fromHsv(0, 0, 0, (4 - i) * 255 / 4), 0));
-		_p->drawLine(0, -h * (i + 3) / 4, w - h / 2, -h * (i + 3) / 4);
-		_p->drawLine(w - h / 2, -h * (i + 3) / 4, w, -h * (i + 1) / 4);
+		QPolygonF p;
+		p.append(QPointF(1, psot));
+		p.append(QPointF(cs - psot, psot));
+		p.append(QPointF(cs, 0));
+		p.append(QPointF(cs - psot, -psot));
+		p.append(QPointF(1, -psot));
+		_p->setPen(baseItem()->outerPen());
+		_p->setBrush(Qt::NoBrush);
+		_p->drawPolyline(p.translated(0, pos().y()));
 	}
-	_p->setPen(QPen(Qt::black, 0));
-	QPolygonF p;
-	p.append(QPointF(0, -h / 2));
-	p.append(QPointF(0, h / 2));
-	p.append(QPointF(w - h / 2, h / 2));
-	p.append(QPointF(w, 0));
-	p.append(QPointF(w - h / 2, -h / 2));
-	_p->drawPolygon(p);
+	{
+		QPolygonF p;
+		p.append(QPointF(-.5f, psot - 1));
+		p.append(QPointF(cs - psot - 1, psot - 1));
+		p.append(QPointF(cs - 1, 0));
+		p.append(QPointF(cs - psot - 1, 1-psot));
+		p.append(QPointF(-.5f, 1-psot));
+		_p->setPen(Qt::NoPen);
+		_p->setBrush(baseItem()->fillBrush());
+		_p->drawPolygon(p.translated(0, pos().y()));
+	}
+	{
+		QPolygonF p;
+		p.append(QPointF(0, psot - 1));
+		p.append(QPointF(cs - psot - 1, psot - 1));
+		p.append(QPointF(cs - 1, 0));
+		p.append(QPointF(cs - psot - 1, 1-psot));
+		p.append(QPointF(0, 1-psot));
+		_p->setPen(baseItem()->innerPen());
+		_p->setBrush(Qt::NoBrush);
+		_p->drawPolyline(p.translated(0, pos().y()));
+	}
+	_p->restore();
+	QString s = m_multiplicity != Undefined ? QString::number(m_multiplicity) : "?";
+	QFont f;
+	f.setBold(true);
+	QRectF br = boundingRect().adjusted(2, 2, -2 - m_size.height() / 2, -2);
+	f.setPixelSize(br.height());
+	_p->setFont(f);
+	_p->setPen(QColor(0, 0, 0, 96));
+	_p->drawText(br.translated(0, 1), Qt::AlignCenter, s);
+	_p->setPen(Qt::white);
+	_p->drawText(br, Qt::AlignCenter, s);
 }
 
 void MultipleOutputItem::hoverEnterEvent(QGraphicsSceneHoverEvent*)

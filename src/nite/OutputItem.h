@@ -43,9 +43,7 @@ public:
 	virtual int type() const { return Type; }
 
 private:
-	QPolygonF polygon() const;
-
-	virtual QRectF boundingRect() const { return polygon().boundingRect(); }
+	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);

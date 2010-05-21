@@ -1,12 +1,10 @@
-Bigger ports.
-Show future link.
 Change MultiPort to M.
+
+Show future link.
 Allow dragging of subprocs around.
 Graphical glitches.
 
 Allow properties to be declared run-time and edited within processor.
-
-ALSACapturer to have squares for buffers & hollow for missed.
 
 Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).
 Latch as a Connection that sits between a connection and a processor.

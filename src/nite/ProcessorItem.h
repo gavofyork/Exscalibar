@@ -28,6 +28,10 @@
 
 class PauseItem;
 
+extern const QSizeF portSize;
+extern const QSizeF multiPortSize;
+extern const double portLateralMargin;
+
 class ProcessorItem: public BaseItem
 {
 	friend class InputItem;

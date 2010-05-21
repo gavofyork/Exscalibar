@@ -27,6 +27,7 @@
 #include <alsa/asoundlib.h>
 
 #include "qfactoryexporter.h"
+#include "qring.h"
 
 #include "buffer.h"
 #include "processor.h"
@@ -43,11 +44,13 @@ class ALSACapturer: public CoProcessor
 	uint thePeriods;
 	uint theFrequency;
 	enum { NormDisabled = 0, NormMax, NormRMS };
-	int m_normalisation;
 	snd_pcm_t *thePcmHandle;
 	QVector<short> m_inData;
 
 	float m_error;
+
+	int m_normAlgorithm;
+	QRing<float> m_normalisation;
 
 	float m_dcOffsetLearnRate;
 	QVector<float> m_inAvg;
@@ -70,20 +73,23 @@ class ALSACapturer: public CoProcessor
 		m_inAvg.resize(theChannels);
 		setupIO(0, theChannels);
 		setupVisual(30, 30, 30);
+		m_normalisation.resize(theFrequency / thePeriodSize * _p["Normalisation Length"].toFloat());
+		m_error = 0.f;
 	}
 	virtual void updateFromProperties(const Properties &_p)
 	{
 		m_dcOffsetLearnRate = _p["DC Offset Learn Rate"].toDouble();
-		m_normalisation = _p["Volume Normalisation"].toInt();
+		m_normAlgorithm = _p["Normalisation Algorithm"].toInt();
 	}
 	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
 								("Channels", 2, "The number of channels to capture.")
-								("Frequency", 44100, "The frequency with which to sample at { Hz }.")
-								("DC Offset Learn Rate", 0.7, "How quickly changes in the DC offset are learned.")
-								("Volume Normalisation", 1, "How volume is normalised. { 0: Disabled; 1: Max; 2: RMS }")
+								("Frequency", 44100, "The frequency with which to sample at. { Hz }")
+								("DC Offset Learn Rate", 0.7, "How quickly changes in the DC offset are learned. { 0..1 }", true)
+								("Normalisation Algorithm", 1, "How volume is normalised. { 0: Disabled; 1: Max; 2: RMS }", true)
+								("Normalisation Length", 60.f, "The length of history for normalisation. { s }")
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
@@ -134,6 +140,7 @@ bool ALSACapturer::processorStarted()
 		m_inData.resize(thePeriodSize * theChannels);
 		assert(!snd_pcm_nonblock(thePcmHandle, 1));
 		snd_pcm_prepare(thePcmHandle);
+		m_normalisation.clear();
 		for (uint c = 0; c < numOutputs(); c++)
 			m_inAvg[c] = 0.f;
 		return true;
@@ -178,9 +185,34 @@ int ALSACapturer::process()
 		float avg[theChannels];
 		for (uint c = 0; c < theChannels; c++)
 			d[c] = output(c).makeScratchSamples(count), avg[c] = 0.f;
-		for (int i = 0; i < count; i++)
-			m_max = max(m_max, fabsf(m_inData[i]));
-		float divisor = (m_normalisation == NormMax) ? m_max : 32768.f;
+
+		if (count > thePeriodSize / 2.f)
+		{
+			float m = 0.f;
+			if (m_normAlgorithm == NormMax)
+				for (int i = 0; i < count; i++)
+					m = max(m, fabsf(m_inData[i]));
+			else if (m_normAlgorithm == NormRMS)
+			{
+				for (int i = 0; i < count; i++)
+					m += m_inData[i] * m_inData[i];
+				m = sqrt(m / count);
+			}
+			m_normalisation.shift(m);
+		}
+		float divisor = 0.f;
+		if (m_normAlgorithm == NormMax && m_normalisation.count())
+			for (int i = 0; i < m_normalisation.count(); i++)
+				divisor = max(divisor, fabsf(m_normalisation[i]));
+		else if (m_normAlgorithm == NormRMS && m_normalisation.count())
+		{
+			for (int i = 0; i < m_normalisation.count(); i++)
+				divisor += m_normalisation[i] * m_normalisation[i];
+			divisor = sqrt(divisor / m_normalisation.count());
+		}
+		else
+			divisor = 32768.f;
+
 		for (int i = 0; i < count; i++)
 			for (uint c = 0; c < theChannels; c++)
 			{

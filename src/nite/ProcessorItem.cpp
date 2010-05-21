@@ -25,8 +25,9 @@
 // TODO: MultipleOutputPort
 // qobject_cast<ProcessorsScene*>(scene())->beginMultipleConnect(this);
 
-static const QSizeF portSize = QSizeF(8.f, 12.f);
-static const double portLateralMargin = 4.0;
+const QSizeF portSize = QSizeF(8.f, 12.f);
+const QSizeF multiPortSize = QSizeF(20.f, 12.f);
+const double portLateralMargin = 4.0;
 
 ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
 	BaseItem			(_pr, _size),
@@ -173,10 +174,10 @@ void ProcessorItem::geometryChanged()
 	{
 		MultipleInputItem* mii;
 		if (filter<MultipleInputItem>(childItems()).isEmpty())
-			(mii = new MultipleInputItem(this, portSize))->hide();
+			(mii = new MultipleInputItem(this, multiPortSize))->hide();
 		else
 			mii = filter<MultipleInputItem>(childItems())[0];
-		mii->setPos(-1.f, portLateralMargin * 3 / 2 + mii->size().height() / 2);
+		mii->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2);/* + (portLateralMargin + i->size().height()) * i->index());*/
 	}
 	foreach (InputItem* ii, filter<InputItem>(childItems()))
 		if ((int)ii->index() < iis.count())
@@ -194,10 +195,10 @@ void ProcessorItem::geometryChanged()
 	{
 		MultipleOutputItem* moi;
 		if (filter<MultipleOutputItem>(childItems()).isEmpty())
-			(moi = new MultipleOutputItem(this, portSize))->hide();
+			(moi = new MultipleOutputItem(this, multiPortSize))->hide();
 		else
 			moi = filter<MultipleOutputItem>(childItems())[0];
-		moi->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + moi->size().height() / 2);
+		moi->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2);
 	}
 
 	foreach (OutputItem* oi, filter<OutputItem>(childItems()))

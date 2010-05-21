@@ -23,6 +23,7 @@ using namespace Geddei;
 #include "MultipleOutputItem.h"
 #include "MultipleConnectionItem.h"
 #include "MultiProcessorItem.h"
+#include "ProcessorItem.h"
 
 class ControlsItem: public QGraphicsRectItem
 {
@@ -299,9 +300,9 @@ void MultiProcessorItem::geometryChanged()
 			delete mii;
 	for (int i = 0; i < miis.count(); i++)
 		if (!miis[i])
-			miis[i] = new MultipleInputItem(i, this, QSizeF(10.f, 8.f));
-	foreach (MultipleInputItem* i, miis)
-		i->setPos(-1.f, 6.f * 3 / 2 + (8.f + i->size().height()) * i->index());
+			miis[i] = new MultipleInputItem(i, this, multiPortSize);
+	foreach (MultipleInputItem* mii, miis)
+		mii->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + mii->size().height()) * mii->index());
 
 	QVector<MultipleOutputItem*> mois(multiProcessor()->numMultiOutputs(), 0);
 	foreach (MultipleOutputItem* moi, filter<MultipleOutputItem>(childItems()))
@@ -311,9 +312,9 @@ void MultiProcessorItem::geometryChanged()
 			delete moi;
 	for (int i = 0; i < mois.count(); i++)
 		if (!mois[i])
-			mois[i] = new MultipleOutputItem(i, this, QSizeF(10.f, 8.f));
-	foreach (MultipleOutputItem* i, mois)
-		i->setPos(centreRect().right() + 1.f, 6.f * 3 / 2 + (8.f + i->size().height()) * i->index());
+			mois[i] = new MultipleOutputItem(i, this, multiPortSize);
+	foreach (MultipleOutputItem* moi, mois)
+		moi->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
 
 	updateMultiplicities();
 

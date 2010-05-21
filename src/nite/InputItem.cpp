@@ -44,7 +44,7 @@ bool InputItem::isConnected() const
 
 QRectF InputItem::boundingRect() const
 {
-	return QRectF(-m_size.width(), -m_size.height() / 2, m_size.width(), m_size.height() / 2);
+	return QRectF(-m_size.width(), -m_size.height() / 2, m_size.width(), m_size.height());
 }
 
 QPointF InputItem::tip() const
@@ -55,8 +55,6 @@ QPointF InputItem::tip() const
 void InputItem::typesConfirmed()
 {
 	prepareGeometryChange();
-/*	double secs = processorItem()->m_processor->input(m_index).capacity() / processorItem()->m_processor->input(m_index).type().frequency();
-	m_size = QSizeF(log(1.0 + secs) / log(2) * 16 + m_baseSize.width(), m_baseSize.height());*/
 	m_size = m_baseSize;
 	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->m_processor->input(m_index).type().info();
 	update();
@@ -67,6 +65,7 @@ void InputItem::typesConfirmed()
 
 void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
+	_p->save();
 	_p->setPen(baseItem()->outerPen());
 	_p->translate(0, -pos().y());
 	{
@@ -100,10 +99,5 @@ void InputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 		_p->setBrush(Qt::NoBrush);
 		_p->drawPolyline(p.translated(0, pos().y()));
 	}
-/*
-	if (processorItem()->m_processor->isRunning())	//  a bit unsafe, since the processor could stop & get reset between these two.
-	{
-		double fill = processorItem()->m_processor->input(m_index).filled();
-		_p->fillRect(QRectF(0, -m_size.height() / 4, -(m_size.width() - m_baseSize.width()) * fill, m_size.height() / 2) , QColor(Qt::darkRed));
-	}*/
+	_p->restore();
 }

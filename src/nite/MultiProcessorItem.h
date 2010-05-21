@@ -71,7 +71,7 @@ protected:
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
 
-	uint				multiplicity() { if (multiProcessor() && multiProcessor()->knowMultiplicity()) return multiProcessor()->multiplicity(); return Undefined; }
+	uint				multiplicity() const { if (multiProcessor() && multiProcessor()->knowMultiplicity()) return multiProcessor()->multiplicity(); return Undefined; }
 
 	virtual QSizeF		centreMin() const;
 	virtual QSizeF		centrePref() const;
@@ -87,7 +87,7 @@ protected:
 	Processor*			m_processor;
 	ControlsItem*		m_controls;
 
-	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(m_multiProcessor->processor(0)); }
+	virtual QTask*		primaryTask() const { return (multiplicity() != Undefined && multiplicity()) ? dynamic_cast<CoProcessor*>(m_multiProcessor->processor(0)) : 0; }
 
 private:
 	QString				m_type;

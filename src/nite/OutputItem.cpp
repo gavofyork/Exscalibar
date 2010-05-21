@@ -46,17 +46,9 @@ BaseItem* OutputItem::baseItem() const
 	return dynamic_cast<BaseItem*>(parentItem());
 }
 
-QPolygonF OutputItem::polygon() const
+QRectF OutputItem::boundingRect() const
 {
-	QPolygonF p;
-	double psot = m_size.height() / 2;
-	double cs = m_size.width();
-	p.append(QPointF(0, -psot));
-	p.append(QPointF(0, psot));
-	p.append(QPointF(cs - psot, psot));
-	p.append(QPointF(cs, 0));
-	p.append(QPointF(cs - psot, -psot));
-	return p;
+	return QRectF(0, -m_size.height() / 2, m_size.width(), m_size.height());
 }
 
 QPointF OutputItem::tip() const
@@ -69,6 +61,7 @@ void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 	double psot = m_size.height() / 2;
 	double cs = m_size.width();
 
+	_p->save();
 	_p->translate(0, -pos().y());
 	{
 		QPolygonF p;
@@ -103,6 +96,7 @@ void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 		_p->setBrush(Qt::NoBrush);
 		_p->drawPolyline(p.translated(0, pos().y()));
 	}
+	_p->restore();
 }
 
 void OutputItem::hoverEnterEvent(QGraphicsSceneHoverEvent*)

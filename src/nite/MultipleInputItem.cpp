@@ -78,7 +78,7 @@ MultiProcessorItem* MultipleInputItem::multiProcessorItem() const
 
 QRectF MultipleInputItem::boundingRect() const
 {
-	return QRectF(-m_size.width(), -m_size.height() * (0.5 + 0.25 * ((m_multiplicity == Undefined) ? 6 : m_multiplicity)), m_size.width(), m_size.height() * (1 + 0.25 * ((m_multiplicity == Undefined) ? 6 : m_multiplicity)));
+	return QRectF(-m_size.width(), -m_size.height() / 2, m_size.width(), m_size.height());
 }
 
 QPointF MultipleInputItem::tip() const
@@ -97,24 +97,49 @@ void MultipleInputItem::typesConfirmed()
 
 void MultipleInputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	_p->setPen(QPen(Qt::black, 0));
-	_p->setBrush(QColor::fromHsv(40, 128, 220));
-	float w = m_size.width();
-	float h = m_size.height();
-	for (int i = 0; (uint)i < ((m_multiplicity == Undefined) ? 4 : (m_multiplicity - 1)); i++)
+	_p->save();
+	_p->translate(0, -pos().y());
 	{
-		if (m_multiplicity == Undefined)
-			_p->setPen(QPen(QColor::fromHsv(0, 0, 0, (4 - i) * 255 / 4), 0));
-		_p->drawLine(0, -h * (i + 3) / 4, -w, -h * (i + 3) / 4);
-		if (i < 2)
-			_p->drawLine(-w, -h * (i - 1) / 4, h / 2 - w, -h * (i + 1) / 4);
+		QPolygonF p;
+		p.append(QPointF(-1, -m_size.height() / 2));
+		p.append(QPointF(-m_size.width(), -m_size.height() / 2));
+		p.append(QPointF(m_size.height() / 2 - m_size.width(), 0));
+		p.append(QPointF(-m_size.width(), m_size.height() / 2));
+		p.append(QPointF(-1, m_size.height() / 2));
+		_p->setPen(baseItem()->outerPen());
+		_p->drawPolyline(p.translated(0, pos().y()));
 	}
-	_p->setPen(QPen(Qt::black, 0));
-	QPolygonF p;
-	p.append(QPointF(m_size.height() / 2 - m_size.width(), 0));
-	p.append(QPointF(-m_size.width(), m_size.height() / 2));
-	p.append(QPointF(0, m_size.height() / 2));
-	p.append(QPointF(0, -m_size.height() / 2));
-	p.append(QPointF(-m_size.width(), -m_size.height() / 2));
-	_p->drawPolygon(p);
+	{
+		QPolygonF p;
+		p.append(QPointF(0.5, -m_size.height() / 2 + 1));
+		p.append(QPointF(-m_size.width() + 2, -m_size.height() / 2 + 1));
+		p.append(QPointF(m_size.height() / 2 - m_size.width() + 2, 0));
+		p.append(QPointF(-m_size.width() + 2, m_size.height() / 2 - 1));
+		p.append(QPointF(0.5, m_size.height() / 2 - 1));
+		_p->setPen(Qt::NoPen);
+		_p->setBrush(baseItem()->fillBrush());
+		_p->drawPolygon(p.translated(0, pos().y()));
+	}
+	{
+		QPolygonF p;
+		p.append(QPointF(0, -m_size.height() / 2 + 1));
+		p.append(QPointF(-m_size.width() + 2, -m_size.height() / 2 + 1));
+		p.append(QPointF(m_size.height() / 2 - m_size.width() + 2, 0));
+		p.append(QPointF(-m_size.width() + 2, m_size.height() / 2 - 1));
+		p.append(QPointF(0, m_size.height() / 2 - 1));
+		_p->setPen(baseItem()->innerPen());
+		_p->setBrush(Qt::NoBrush);
+		_p->drawPolyline(p.translated(0, pos().y()));
+	}
+	_p->restore();
+	QString s = m_multiplicity != Undefined ? QString::number(m_multiplicity) : "?";
+	QFont f;
+	f.setBold(true);
+	QRectF br = boundingRect().adjusted(m_size.height() / 2 + 2, 2, -2, -2);
+	f.setPixelSize(br.height());
+	_p->setFont(f);
+	_p->setPen(QColor(0, 0, 0, 96));
+	_p->drawText(br.translated(0, 1), Qt::AlignCenter, s);
+	_p->setPen(Qt::white);
+	_p->drawText(br, Qt::AlignCenter, s);
 }
