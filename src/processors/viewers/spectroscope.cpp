@@ -48,6 +48,7 @@ class Spectroscope: public CoProcessor
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 
 public:
 	Spectroscope(): CoProcessor("Spectroscope", NotMulti) {}

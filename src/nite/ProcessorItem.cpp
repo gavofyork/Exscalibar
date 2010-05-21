@@ -25,7 +25,7 @@
 // TODO: MultipleOutputPort
 // qobject_cast<ProcessorsScene*>(scene())->beginMultipleConnect(this);
 
-static const double portSize = 16.0;
+static const QSizeF portSize = QSizeF(8.f, 12.f);
 static const double portLateralMargin = 4.0;
 
 ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
@@ -139,7 +139,7 @@ Processor* ProcessorItem::reconstructProcessor()
 
 QSizeF ProcessorItem::centreMin() const
 {
-	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin / 2));
 }
 
 void ProcessorItem::propertiesChanged(QString const& _newName)
@@ -173,7 +173,7 @@ void ProcessorItem::geometryChanged()
 	{
 		MultipleInputItem* mii;
 		if (filter<MultipleInputItem>(childItems()).isEmpty())
-			(mii = new MultipleInputItem(this, QSizeF(10.f, 8.f)))->hide();
+			(mii = new MultipleInputItem(this, portSize))->hide();
 		else
 			mii = filter<MultipleInputItem>(childItems())[0];
 		mii->setPos(-1.f, portLateralMargin * 3 / 2 + mii->size().height() / 2);
@@ -185,7 +185,7 @@ void ProcessorItem::geometryChanged()
 			delete ii;
 	for (int i = 0; i < iis.count(); i++)
 		if (!iis[i])
-			iis[i] = new InputItem(i, this, QSizeF(10.f, 8.f));
+			iis[i] = new InputItem(i, this, portSize);
 	foreach (InputItem* i, iis)
 		i->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
@@ -194,7 +194,7 @@ void ProcessorItem::geometryChanged()
 	{
 		MultipleOutputItem* moi;
 		if (filter<MultipleOutputItem>(childItems()).isEmpty())
-			(moi = new MultipleOutputItem(this, QSizeF(10.f, 8.f)))->hide();
+			(moi = new MultipleOutputItem(this, portSize))->hide();
 		else
 			moi = filter<MultipleOutputItem>(childItems())[0];
 		moi->setPos(1.f + centreRect().width(), portLateralMargin * 3 / 2 + moi->size().height() / 2);
@@ -207,7 +207,7 @@ void ProcessorItem::geometryChanged()
 			delete oi;
 	for (int i = 0; i < ois.count(); i++)
 		if (!ois[i])
-			ois[i] = new OutputItem(i, this, QSizeF(10.f, 8.f));
+			ois[i] = new OutputItem(i, this, portSize);
 	foreach (OutputItem* i, ois)
 		i->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 

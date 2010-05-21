@@ -42,6 +42,7 @@ class Matrigraph: public CoProcessor
 	virtual void initFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = 1; }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 
 public:
 	Matrigraph(): CoProcessor("Matrigraph", NotMulti) {}

@@ -40,6 +40,7 @@ class Oscilloscope: public CoProcessor
 	virtual void updateFromProperties(Properties const& _p);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_last.count(); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 
 public:
 	Oscilloscope(): CoProcessor("Oscilloscope", NotMulti) {}

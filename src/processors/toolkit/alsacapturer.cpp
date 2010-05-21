@@ -47,6 +47,8 @@ class ALSACapturer: public CoProcessor
 	snd_pcm_t *thePcmHandle;
 	QVector<short> m_inData;
 
+	float m_error;
+
 	float m_dcOffsetLearnRate;
 	QVector<float> m_inAvg;
 
@@ -57,7 +59,6 @@ class ALSACapturer: public CoProcessor
 	virtual int canProcess();
 	virtual int process();
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
 	{
 		theDevice = _p["Device"].toString();
@@ -68,6 +69,7 @@ class ALSACapturer: public CoProcessor
 		updateFromProperties(_p);
 		m_inAvg.resize(theChannels);
 		setupIO(0, theChannels);
+		setupVisual(30, 30, 30);
 	}
 	virtual void updateFromProperties(const Properties &_p)
 	{
@@ -85,9 +87,8 @@ class ALSACapturer: public CoProcessor
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");
 	}
-/*	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const
-	{
-	}*/
+	virtual QColor specifyOutlineColour() const { return QColor(255 * m_error, 127 * (1.f - m_error), 0); }
+	virtual QString simpleText() const { return QChar(0x2386); }
 
 public:
 	ALSACapturer(): CoProcessor("ALSACapturer", OutConst), thePcmHandle(0) {}
@@ -103,6 +104,7 @@ bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs 
 bool ALSACapturer::processorStarted()
 {
 	m_max = 0.f;
+	m_error = 0.f;
 
 	snd_pcm_hw_params_t *hwparams;
 	snd_pcm_hw_params_alloca(&hwparams);
@@ -161,12 +163,14 @@ int ALSACapturer::canProcess()
 			int r = -(int)max(1u, (thePeriodSize - av) * 1000 / theFrequency);
 			return r;
 		}
+		m_error = .99999f;
 		snd_pcm_recover(thePcmHandle, av, 0);
 	}
 }
 
 int ALSACapturer::process()
 {
+	m_error *= m_error;
 	int count = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
 	if (count > 0)
 	{
@@ -191,6 +195,7 @@ int ALSACapturer::process()
 	else if (count < 0)
 	{
 		snd_pcm_recover(thePcmHandle, count, 0);
+		m_error = .99999f;
 		return DidWork;
 	}
 	return NoWork;

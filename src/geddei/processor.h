@@ -423,7 +423,7 @@ protected:
 	 */
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
 	virtual QString simpleText() const { return "?"; }
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(0, 0, 160); }
 
 	/**
 	 * Reimplement to initialise any stuff that processor may need to be open/

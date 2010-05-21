@@ -65,6 +65,7 @@ class Grapher: public CoProcessor
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_spu; }
 	virtual void requireInputSpace(QVector<uint>& _s) { _s[0] = 1; }
 	void updateLimits(QSizeF const& _s, float _ppl) const;
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
 public:
 	Grapher(): CoProcessor("Grapher") {}
 };

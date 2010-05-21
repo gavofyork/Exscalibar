@@ -214,7 +214,7 @@ QSizeF MultiProcessorItem::centreMin() const
 	int rows = m_showAll ? (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize) : 1;
 	int cols = m_showAll ? m_rowSize : 1;
 	if (m_processor)
-		return QSizeF(processor()->minWidth() * cols + (cols - 1) * marginWidth, max((double)processor()->minHeight() * rows + (rows - 1) * marginWidth, portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize)));
+		return QSizeF(processor()->minWidth() * cols + (cols - 1) * marginWidth, max((double)processor()->minHeight() * rows + (rows - 1) * marginWidth, portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height())));
 	return QSizeF(0, 0);
 }
 

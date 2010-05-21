@@ -127,6 +127,7 @@ class SelfSimilarity : public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual QString simpleText() const { return QChar(0x2258); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(40, 96, 160); }
 
 public:
 	SelfSimilarity() : SubProcessor("SelfSimilarity") {}
