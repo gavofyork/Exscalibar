@@ -57,7 +57,7 @@ void ProcessorItem::tick()
 {
 	BaseItem::tick();
 	foreach (QGraphicsItem* i, childItems())
-		if (InputItem* ii = dynamic_cast<InputItem*>(i))
+		if (InputItem* ii = item_cast<InputItem>(i))
 			ii->update();
 }
 
@@ -116,9 +116,9 @@ void ProcessorItem::typesConfirmed()
 {
 	BaseItem::typesConfirmed();
 	foreach (QGraphicsItem* i, childItems())
-		if (InputItem* ii = dynamic_cast<InputItem*>(i))
+		if (MultipleInputItem* ii = item_cast<MultipleInputItem>(i))
 			ii->typesConfirmed();
-		else if (MultipleInputItem* ii = dynamic_cast<MultipleInputItem*>(i))
+		else if (InputItem* ii = item_cast<InputItem>(i))
 			ii->typesConfirmed();
 	updateMultiplicities();
 }
@@ -198,7 +198,7 @@ void ProcessorItem::geometryChanged()
 			(moi = new MultipleOutputItem(this, multiPortSize))->hide();
 		else
 			moi = filter<MultipleOutputItem>(childItems())[0];
-		moi->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2);
+		moi->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2);
 	}
 
 	foreach (OutputItem* oi, filter<OutputItem>(childItems()))
@@ -210,7 +210,7 @@ void ProcessorItem::geometryChanged()
 		if (!ois[i])
 			ois[i] = new OutputItem(i, this, portSize);
 	foreach (OutputItem* i, ois)
-		i->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
+		i->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
 
 	updateMultiDisplay();
 	BaseItem::geometryChanged();
@@ -220,11 +220,11 @@ void ProcessorItem::positionChanged()
 {
 	if (scene())
 		foreach (QGraphicsItem* i, scene()->items())
-			if (ConnectionItem* ci = dynamic_cast<ConnectionItem*>(i))
+			if (ConnectionItem* ci = item_cast<ConnectionItem>(i))
 			{	if (ci->toProcessor() == this || ci->fromProcessor() == this)
 					ci->rejigEndPoints();
 			}
-			else if (MultipleConnectionItem* mci = dynamic_cast<MultipleConnectionItem*>(i))
+			else if (MultipleConnectionItem* mci = item_cast<MultipleConnectionItem>(i))
 				if (mci->to()->processorItem() == this || mci->from()->processorItem() == this)
 					mci->rejigEndPoints();
 
@@ -337,7 +337,7 @@ void ProcessorItem::disconnectYourself()
 
 	geometryChanged();
 	foreach (QGraphicsItem* i, childItems())
-		if (OutputItem* ii = dynamic_cast<OutputItem*>(i))
+		if (OutputItem* ii = item_cast<OutputItem>(i))
 			ii->setInputItem();
 	m_processor->disconnectAll();
 	m_processor->setNoGroup();

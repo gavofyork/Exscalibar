@@ -26,7 +26,7 @@ IncompleteMultipleConnectionItem::IncompleteMultipleConnectionItem(MultipleOutpu
 
 MultipleOutputItem* IncompleteMultipleConnectionItem::from() const
 {
-	return dynamic_cast<MultipleOutputItem*>(parentItem());
+	return item_cast<MultipleOutputItem>(parentItem());
 }
 
 void IncompleteMultipleConnectionItem::setTo(QPointF _to)

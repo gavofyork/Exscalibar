@@ -33,7 +33,7 @@ class SubProcessorItem: public QGraphicsItem
 public:
 	SubProcessorItem(SubsContainer* _dpi, QString const& _type, int _index = 0, Properties const& _pr = Properties());
 
-	QSizeF size() const { return QSizeF(subProcessor()->width(), subProcessor()->height()); }
+	QSizeF size() const;
 
 	uint index() const { return m_index; }
 	SubsContainer* subsContainer() const;
@@ -50,7 +50,7 @@ public:
 
 	Properties const& properties() const { return m_properties; }
 	void setProperty(QString const& _key, QVariant const& _value);
-	void setDefaultProperties(PropertiesInfo const& _p) { m_properties.defaultFrom(_p); }
+	void setDefaultProperties(PropertiesInfo const& _p) { m_propertiesInfo = _p; m_properties.defaultFrom(_p); }
 
 private:
 	virtual QRectF boundingRect() const
@@ -63,6 +63,7 @@ private:
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 
+	PropertiesInfo		m_propertiesInfo;
 	Properties			m_properties;
 	QString				m_type;
 	uint				m_index;

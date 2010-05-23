@@ -82,7 +82,7 @@ void MultipleConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _sce
 {
 	MultipleOutputItem* moi = 0;
 	MultipleInputItem* mii = 0;
-	foreach (BaseItem* bi, filter<BaseItem>(_scene->items()))
+	foreach (BaseItem* bi, filterRelaxed<BaseItem>(_scene->items()))
 		if (bi->name() == _element.attribute("from"))
 			foreach (MultipleOutputItem* i, filter<MultipleOutputItem>(bi->childItems()))
 				if (i->index() == _element.attribute("fromindex").toUInt())

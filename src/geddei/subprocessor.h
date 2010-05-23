@@ -346,6 +346,8 @@ public:
 
 	void draw(QPainter& _p) const { paintProcessor(_p); }
 
+	QColor outlineColour() const { return specifyOutlineColour(); }
+
 	/**
 	 * Gets the width of the processor's image. Used by the Nite for drawing.
 	 *

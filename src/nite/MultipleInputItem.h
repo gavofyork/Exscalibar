@@ -24,45 +24,32 @@
 #include <Geddei>
 using namespace Geddei;
 
+#include "InputItem.h"
+
 class ProcessorItem;
 class MultiProcessorItem;
 
-class MultipleInputItem: public QGraphicsItem
+class MultipleInputItem: public InputItem
 {
 public:
 	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
 	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
 	void setMultiplicity(uint _m);
-
 	MultiSink* sink() const;
 
-	BaseItem* baseItem() const;
-
-	// One of these two will return non-zero.
-	ProcessorItem* processorItem() const;
+	// This or processorItem() will return non-zero.
 	MultiProcessorItem* multiProcessorItem() const;
 
 	bool isConnected() const;
 
-	inline uint index() const { return m_index; }
-	inline QSizeF size() const { return m_size; }
-
-	virtual QRectF boundingRect() const;
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-	QPointF tip() const;
+	virtual void interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
 	virtual void typesConfirmed();
-
-	QString const& typeInfo() const { return m_typeInfo; }
 
 	enum { Type = UserType + 12 };
 	virtual int type() const { return Type; }
 
 private:
 	uint		m_multiplicity;
-	int			m_index;
-	QSizeF		m_size;
-	QSizeF		m_baseSize;
-	QString		m_typeInfo;
 };

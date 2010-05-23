@@ -83,4 +83,11 @@ bool PropertiesInfo::isDynamic(const QString &key) const
 	return theInfo[key].isDynamic;
 }
 
+QString PropertiesInfo::symbolOf(const QString &key) const
+{
+	if (!theInfo.contains(key))
+		return "?";
+	return theInfo[key].symbol.isNull() ? key.left(1) : theInfo[key].symbol;
+}
+
 }

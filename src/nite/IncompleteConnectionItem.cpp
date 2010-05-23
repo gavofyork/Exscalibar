@@ -26,7 +26,7 @@ IncompleteConnectionItem::IncompleteConnectionItem(OutputItem* _from): QGraphics
 
 OutputItem* IncompleteConnectionItem::from() const
 {
-	return dynamic_cast<OutputItem*>(parentItem());
+	return item_cast<OutputItem>(parentItem());
 }
 
 void IncompleteConnectionItem::setTo(QPointF _to)

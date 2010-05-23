@@ -21,25 +21,15 @@
 #include "MultipleOutputItem.h"
 
 MultipleOutputItem::MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size):
-	QGraphicsItem	(_p),
-	m_multiplicity	(UINT_MAX),
-	m_size			(_size),
-	m_index			(0),
-	m_hover			(false)
+	OutputItem		(0, _p, _size),
+	m_multiplicity	(Undefined)
 {
-	setCursor(Qt::CrossCursor);
-	setAcceptHoverEvents(true);
 }
 
 MultipleOutputItem::MultipleOutputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size):
-	QGraphicsItem	(_p),
-	m_multiplicity	(UINT_MAX),
-	m_size			(_size),
-	m_index			(_i),
-	m_hover			(false)
+	OutputItem		(_i, _p, _size),
+	m_multiplicity	(Undefined)
 {
-	setCursor(Qt::CrossCursor);
-	setAcceptHoverEvents(true);
 }
 
 void MultipleOutputItem::setMultiplicity(uint _m)
@@ -67,94 +57,23 @@ MultiSource* MultipleOutputItem::source() const
 	return processorItem() ? static_cast<MultiSource*>(processorItem()->processor()) : static_cast<MultiSource*>(multiProcessorItem()->multiProcessor());
 }
 
-BaseItem* MultipleOutputItem::baseItem() const
-{
-	return dynamic_cast<BaseItem*>(parentItem());
-}
-
-ProcessorItem* MultipleOutputItem::processorItem() const
-{
-	return dynamic_cast<ProcessorItem*>(parentItem());
-}
-
 MultiProcessorItem* MultipleOutputItem::multiProcessorItem() const
 {
-	return dynamic_cast<MultiProcessorItem*>(parentItem());
+	return dynamic_cast<MultiProcessorItem*>(baseItem());
 }
 
-QRectF MultipleOutputItem::boundingRect() const
+void MultipleOutputItem::interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	return QRectF(0, -m_size.height() / 2, m_size.width(), m_size.height());
-}
-
-QPointF MultipleOutputItem::tip() const
-{
-	return QPointF(m_size.width(), 0);
-}
-
-void MultipleOutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
-{
-	double psot = m_size.height() / 2;
-	double cs = m_size.width();
-
-	_p->save();
-	_p->translate(0, -pos().y());
-	{
-		QPolygonF p;
-		p.append(QPointF(1, psot));
-		p.append(QPointF(cs - psot, psot));
-		p.append(QPointF(cs, 0));
-		p.append(QPointF(cs - psot, -psot));
-		p.append(QPointF(1, -psot));
-		_p->setPen(baseItem()->outerPen());
-		_p->setBrush(Qt::NoBrush);
-		_p->drawPolyline(p.translated(0, pos().y()));
-	}
-	{
-		QPolygonF p;
-		p.append(QPointF(-.5f, psot - 1));
-		p.append(QPointF(cs - psot - 1, psot - 1));
-		p.append(QPointF(cs - 1, 0));
-		p.append(QPointF(cs - psot - 1, 1-psot));
-		p.append(QPointF(-.5f, 1-psot));
-		_p->setPen(Qt::NoPen);
-		_p->setBrush(baseItem()->fillBrush());
-		_p->drawPolygon(p.translated(0, pos().y()));
-	}
-	{
-		QPolygonF p;
-		p.append(QPointF(0, psot - 1));
-		p.append(QPointF(cs - psot - 1, psot - 1));
-		p.append(QPointF(cs - 1, 0));
-		p.append(QPointF(cs - psot - 1, 1-psot));
-		p.append(QPointF(0, 1-psot));
-		_p->setPen(baseItem()->innerPen());
-		_p->setBrush(Qt::NoBrush);
-		_p->drawPolyline(p.translated(0, pos().y()));
-	}
-	_p->restore();
 	QString s = m_multiplicity != Undefined ? QString::number(m_multiplicity) : "?";
 	QFont f;
 	f.setBold(true);
-	QRectF br = boundingRect().adjusted(2, 2, -2 - m_size.height() / 2, -2);
+	QRectF br = boundingRect().adjusted(2, 4, -2 - m_size.height() / 2 - 1, -4);
 	f.setPixelSize(br.height());
 	_p->setFont(f);
 	_p->setPen(QColor(0, 0, 0, 96));
 	_p->drawText(br.translated(0, 1), Qt::AlignCenter, s);
 	_p->setPen(Qt::white);
 	_p->drawText(br, Qt::AlignCenter, s);
-}
-
-void MultipleOutputItem::hoverEnterEvent(QGraphicsSceneHoverEvent*)
-{
-	m_hover = true;
-	update();
-}
-
-void MultipleOutputItem::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
-{
-	m_hover = false;
-	update();
 }
 
 void MultipleOutputItem::mousePressEvent(QGraphicsSceneMouseEvent*)

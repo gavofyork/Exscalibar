@@ -34,7 +34,7 @@ public:
 	MultiProcessorItem(QString const& _type, Properties const& _pr = Properties(), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 	~MultiProcessorItem();
 
-	enum { Type = BaseItem::Type + 2 };
+	enum { Type = UserType + 7 };
 	virtual int			type() const { return Type; }
 
 	virtual QString		typeName() const { return m_processor->type(); }
@@ -62,7 +62,7 @@ public:
 
 	virtual QColor		outlineColour() const { return processor() ? processor()->outlineColour() : Qt::black; }
 
-	virtual QRectF		boundingRect() const;
+	virtual QRectF		adjustBounds(QRectF const& _wouldBe) const;
 
 protected:
 	MultiProcessorItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF(0, 0));

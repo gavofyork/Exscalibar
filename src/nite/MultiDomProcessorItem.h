@@ -39,11 +39,16 @@ public:
 	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
+	enum { Type = UserType + 15 };
+	virtual int			type() const { return Type; }
+
 protected:
 	virtual void		geometryChanged();
 	virtual QSizeF		centreMin() const;
 	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
 	virtual void		propertiesChanged() { MultiProcessorItem::propertiesChanged(); }
+
+	virtual void		paintCentre(QPainter* _p);
 
 	virtual QList<SubProcessorItem*> subProcessorItems() const;
 	virtual BaseItem*	baseItem() { return this; }

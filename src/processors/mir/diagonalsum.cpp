@@ -37,11 +37,11 @@ class DiagonalSum : public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("Alpha", 1.0, "Alpha value for the power function.");
+		return PropertiesInfo	("Alpha", 1.0, "Alpha value for the power function. { 0 .. 2 }", true);
 	}
 	virtual void updateFromProperties(Properties const& _p)
 	{
-		m_alpha = _p["Alpha"].toDouble();
+		m_alpha = _p["Alpha"].toFloat();
 	}
 	virtual QString simpleText() const { return QChar(0x21F1); }
 

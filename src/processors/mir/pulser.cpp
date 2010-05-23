@@ -372,7 +372,7 @@ void Peakify::updateFromProperties(Properties const& _p)
 
 PropertiesInfo Peakify::specifyProperties() const
 {
-	return PropertiesInfo("Algorithm", 1, "Algorithm to use for peak finding. { 0: Area; 1: Altitude }");
+	return PropertiesInfo("Algorithm", 1, "Algorithm to use for peak finding. { 0: Area; 1: Altitude }", true, QChar(0x03BB));
 }
 
 EXPORT_CLASS(Peakify, 0,3,0, SubProcessor);

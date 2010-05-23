@@ -91,7 +91,7 @@ void GeddeiNite::doSave(const QString& _filename)
 	QDomDocument doc;
 	QDomElement root = doc.createElement("network");
 	doc.appendChild(root);
-	foreach (BaseItem* pi, filter<BaseItem>(theScene.items()))
+	foreach (BaseItem* pi, filterRelaxed<BaseItem>(theScene.items()))
 		pi->saveYourself(root, doc);
 	foreach (MultipleConnectionItem* ci, filter<MultipleConnectionItem>(theScene.items()))
 		ci->saveYourself(root, doc);
@@ -289,10 +289,11 @@ void GeddeiNite::on_editRemove_activated()
 	if (BaseItem* bi = dynamic_cast<BaseItem*>(theScene.selectedItems()[0]))
 	{
 		foreach (ConnectionItem* i, filter<ConnectionItem>(theScene.items()))
-			if (i->fromProcessor() == bi)
+			if (i->fromProcessor() == bi || i->toProcessor() == bi)
 				delete i;
 		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(theScene.items()))
-			if (i->from()->processorItem() == theScene.selectedItems()[0] || i->from()->multiProcessorItem() == theScene.selectedItems()[0])
+			if (i->from()->processorItem() == theScene.selectedItems()[0] || i->from()->multiProcessorItem() == theScene.selectedItems()[0] ||
+				i->to()->processorItem() == theScene.selectedItems()[0] || i->to()->multiProcessorItem() == theScene.selectedItems()[0])
 				delete i;
 		delete bi;
 		setModified(true);
@@ -341,9 +342,9 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 bool GeddeiNite::connectAll()
 {
 	QString failed;
-	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		i->prepYourself(theGroup);
-	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		if (!i->connectYourself())
 			failed += i->name() + ", ";
 	if (!failed.isEmpty())
@@ -365,7 +366,7 @@ bool GeddeiNite::connectAll()
 		return false;
 	}
 
-	foreach (BaseItem* bi, filter<BaseItem>(theScene.items()))
+	foreach (BaseItem* bi, filterRelaxed<BaseItem>(theScene.items()))
 		bi->typesConfirmed();
 
 	theConnected = true;
@@ -374,7 +375,7 @@ bool GeddeiNite::connectAll()
 
 void GeddeiNite::disconnectAll()
 {
-	foreach (BaseItem* i, filter<BaseItem>(theScene.items()))
+	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		i->disconnectYourself();
 	theConnected = false;
 }

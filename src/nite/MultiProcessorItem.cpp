@@ -28,7 +28,7 @@ using namespace Geddei;
 class ControlsItem: public QGraphicsRectItem
 {
 public:
-	ControlsItem(MultiProcessorItem* _p);
+	ControlsItem(MultiProcessorItem* _p, float _size = 10);
 
 	MultiProcessorItem* mpi() const { return dynamic_cast<MultiProcessorItem*>(parentItem()); }
 	void init();
@@ -46,38 +46,75 @@ protected:
 			return QRectF(rect().left() + rect().width() / 3 * _i, rect().top(), rect().width() / 3, rect().height());
 		return QRectF();
 	}
-	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w)
+	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const*, QWidget*)
 	{
-		QGraphicsRectItem::paint(_p, _o, _w);
+		_p->save();
+		float yo = pos().y();
+		_p->translate(0, -yo);
+		_p->setBrush(Qt::NoBrush);
+		_p->setPen(mpi()->outerPen());
+		_p->setClipRect(rect().adjusted(-1, -1, 0.5, -2).translated(0, yo));
+		_p->drawRoundedRect(rect().adjusted(0, 0, 0, 3).translated(0, yo), 3, 3);
+		_p->setClipping(false);
+		_p->drawLine(rect().translated(0, yo).bottomRight(), rect().translated(0, yo).bottomRight() + QPointF(0, -3));
+		_p->fillRect(rect().adjusted(1, 1, -1, 0).translated(0, yo), mpi()->fillBrush());
 		if (m_clickedRect != Undefined)
-			_p->fillRect(rectOf(m_clickedRect).adjusted(0, 0, 0, 1), QBrush(mpi()->outlineColour().lighter(200)));
-		_p->setPen(mpi()->outlineColour());
-		_p->drawLine(rect().bottomLeft(), rect().bottomRight());
-		_p->setPen(QPen(QColor::fromHsv(0, 0, 32), 0, Qt::DotLine));
+			_p->fillRect(rectOf(m_clickedRect).adjusted(0, 0, 0, 1).translated(0, yo), QColor(255, 255, 255, 127));
+		_p->setPen(mpi()->innerPen());
+		_p->setClipRect(rect().adjusted(-1, -1, 0, -.5).translated(0, yo));
+		_p->drawRoundedRect(rect().adjusted(1, 1, -1, 3).translated(0, yo), 1.5f, 1.5f);
+		_p->setClipping(false);
+		_p->drawLine(rect().translated(-1, yo).bottomRight(), rect().translated(-1, yo - 3).bottomRight());
+		_p->restore();
+
+		QPen pen = mpi()->outerPen();
+		pen.setStyle(Qt::DotLine);
+		_p->setPen(pen);
 		for (uint i = 1; i < 3; i++)
-			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft());
-		_p->drawLine(rect().bottomLeft(), rect().bottomRight());
+			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft() + QPointF(0, -2));
 		if (mpi()->showingAll())
 		{
-			_p->setPen(QPen(QColor(Qt::black), 0));
-			_p->setBrush(QColor(Qt::white));
-			_p->drawRect(rectOf(1).adjusted(5, 5, -5, -5));
-			_p->drawRect(rectOf(0).adjusted(2, 6, -2, -6));
-			_p->drawRect(rectOf(2).adjusted(6, 2, -6, -2));
+			_p->setBrush(Qt::NoBrush);
+			for (int i = 0; i < 2; i++)
+			{
+				_p->setPen(QPen(i ? Qt::white : QColor(0, 0, 0, 96), 1));
+				_p->drawRect(rectOf(1).adjusted(3, 3, -3, -3).translated(0, 1 - i));
+				_p->drawRect(rectOf(0).adjusted(2, 3, -2, -3).translated(0, 1 - i));
+				_p->drawRect(rectOf(2).adjusted(3, 2, -3, -2).translated(0, 1 - i));
+			}
 		}
 		else
 		{
 			_p->setPen(QPen(QColor(Qt::black), 0));
 			_p->setBrush(QColor(Qt::white));
-			_p->drawText(rectOf(1), QString::number(mpi()->face()), QTextOption(Qt::AlignCenter));
-			QRectF r = rectOf(0).adjusted(5, 5, -5, -5);
-			_p->drawLine(r.topRight(), QPointF(r.left(), r.center().y()));
-			_p->drawLine(r.bottomRight(), QPointF(r.left(), r.center().y()));
-			r = rectOf(2).adjusted(5, 5, -5, -5);
-			_p->drawLine(r.topLeft(), QPointF(r.right(), r.center().y()));
-			_p->drawLine(r.bottomLeft(), QPointF(r.right(), r.center().y()));
+			QFont f;
+			f.setPixelSize(m_size - 2.f);
+			_p->setFont(f);
+			QString t = QString::number(mpi()->face());
+			_p->setPen(QPen(QColor(0, 0, 0, 96), 0));
+			_p->drawText(rectOf(1).translated(0, 1), t, QTextOption(Qt::AlignCenter));
+			_p->setPen(QPen(QColor(Qt::white), 0));
+			_p->drawText(rectOf(1), t, QTextOption(Qt::AlignCenter));
+
+			_p->setBrush(Qt::NoBrush);
+			for (int i = 0; i < 2; i++)
+			{
+				_p->setPen(QPen(i ? Qt::white : QColor(0, 0, 0, 96), 1));
+				QRectF r = rectOf(0).adjusted(3, 3, -3, -3).translated(0, 1 - i);
+				_p->drawLine(r.topRight(), QPointF(r.left(), r.center().y()));
+				_p->drawLine(r.bottomRight(), QPointF(r.left(), r.center().y()));
+				r = rectOf(2).adjusted(3, 3, -3, -3).translated(0, 1 - i);
+				_p->drawLine(r.topLeft(), QPointF(r.right(), r.center().y()));
+				_p->drawLine(r.bottomLeft(), QPointF(r.right(), r.center().y()));
+			}
 		}
-		_p->drawLines(QVector<QPointF>() << rect().bottomLeft() << rect().topLeft() << rect().topLeft() << rect().topRight() << rect().topRight() << rect().bottomRight());
+		//_p->drawLines(QVector<QPointF>() << rect().bottomLeft() << rect().topLeft() << rect().topLeft() << rect().topRight() << rect().topRight() << rect().bottomRight());
+		if (parentItem()->isSelected())
+			for (int i = 1; i < 4; i++)
+			{
+				_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
+				_p->drawPolyline(QVector<QPointF>() << rect().translated(0, -2).bottomLeft() << rect().topLeft() << rect().topRight() << rect().bottomRight());
+			}
 	}
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e)
 	{
@@ -107,13 +144,15 @@ protected:
 		update();
 	}
 	uint m_clickedRect;
+	float m_size;
 };
 
-ControlsItem::ControlsItem(MultiProcessorItem* _p):
+ControlsItem::ControlsItem(MultiProcessorItem* _p, float _size):
 	QGraphicsRectItem	(_p),
-	m_clickedRect		(Undefined)
+	m_clickedRect		(Undefined),
+	m_size				(_size)
 {
-	setRect(0, 0, 48, 16);
+	setRect(0, 0, _size * 3, _size);
 	setCursor(Qt::ArrowCursor);
 }
 
@@ -215,7 +254,7 @@ QSizeF MultiProcessorItem::centreMin() const
 	int rows = m_showAll ? (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize) : 1;
 	int cols = m_showAll ? m_rowSize : 1;
 	if (m_processor)
-		return QSizeF(processor()->minWidth() * cols + (cols - 1) * marginWidth, max((double)processor()->minHeight() * rows + (rows - 1) * marginWidth, portLateralMargin + portLateralMargin + max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height())));
+		return QSizeF(processor()->minWidth() * cols + (cols - 1) * marginWidth, max((double)processor()->minHeight() * rows + (rows - 1) * marginWidth, max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin / 2));
 	return QSizeF(0, 0);
 }
 
@@ -226,9 +265,9 @@ QSizeF MultiProcessorItem::centrePref() const
 	return QSizeF(processor()->width() * cols + (cols - 1) * marginWidth, processor()->height() * rows + (rows - 1) * marginWidth);
 }
 
-QRectF MultiProcessorItem::boundingRect() const
+QRectF MultiProcessorItem::adjustBounds(QRectF const& _wouldBe) const
 {
-	return outlineRect().adjusted(-4.f, -12.f, 4.f, 4.f);
+	return _wouldBe.adjusted(0, -8, 0, 0);
 }
 
 Processor* MultiProcessorItem::processor() const
@@ -243,10 +282,9 @@ void MultiProcessorItem::paintOutline(QPainter* _p)
 	BaseItem::paintOutline(_p);
 	uint m = multiplicity();
 	_p->setPen(QPen(Qt::black, 0));
-	for (int i = 1; i < int((m == Undefined) ? 5 : m); i++)
+	for (int i = 1; i < min(5, int((m == Undefined) ? 5 : m)); i++)
 	{
-		if (m == Undefined)
-			_p->setPen(QPen(QColor::fromHsv(0, 0, (i - 1) * 255 / 4), 0));
+		_p->setPen(QPen(QColor::fromHsv(0, 0, (i - 1) * 255 / 4), 0));
 		_p->drawLine(outlineRect().topLeft() + QPointF(i, -i * 2), outlineRect().topRight() + QPointF(-i, -i * 2));
 	}
 }
@@ -314,12 +352,12 @@ void MultiProcessorItem::geometryChanged()
 		if (!mois[i])
 			mois[i] = new MultipleOutputItem(i, this, multiPortSize);
 	foreach (MultipleOutputItem* moi, mois)
-		moi->setPos(centreRect().width() + portLateralMargin - 1.f, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
+		moi->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
 
 	updateMultiplicities();
 
 	if (m_controls)
-		m_controls->setPos(outlineRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height()));
+		m_controls->setPos(outlineRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height() - 2));
 
 	BaseItem::geometryChanged();
 }
@@ -359,7 +397,7 @@ bool MultiProcessorItem::connectYourself()
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 	{
 		QList<MultipleConnectionItem*> mcis;
-		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(mii->childItems()))
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
 			if (i->to() == mii)
 				mcis << i;
 		if (mcis.size() != 1)

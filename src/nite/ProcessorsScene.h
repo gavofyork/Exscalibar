@@ -21,7 +21,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 
-template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
+template<class T> T* item_cast(QGraphicsItem* _i) { if (_i->type() == T::Type) return static_cast<T*>(_i); return 0; }
+template<class T> inline QList<T*> filterRelaxed(QList<QGraphicsItem*> _l)
 {
 	QList<T*> ret;
 	foreach (QGraphicsItem* i, _l)
@@ -29,6 +30,17 @@ template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
 			ret << t;
 	return ret;
 }
+
+template<class T> inline QList<T*> filter(QList<QGraphicsItem*> _l)
+{
+	QList<T*> ret;
+	foreach (QGraphicsItem* i, _l)
+		if (T* t = item_cast<T>(i))
+			ret << t;
+	return ret;
+}
+
+void deepRect(QPainter* _p, QRectF _r, bool _down = true, QColor const& _fill = Qt::transparent, bool _rIsInside = true, float _thickness = 2.f, bool _radialFill = true);
 
 class IncompleteConnectionItem;
 class IncompleteMultipleConnectionItem;

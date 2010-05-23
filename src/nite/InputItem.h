@@ -38,6 +38,7 @@ public:
 
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual void interPaint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) {}
 	QPointF tip() const;
 
 	void typesConfirmed();
@@ -47,7 +48,7 @@ public:
 	enum { Type = UserType + 2 };
 	virtual int type() const { return Type; }
 
-private:
+protected:
 	uint		m_index;
 	QSizeF		m_size;
 	QSizeF		m_baseSize;

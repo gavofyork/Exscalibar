@@ -20,7 +20,7 @@
 #include "ProcessorItem.h"
 #include "OutputItem.h"
 
-OutputItem::OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size):
+OutputItem::OutputItem(int _i, BaseItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
 	m_size			(_size),
 	m_index			(_i),
@@ -48,7 +48,7 @@ BaseItem* OutputItem::baseItem() const
 
 QRectF OutputItem::boundingRect() const
 {
-	return QRectF(0, -m_size.height() / 2, m_size.width(), m_size.height());
+	return QRectF(0, -m_size.height() / 2, m_size.width(), m_size.height()).adjusted(-2, -2, 2, 2);
 }
 
 QPointF OutputItem::tip() const
@@ -56,59 +56,65 @@ QPointF OutputItem::tip() const
 	return QPointF(m_size.width(), 0);
 }
 
-void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
+void OutputItem::paint(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w)
 {
 	double psot = m_size.height() / 2;
 	double cs = m_size.width();
+	float de = .42f;
+
+	QPolygonF po;
+	po.append(QPointF(1, psot));
+	po.append(QPointF(cs - psot, psot));
+	po.append(QPointF(cs, 0));
+	po.append(QPointF(cs - psot, -psot));
+	po.append(QPointF(1, -psot));
+	QPolygonF pf;
+	pf.append(QPointF(-.5f, psot - 1));
+	pf.append(QPointF(cs - psot - de, psot - 1));
+	pf.append(QPointF(cs - 1 - de, 0));
+	pf.append(QPointF(cs - psot - de, 1-psot));
+	pf.append(QPointF(-.5f, 1-psot));
+	QPolygonF pi;
+	pi.append(QPointF(0, psot - 1));
+	pi.append(QPointF(cs - psot - de, psot - 1));
+	pi.append(QPointF(cs - 1 - de, 0));
+	pi.append(QPointF(cs - psot - de, 1-psot));
+	pi.append(QPointF(0, 1-psot));
 
 	_p->save();
 	_p->translate(0, -pos().y());
-	{
-		QPolygonF p;
-		p.append(QPointF(1, psot));
-		p.append(QPointF(cs - psot, psot));
-		p.append(QPointF(cs, 0));
-		p.append(QPointF(cs - psot, -psot));
-		p.append(QPointF(1, -psot));
-		_p->setPen(baseItem()->outerPen());
-		_p->setBrush(Qt::NoBrush);
-		_p->drawPolyline(p.translated(0, pos().y()));
-	}
-	{
-		QPolygonF p;
-		p.append(QPointF(-.5f, psot - 1));
-		p.append(QPointF(cs - psot - 1, psot - 1));
-		p.append(QPointF(cs - 1, 0));
-		p.append(QPointF(cs - psot - 1, 1-psot));
-		p.append(QPointF(-.5f, 1-psot));
-		_p->setPen(Qt::NoPen);
-		_p->setBrush(baseItem()->fillBrush());
-		_p->drawPolygon(p.translated(0, pos().y()));
-	}
-	{
-		QPolygonF p;
-		p.append(QPointF(0, psot - 1));
-		p.append(QPointF(cs - psot - 1, psot - 1));
-		p.append(QPointF(cs - 1, 0));
-		p.append(QPointF(cs - psot - 1, 1-psot));
-		p.append(QPointF(0, 1-psot));
-		_p->setPen(baseItem()->innerPen());
-		_p->setBrush(Qt::NoBrush);
-		_p->drawPolyline(p.translated(0, pos().y()));
-	}
+	_p->setPen(baseItem()->outerPen());
+	_p->setBrush(Qt::NoBrush);
+	_p->drawPolyline(po.translated(0, pos().y()));
+	_p->setPen(Qt::NoPen);
+	_p->setBrush(baseItem()->fillBrush());
+	_p->drawPolygon(pf.translated(0, pos().y()));
+	_p->setPen(baseItem()->innerPen());
+	_p->setBrush(Qt::NoBrush);
+	_p->drawPolyline(pi.translated(0, pos().y()));
 	_p->restore();
+
+	interPaint(_p, _o, _w);
+
+	if (parentItem()->isSelected())
+	{
+		_p->setBrush(Qt::NoBrush);
+		for (int i = 1; i < 4; i++)
+		{
+			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
+			_p->drawPolyline(po);
+		}
+	}
 }
 
 void OutputItem::hoverEnterEvent(QGraphicsSceneHoverEvent*)
 {
-	prepareGeometryChange();
 	m_hover = true;
 	update();
 }
 
 void OutputItem::hoverLeaveEvent(QGraphicsSceneHoverEvent*)
 {
-	prepareGeometryChange();
 	m_hover = false;
 	update();
 }

@@ -21,3 +21,14 @@
 ProcessorsView::ProcessorsView(QWidget* _parent): QGraphicsView(_parent)
 {
 }
+
+void ProcessorsView::wheelEvent(QWheelEvent* _e)
+{
+//	QGraphicsView::wheelEvent(_e);
+//	if (!_e->isAccepted())
+	{
+		setResizeAnchor(AnchorUnderMouse);
+		float sc = (_e->delta() > 0) ? 2.f : .5f;
+		scale(sc, sc);
+	}
+}

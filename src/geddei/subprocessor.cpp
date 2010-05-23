@@ -66,11 +66,11 @@ void SubProcessor::setupVisual(uint width, uint height)
 void SubProcessor::paintProcessor(QPainter& _p) const
 {
 	QRectF area(0, 0, width(), height());
-	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
+/*	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
 	g.setColorAt(0, specifyOutlineColour().lighter(125));
 	g.setColorAt(1, specifyOutlineColour().darker(150));
 	_p.fillRect(area, g);
-
+*/
 	_p.setFont(QFont("Helvetica", min(width(), height()) * 3 / 5, QFont::Black, false));
 
 	_p.setPen(QColor(0, 0, 0, 192));

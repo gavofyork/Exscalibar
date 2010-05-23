@@ -23,10 +23,12 @@
 #include <Geddei>
 using namespace Geddei;
 
+#include "OutputItem.h"
+
 class ProcessorItem;
 class MultiProcessorItem;
 
-class MultipleOutputItem: public QGraphicsItem
+class MultipleOutputItem: public OutputItem
 {
 public:
 	MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size);
@@ -34,33 +36,17 @@ public:
 
 	void setMultiplicity(uint _m);
 
-	BaseItem* baseItem() const;
-
-	// One of these two will return non-zero.
-	ProcessorItem* processorItem() const;
+	// This or processorItem() will return non-zero.
 	MultiProcessorItem* multiProcessorItem() const;
-
 	MultiSource* source() const;
-
 	bool isConnected() const;
-
-	inline uint index() const { return m_index; }
-	inline QSizeF size() const { return m_size; }
-
-	QPointF tip() const;
 
 	enum { Type = UserType + 13 };
 	virtual int type() const { return Type; }
 
 private:
-	virtual QRectF boundingRect() const;
-	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
-	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
+	virtual void interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 
 	uint			m_multiplicity;
-	QSizeF			m_size;
-	uint			m_index;
-	bool			m_hover;
 };

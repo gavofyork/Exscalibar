@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ProcessorsScene.h"
 #include "SubsContainer.h"
 #include "SubProcessorItem.h"
 
@@ -57,18 +58,49 @@ SubProcessor* SubProcessorItem::subProcessor() const
 	}
 }
 
+float widgetMargin = 1.f;
+float widgetHeight = 9.f;
+
+QSizeF SubProcessorItem::size() const
+{
+	QStringList ds;
+	foreach (QString k, m_propertiesInfo.keys())
+		if (m_propertiesInfo.isDynamic(k))
+			ds << k;
+	return QSizeF(subProcessor()->width(), subProcessor()->height() + (ds.count() ? 2 * widgetMargin + widgetHeight * ds.count() : 0));
+}
+
 void SubProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
+	_p->translate(.5f, .5f);
+
 	QRectF ca = QRectF(QPointF(0, 0), size());
+
 	_p->save();
 	_p->setClipRect(ca);
 	subProcessor()->draw(*_p);
 	_p->restore();
 
+	QRectF widget(widgetMargin, subProcessor()->height() + widgetMargin, size().width() - widgetMargin * 2, widgetHeight);
+	foreach (QString k, m_propertiesInfo.keys())
+		if (m_propertiesInfo.isDynamic(k))
+		{
+			QFont f;
+			f.setPixelSize(widgetHeight - 1);
+			f.setBold(true);
+			_p->setFont(f);
+			_p->setPen(QColor(0, 0, 0, 96));
+			_p->drawText(widget.translated(0, 2), m_propertiesInfo.symbolOf(k), Qt::AlignLeft|Qt::AlignVCenter);
+			_p->setPen(Qt::white);
+			_p->drawText(widget.translated(0, 1), m_propertiesInfo.symbolOf(k), Qt::AlignLeft|Qt::AlignVCenter);
+			deepRect(_p, widget.adjusted(floor(widgetHeight * .7f), 0, 0, 0), true, QColor::fromHsv(0, 0, 192), false, 1.f, false);
+			widget.translate(0, widgetHeight);
+		}
+
 	if (isSelected())
 	{
 		_p->setBrush(Qt::NoBrush);
-		for (int i = 0; i < 5; i+=2)
+		for (int i = 1; i < 4; i++)
 		{
 			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
 			_p->drawRect(ca);

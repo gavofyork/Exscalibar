@@ -35,6 +35,11 @@ void MultiDomProcessorItem::postCreate()
 		i->setDefaultProperties(pi.destash());
 }
 
+void MultiDomProcessorItem::paintCentre(QPainter* _p)
+{
+	paintFrames(_p);
+}
+
 DomProcessor* MultiDomProcessorItem::domProcessor() const
 {
 	return dynamic_cast<DomProcessor*>(processor());

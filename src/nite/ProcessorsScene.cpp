@@ -35,6 +35,39 @@ using namespace Geddei;
 #include "ProcessorItem.h"
 #include "ProcessorsView.h"
 
+void deepRect(QPainter* _p, QRectF _r, bool _down, QColor const& _fill, bool _rIsInside, float _thickness, bool _radialFill)
+{
+	_r.adjust(.5f, .5f, -.5f, -.5f);
+	if (!_rIsInside)
+		_r.adjust(_thickness, _thickness, -_thickness, -_thickness);
+	QLinearGradient g(_r.topLeft(), _r.bottomLeft());
+	g.setColorAt(_down ? 0 : 1, Qt::transparent);
+	g.setColorAt(_down ? 1 : 0, QColor(255, 255, 255, 64));
+	_p->setPen(QPen(QBrush(g), 1));
+	_p->drawRoundedRect(_r.adjusted(-_thickness, -_thickness, _thickness, _thickness), _thickness * 1, _thickness * 1);
+	_p->setPen(QPen(QColor(0, 0, 0, 128), 1));
+	_p->drawRoundedRect(_r.adjusted(-_thickness / 2, -_thickness / 2, _thickness / 2, _thickness / 2), _thickness * .5, _thickness * .5);
+
+	if (_fill != Qt::transparent)
+	{
+		_r.adjust(-.5f, -.5f, .5f, .5f);
+		if (_radialFill)
+		{
+			QRadialGradient g(_r.center(), max(_r.width(), _r.height()) * 2 / 3, _r.center());
+			g.setColorAt(0, _fill);
+			g.setColorAt(1, _fill.darker(150));
+			_p->fillRect(_r, g);
+		}
+		else
+		{
+			QLinearGradient g(_r.topLeft(), _r.bottomLeft());
+			g.setColorAt(0, _fill.darker(150));
+			g.setColorAt(1, _fill);
+			_p->fillRect(_r, g);
+		}
+	}
+}
+
 ProcessorsScene::ProcessorsScene(QObject* _p): QGraphicsScene(_p), m_currentConnect(0), m_currentMultipleConnect(0), m_timerId(-1), m_dynamicDisplay(false)
 {
 }
@@ -156,7 +189,7 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		OutputItem* oi = m_currentConnect->from();
 		delete m_currentConnect;
 		m_currentConnect = 0;
-		if (InputItem* ii = dynamic_cast<InputItem*>(itemAt(_e->scenePos())))
+		if (InputItem* ii = item_cast<InputItem>(itemAt(_e->scenePos())))
 			if (ii->isVisible() && !filter<ConnectionItem>(ii->childItems()).count())
 			{
 				ci = new ConnectionItem(ii, oi);
@@ -168,7 +201,7 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		MultipleOutputItem* moi = m_currentMultipleConnect->from();
 		delete m_currentMultipleConnect;
 		m_currentMultipleConnect = 0;
-		if (MultipleInputItem* mii = dynamic_cast<MultipleInputItem*>(itemAt(_e->scenePos())))
+		if (MultipleInputItem* mii = item_cast<MultipleInputItem>(itemAt(_e->scenePos())))
 			if (mii->isVisible() && !filter<MultipleConnectionItem>(mii->childItems()).count())
 			{
 				mci = new MultipleConnectionItem(mii, moi);

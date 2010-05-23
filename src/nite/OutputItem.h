@@ -25,7 +25,7 @@ class ProcessorItem;
 class OutputItem: public QGraphicsItem
 {
 public:
-	OutputItem(int _i, ProcessorItem* _p, QSizeF const& _size);
+	OutputItem(int _i, BaseItem* _p, QSizeF const& _size);
 
 	ProcessorItem* processorItem() const;
 	BaseItem* baseItem() const;
@@ -42,9 +42,11 @@ public:
 	enum { Type = UserType + 3 };
 	virtual int type() const { return Type; }
 
-private:
+protected:
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
+	virtual void interPaint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) {}
+
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent*);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent*);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);

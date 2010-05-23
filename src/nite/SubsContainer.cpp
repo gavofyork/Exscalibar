@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ProcessorsScene.h"
 #include "SubProcessorItem.h"
 #include "SubsContainer.h"
 
@@ -33,20 +34,10 @@ QSizeF SubsContainer::centreMin() const
 
 void SubsContainer::paintFrames(QPainter* _p) const
 {
-	QPointF cp(padding(), padding());
 	_p->save();
-	_p->translate(.5f, .5f);
 	foreach (SubProcessorItem* spi, ordered())
-	{
-		QLinearGradient g(spi->pos(), spi->pos() + QPointF(0, spi->size().height()));
-		g.setColorAt(0, Qt::transparent);
-		g.setColorAt(1, QColor(255, 255, 255, 64));
-		_p->setPen(QPen(QBrush(g), 1));
-		_p->drawRoundedRect(QRectF(spi->pos(), spi->size()).adjusted(-2, -2, 1, 1), 3, 3);
-		_p->setPen(QColor(0, 0, 0, 128));
-		_p->drawRoundedRect(QRectF(spi->pos(), spi->size()).adjusted(-1, -1, 0, 0), 1.5, 1.5);
-		cp += QPointF(spi->size().width() + margin(), 0);
-	}
+		deepRect(_p, QRectF(spi->pos(), spi->size()), true, spi->subProcessor()->outlineColour());
+
 	_p->restore();
 }
 
@@ -111,7 +102,7 @@ QList<SubProcessorItem*> SubsContainer::ordered() const
 
 void SubsContainer::geometryChanged()
 {
-	QPointF cp(padding() + .5f, padding() + .5f);
+	QPointF cp(padding(), padding());
 	foreach (SubProcessorItem* spi, ordered())
 	{
 		spi->setPos(cp);

@@ -41,7 +41,7 @@ public:
 	ProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 	~ProcessorItem() { delete m_processor; }
 
-	enum { Type = BaseItem::Type + 1 };
+	enum { Type = UserType + 1 };
 	virtual int			type() const { return Type; }
 
 	virtual bool		isRunning() const { return processor() && processor()->isRunning(); }

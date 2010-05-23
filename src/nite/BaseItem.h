@@ -37,7 +37,7 @@ public:
 	BaseItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 	~BaseItem();
 
-	enum { Type = UserType + 100 };
+	enum { Type = UserType };
 	virtual int			type() const { return Type; }
 
 	void				setPos(qreal _x, qreal _y) { QGraphicsItem::setPos(floor(_x) + .5f, floor(_y) + .5f); }
@@ -71,6 +71,8 @@ public:
 	QRectF				centreRect() const { return QRectF(QPointF(0, 0), m_size); }
 	virtual QRectF		outlineRect() const;
 	virtual QRectF		boundingRect() const;
+	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return outlineRect().adjusted(-ms, -ms, ms, ms); }
+	virtual QRectF		adjustBounds(QRectF const& _wouldBe) const { return _wouldBe; }
 
 	void				forwardEvent(QGraphicsSceneEvent* _e);
 

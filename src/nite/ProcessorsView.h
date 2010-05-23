@@ -29,4 +29,6 @@ class ProcessorsView: public QGraphicsView
 
 public:
 	ProcessorsView(QWidget* _parent);
+
+	virtual void wheelEvent(QWheelEvent* _e);
 };

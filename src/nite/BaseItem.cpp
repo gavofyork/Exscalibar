@@ -105,13 +105,13 @@ float BaseItem::marginSize() const
 
 QRectF BaseItem::boundingRect() const
 {
-	float ms = marginSize();
-	return outlineRect().adjusted(-ms, -ms, ms, ms);
+	return adjustBounds(basicBoundingRect());
 }
 
 QRectF BaseItem::outlineRect() const
 {
-	return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize, statusHeight + 2 * statusMargin);
+	// Add one to width & height as we translate up 7 left by half a pixel when drawing.
+	return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, statusHeight + 2 * statusMargin + 1);
 }
 
 QRectF BaseItem::resizeRect() const
@@ -217,7 +217,7 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 		QGraphicsItem::mouseMoveEvent(_e);
 
 	QPointF best = QPointF(1.0e99, 1.0e99);
-	foreach (Magnetic const* m, filter<Magnetic>(scene()->items()))
+	foreach (Magnetic const* m, filterRelaxed<Magnetic>(scene()->items()))
 		foreach (QPointF wa, m->magnetism(this, !m_resizing))
 		{
 			if (fabs(best.x()) > fabs(wa.x()))
@@ -249,11 +249,12 @@ void BaseItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	_p->setClipRect(boundingRect());
 	paintOutline(_p);
-	_p->setClipRect(centreRect());
+	_p->setClipRect(centreRect().adjusted(0, 0, .5f, .5f));
+	_p->translate(.5f, .5f);
 	paintCentre(_p);
 }
 
-void BaseItem::paintCentre(QPainter* _p)
+void BaseItem::paintCentre(QPainter*)
 {
 }
 
@@ -269,14 +270,14 @@ QPen BaseItem::innerPen() const
 	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
 	cg.setColorAt(0, outlineColour().lighter(175));
 	cg.setColorAt(1, outlineColour().darker(150));
-	return QPen(cg, 1);
+	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 QPen BaseItem::outerPen() const
 {
 	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
 	cg.setColorAt(0, outlineColour().darker(250));
 	cg.setColorAt(1, outlineColour().darker(350));
-	return QPen(cg, 1);
+	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 
 void BaseItem::paintOutline(QPainter* _p)
@@ -285,11 +286,11 @@ void BaseItem::paintOutline(QPainter* _p)
 	{
 		float cornerRadius = round(marginSize() * (isSelected() ? 1.25f : 1.25f));
 		float adj = round(marginSize() / (isSelected() ? 4.f : 2.f));
-		QRectF br = boundingRect().adjusted(adj, adj, -adj, -adj);
+		QRectF br = basicBoundingRect().adjusted(adj, adj, -adj, -adj);
 		GeddeiNite* gn = qobject_cast<GeddeiNite*>(scene()->parent());
 		QColor shadow = gn->myColour(primaryTask()).darker(isSelected() ? 400 : 300);
 
-		_p->translate(0.5f, 0.5f + round(marginSize() / (isSelected() ? 5.f : 6.f)));
+		_p->translate(-0.5f, -0.5f + round(marginSize() / (isSelected() ? 5.f : 6.f)));
 		{
 			QRadialGradient cg(0, 0, cornerRadius, 0, 0);
 			cg.setColorAt(0.f, shadow);
@@ -331,15 +332,15 @@ void BaseItem::paintOutline(QPainter* _p)
 	_p->setPen(innerPen());
 	_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
 
-	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
 	QRectF o = outlineRect().adjusted(1, 1, -1, -1);
+/*	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
 	for (int i = 0; i < 4; i++)
 	{
 		double mp = cornerSize * 2.f * (4.0 - i) / 4.0;
 		_p->drawLine(o.left() + mp, o.bottom(), o.left(), o.bottom() - mp);
 		_p->drawLine(o.left() + mp, o.top(), o.left(), o.top() + mp);
 		_p->drawLine(o.right(), o.top() + mp, o.right() - mp, o.top());
-	}
+	}*/
 	_p->setPen(QPen(outlineColour().darker(), 1));
 	for (int i = 0; i < 4; i++)
 	{
@@ -350,7 +351,7 @@ void BaseItem::paintOutline(QPainter* _p)
 	if (isSelected())
 	{
 		_p->setBrush(Qt::NoBrush);
-		for (int i = 0; i < 5; i+=2)
+		for (int i = 1; i < 4; i++)
 		{
 			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
 			_p->drawRect(outlineRect());
