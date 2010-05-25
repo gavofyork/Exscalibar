@@ -151,7 +151,7 @@ void GeddeiNite::doLoad(const QString &filename)
 void GeddeiNite::setModified(bool _modified)
 {
 	theModified = _modified;
-	if (_modified)
+	if (_modified && !theRunning)
 	{
 		modeRun->setEnabled(connectAll());
 		disconnectAll();

@@ -73,8 +73,9 @@ void MultipleConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*
 QList<QPointF> MultipleConnectionItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
-	if ((to()->multiProcessorItem() == dynamic_cast<MultiProcessorItem const*>(_b) || from()->multiProcessorItem() == dynamic_cast<MultiProcessorItem const*>(_b)) && _moving)
-		ret << (to()->multiProcessorItem() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y());
+	if ((to()->baseItem() == _b || from()->baseItem() == _b) && _moving)
+		ret << ((to()->baseItem() == _b) ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y())
+			<< ((to()->baseItem() == _b) ? 1 : -1) * QPointF(mapFromItem(m_from, m_from->tip()).x() - mapFromItem(m_to, m_to->tip()).x(), 1e99);
 	return ret;
 }
 

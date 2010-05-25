@@ -39,7 +39,8 @@ QList<QPointF> ConnectionItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
 	if ((toProcessor() == dynamic_cast<ProcessorItem const*>(_b) || fromProcessor() == dynamic_cast<ProcessorItem const*>(_b)) && _moving)
-		ret << (toProcessor() == _b ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y());
+		ret << ((toProcessor() == _b) ? 1 : -1) * QPointF(1e99, mapFromItem(m_from, m_from->tip()).y() - mapFromItem(m_to, m_to->tip()).y())
+			<< ((toProcessor() == _b) ? 1 : -1) * QPointF(mapFromItem(m_from, m_from->tip()).x() - mapFromItem(m_to, m_to->tip()).x(), 1e99);
 	return ret;
 }
 
@@ -93,7 +94,7 @@ void ConnectionItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
 	OutputItem* oi = 0;
 	InputItem* ii = 0;
-	foreach (ProcessorItem* pi, filter<ProcessorItem>(_scene->items()))
+	foreach (ProcessorItem* pi, filterRelaxed<ProcessorItem>(_scene->items()))
 		if (pi->processor() && pi->processor()->name() == _element.attribute("from"))
 			foreach (OutputItem* i, filter<OutputItem>(pi->childItems()))
 				if (i->index() == (uint)_element.attribute("fromindex").toInt())

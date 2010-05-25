@@ -29,10 +29,10 @@ static const double statusHeight = 8.0;
 static const double statusMargin = 2.0;
 
 BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
+	WithProperties	(0, _pr),
 	m_size			(_size),
 	m_timerId		(-1),
-	m_resizing		(false),
-	m_properties	(_pr)
+	m_resizing		(false)
 {
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
@@ -68,7 +68,7 @@ void BaseItem::setProperty(QString const& _key, QVariant const& _value)
 
 void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
 {
-	m_properties.defaultFrom(_def);
+	setPropertiesInfo(_def);
 }
 
 void BaseItem::tick()

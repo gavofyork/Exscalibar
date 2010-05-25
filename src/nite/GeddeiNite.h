@@ -47,6 +47,9 @@ public:
 
 	ProcessorGroup&	group() { return theGroup; }
 
+public slots:
+	void			propertyHasBeenChanged() { setModified(true); if (!theUpdatingProperties) slotUpdateProperties(); }
+
 protected:
 	void			closeEvent(QCloseEvent *);
 

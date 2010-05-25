@@ -37,7 +37,7 @@ class DiagonalSum : public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("Alpha", 1.0, "Alpha value for the power function. { 0 .. 2 }", true);
+		return PropertiesInfo	("Alpha", 1.f, "Alpha value for the power function. { 0 .. 2 }", true, QChar(0x03B1));
 	}
 	virtual void updateFromProperties(Properties const& _p)
 	{
@@ -60,6 +60,8 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 
 void DiagonalSum::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
+	// TODO: Allow counting of top proportion of period only.
+	// TODO: Allow minimum required period.
 	for (uint n = 1; n < theBandwidth; n++)
 	{
 		out[0][n] = 0.f;

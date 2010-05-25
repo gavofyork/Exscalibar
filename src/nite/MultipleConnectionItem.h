@@ -21,6 +21,8 @@
 #include <QtGui>
 #include <QtXml>
 
+#include "Magnetic.h"
+
 class InputItem;
 class OutputItem;
 class MultipleInputItem;
@@ -28,7 +30,7 @@ class MultipleOutputItem;
 class ProcessorItem;
 class MultiProcessorItem;
 
-class MultipleConnectionItem: public QGraphicsPathItem
+class MultipleConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
 	MultipleConnectionItem(MultipleInputItem* _to, MultipleOutputItem* _from);

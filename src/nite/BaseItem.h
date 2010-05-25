@@ -25,13 +25,13 @@
 #include "Magnetic.h"
 #include "InputItem.h"
 #include "OutputItem.h"
+#include "withproperties.h"
 
 class PauseItem;
 
-class BaseItem: public QObject, public QGraphicsItem, public Magnetic
+class BaseItem: public QObject, public WithProperties, public Magnetic
 {
 	Q_OBJECT
-	Q_INTERFACES(QGraphicsItem)
 
 public:
 	BaseItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
@@ -45,8 +45,7 @@ public:
 
 	virtual QTask*		primaryTask() const { return 0; }
 
-	Properties const&	properties() const { return m_properties; }
-	void				setProperty(QString const& _key, QVariant const& _value);
+	virtual void		setProperty(QString const& _key, QVariant const& _value);
 	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.
 
 	virtual QString		typeName() const { return QString::null; }
@@ -117,5 +116,4 @@ private:
 	int					m_timerId;
 	bool				m_resizing;
 	QPointF				m_origPosition;
-	Properties			m_properties;
 };

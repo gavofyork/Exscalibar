@@ -141,7 +141,7 @@ void ProcessorsScene::timerEvent(QTimerEvent*)
 {
 	if (m_dynamicDisplay)
 		foreach (QGraphicsItem* i, items())
-			if (ProcessorItem* pi = dynamic_cast<ProcessorItem*>(i))
+			if (BaseItem* pi = dynamic_cast<BaseItem*>(i))
 				pi->tick();
 }
 
@@ -167,7 +167,7 @@ void ProcessorsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 void ProcessorsScene::keyPressEvent(QKeyEvent* _e)
 {
 	if (_e->key() == Qt::Key_Shift)
-		foreach (ProcessorItem* i, filter<ProcessorItem>(items()))
+		foreach (ProcessorItem* i, filterRelaxed<ProcessorItem>(items()))
 			i->setTryMulti(true);
 	update();
 }
@@ -175,7 +175,7 @@ void ProcessorsScene::keyPressEvent(QKeyEvent* _e)
 void ProcessorsScene::keyReleaseEvent(QKeyEvent* _e)
 {
 	if (_e->key() == Qt::Key_Shift)
-		foreach (ProcessorItem* i, filter<ProcessorItem>(items()))
+		foreach (ProcessorItem* i, filterRelaxed<ProcessorItem>(items()))
 			i->setTryMulti(false);
 	update();
 }

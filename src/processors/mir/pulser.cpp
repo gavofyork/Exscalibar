@@ -174,7 +174,13 @@ bool Pulser::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs
 		if (!inTypes[1].isA<MultiValue>() && !inTypes[1].isA<Value>()) return false;
 	}
 	m_frequency = inTypes[0].frequency();
-	outTypes[0] = MultiValue(10, inTypes[0].frequency());
+	outTypes[0] = MultiValue(10, inTypes[0].frequency(), 1, 0, QVector<MultiValue::Config>()
+		<< MultiValue::Config(QColor(0, 0, 0, 64), QColor(0, 0, 0, 64))
+		<< MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
+		<< MultiValue::Config(Qt::blue, Qt::transparent, 1, 0, 2, 100, "%")
+		<< MultiValue::Config(Qt::gray, Qt::transparent, 1, 0, 3, 100, "%")
+		<< MultiValue::Config(Qt::yellow, Qt::transparent, 1, 0, 8, 100, "%")
+		<< MultiValue::Config(Qt::green, Qt::transparent, 1, 0, 9, 100, "%"));
 	return true;
 }
 
@@ -372,7 +378,7 @@ void Peakify::updateFromProperties(Properties const& _p)
 
 PropertiesInfo Peakify::specifyProperties() const
 {
-	return PropertiesInfo("Algorithm", 1, "Algorithm to use for peak finding. { 0: Area; 1: Altitude }", true, QChar(0x03BB));
+	return PropertiesInfo("Algorithm", 1, "Algorithm to use for peak finding.", true, QChar(0x03BB), QList<AllowedValue>() << AllowedValue("Area", QChar(0x22A1), 0) << AllowedValue("Altitude", QChar(0x22A5), 1));
 }
 
 EXPORT_CLASS(Peakify, 0,3,0, SubProcessor);

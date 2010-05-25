@@ -81,7 +81,7 @@ void MultiValue::updateMM()
 {
 	theMax = m_config.size() ? m_config[0].max : 1.f;
 	theMin = m_config.size() ? m_config[0].min : 1.f;
-	for (uint i = 1; i < theScope; i++)
+	for (int i = 1; i < m_config.size(); i++)
 	{
 		theMax = max(theMax, m_config[i].max);
 		theMin = min(theMin, m_config[i].min);

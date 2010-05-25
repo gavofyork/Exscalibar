@@ -1,16 +1,21 @@
-Change MultiPort to M.
-
-Show future link.
-Allow dragging of subprocs around.
-Graphical glitches.
+18+
 
 Allow properties to be declared run-time and edited within processor.
 
+Make processors magnetic when size of connnection is zero.
+
+Allow frequency as stream of subs.
+
+Show future link.
+Allow dragging of subprocs around.
+
 Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).
 Latch as a Connection that sits between a connection and a processor.
+
 Automatic splitting when connecting single to multiple.
 Allow connections single to multiplicative & singles.
-Automatic latching when connecting to multiple.
+
+Automatic latching when connecting to multiple?
 
 Reload plugins.
 Generalised plugin architecture (e.g. distance function plugins for SSM).

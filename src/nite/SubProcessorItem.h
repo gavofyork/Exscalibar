@@ -24,9 +24,11 @@
 #include <Geddei>
 using namespace Geddei;
 
+#include "withproperties.h"
+
 class SubsContainer;
 
-class SubProcessorItem: public QGraphicsItem
+class SubProcessorItem: public WithProperties
 {
 	friend class SubsContainer;// so it can have its properties populated.
 
@@ -48,9 +50,8 @@ public:
 	enum { Type = UserType + 8 };
 	virtual int type() const { return Type; }
 
-	Properties const& properties() const { return m_properties; }
-	void setProperty(QString const& _key, QVariant const& _value);
-	void setDefaultProperties(PropertiesInfo const& _p) { m_propertiesInfo = _p; m_properties.defaultFrom(_p); }
+	virtual void setProperty(QString const& _key, QVariant const& _value);
+	void setDefaultProperties(PropertiesInfo const& _p) { setPropertiesInfo(_p); }
 
 private:
 	virtual QRectF boundingRect() const
@@ -63,8 +64,6 @@ private:
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 
-	PropertiesInfo		m_propertiesInfo;
-	Properties			m_properties;
 	QString				m_type;
 	uint				m_index;
 };

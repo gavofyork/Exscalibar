@@ -22,6 +22,7 @@
 #include <QDataStream>
 #include <QVariant>
 #include <QMap>
+#include <QList>
 #include <QStringList>
 
 #include <exscalibar.h>
@@ -113,6 +114,7 @@ public:
 	Properties stashed() const { Properties ret; foreach (QString k, keys()) ret[":" + k] = get(k); return ret; }
 	Properties unstash() { Properties ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret[k.mid(1)] = get(k); remove(k); } return ret; }
 	Properties operator+(Properties const& _p) const { Properties ret(_p); ret.theData.unite(theData); return ret; }
+	Properties& operator+=(Properties const& _p) { theData.unite(_p.theData); return *this; }
 	void defaultFrom(const PropertiesInfo& _i);
 
 	/**
@@ -233,17 +235,29 @@ public:
 	Properties(const PropertiesInfo &info);
 };
 
+struct AllowedValue
+{
+	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f, QVariant const& _t): meaning(_m), symbol(_s), from(_f), to(_t) {}
+	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f): meaning(_m), symbol(_s), from(_f) {}
+	AllowedValue() {}
+	QString meaning;
+	QString symbol;
+	QVariant from;
+	QVariant to;	// == isNull() for a single value.
+};
+
 /** @internal
  * Class to hold any extra data for each Property of the the PropertiesInfo
  * class.
  */
 struct PropertiesDatum
 {
-	PropertiesDatum(QString const& _desc = QString::null, bool _dyn = false, QString _sym = QString::null): description(_desc), isDynamic(_dyn), symbol(_sym) {}
+	PropertiesDatum(QString const& _desc = QString::null, bool _dyn = false, QString _sym = QString::null, QList<AllowedValue> const& _all = QList<AllowedValue>()): description(_desc), isDynamic(_dyn), symbol(_sym), allowed(_all) {}
 
 	QString description;
 	bool isDynamic;
 	QString symbol;
+	QList<AllowedValue> allowed;
 };
 
 /** @ingroup Geddei
@@ -272,10 +286,11 @@ public:
 	 */
 	uint size() const { return Properties::size(); }
 
-	PropertiesInfo stashed() const { PropertiesInfo ret; foreach (QString k, keys()) ret.set(":" + k, Properties::get(k), theInfo[k].description, theInfo[k].isDynamic, theInfo[k].symbol); return ret; }
-	PropertiesInfo unstashed() { PropertiesInfo ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret.set(k.mid(1), Properties::get(k), theInfo[k].description, theInfo[k].isDynamic, theInfo[k].symbol); remove(k); } return ret; }
+	PropertiesInfo stashed() const { PropertiesInfo ret; foreach (QString k, keys()) ret.set(":" + k, Properties::get(k), theInfo[k]); return ret; }
+	PropertiesInfo unstashed() { PropertiesInfo ret; foreach (QString k, keys()) if (k.startsWith(":")) { ret.set(k.mid(1), Properties::get(k), theInfo[k]); remove(k); } return ret; }
 	PropertiesInfo destash() { PropertiesInfo ret = *this; (*this) = ret.unstashed(); return ret; }
-	PropertiesInfo operator+(PropertiesInfo const& _p) const { PropertiesInfo ret(_p); ret.Properties::operator+(*this); ret.theInfo.unite(theInfo); return ret; }
+	PropertiesInfo operator+(PropertiesInfo const& _p) const { PropertiesInfo ret(_p); ret.Properties::operator+=(*this); ret.theInfo.unite(theInfo); return ret; }
+	PropertiesInfo& operator+=(PropertiesInfo const& _p) { Properties::operator+=(_p); theInfo.unite(_p.theInfo); return *this; }
 
 	void remove(QString const& _k) { Properties::remove(_k); theInfo.remove(_k); }
 
@@ -316,7 +331,7 @@ public:
 	 *
 	 * @sa operator()()
 	 */
-	void set(const QString &key, const QVariant defaultValue, const QString &description, bool _isDynamic, QString _symbol) { Properties::set(key, defaultValue); theInfo[key] = PropertiesDatum(description, _isDynamic, _symbol); }
+	void set(const QString &key, const QVariant defaultValue, const PropertiesDatum& _pd) { Properties::set(key, defaultValue); theInfo[key] = _pd; }
 
 	/**
 	 * Retrieve the default value for a given property.
@@ -325,6 +340,8 @@ public:
 	 * @return The default value for the property named @a key.
 	 */
 	QVariant defaultValue(const QString &key) const { return Properties::get(key); }
+
+	PropertiesDatum datum(QString const& _k) const { return theInfo[_k]; }
 
 	/**
 	 * Retrieve the description of a given property.
@@ -365,7 +382,7 @@ public:
 	 *
 	 * @sa set()
 	 */
-	PropertiesInfo &operator()(const QString &key, const QVariant defaultValue, const QString &description, bool _isDynamic = false, QString _symbol = QString::null) { set(key, defaultValue, description, _isDynamic, _symbol); return *this; }
+	PropertiesInfo &operator()(const QString &key, const QVariant defaultValue, const QString &description, bool _isDynamic = false, QString _symbol = QString::null, QList<AllowedValue> const& _all = QList<AllowedValue>()) { set(key, defaultValue, PropertiesDatum(description, _isDynamic, _symbol, _all)); return *this; }
 
 	/**
 	 * Inserts (or overwrites) a set of new tuples into this object.
@@ -400,7 +417,12 @@ public:
 	 * @param defaultValue The default value this property will take.
 	 * @param description A description of what this property means.
 	 */
-	PropertiesInfo(const QString &key, QVariant defaultValue, const QString &description, bool _isDynamic = false, QString _symbol = QString::null) { set(key, defaultValue, description, _isDynamic, _symbol); }
+	PropertiesInfo(const QString &key, QVariant defaultValue, const QString &description, bool _isDynamic = false, QString _symbol = QString::null, QList<AllowedValue> const& _all = QList<AllowedValue>()) { set(key, defaultValue, PropertiesDatum(description, _isDynamic, _symbol, _all)); }
+
+	/**
+	 * Copy-constructor.
+	 */
+	PropertiesInfo(const PropertiesInfo &merge): Properties() { set(merge); }
 
 	/**
 	 * Basic constructor. Creates an empty Properties object.

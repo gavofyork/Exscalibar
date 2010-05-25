@@ -38,7 +38,8 @@ HEADERS += GeddeiNite.h \
     MultiDomProcessorItem.h \
     IncompleteMultipleConnectionItem.h \
     scheduled.h \
-    Magnetic.h
+    Magnetic.h \
+    withproperties.h
 SOURCES += GeddeiNite.cpp \
     main.cpp \
     ProcessorView.cpp \
@@ -61,7 +62,8 @@ SOURCES += GeddeiNite.cpp \
     MultiDomProcessorItem.cpp \
     IncompleteMultipleConnectionItem.cpp \
     scheduled.cpp \
-    Magnetic.cpp
+    Magnetic.cpp \
+    withproperties.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp

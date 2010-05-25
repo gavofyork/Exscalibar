@@ -251,7 +251,11 @@ bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 
 PropertiesInfo DomProcessor::specifyProperties() const
 {
-	return PropertiesInfo(thePrimary->specifyProperties().stashed())
+	PropertiesInfo ps = thePrimary->specifyProperties();
+	qDebug() << ps.keys();
+	ps = ps.stashed();
+	qDebug() << ps.keys();
+	return PropertiesInfo(ps)
 						 ("Latency/Throughput", 0.5, "Throughput to latency optimisation weighting. Towards 0 for low latency at the cost of CPU usage and throughput, towards 1 for high throughput at the cost of memory and latency. { Value >= 0; Value <= 1 }")
 						 ("Alter Buffer", true, "Change buffer size according to optimal configuration.")
 						 ("Optimal Throughput", 262144, "Optimal size of buffer for maximum throughput in elements.")
