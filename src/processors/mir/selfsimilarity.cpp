@@ -197,8 +197,8 @@ void SelfSimilarity::updateFromProperties(const Properties &properties)
 
 PropertiesInfo SelfSimilarity::specifyProperties() const
 {
-	return PropertiesInfo("Size", 64, "The size of the block (in samples) from which to create a self-similarity matrix.")
-						 ("Distance Function", 0, "The distance function to be used when calculating the similarity. { 0: Cosine; 1: Magnitude ; 2: MagnitudeGreater }", true, QChar(0x2248), QList<AllowedValue>() << AllowedValue("Cosine", QChar(0x2221), 0) << AllowedValue("Magnitude", "=", 1) << AllowedValue("Greater", ">", 2));
+	return PropertiesInfo("Size", 64, "The size of the block (in samples) from which to create a self-similarity matrix.", false, QChar(0x2311), QList<AllowedValue>() << AllowedValue("Samples", "s", 8, 1024, AllowedValue::Log2))
+						 ("Distance Function", 0, "The distance function to be used when calculating the similarity.", true, QChar(0x2248), QList<AllowedValue>() << AllowedValue("Cosine", QChar(0x2221), 0) << AllowedValue("Magnitude", "=", 1) << AllowedValue("Greater", ">", 2));
 }
 
 EXPORT_CLASS(SelfSimilarity, 0,2,0, SubProcessor);

@@ -68,6 +68,7 @@ public:
 	virtual float		marginSize() const;
 
 	QRectF				centreRect() const { return QRectF(QPointF(0, 0), m_size); }
+	QRectF				clientRect() const { return QRectF(QPointF(0, 0), m_size - QSizeF(0, m_widgetsHeight)); }
 	virtual QRectF		outlineRect() const;
 	virtual QRectF		boundingRect() const;
 	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return outlineRect().adjusted(-ms, -ms, ms, ms); }
@@ -107,10 +108,14 @@ private:
 	virtual void		hoverMoveEvent(QGraphicsSceneHoverEvent* _e);
 	virtual void		timerEvent(QTimerEvent*);
 
+	void				checkWidgets();
+
 	QRectF				resizeRect() const;
 
 	QGraphicsRectItem*	m_statusBar;
 	PauseItem*			m_pauseItem;
+
+	float				m_widgetsHeight;
 
 	QSizeF				m_size;
 	int					m_timerId;

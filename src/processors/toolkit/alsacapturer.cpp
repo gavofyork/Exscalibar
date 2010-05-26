@@ -82,13 +82,15 @@ class ALSACapturer: public CoProcessor
 		m_normAlgorithm = _p["Normalisation Algorithm"].toInt();
 	}
 	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
+#define AV QList<AllowedValue>() << AllowedValue
+#define AVand << AllowedValue
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.")
-								("Channels", 2, "The number of channels to capture.")
+		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.", false, "D")
+								("Channels", 2, "The number of channels to capture.", false, "#", AV("Channels", "#", 1, 6))
 								("Frequency", 44100, "The frequency with which to sample at. { Hz }")
-								("DC Offset Learn Rate", 0.7, "How quickly changes in the DC offset are learned. { 0..1 }", true)
-								("Normalisation Algorithm", 1, "How volume is normalised. { 0: Disabled; 1: Max; 2: RMS }", true)
+								("DC Offset Learn Rate", 0.7f, "How quickly changes in the DC offset are learned.", true, QChar(0x03B1), AV("Learning rate", QChar(0x03B1), 0.1f, 1.f, AllowedValue::Log2))
+								("Normalisation Algorithm", 1, "How volume is normalised. { 0: Disabled; 1: Max; 2: RMS }", true, QChar(0x03BB), AV("Max", QString(QChar(0x2308)) + QChar(0x2309), 0) AVand("RMS", QChar(0x223F), 1))
 								("Normalisation Length", 60.f, "The length of history for normalisation. { s }")
 								("Period Size", 1024, "The number of frames in each period.")
 								("Periods", 4, "The number of periods in the outgoing buffer.");

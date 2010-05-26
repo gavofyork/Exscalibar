@@ -29,6 +29,8 @@ const QSizeF portSize = QSizeF(8.f, 12.f);
 const QSizeF multiPortSize = QSizeF(20.f, 12.f);
 const double portLateralMargin = 4.0;
 
+const float widgetMarginP = 0.f;
+
 ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
 	BaseItem			(_pr, _size),
 	m_processor			(0),
@@ -38,6 +40,11 @@ ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF
 {
 	if (!m_type.isEmpty())
 		propertiesChanged();
+}
+
+QSizeF ProcessorItem::centreMin() const
+{
+	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin / 2));
 }
 
 void ProcessorItem::togglePause()
@@ -136,11 +143,6 @@ Processor* ProcessorItem::reconstructProcessor()
 	Processor* r = ProcessorFactory::create(m_type);
 	setDefaultProperties(r->properties());
 	return r;
-}
-
-QSizeF ProcessorItem::centreMin() const
-{
-	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin / 2));
 }
 
 void ProcessorItem::propertiesChanged(QString const& _newName)

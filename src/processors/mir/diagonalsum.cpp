@@ -37,7 +37,7 @@ class DiagonalSum : public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
-		return PropertiesInfo	("Alpha", 1.f, "Alpha value for the power function. { 0 .. 2 }", true, QChar(0x03B1));
+		return PropertiesInfo	("Alpha", 1.f, "Alpha value for the power function.", true, QChar(0x03B1), QList<AllowedValue>() << AllowedValue("Alpha", QChar(0x03B1), 0.f, 2.f));
 	}
 	virtual void updateFromProperties(Properties const& _p)
 	{

@@ -237,13 +237,15 @@ public:
 
 struct AllowedValue
 {
-	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f, QVariant const& _t): meaning(_m), symbol(_s), from(_f), to(_t) {}
-	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f): meaning(_m), symbol(_s), from(_f) {}
+	enum Scaling { NoScale = 0, Linear, Log2, Log10 };
+	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f, QVariant const& _t, Scaling _sc = Linear): meaning(_m), symbol(_s), from(_f), to(_t), scale(_sc) {}
+	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f): meaning(_m), symbol(_s), from(_f), scale(NoScale) {}
 	AllowedValue() {}
 	QString meaning;
 	QString symbol;
 	QVariant from;
 	QVariant to;	// == isNull() for a single value.
+	Scaling scale;
 };
 
 /** @internal

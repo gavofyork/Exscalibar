@@ -50,25 +50,40 @@ namespace Geddei
 			if (i <= uint(1 << l))
 				return l;
 	}
-	inline float lerp(float _a, float _b, float _x)
+	template<class T>
+	inline T quantised(T _i, T _s)
+	{
+		return floor(_i / _s) * _s;
+	}
+	template<class T>
+	inline T clamp(T _a, T _l, T _u)
+	{
+		return _a > _u ? _u : _a < _l ? _l : _a;
+	}
+	template<class T>
+	inline T lerp(T _a, T _b, T _x)
 	{
 		return (_b - _a) * _x + _a;
 	}
-	inline float sqr(float _x)
+	template<class T>
+	inline T sqr(T _x)
 	{
 		return _x * _x;
 	}
-	inline float normalPDFN(float _x, float _m, float _o)
+	template<class T>
+	inline T normalPDFN(T _x, T _m, T _o)
 	{
-		return exp(sqr(_x - _m)/(-2.f * _o * _o));
+		return exp(sqr(_x - _m)/(-2.0 * _o * _o));
 	}
-	inline float normalPDF(float _x, float _m, float _o)
+	template<class T>
+	inline T normalPDF(T _x, T _m, T _o)
 	{
-		return exp(sqr(_x - _m)/(-2.f * _o * _o)) / sqrtf(2.f * M_PI * _o * _o);
+		return exp(sqr(_x - _m)/(-2.0 * _o * _o)) / sqrt(2.0 * M_PI * _o * _o);
 	}
-	inline float normalCDF(float _x, float _m, float _o)
+	template<class T>
+	inline T normalCDF(T _x, T _m, T _o)
 	{
-		return .5f * (1 + erff((_x - _m) / (M_SQRT2 * _o)));
+		return 0.5 * (1 + erf((_x - _m) / (M_SQRT2 * _o)));
 	}
 	inline int isInf(float _x)
 	{

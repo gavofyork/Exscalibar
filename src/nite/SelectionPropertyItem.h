@@ -16,14 +16,18 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "withproperties.h"
+#pragma once
 
-void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
+#include "PropertyItem.h"
+
+class SelectionPropertyItem: public BasePropertyItem
 {
-	m_properties.defaultFrom(_i);
-	m_propertiesInfo = _i;
-	m_dynamicKeys.clear();
-	foreach (QString k, _i.keys())
-//		if (_i.isDynamic(k))
-			m_dynamicKeys << k;
-}
+public:
+	SelectionPropertyItem(PropertyItem* _p, QRectF const& _r): BasePropertyItem(_p, _r) {}
+
+	enum { Type = UserType + 19 };
+	virtual int			type() const { return Type; }
+
+	virtual void		mousePressEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void		paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);
+};

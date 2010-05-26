@@ -66,4 +66,5 @@ private:
 
 	QString				m_type;
 	uint				m_index;
+	float				m_widgetsHeight;
 };

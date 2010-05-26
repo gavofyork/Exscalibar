@@ -42,6 +42,7 @@ public:
 
 	bool			tested() const { return theTested; }
 	bool			connected() const { return theConnected; }
+	bool			isRunning() const { return theRunning; }
 
 	QColor			myColour(QTask* _me) const { return m_colourMap.value(_me, QColor(0, 0, 0)); }
 

@@ -314,7 +314,7 @@ void MultiProcessorItem::paintCentre(QPainter* _p)
 	else
 	{
 		BaseItem::paintCentre(_p);
-		processor()->draw(*_p, centreRect().size());
+		processor()->draw(*_p, clientRect().size());
 	}
 }
 

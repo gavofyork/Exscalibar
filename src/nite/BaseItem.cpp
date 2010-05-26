@@ -19,6 +19,7 @@
 #include "GeddeiNite.h"
 #include "PauseItem.h"
 #include "BaseItem.h"
+#include "PropertyItem.h"
 
 #include "Magnetic.h"
 #include "InputItem.h"
@@ -69,6 +70,27 @@ void BaseItem::setProperty(QString const& _key, QVariant const& _value)
 void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
 {
 	setPropertiesInfo(_def);
+
+	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
+		delete i;
+
+	m_widgetsHeight = 0.f;
+	foreach (QString k, m_dynamicKeys)
+	{
+		PropertyItem* item = new PropertyItem(this, QRectF(0, 0, m_size.width(), 0), k);
+		m_widgetsHeight += item->boundingRect().height();
+	}
+	checkWidgets();
+}
+
+void BaseItem::checkWidgets()
+{
+	QRectF widget(widgetMarginP, m_size.height() - m_widgetsHeight + widgetMarginP, m_size.width() - widgetMarginP * 2, 0);
+	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
+	{
+		i->resize(widget);
+		widget.translate(0, i->boundingRect().height());
+	}
 }
 
 void BaseItem::tick()
@@ -78,7 +100,7 @@ void BaseItem::tick()
 
 void BaseItem::timerEvent(QTimerEvent*)
 {
-	update(centreRect().adjusted(2, 2, -2, -2));
+	update();//centreRect().adjusted(2, 2, -2, -2));
 }
 
 void BaseItem::propertiesChanged(QString const&)
@@ -91,9 +113,11 @@ void BaseItem::geometryChanged()
 	prepareGeometryChange();
 	if (!m_size.isValid())
 		m_size = centrePref();
-	m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height(), m_size.height()));
+	m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height() + m_widgetsHeight, m_size.height()));
 	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(cornerSize * 2.f, statusMargin));
 	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 5.f, statusHeight));
+
+	checkWidgets();
 
 	positionChanged();
 }
@@ -232,7 +256,7 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 			m_size = m_size + QSizeF(best.x(), 0);
 		if (fabs(best.y()) < 5)
 			m_size = m_size + QSizeF(0, best.y());
-		m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height(), m_size.height()));
+		m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height() + m_widgetsHeight, m_size.height()));
 		geometryChanged();
 	}
 	else
@@ -249,7 +273,7 @@ void BaseItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	_p->setClipRect(boundingRect());
 	paintOutline(_p);
-	_p->setClipRect(centreRect().adjusted(0, 0, .5f, .5f));
+	_p->setClipRect(clientRect().adjusted(0, 0, .5f, .5f));
 	_p->translate(.5f, .5f);
 	paintCentre(_p);
 }
