@@ -24,7 +24,7 @@
 using namespace QtExtra;
 
 #include "GeddeiNite.h"
-#include "scheduled.h"
+#include "Scheduled.h"
 
 Scheduled::Scheduled(QWidget *parent) :
     QWidget(parent)

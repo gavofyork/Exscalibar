@@ -25,7 +25,7 @@
 #include "Magnetic.h"
 #include "InputItem.h"
 #include "OutputItem.h"
-#include "withproperties.h"
+#include "WithProperties.h"
 
 class PauseItem;
 

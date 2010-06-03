@@ -95,8 +95,8 @@ void Grapher::updateLimits(QSizeF const& _s, float _ppl) const
 {
 	for (int i = 0; i < m_config.size(); i++)
 	{
-		float uMin = m_config[i].min * m_config[i].conversion;
-		float uMax = m_config[i].max * m_config[i].conversion;
+		float uMin = m_config[i].min * m_config[i].conversion / m_gain;
+		float uMax = m_config[i].max * m_config[i].conversion / m_gain;
 		float l10 = logf((uMax - uMin) / (_s.height() / _ppl) * 5.5f) / logf(10.f);
 		float mt = pow(10.f, l10 - floor(l10));
 		float ep = pow(10.f, floor(l10));
@@ -112,7 +112,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	QFont f;
 	f.setPixelSize(8.f);
 
-	#define Y(val, i) ((1.f - ((val) * m_gain - m_mins[i]) / m_deltas[i]) * _s.height())
+	#define Y(val, i) ((1.f - ((val) - m_mins[i]) / m_deltas[i]) * _s.height())
 
 	if (m_points.size())
 	{
@@ -277,7 +277,7 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 		m_mins[i] = m_config[i].min * m_config[i].conversion;
 		m_incs[i] = m_deltas[i] = (m_config[i].max - m_config[i].min) * m_config[i].conversion;
 	}
-	setupVisual(m_viewWidthSamples, 20, 1000);
+	setupVisual(m_viewWidthSamples, 20, m_spu * 1000 / _inTypes[0].frequency());
 	return true;
 }
 
@@ -303,9 +303,9 @@ void Grapher::updateFromProperties(Properties const& _p)
 PropertiesInfo Grapher::specifyProperties() const
 {
 	return PropertiesInfo	("Samples/Update", 1, "The number of samples to read per graph update.")
-							("Antialias", false, "Antialiasing of lines.")
-							("Labeled", -1, "The subgraph index for the unit labels. { -1: Default; >= 0 }")
-							("Gain", 1, "The amount to multiply the incoming value by.")
+							("Antialias", false, "Antialiasing of lines.", true, "A")
+							("Labeled", -1, "The subgraph index for the unit labels. { -1: Default; >= 0 }", true)
+							("Gain", 1, "The amount to multiply the incoming value by.", true)
 							("View Width", 5, "The width of the view (seconds).");
 }
 

@@ -19,7 +19,7 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "withproperties.h"
+#include "WithProperties.h"
 #include "SelectionPropertyItem.h"
 
 void SelectionPropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)

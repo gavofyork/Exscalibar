@@ -235,9 +235,13 @@ public:
 	Properties(const PropertiesInfo &info);
 };
 
+#define AV QList<AllowedValue>() << AllowedValue
+#define AVand << AllowedValue
+
 struct AllowedValue
 {
 	enum Scaling { NoScale = 0, Linear, Log2, Log10 };
+	AllowedValue(QVariant const& _f, QVariant const& _t, Scaling _sc = Linear): from(_f), to(_t), scale(_sc) {}
 	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f, QVariant const& _t, Scaling _sc = Linear): meaning(_m), symbol(_s), from(_f), to(_t), scale(_sc) {}
 	AllowedValue(QString const& _m, QString const& _s, QVariant const& _f): meaning(_m), symbol(_s), from(_f), scale(NoScale) {}
 	AllowedValue() {}
@@ -247,6 +251,10 @@ struct AllowedValue
 	QVariant to;	// == isNull() for a single value.
 	Scaling scale;
 };
+
+static const QList<AllowedValue> AVfrequency = AV(20.f, 20000.f, AllowedValue::Log10);
+static const QList<AllowedValue> AVunity = AV(0.f, 1.f, AllowedValue::Linear);
+static const QList<AllowedValue> AVlogUnity = AV(0.f, 1.f, AllowedValue::Log2);
 
 /** @internal
  * Class to hold any extra data for each Property of the the PropertiesInfo

@@ -377,4 +377,10 @@ public:
 	uint numOutputs() const { return theNumOutputs; }
 };
 
+class StatefulSubProcessor: public SubProcessor
+{
+public:
+	StatefulSubProcessor(const QString &type, const MultiplicityType &multi = NotMulti): SubProcessor(type, multi) {}
+};
+
 }

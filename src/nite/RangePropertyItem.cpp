@@ -19,7 +19,7 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "withproperties.h"
+#include "WithProperties.h"
 #include "RangePropertyItem.h"
 
 void RangePropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)

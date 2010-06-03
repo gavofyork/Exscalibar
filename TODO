@@ -1,12 +1,19 @@
+Tonaliser: allow for higher precision: 12 should be configurable.
+
+Rake-max with min-req activation energy searcher.
+- Can return most certain periods w/probabilities.
+- Multiple timespans.
+
+Frequency sweep recogniser?
+
+Peak finder has momentum?!
+
+Sigmoid activator.
+
 18+
-
-Allow properties to be declared run-time and edited within processor.
-
-Make processors magnetic when size of connnection is zero.
 
 Allow frequency as stream of subs.
 
-Show future link.
 Allow dragging of subprocs around.
 
 Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).

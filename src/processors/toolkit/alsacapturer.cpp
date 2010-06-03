@@ -82,8 +82,6 @@ class ALSACapturer: public CoProcessor
 		m_normAlgorithm = _p["Normalisation Algorithm"].toInt();
 	}
 	virtual void specifyOutputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.count(); i++) _s[i] = thePeriodSize; }
-#define AV QList<AllowedValue>() << AllowedValue
-#define AVand << AllowedValue
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Device", "hw:0,0", "The ALSA hardware device to open.", false, "D")

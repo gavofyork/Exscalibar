@@ -33,7 +33,8 @@ SOURCES += monitor.cpp \
 	fan.cpp \
 	stress.cpp \
 	recorder.cpp \
-	alsaplayer.cpp
+	alsaplayer.cpp \
+    slur.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

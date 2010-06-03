@@ -31,10 +31,12 @@ static const double statusMargin = 2.0;
 
 BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
 	WithProperties	(0, _pr),
+	m_widgetsHeight	(0),
 	m_size			(_size),
 	m_timerId		(-1),
 	m_resizing		(false)
 {
+	assert(m_size.height() < 100000);
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
 	m_statusBar->setBrush(QColor(255, 255, 255, 16));
@@ -135,6 +137,9 @@ QRectF BaseItem::boundingRect() const
 QRectF BaseItem::outlineRect() const
 {
 	// Add one to width & height as we translate up 7 left by half a pixel when drawing.
+	assert(statusHeight < 100000);
+	assert(statusMargin < 100000);
+	assert(m_size.height() < 100000);
 	return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, statusHeight + 2 * statusMargin + 1);
 }
 
@@ -154,7 +159,6 @@ bool BaseItem::connectYourself()
 
 void BaseItem::typesConfirmed()
 {
-	qDebug() << "Redraw period: " << redrawPeriod();
 	if (uint i = redrawPeriod())
 		m_timerId = startTimer(i);
 }

@@ -56,7 +56,7 @@ float barkFrequency(float _band)
 		return 0.f;
 	if (_band >= 24.f)
 		return 15500.f;
-	return lerp(barkBands[(int)floor(_band)], barkBands[(int)floor(_band) + 1], _band - floor(_band));
+	return lerp<float>(barkBands[(int)floor(_band)], barkBands[(int)floor(_band) + 1], _band - floor(_band));
 }
 
 float barkBand(float _freq)

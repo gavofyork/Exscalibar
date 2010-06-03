@@ -141,7 +141,8 @@ void ProcessorItem::updateMultiplicities()
 Processor* ProcessorItem::reconstructProcessor()
 {
 	Processor* r = ProcessorFactory::create(m_type);
-	setDefaultProperties(r->properties());
+	if (r)
+		setDefaultProperties(r->properties());
 	return r;
 }
 

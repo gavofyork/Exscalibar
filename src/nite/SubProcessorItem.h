@@ -24,7 +24,7 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "withproperties.h"
+#include "WithProperties.h"
 
 class SubsContainer;
 

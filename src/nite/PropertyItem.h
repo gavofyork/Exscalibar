@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "withproperties.h"
+#include "WithProperties.h"
 
 class PropertyItem: public QGraphicsItem
 {

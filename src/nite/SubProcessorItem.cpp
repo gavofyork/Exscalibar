@@ -18,7 +18,7 @@
 
 #include "ProcessorsScene.h"
 #include "SubsContainer.h"
-#include "withproperties.h"
+#include "WithProperties.h"
 #include "GeddeiNite.h"
 #include "SubProcessorItem.h"
 #include "PropertyItem.h"
@@ -31,7 +31,8 @@ float widgetMargin = 0.f;
 SubProcessorItem::SubProcessorItem(SubsContainer* _dpi, QString const& _type, int _index, Properties const& _pr):
 	WithProperties	(_dpi->baseItem(), _pr),
 	m_type			(_type),
-	m_index			(_index)
+	m_index			(_index),
+	m_widgetsHeight	(0.f)
 {
 	_dpi->reorder();
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
@@ -42,6 +43,7 @@ SubProcessorItem::SubProcessorItem(SubsContainer* _dpi, QString const& _type, in
 		widget.translate(0, item->boundingRect().height());
 	}
 	m_widgetsHeight = widget.top() - (subProcessor()->height() + widgetMargin);
+	assert(m_widgetsHeight < 10000);
 }
 
 SubProcessor* SubProcessorItem::subProcessor() const

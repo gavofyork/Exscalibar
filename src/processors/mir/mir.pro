@@ -31,7 +31,11 @@ SOURCES += bandwise.cpp \
 		   simplesplit.cpp \
 		   wavegen.cpp \
 		   weightedsum.cpp \
-		   pulser.cpp
+		   pulser.cpp \
+    Peakify.cpp \
+    PeakRoller.cpp \
+    SpectralHarmonics.cpp \
+    tonaliser.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
@@ -42,3 +46,5 @@ SOURCES += bandwise.cpp \
 TEMPLATE = lib
 CONFIG += plugin
 VERSION = $$OURVERSION
+
+HEADERS +=

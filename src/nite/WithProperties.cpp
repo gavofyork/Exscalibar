@@ -16,7 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "withproperties.h"
+#include "WithProperties.h"
 
 void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
 {

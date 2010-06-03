@@ -69,12 +69,12 @@ public:
 			out[0].sample(i).copyFrom(in[0].mid(i * 1024, 2048));
 	}
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const&, SignalTypeRefs& _outTypes)
 	{
-		outTypes[0] = FreqSteppedSpectrum(2048, 1);
+		_outTypes[0] = FreqSteppedSpectrum(2048, 1);
 		return true;
 	}
-	virtual void initFromProperties(const Properties &properties)
+	virtual void initFromProperties(Properties const&)
 	{
 		setupIO(1, 1);
 		setupSamplesIO(2048, 1024, 1);
@@ -86,9 +86,10 @@ class Transparent: public SubProcessor
 public:
 	Transparent() : SubProcessor("Transparent") {}
 
-	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks)
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint)
 	{
-		out[0][0] = in[0][0];
+		for (int i = 0; i < in[0].elements(); i++)
+			out[0][i] = in[0][i];
 	}
 
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
@@ -96,7 +97,7 @@ public:
 		outTypes = inTypes;
 		return true;
 	}
-	virtual void initFromProperties(const Properties &properties)
+	virtual void initFromProperties(const Properties &)
 	{
 		setupIO(1, 1);
 		setupSamplesIO(64, 1, 1);

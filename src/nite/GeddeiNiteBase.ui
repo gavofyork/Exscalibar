@@ -1137,7 +1137,7 @@
   <customwidget>
    <class>Scheduled</class>
    <extends>QWidget</extends>
-   <header>scheduled.h</header>
+   <header>Scheduled.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
