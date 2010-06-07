@@ -29,7 +29,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "signaltypes.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Delta: public SubProcessor
 {
@@ -61,7 +61,7 @@ class Extract: public SubProcessor
 	uint m_index;
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Element Index", 0, "Index of the element to extract."); }
 	virtual void updateFromProperties(Properties const& _p) { m_index = _p["Element Index"].toInt(); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Signal>()) return false; outTypes[0] = Value(inTypes[0].asA<Signal>().frequency(), inTypes[0].asA<Signal>().maxAmplitude(), inTypes[0].asA<Signal>().minAmplitude()); return m_index < inTypes[0].asA<Signal>().arity(); }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency(), inTypes[0].asA<Contiguous>().maxAmplitude(), inTypes[0].asA<Contiguous>().minAmplitude()); return m_index < inTypes[0].asA<Contiguous>().arity(); }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		outs[0][0] = ins[0][m_index];
@@ -78,7 +78,7 @@ class Invert: public SubProcessor
 	uint m_min;
 	uint m_max;
 	uint m_arity;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Signal>()) return false; outTypes = inTypes; m_min = inTypes[0].asA<Signal>().minAmplitude(); m_arity = inTypes[0].asA<Signal>().arity(); m_max = inTypes[0].asA<Signal>().maxAmplitude(); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes = inTypes; m_min = inTypes[0].asA<Contiguous>().minAmplitude(); m_arity = inTypes[0].asA<Contiguous>().arity(); m_max = inTypes[0].asA<Contiguous>().maxAmplitude(); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		for (uint i = 0; i < m_arity; i++)
@@ -111,10 +111,10 @@ Sum::Sum(): SubProcessor("Sum")
 
 bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Signal>())
+	if (!inTypes[0].isA<Contiguous>())
 		return false;
-	m_arity = inTypes[0].asA<Signal>().arity();
-	outTypes = Value(inTypes[0].asA<Signal>().frequency());
+	m_arity = inTypes[0].asA<Contiguous>().arity();
+	outTypes = Value(inTypes[0].asA<Contiguous>().frequency());
 	return true;
 }
 

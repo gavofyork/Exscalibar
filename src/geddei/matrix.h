@@ -21,22 +21,22 @@
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 
-#include "signaltype.h"
+#include "contiguous.h"
 #else
-#include <geddei/signaltype.h>
+#include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 /** @ingroup SignalTypes
  * @brief A TransmissionType refinement for describing 2-D matrix data.
  * @author Gav Wood <gav@kde.org>
  */
-class DLLEXPORT Matrix: public Signal
+class DLLEXPORT Matrix: public Contiguous
 {
-	TRANSMISSION_TYPE(Matrix, Signal);
+	TRANSMISSION_TYPE(Matrix, Contiguous);
 
 public:
 	/**
@@ -53,7 +53,7 @@ public:
 	 * would represent a second in signal time. Of course this property may be
 	 * left as its default (0) if it makes no sense for the data.
 	 */
-	Matrix(uint width = 1, uint height = 1, float frequency = 0, float pitchWidth = 0, float pitchHeight = 0) : Signal(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
+	Matrix(uint width = 1, uint height = 1, float frequency = 0, float pitchWidth = 0, float pitchHeight = 0) : Contiguous(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
 
 	/**
 	 * Get the number of columns in the matrix this object represents.
@@ -84,7 +84,7 @@ public:
 	 */
 	float pitchHeight() const { return thePitchHeight; }
 
-	virtual QString info() const { return QString("<div><b>Matrix</b></div><div>Dimensions: %1x%2</div><div>Pitch: %3x%4 s</div>").arg(theWidth).arg(theHeight).arg(thePitchWidth).arg(thePitchHeight) + Signal::info(); }
+	virtual QString info() const { return QString("<div><b>Matrix</b></div><div>Dimensions: %1x%2</div><div>Pitch: %3x%4 s</div>").arg(theWidth).arg(theHeight).arg(thePitchWidth).arg(thePitchHeight) + Contiguous::info(); }
 
 protected:
 	uint theWidth; ///< Width of the represented matrix in elements.

@@ -24,7 +24,7 @@
 using namespace Geddei;
 
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>

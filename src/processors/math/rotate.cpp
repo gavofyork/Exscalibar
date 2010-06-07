@@ -19,7 +19,7 @@
 #include "qfactoryexporter.h"
 #include "qpca.h"
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "value.h"
 #include "bufferdata.h"
 #include "subprocessor.h"

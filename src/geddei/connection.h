@@ -21,10 +21,10 @@
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "signaltyperef.h"
 #else
-#include <geddei/signaltype.h>
+#include <geddei/transmissiontype.h>
 #include <geddei/signaltyperef.h>
 #endif
 using namespace Geddei;

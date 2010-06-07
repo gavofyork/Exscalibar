@@ -16,27 +16,12 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "signaltype.h"
+#include "mark.h"
 #include "source.h"
 using namespace Geddei;
 
-namespace Geddei
+namespace TransmissionTypes
 {
-
-TRANSMISSION_TYPE_CPP(Signal);
-
-Signal::Signal(uint _arity, float _frequency, float _max, float _min):
-	TransmissionType	(_arity),
-	theFrequency		(_frequency),
-	theMin				(min(_min, _max)),
-	theMax				(max(_min, _max))
-{
-}
-
-QString Signal::info() const
-{
-	return QString("<div><b>Signal</b></div><div>Frequency: %1 Hz</div><div>Range: %3-%4</div>").arg(theFrequency).arg(theMin).arg(theMax) + TransmissionType::info();
-}
 
 TRANSMISSION_TYPE_CPP(Mark);
 

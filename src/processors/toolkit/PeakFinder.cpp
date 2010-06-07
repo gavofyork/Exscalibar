@@ -18,11 +18,14 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "processor.h"
 #include "buffer.h"
 using namespace Geddei;
+
+#include "contiguous.h"
+#include "mark.h"
+using namespace TransmissionTypes;
 
 class PeakFinder : public CoProcessor
 {
@@ -68,7 +71,7 @@ void PeakFinder::processorStopped()
 
 bool PeakFinder::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	if (!_inTypes[0].isA<Signal>() || _inTypes[0].asA<Signal>().arity() != 1)
+	if (!_inTypes[0].isA<Contiguous>() || _inTypes[0].asA<Contiguous>().arity() != 1)
 		return false;
 	_outTypes[0] = Mark(2);
 	return true;

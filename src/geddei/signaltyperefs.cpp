@@ -21,7 +21,7 @@ using namespace std;
 
 #include "signaltyperefs.h"
 #include "signaltyperef.h"
-#include "signaltype.h"
+#include "transmissiontype.h"
 
 namespace Geddei
 {

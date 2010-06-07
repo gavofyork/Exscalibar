@@ -40,7 +40,6 @@ HEADERS += buffer.h \
 	properties.h \
 	rlconnection.h \
 	rscoupling.h \
-	signaltype.h \
 	signaltyperefs.h \
 	sink.h \
 	source.h \
@@ -59,7 +58,9 @@ HEADERS += buffer.h \
 	signaltyperef.h \
 	value.h \
 	groupable.h \
-    transmissiontype.h
+    transmissiontype.h \
+    mark.h \
+    contiguous.h
 SOURCES += buffer.cpp \
 	bufferinfo.cpp \
 	bufferdata.cpp \
@@ -91,7 +92,6 @@ SOURCES += buffer.cpp \
 	properties.cpp \
 	rlconnection.cpp \
 	rscoupling.cpp \
-	signaltype.cpp \
 	signaltyperefs.cpp \
 	sink.cpp \
 	source.cpp \
@@ -109,7 +109,9 @@ SOURCES += buffer.cpp \
 	globals.cpp \
 	groupable.cpp \
     value.cpp \
-    transmissiontype.cpp
+    transmissiontype.cpp \
+    mark.cpp \
+    contiguous.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

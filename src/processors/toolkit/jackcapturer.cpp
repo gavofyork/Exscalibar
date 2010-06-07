@@ -31,7 +31,7 @@
 using namespace Geddei;
 
 #include "wave.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class JackCapturer: public CoProcessor
 {

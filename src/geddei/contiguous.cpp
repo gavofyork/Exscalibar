@@ -16,14 +16,25 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "qsocketsession.h"
-
-#include "matrix.h"
+#include "contiguous.h"
+using namespace Geddei;
 
 namespace TransmissionTypes
 {
 
-TRANSMISSION_TYPE_CPP(Matrix);
-TRANSMISSION_TYPE_CPP(SquareMatrix);
+TRANSMISSION_TYPE_CPP(Contiguous);
+
+Contiguous::Contiguous(uint _arity, float _frequency, float _max, float _min):
+	TransmissionType	(_arity),
+	theFrequency		(_frequency),
+	theMin				(min(_min, _max)),
+	theMax				(max(_min, _max))
+{
+}
+
+QString Contiguous::info() const
+{
+	return QString("<div><b>Contiguous</b></div><div>Frequency: %1 Hz</div><div>Range: %3-%4</div>").arg(theFrequency).arg(theMin).arg(theMax) + TransmissionType::info();
+}
 
 }

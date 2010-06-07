@@ -19,7 +19,7 @@
 #include <cassert>
 using namespace std;
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "signaltyperef.h"
 using namespace Geddei;
 

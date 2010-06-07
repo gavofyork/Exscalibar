@@ -21,11 +21,11 @@
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 #include "bufferdata.h"
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "buffer.h"
 #else
 #include <geddei/bufferdata.h>
-#include <geddei/signaltype.h>
+#include <geddei/transmissiontype.h>
 #include <geddei/buffer.h>
 #endif
 

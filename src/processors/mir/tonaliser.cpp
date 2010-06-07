@@ -18,7 +18,6 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "value.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
@@ -26,7 +25,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Tonaliser: public SubProcessor
 {

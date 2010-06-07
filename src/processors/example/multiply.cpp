@@ -18,7 +18,7 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "bufferdata.h"
 #include "processor.h"
 #include "buffer.h"

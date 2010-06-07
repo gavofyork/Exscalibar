@@ -23,7 +23,6 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
@@ -32,7 +31,7 @@ using namespace Geddei;
 #include "spectrum.h"
 #include "value.h"
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 static inline float cosineDistance(const float *x, const float *y, uint bandWidth)
 {
@@ -86,7 +85,7 @@ class Distance: public SubProcessor
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 	{
 		m_arity = inTypes[0].asA<TransmissionType>().arity();
-		outTypes[0] = Value(inTypes[0].asA<Signal>().frequency());
+		outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency());
 		return true;
 	}
 	virtual PropertiesInfo specifyProperties() const;

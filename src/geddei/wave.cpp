@@ -18,7 +18,7 @@
 
 #include "wave.h"
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 TRANSMISSION_TYPE_CPP(Wave);

@@ -29,7 +29,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "signaltypes.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Magnitude: public SubProcessor
 {

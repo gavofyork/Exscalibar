@@ -22,7 +22,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>

@@ -20,7 +20,7 @@
 
 #include "value.h"
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 TRANSMISSION_TYPE_CPP(Value);
@@ -45,7 +45,7 @@ static const Qt::GlobalColor s_colours[] = {
 };
 
 MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, QVector<MultiValue::Config> const& _c, int _l):
-	Signal(_scope, _frequency, _max, _min), m_labeled(_l)
+	Contiguous(_scope, _frequency, _max, _min), m_labeled(_l)
 {
 	if (_c.isEmpty())
 	{
@@ -67,7 +67,7 @@ MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, Q
 }
 
 MultiValue::MultiValue(float _scope, float _frequency, QVector<MultiValue::Config> const& _c, int _l):
-	Signal(_scope, _frequency), m_labeled(_l)
+	Contiguous(_scope, _frequency), m_labeled(_l)
 {
 	m_config = _c;
 	updateMM();

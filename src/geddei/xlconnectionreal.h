@@ -20,16 +20,18 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "buffer.h"
 #include "bufferreader.h"
 #include "xlconnection.h"
+#include "contiguous.h"
 #else
 #include <geddei/buffer.h>
 #include <geddei/bufferreader.h>
 #include <geddei/xlconnection.h>
+#include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
+using namespace TransmissionTypes;
 
 class BobPort;
 
@@ -71,7 +73,7 @@ private:
 	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
 	virtual bool plungeSync(uint samples) const;
 	virtual bool require(uint samples, uint preferSamples = Undefined);
-	virtual double secondsPassed() const { return type().isA<Signal>() ? m_latestPeeked / (double)(type().asA<Signal>().frequency()) : 0.0; }
+	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
 
 protected:
 	friend class BobPort;

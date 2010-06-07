@@ -25,7 +25,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "signaltypes.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 #include "player.h"
 #include "monitor.h"
@@ -81,11 +81,11 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint c
 
 bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Signal>())
+	if (!inTypes[0].isA<Contiguous>())
 		return false;
-	m_arity = inTypes[0].asA<Signal>().arity();
+	m_arity = inTypes[0].asA<Contiguous>().arity();
 	outTypes = inTypes[0];
-	outTypes[0].asA<Signal>().setFrequency(inTypes[0].asA<Signal>().frequency() / (float)theStep);
+	outTypes[0].asA<Contiguous>().setFrequency(inTypes[0].asA<Contiguous>().frequency() / (float)theStep);
 	return true;
 }
 

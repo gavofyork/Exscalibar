@@ -21,13 +21,13 @@
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 
-#include "signaltype.h"
+#include "contiguous.h"
 #else
-#include <geddei/signaltype.h>
+#include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 /** @ingroup SignalTypes
@@ -39,9 +39,9 @@ namespace SignalTypes
  * significant attributes, the frequency by which each individual spectrum
  * arrives from the source, and the stepping between spectral bands.
  */
-class DLLEXPORT Spectrum: public Signal
+class DLLEXPORT Spectrum: public Contiguous
 {
-	TRANSMISSION_TYPE(Spectrum, Signal);
+	TRANSMISSION_TYPE(Spectrum, Contiguous);
 
 public:
 	/**
@@ -53,7 +53,7 @@ public:
 	 * @param step The increase in audio frequency (in Hz) per band. It is
 	 * currently assumed that the signal is a monotonically stepped spectrum.
 	 */
-	inline Spectrum(uint bins = 1, float frequency = 1, float _max = 1.f, float _min = 0.f): Signal(bins, frequency, _max, _min) {}
+	inline Spectrum(uint bins = 1, float frequency = 1, float _max = 1.f, float _min = 0.f): Contiguous(bins, frequency, _max, _min) {}
 
 	/**
 	 * Determines the frequency represented by a specific band.
@@ -88,7 +88,7 @@ public:
 	 */
 	virtual float nyquist() const { return 0.f; }
 
-	virtual QString info() const { return QString("<div><b>Spectrum</b></div><div>Bin range: %1,%2-%3,%4 Hz</div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(size() - 2)).arg(bandFrequency(size() - 1)) + Signal::info(); }
+	virtual QString info() const { return QString("<div><b>Spectrum</b></div><div>Bin range: %1,%2-%3,%4 Hz</div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(size() - 2)).arg(bandFrequency(size() - 1)) + Contiguous::info(); }
 };
 
 /** @ingroup SignalTypes

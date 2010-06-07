@@ -18,12 +18,13 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
-#include "value.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
 using namespace Geddei;
+
+#include "value.h"
+using namespace TransmissionTypes;
 
 class Rectify: public SubProcessor
 {

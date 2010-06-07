@@ -30,11 +30,11 @@ using namespace std;
 #ifdef __GEDDEI_BUILD
 #include "qfastwaitcondition.h"
 #include "bufferdata.h"
-#include "signaltype.h"
+#include "transmissiontype.h"
 #else
 #include <qtextra/qfastwaitcondition.h>
 #include <geddei/bufferdata.h>
-#include <geddei/signaltype.h>
+#include <geddei/transmissiontype.h>
 #endif
 using namespace Geddei;
 

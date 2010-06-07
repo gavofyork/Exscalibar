@@ -22,7 +22,7 @@
 using namespace Geddei;
 
 #include "value.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 #define DISPLAY 1
 
@@ -251,10 +251,10 @@ void Grapher::processorStopped()
 
 bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
 {
-	if (!_inTypes[0].isA<Signal>())
+	if (!_inTypes[0].isA<Contiguous>())
 		return false;
-	m_viewWidthSamples = (uint)(_inTypes[0].asA<Signal>().frequency() * m_viewWidth);
-	m_arity = max(1u, _inTypes[0].asA<Signal>().arity());
+	m_viewWidthSamples = (uint)(_inTypes[0].asA<Contiguous>().frequency() * m_viewWidth);
+	m_arity = max(1u, _inTypes[0].asA<Contiguous>().arity());
 	if (_inTypes[0].isA<MultiValue>())
 	{
 		m_config = _inTypes[0].asA<MultiValue>().config();
@@ -267,8 +267,8 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 		for (uint i = 0; i < m_arity; i++)
 		{
 			m_config[i].index = i;
-			m_config[i].min = _inTypes[0].asA<Signal>().minAmplitude();
-			m_config[i].max = _inTypes[0].asA<Signal>().maxAmplitude();
+			m_config[i].min = _inTypes[0].asA<Contiguous>().minAmplitude();
+			m_config[i].max = _inTypes[0].asA<Contiguous>().maxAmplitude();
 		}
 	}
 	m_mins.resize(m_config.size());
@@ -279,7 +279,7 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 		m_mins[i] = m_config[i].min * m_config[i].conversion;
 		m_incs[i] = m_deltas[i] = (m_config[i].max - m_config[i].min) * m_config[i].conversion;
 	}
-	setupVisual(m_viewWidthSamples, 20, m_spu * 1000 / _inTypes[0].asA<Signal>().frequency());
+	setupVisual(m_viewWidthSamples, 20, m_spu * 1000 / _inTypes[0].asA<Contiguous>().frequency());
 	return true;
 }
 

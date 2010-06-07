@@ -28,7 +28,7 @@ using namespace Geddei;
 // And the Geddei SignalTypes. We have to use the SignalTypes namespace here,
 // too. Again outside Geddei, this is called <geddei/signaltypes.h>
 #include "signaltypes.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 // Our first custom processor. This has no inputs and one output, and it just
 // produces loads of ones on that output.

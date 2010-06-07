@@ -21,14 +21,13 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class CutOff : public SubProcessor
 {

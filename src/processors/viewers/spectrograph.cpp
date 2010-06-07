@@ -22,7 +22,7 @@
 using namespace Geddei;
 
 #include "value.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -117,12 +117,12 @@ bool Spectrograph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalT
 {
 	if (!_inTypes[0].isA<Spectrum>())
 		return false;
-	m_viewWidthSamples = (uint)(_inTypes[0].asA<Signal>().frequency() * m_viewWidth);
+	m_viewWidthSamples = (uint)(_inTypes[0].asA<Contiguous>().frequency() * m_viewWidth);
 	m_display = QPixmap(m_viewWidthSamples, _inTypes[0].asA<Spectrum>().bins());
 	m_display.fill(Qt::white);
 	setupVisual(m_display.width(), m_display.height(), 30);
-	m_min = _inTypes[0].asA<Signal>().minAmplitude();
-	m_delta = _inTypes[0].asA<Signal>().maxAmplitude() - _inTypes[0].asA<Signal>().minAmplitude();
+	m_min = _inTypes[0].asA<Contiguous>().minAmplitude();
+	m_delta = _inTypes[0].asA<Contiguous>().maxAmplitude() - _inTypes[0].asA<Contiguous>().minAmplitude();
 	return true;
 }
 

@@ -22,7 +22,7 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "bufferdata.h"
 #include "processor.h"
 #include "buffer.h"
@@ -31,7 +31,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class PeakRoller : public CoProcessor
 {
@@ -140,7 +140,7 @@ bool PeakRoller::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalType
 	// inTypes[0].asA<Spectrum>().bandFrequency(1)
 	// inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1)
 	for (uint i = 0; i < multiplicity(); i++)
-		outTypes[i] = MultiValue(3, inTypes[0].asA<Signal>().frequency(), QVector<MultiValue::Config>()
+		outTypes[i] = MultiValue(3, inTypes[0].asA<Contiguous>().frequency(), QVector<MultiValue::Config>()
 								 << MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
 								 << MultiValue::Config(QColor(0, 0, 0, 64), Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(1), inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1), 2, 60.f, "bpm")
 								 << MultiValue::Config(Qt::black, Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1), inTypes[0].asA<Spectrum>().bandFrequency(1), 0, 60.f, "bpm"), 2);

@@ -21,13 +21,12 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "processor.h"
 using namespace Geddei;
 
 #include "wave.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class WaveGen: public CoProcessor
 {

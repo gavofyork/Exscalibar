@@ -22,7 +22,6 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "processor.h"
 #include "buffer.h"
@@ -30,7 +29,7 @@ using namespace Geddei;
 
 #include "value.h"
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Checkerboard : public CoProcessor
 {

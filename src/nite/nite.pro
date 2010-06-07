@@ -46,7 +46,7 @@ HEADERS += GeddeiNite.h \
 SOURCES += GeddeiNite.cpp \
     main.cpp \
     ProcessorView.cpp \
-    ProcessorsView.cpp \
+	ProcessorsView.cpp \
     ProcessorsScene.cpp \
     ProcessorItem.cpp \
     DomProcessorItem.cpp \

@@ -18,12 +18,13 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
-#include "value.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
 using namespace Geddei;
+
+#include "value.h"
+using namespace TransmissionTypes;
 
 class WeightedSum: public SubProcessor
 {
@@ -53,10 +54,10 @@ void WeightedSum::updateFromProperties(Properties const& _p)
 
 bool WeightedSum::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	if (!_inTypes[0].isA<Signal>())
+	if (!_inTypes[0].isA<Contiguous>())
 		return false;
-	_outTypes = Value(_inTypes[0].asA<Signal>().frequency());
-	m_arity = _inTypes[0].asA<Signal>().arity();
+	_outTypes = Value(_inTypes[0].asA<Contiguous>().frequency());
+	m_arity = _inTypes[0].asA<Contiguous>().arity();
 	return true;
 }
 

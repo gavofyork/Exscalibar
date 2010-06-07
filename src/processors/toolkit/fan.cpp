@@ -29,7 +29,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "signaltypes.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Fan: public SubProcessor
 {
@@ -47,7 +47,7 @@ Fan::Fan(): SubProcessor("Fan", Out)
 bool Fan::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes = Spectrum(inTypes[0].asA<Spectrum>().bins() / outTypes.count(), inTypes[0].asA<Signal>().frequency());
+	outTypes = Spectrum(inTypes[0].asA<Spectrum>().bins() / outTypes.count(), inTypes[0].asA<Contiguous>().frequency());
 	return true;
 }
 

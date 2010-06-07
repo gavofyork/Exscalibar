@@ -20,40 +20,40 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
-#include "contiguous.h"
+#include "transmissiontype.h"
 #else
-#include <geddei/contiguous.h>
+#include <geddei/transmissiontype.h>
 #endif
 using namespace Geddei;
 
 namespace TransmissionTypes
 {
 
-/** @ingroup SignalTypes
- * @brief A TransmissionType refinement for describing time-domain wave offset data.
- * @author Gav Wood <gav@kde.org>
+/**
+ * All Mark samples are of sampleSize 2 + the size.
  *
- * This class can be used to define a signal stream that comprises samples
- * of a single element, where each element represents an offset from a defined
- * zero.
+ * The two samples on the front are coalesced to form a double which gives the number of
+ * seconds since the last plunger that this Mark corresponds to. These two are automatically
+ * filled by the near side Connection.
  */
-class DLLEXPORT Wave: public Contiguous
+class DLLEXPORT Mark: public TransmissionType
 {
-	TRANSMISSION_TYPE(Wave, Contiguous);
+	TRANSMISSION_TYPE(Mark, TransmissionType);
 
 public:
-	/**
-	 * The constructor.
-	 *
-	 * @param frequency The sampling frequency of the Wave. That is, the
-	 * inverse of the delay between each sample. e.g. CD audio has a sample
-	 * frequency of 44100, i.e. each sample represents a reading in time of
-	 * 1/44100th of a second later than the last.
-	 */
-	Wave(float frequency = 0) : Contiguous(1, frequency, 1.f, -1.f) {}
+	Mark(uint _arity = 0): TransmissionType(_arity + 2) {}
 
-	virtual QString info() const { return QString("<div><b>Wave</b></div>") + Contiguous::info(); }
+	/**
+	 * Virtual destructor.
+	 */
+	virtual ~Mark() {}
+
+	virtual QString info() const;
+
+	virtual uint reserved() const { return 2u; }
+	virtual void polishData(BufferData&, Source*, uint) const;
+	static void setTimestamp(BufferData& _data, double _ts);
+	static double timestamp(BufferData const& _data);
 
 	TT_NO_MEMBERS;
 };

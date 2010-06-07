@@ -28,11 +28,11 @@ using namespace std;
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 #include "bufferinfo.h"
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "globals.h"
 #else
 #include <geddei/bufferinfo.h>
-#include <geddei/signaltype.h>
+#include <geddei/transmissiontype.h>
 #include <geddei/globals.h>
 #endif
 using namespace Geddei;

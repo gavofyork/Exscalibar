@@ -18,7 +18,7 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
+#include "contiguous.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
@@ -78,13 +78,15 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint c
 
 bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
+	if (!inTypes[0].isA<Contiguous>())
+		return false;
 	theArity = inTypes[0].asA<TransmissionType>().arity();
 	outTypes = inTypes[0];
 
-	if (thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].asA<Signal>().frequency());
-	if (theOverlap != 0.0) theStep = uint(theOverlap * inTypes[0].asA<Signal>().frequency());
+	if (thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].asA<Contiguous>().frequency());
+	if (theOverlap != 0.0) theStep = uint(theOverlap * inTypes[0].asA<Contiguous>().frequency());
 
-	outTypes[0].asA<Signal>().setFrequency(inTypes[0].asA<Signal>().frequency() / (float)theStep);
+	outTypes[0].asA<Contiguous>().setFrequency(inTypes[0].asA<Contiguous>().frequency() / (float)theStep);
 	setupSamplesIO(max(theCount, theStep), theStep, 1);
 	return true;
 }

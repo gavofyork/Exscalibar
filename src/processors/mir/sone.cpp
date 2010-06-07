@@ -25,7 +25,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "SignalTypes"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Terhardt : public SubProcessor
 {
@@ -164,9 +164,9 @@ bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeR
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
 	theColumns = inTypes[0].asA<TransmissionType>().arity();
-	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].asA<Signal>().frequency() / theStep, 0, 0);
-	theCount = uint(thePeriod * inTypes[0].asA<Signal>().frequency());
-	theStep = uint(theOverlap * inTypes[0].asA<Signal>().frequency());
+	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].asA<Contiguous>().frequency() / theStep, 0, 0);
+	theCount = uint(thePeriod * inTypes[0].asA<Contiguous>().frequency());
+	theStep = uint(theOverlap * inTypes[0].asA<Contiguous>().frequency());
 	setupSamplesIO(theCount, theStep, 1);
 
 	delete [] theWindow;

@@ -22,7 +22,7 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
+#include "transmissiontype.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"

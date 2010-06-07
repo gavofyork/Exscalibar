@@ -18,27 +18,20 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <iostream>
-using namespace std;
-
-#include <qglobal.h>
-
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
 #include "transmissiontype.h"
 #else
 #include <geddei/transmissiontype.h>
 #endif
+using namespace Geddei;
 
-class QSocketSession;
-
-namespace Geddei
+namespace TransmissionTypes
 {
 
-class DLLEXPORT Signal: public TransmissionType
+class DLLEXPORT Contiguous: public TransmissionType
 {
-	TRANSMISSION_TYPE(Signal, TransmissionType);
+	TRANSMISSION_TYPE(Contiguous, TransmissionType);
 
 public:
 	/**
@@ -53,12 +46,12 @@ public:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	Signal(uint sampleSize = 1u, float frequency = 0.f, float _max = 1.f, float _min = 0.f);
+	Contiguous(uint sampleSize = 1u, float frequency = 0.f, float _max = 1.f, float _min = 0.f);
 
 	/**
 	 * Virtual destructor.
 	 */
-	virtual ~Signal() {}
+	virtual ~Contiguous() {}
 
 	virtual QString info() const;
 
@@ -67,7 +60,7 @@ public:
 	void setRange(float _max, float _min) { theMin = min(_min, _max); theMax = max(_min, _max); }
 
 	/**
-	 * @return The frequency, or number of samples per Signal-time second of
+	 * @return The frequency, or number of samples per Contiguous-time second of
 	 * the data represented by this TransmissionType.
 	 */
 	float frequency() const { return theFrequency; }
@@ -83,14 +76,14 @@ public:
 	 * Get the number of seconds represented by the given number of elements.
 	 *
 	 * @param elements The number of elements.
-	 * @return The number of Signal-time seconds that @a elements constitute.
+	 * @return The number of Contiguous-time seconds that @a elements constitute.
 	 */
 	float seconds(uint elements) const { return float(elements / size()) / theFrequency; }
 
 	/**
-	 * Get the number of elements a Signal-time length of seconds represents.
+	 * Get the number of elements a Contiguous-time length of seconds represents.
 	 *
-	 * @param seconds The length of Signal-time.
+	 * @param seconds The length of Contiguous-time.
 	 * @return The number of elements.
 	 */
 	uint elementsFromSeconds(float seconds) const { return (uint)(seconds * theFrequency) * size(); }
@@ -105,35 +98,6 @@ protected:
 	float theMax;
 
 	TT_3_MEMBERS(theFrequency, theMin, theMax);
-};
-
-/**
- * All Mark samples are of sampleSize 2 + the size.
- *
- * The two samples on the front are coalesced to form a double which gives the number of
- * seconds since the last plunger that this Mark corresponds to. These two are automatically
- * filled by the near side Connection.
- */
-class DLLEXPORT Mark: public TransmissionType
-{
-	TRANSMISSION_TYPE(Mark, TransmissionType);
-
-public:
-	Mark(uint _arity = 0): TransmissionType(_arity + 2) {}
-
-	/**
-	 * Virtual destructor.
-	 */
-	virtual ~Mark() {}
-
-	virtual QString info() const;
-
-	virtual uint reserved() const { return 2u; }
-	virtual void polishData(BufferData&, Source*, uint) const;
-	static void setTimestamp(BufferData& _data, double _ts);
-	static double timestamp(BufferData const& _data);
-
-	TT_NO_MEMBERS;
 };
 
 }

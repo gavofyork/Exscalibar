@@ -19,13 +19,15 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "buffer.h"
 #include "processor.h"
 #include "processorforwarder.h"
 #include "processorgroup.h"
 using namespace Geddei;
+
+#include "contiguous.h"
+using namespace TransmissionTypes;
 
 #include "monitor.h"
 
@@ -87,11 +89,11 @@ void Monitor::specifyOutputSpace(QVector<uint> &samples)
 
 bool Monitor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (!inTypes[0].isA<Signal>())
+	if (!inTypes[0].isA<Contiguous>())
 		return false;
 	outTypes[0] = inTypes[0];
-	m_arity = inTypes[0].asA<Signal>().arity();
-	theFrequency = inTypes[0].asA<Signal>().frequency();
+	m_arity = inTypes[0].asA<Contiguous>().arity();
+	theFrequency = inTypes[0].asA<Contiguous>().frequency();
 	return true;
 }
 

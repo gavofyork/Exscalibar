@@ -33,7 +33,7 @@
 using namespace Geddei;
 
 #include "wave.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class ALSAPlayer: public CoProcessor
 {
@@ -90,8 +90,8 @@ bool ALSAPlayer::processorStarted()
 		fprintf(stderr, "Error setting access.\n");
 	else if (snd_pcm_hw_params_set_format(thePcmHandle, hwparams, SND_PCM_FORMAT_S16_LE) < 0)
 		fprintf(stderr, "Error setting format.\n");
-	else if (snd_pcm_hw_params_set_rate_resample(thePcmHandle, hwparams, (uint)input(0).type().asA<Signal>().frequency()))
-		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n", (uint)input(0).type().asA<Signal>().frequency());
+	else if (snd_pcm_hw_params_set_rate_resample(thePcmHandle, hwparams, (uint)input(0).type().asA<Contiguous>().frequency()))
+		fprintf(stderr, "The rate %d Hz is not supported by your hardware.\n", (uint)input(0).type().asA<Contiguous>().frequency());
 	else if (snd_pcm_hw_params_set_channels(thePcmHandle, hwparams, theChannels) < 0)
 		fprintf(stderr, "Error setting channels.\n");
 	else if (snd_pcm_hw_params_set_periods(thePcmHandle, hwparams, thePeriods, 0) < 0)

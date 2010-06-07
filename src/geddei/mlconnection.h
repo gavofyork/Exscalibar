@@ -107,7 +107,7 @@ public:
 	 */
 	void noMorePlungers();
 
-	virtual double secondsPassed() const { return type().isA<Signal>() ? m_latestPeeked / (double)(type().asA<Signal>().frequency()) : 0.0; }
+	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
 
 	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();

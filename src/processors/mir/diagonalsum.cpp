@@ -18,14 +18,13 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 using namespace Geddei;
 
 #include "spectrum.h"
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class DiagonalSum : public SubProcessor
 {

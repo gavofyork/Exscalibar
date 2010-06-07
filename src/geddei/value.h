@@ -24,13 +24,13 @@
 #include <QColor>
 
 #ifdef __GEDDEI_BUILD
-#include "signaltype.h"
+#include "contiguous.h"
 #else
-#include <geddei/signaltype.h>
+#include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 /** @ingroup SignalTypes
@@ -42,9 +42,9 @@ namespace SignalTypes
  *
  * It is the simplest TransmissionType-derived class.
  */
-class DLLEXPORT Value: public Signal
+class DLLEXPORT Value: public Contiguous
 {
-	TRANSMISSION_TYPE(Value, Signal);
+	TRANSMISSION_TYPE(Value, Contiguous);
 
 public:
 	/**
@@ -56,9 +56,9 @@ public:
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	Value(float frequency = 1, float _max = 1.f, float _min = 0.f) : Signal(1, frequency, _max, _min) {}
+	Value(float frequency = 1, float _max = 1.f, float _min = 0.f) : Contiguous(1, frequency, _max, _min) {}
 
-	virtual QString info() const { return QString("<div><b>Value</b></div>") + Signal::info(); }
+	virtual QString info() const { return QString("<div><b>Value</b></div>") + Contiguous::info(); }
 
 	TT_NO_MEMBERS;
 };
@@ -72,9 +72,9 @@ public:
  *
  * It is the simplest TransmissionType-derived class.
  */
-class DLLEXPORT MultiValue: public Signal
+class DLLEXPORT MultiValue: public Contiguous
 {
-	TRANSMISSION_TYPE(MultiValue, Signal);
+	TRANSMISSION_TYPE(MultiValue, Contiguous);
 
 public:
 	struct Config
@@ -110,7 +110,7 @@ public:
 
 	inline int labeled() const { return m_labeled; }
 
-	virtual QString info() const { return QString("<div><b>MultiValue</b></div>") + Signal::info(); }
+	virtual QString info() const { return QString("<div><b>MultiValue</b></div>") + Contiguous::info(); }
 
 protected:
 	void updateMM();

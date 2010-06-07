@@ -22,7 +22,6 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "processor.h"
 #include "buffer.h"
@@ -31,7 +30,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 class Pulser : public CoProcessor
 {
@@ -174,8 +173,8 @@ bool Pulser::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs
 	{
 		if (!inTypes[1].isA<MultiValue>() && !inTypes[1].isA<Value>()) return false;
 	}
-	m_frequency = inTypes[0].asA<Signal>().frequency();
-	outTypes[0] = MultiValue(10, inTypes[0].asA<Signal>().frequency(), 1, 0, QVector<MultiValue::Config>()
+	m_frequency = inTypes[0].asA<Contiguous>().frequency();
+	outTypes[0] = MultiValue(10, inTypes[0].asA<Contiguous>().frequency(), 1, 0, QVector<MultiValue::Config>()
 		<< MultiValue::Config(QColor(0, 0, 0, 64), QColor(0, 0, 0, 64))
 		<< MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
 		<< MultiValue::Config(Qt::blue, Qt::transparent, 1, 0, 2, 100, "%")

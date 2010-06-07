@@ -18,14 +18,13 @@
 
 #include "qfactoryexporter.h"
 
-#include "signaltype.h"
 #include "bufferdata.h"
 #include "subprocessor.h"
 #include "buffer.h"
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace SignalTypes;
+using namespace TransmissionTypes;
 
 //template<class C> inline C max(C a, C b) { return a > b ? a : b; }
 

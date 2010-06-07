@@ -20,7 +20,7 @@
 
 #include "spectrum.h"
 
-namespace SignalTypes
+namespace TransmissionTypes
 {
 
 TRANSMISSION_TYPE_CPP(Spectrum);
