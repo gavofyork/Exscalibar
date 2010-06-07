@@ -54,7 +54,7 @@ bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();
 	theBandwidth = theSize / 2;
-	outTypes[0] = PeriodSteppedSpectrum(theBandwidth, inTypes[0].frequency(), inTypes[0].asA<SquareMatrix>().pitch());
+	outTypes[0] = PeriodSteppedSpectrum(theBandwidth, inTypes[0].asA<SquareMatrix>().frequency(), inTypes[0].asA<SquareMatrix>().pitch());
 	return true;
 }
 

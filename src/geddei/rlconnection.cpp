@@ -111,7 +111,7 @@ void RLConnection::run()
 		case SetType:
 		{	if (MESSAGES) qDebug("= RLC::run(): SetType");
 			delete theType;
-			theType = SignalType::receive(theSource);
+			theType = TransmissionType::receive(theSource);
 			if (MESSAGES) qDebug("= RLC::run(): theBuffer.setType()");
 			theBuffer.setType(theType);
 			if (MESSAGES) qDebug("= RLC::run(): Make lock");

@@ -67,6 +67,15 @@ Processor::~Processor()
 	if (MESSAGES) qDebug("Deleted Processor.");
 }
 
+double Processor::secondsPassed() const
+{
+	double m = 0.0;
+	for (uint i = 0; i < (uint)theInputs.size(); i++)
+		if (theInputs[i])
+			m = max(m, theInputs[i]->secondsPassed());
+	return m;
+}
+
 void Processor::startPlungers()
 {
 	if (pMESSAGES) qDebug("> Processor::startPlungers() [%s]: %d finished", qPrintable(name()), thePlungersEnded);
@@ -607,7 +616,7 @@ bool Processor::confirmTypes()
 				theOutputs[i] = new LxConnectionNull(this, i);
 			if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
 			theOutputs[i]->setType(theTypesCache.ptrAt(i));
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->size() * 2);
 		}
 		return true;
 	}
@@ -624,7 +633,7 @@ bool Processor::confirmTypes()
 			theErrorWritten.wakeAll();
 			return false;
 		}
-		const SignalType *t = (*i)->type().thePtr;
+		const TransmissionType *t = (*i)->type().thePtr;
 		if (!t)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d is null - exiting with error.", qPrintable(name()), ii);
 			theTypesConfirmed = false;
@@ -689,7 +698,7 @@ bool Processor::confirmTypes()
 			// We multiply it by 2 to get the maximum of 2xoutputMin and 2xinputMin.
 			// This is a cheap hack on what we really want which is outputMin+inputMin
 			// For that, we will need a new API call in order to seperate the two enforceMinimum()s.
-			(*i)->enforceMinimum(sizes[ii] * (*i)->type().scope() * 2);
+			(*i)->enforceMinimum(sizes[ii] * (*i)->type().size() * 2);
 		}
 	}
 
@@ -707,7 +716,7 @@ bool Processor::confirmTypes()
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
 			theOutputs[i]->setType(theTypesCache.ptrAt(i));
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->scope() * 2);
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->size() * 2);
 		}
 	}
 
@@ -1196,7 +1205,7 @@ int CoProcessor::cyclesReady()
 	uint cycles = UINT_MAX;
 	for (uint i = 0; i < numOutputs(); i++)
 	{
-		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().scope();
+		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().size();
 		if (bFree < mSpace[i])
 			return 0;
 		else if (mSpace[i] > 0)

@@ -31,8 +31,8 @@
  * idea of a normal C++ (non-event driven) style program while still retaining
  * the Qt event loop.
  *
- * Subclass QSubApp and reimplement the main() method, creating one global
- * scope instance on it.
+ * Subclass QSubApp and reimplement the main() method, creating one globalscope
+ * instance on it.
  *
  * Example:
  *

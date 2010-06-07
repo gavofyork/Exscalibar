@@ -68,10 +68,10 @@ bool Tonaliser::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalType
 		return false;
 
 	static const float middleC = 261.626f;
-	m_bands.resize(_inTypes[0].scope());
+	m_bands.resize(_inTypes[0].asA<Spectrum>().bins());
 	for (int ob = 0; ob < m_bc.count(); ob++)
 		m_bc[ob] = 0;
-	for (uint b = 0; b < _inTypes[0].scope(); b++)
+	for (uint b = 0; b < _inTypes[0].asA<Spectrum>().bins(); b++)
 	{
 		int ob = -1;
 		float bf = _inTypes[0].asA<Spectrum>().bandFrequency(b);
@@ -93,7 +93,7 @@ void Tonaliser::processChunks(BufferDatas const& _in, BufferDatas& _out, uint _c
 	{
 		for (int ob = 0; ob < m_bc.count(); ob++)
 			_out[0](i, ob) = 0.f;
-		for (uint b = 0; b < _in[0].scope(); b++)
+		for (int b = 0; b < m_bands.count(); b++)
 			if (m_bands[b] != -1)
 				_out[0](i, m_bands[b]) += _in[0](i, b);
 		for (int ob = 0; ob < m_bc.count(); ob++)
@@ -116,6 +116,8 @@ private:
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
+
+	uint m_arity;
 };
 
 PropertiesInfo Deaverage::specifyProperties() const
@@ -129,8 +131,9 @@ void Deaverage::updateFromProperties(Properties const&)
 
 bool Deaverage::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	if (_inTypes[0].scope() == 1)
+	if (_inTypes[0].asA<TransmissionType>().arity() == 1)
 		return false;
+	m_arity = _inTypes[0].asA<TransmissionType>().arity();
 	_outTypes = _inTypes;
 	return true;
 }
@@ -140,10 +143,10 @@ void Deaverage::processChunks(BufferDatas const& _in, BufferDatas& _out, uint _c
 	for (uint i = 0; i < _ch; i++)
 	{
 		float avg = 0.f;
-		for (uint j = 0; j < _in[0].scope(); j++)
+		for (uint j = 0; j < m_arity; j++)
 			avg += _in[0](i, j);
-		avg /= _in[0].scope();
-		for (uint j = 0; j < _in[0].scope(); j++)
+		avg /= m_arity;
+		for (uint j = 0; j < m_arity; j++)
 			_out[0](i, j) = max(0.f, _in[0](i, j) - avg);
 	}
 }

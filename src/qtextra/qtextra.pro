@@ -31,7 +31,8 @@ HEADERS += qcleaner.h \
 	qpca.h \
 	qkohonennet.h \
     rdtsc.h \
-    qring.h
+    qring.h \
+    memberinfo.h
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

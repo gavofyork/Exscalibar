@@ -21,4 +21,6 @@
 namespace SignalTypes
 {
 
+TRANSMISSION_TYPE_CPP(Wave);
+
 }

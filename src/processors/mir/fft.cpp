@@ -224,7 +224,7 @@ void FFT::initFromProperties(const Properties &properties)
 bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Wave>()) return false;
-	outTypes[0] = FreqSteppedSpectrum(theSize / 2 + 1, inTypes[0].frequency() / float(theStep), inTypes[0].frequency() / float(theSize));
+	outTypes[0] = FreqSteppedSpectrum(theSize / 2 + 1, inTypes[0].asA<Signal>().frequency() / float(theStep), inTypes[0].asA<Signal>().frequency() / float(theSize));
 	return true;
 }
 

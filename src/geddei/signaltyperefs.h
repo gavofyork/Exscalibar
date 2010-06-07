@@ -33,7 +33,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-class SignalType;
+class TransmissionType;
 
 /** @ingroup Geddei
  * @brief Array-like class for containing SignalTypePtr objects.
@@ -63,11 +63,11 @@ class DLLEXPORT SignalTypeRefs
 	friend class Combination;
 
 	uint theCount;
-	const SignalType **theData;
+	const TransmissionType **theData;
 	bool theImplicitCopying;
 
 	/**
-	 * Copies all the SignalType objects into the @a dest list.
+	 * Copies all the TransmissionType objects into the @a dest list.
 	 *
 	 * These copies are then owned by @a dest and their lives should be
 	 * managed. i.e. They must be deleted by the caller before @a dest dies.
@@ -76,15 +76,15 @@ class DLLEXPORT SignalTypeRefs
 	 * is cleared before anything is copied into it. To be safe, pass only
 	 * empty lists.
 	 */
-	void copyInto(QList<SignalType*> &dest);
+	void copyInto(QList<TransmissionType*> &dest);
 
 	/**
 	 * Makes an identical copy of the list given by @a src . This is a deep
 	 * copy - none of the data is shared.
 	 *
-	 * @param src The list of SignalType objects to copy into this object.
+	 * @param src The list of TransmissionType objects to copy into this object.
 	 */
-	explicit SignalTypeRefs(QList<SignalType*> &src);
+	explicit SignalTypeRefs(QList<TransmissionType*> &src);
 
 	/**
 	 * Copy constructor. Constructs an identical copy of the list given by
@@ -111,9 +111,9 @@ class DLLEXPORT SignalTypeRefs
 	}
 
 	/**
-	 * Sets index @a i to point to the SignalType pointed to by @a d .
+	 * Sets index @a i to point to the TransmissionType pointed to by @a d .
 	 *
-	 * This does NOT make a copy of it; This object now owns the SignalType
+	 * This does NOT make a copy of it; This object now owns the TransmissionType
 	 * object at @a d . From the caller's point of view, the object at @a d is
 	 * now invalid.
 	 *
@@ -130,37 +130,37 @@ class DLLEXPORT SignalTypeRefs
 	 * try to delete @a d after this call. You'll get memory corruption.
 	 *
 	 * @param i The index of this array like object to set.
-	 * @param d A pointer to the SignalType -derived object which you wish to
+	 * @param d A pointer to the TransmissionType -derived object which you wish to
 	 * give for adoption into index @a i in this object.
 	 *
 	 * @sa copyData()
 	 */
-	void setData(uint i, const SignalType *d);
+	void setData(uint i, const TransmissionType *d);
 
 	/**
-	 * Sets index @a i to point to a SignalType equivilent to that pointed to
+	 * Sets index @a i to point to a TransmissionType equivilent to that pointed to
 	 * by @a d. Note this makes a copy of the data at @a d; you must destroy
 	 * @a d in a normal manner after making this call.
 	 *
 	 * Example, given a SignalTypeRefs object "types":
 	 *
 	 * @code
-	 * SignalType *d = new SomeType(someParameter);
+	 * TransmissionType *d = new SomeType(someParameter);
 	 * types.copyData(0, d);
 	 * // Use d for something else...
 	 * delete d;
 	 * @endcode
 	 *
-	 * If you do not wish to use the SignalType after copying it to this object
+	 * If you do not wish to use the TransmissionType after copying it to this object
 	 * then setData() may be a better alternative.
 	 *
 	 * @param i The index of this array like object to set.
-	 * @param d A pointer to the SignalType -derived object that you wish to
+	 * @param d A pointer to the TransmissionType -derived object that you wish to
 	 * copy to index @a i to.
 	 *
 	 * @sa setData()
 	 */
-	void copyData(uint i, const SignalType *d);
+	void copyData(uint i, const TransmissionType *d);
 
 	/** @overload
 	 * Retrieve a const SignalTypePtr for the object at index @a i.
@@ -169,12 +169,12 @@ class DLLEXPORT SignalTypeRefs
 	 * @return A const SignalTypePtr object representing the data at index
 	 * @a i .
 	 */
-	const SignalType *ptrAt(uint i) const
+	const TransmissionType *ptrAt(uint i) const
 	{
 #ifdef EDEBUG
 		if (i >= theCount)
 		{	qDebug("Asked for %d th element when count=%d", i, theCount);
-			return (((SignalType **)theData)[0]);
+			return (((TransmissionType **)theData)[0]);
 		}
 #endif
 		return theData[i];
@@ -184,11 +184,11 @@ class DLLEXPORT SignalTypeRefs
 	 * Retrieve SignalTypePtr for the object at index @a i.
 	 *
 	 * Usual usage is with the assignment operator, where you would set this
-	 * to point at some other SignalType. If you did this, it would take
+	 * to point at some other TransmissionType. If you did this, it would take
 	 * ownership over the data it now points at, similar to setData(). See
 	 * SignalTypePtr::operator=() for more information.
 	 *
-	 * If you wish the assignment to copy the SignalType object, you should
+	 * If you wish the assignment to copy the TransmissionType object, you should
 	 * explicity use either copyData() instead of assignment or assign it to a
 	 * copy() of the assignee.
 	 *
@@ -207,18 +207,18 @@ class DLLEXPORT SignalTypeRefs
 	 * @param i The index of the SignalTypePtr object to be referenced.
 	 * @return A SignalTypePtr object representing the data at index @a i .
 	 */
-	SignalType *&mutablePtrAt(uint i)
+	TransmissionType *&mutablePtrAt(uint i)
 	{
 #ifdef EDEBUG
 		if (i >= theCount)
 		{	qDebug("Asked for %d th element when count=%d", i, theCount);
-			return (((SignalType **)theData)[0]);
+			return (((TransmissionType **)theData)[0]);
 		}
 		if (theData[i])
-			qWarning("*** WARNING: You're probably attempting to write over an existing SignalType *.\n"
+			qWarning("*** WARNING: You're probably attempting to write over an existing TransmissionType *.\n"
 					 "             Doing so will likely cause a memory leak. Delete this entry first.");
 #endif
-		return (((SignalType **)theData)[i]);
+		return (((TransmissionType **)theData)[i]);
 	}
 
 	/** @internal
@@ -230,7 +230,7 @@ class DLLEXPORT SignalTypeRefs
 	void resize(uint count);
 
 	/**
-	 * Fills all entries with the SignalType @a d. Deletes any entries before
+	 * Fills all entries with the TransmissionType @a d. Deletes any entries before
 	 * overwriting. This method works correctly even if @a d points to a
 	 * current entry in this array.
 	 *
@@ -241,17 +241,17 @@ class DLLEXPORT SignalTypeRefs
 	 * If you do wish to use @a d after this call, copyFill() would be better
 	 * suited.
 	 *
-	 * @param d A pointer to the SignalType with which to fill the array.
+	 * @param d A pointer to the TransmissionType with which to fill the array.
 	 * @param replaceExisting true iff all entries are to be replaced by copies
 	 * of @a d even if they're already holding another SignalTypePtr.
 	 *
 	 * @sa copyFill()
 	 */
-	void setFill(const SignalType *d, bool replaceExisting = true);
+	void setFill(const TransmissionType *d, bool replaceExisting = true);
 
 public:
-	const SignalTypeRef operator[](uint i) const { return SignalTypeRef((SignalType *&)(theData[i])); }
-	SignalTypeRef operator[](uint i) { return SignalTypeRef((SignalType *&)(theData[i])); }
+	const SignalTypeRef operator[](uint i) const { return SignalTypeRef((TransmissionType *&)(theData[i])); }
+	SignalTypeRef operator[](uint i) { return SignalTypeRef((TransmissionType *&)(theData[i])); }
 
 	/**
 	 * Get the amount of SignalTypePtr spaces currently allocated.
@@ -261,7 +261,7 @@ public:
 	uint count() const { return theCount; }
 
 	/**
-	 * Check if all SignalType objects contained in this object are actually
+	 * Check if all TransmissionType objects contained in this object are actually
 	 * equivalent.
 	 *
 	 * @return true if all SignalTypeRefs contained here point to equivalent
@@ -295,10 +295,10 @@ public:
 	/**
 	 * Assignment operator. Copies one of @a src into each slot.
 	 *
-	 * @param src The SignalType object to make copies of.
+	 * @param src The TransmissionType object to make copies of.
 	 * @return A reference to this object.
 	 */
-	SignalTypeRefs &operator=(const SignalType &src);
+	SignalTypeRefs &operator=(const TransmissionType &src);
 
 	/**
 	 * Default destructor.

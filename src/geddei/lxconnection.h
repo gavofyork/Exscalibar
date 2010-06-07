@@ -119,10 +119,10 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 *
 	 * Syncs it with sink connection if the two are different objects.
 	 *
-	 * @param type The SignalType object this connection's type should be set
+	 * @param type The TransmissionType object this connection's type should be set
 	 * to.
 	 */
-	virtual void setType(const SignalType *type) = 0;
+	virtual void setType(const TransmissionType *type) = 0;
 
 	/**
 	 * Resets the type so that a further setType call will be needed.
@@ -175,6 +175,8 @@ protected:
 	 */
 	LxConnection(Source *source, uint sourceIndex);
 
+	virtual void pushBE(const BufferData &data) = 0;
+
 	/**
 	 * Get the maximum amount of scratch elements we can make that won't cause
 	 * a deadlock if we try to create a scratch of that size. If no elements
@@ -213,7 +215,7 @@ protected:
 	 * @param elements The size of the data chunk required in elements.
 	 * @param autoPush If true, then on destruction of the returned BufferData
 	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semantic scope.
+	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
 	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
@@ -222,9 +224,9 @@ public:
 	/**
 	 * Retrieves the type of signal this connection transfers.
 	 *
-	 * @return A SignalTypeRef of this conection's SignalType.
+	 * @return A SignalTypeRef of this conection's TransmissionType.
 	 */
-	virtual const SignalTypeRef type() { return SignalTypeRef(theType); }
+	virtual const SignalTypeRef type() const { return SignalTypeRef(const_cast<LxConnection*>(this)->theType); }
 
 	/**
 	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but
@@ -243,7 +245,7 @@ public:
 	 * @param samples The size of the data chunk required in samples.
 	 * @param autoPush If true, then on destruction of the returned BufferData
 	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semantic scope.
+	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
 	virtual BufferData makeScratchSamples(uint samples, bool autoPush = false);
@@ -259,7 +261,7 @@ public:
 	 *
 	 * @param autoPush If true, then on destruction of the returned BufferData
 	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semantic scope.
+	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
 	virtual BufferData makeScratchSample(bool autoPush = false) { return makeScratchSamples(1, autoPush); }
@@ -275,10 +277,10 @@ public:
 	 * @param seconds The size of the data chunk required in seconds.
 	 * @param autoPush If true, then on destruction of the returned BufferData
 	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semantic scope.
+	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSeconds(float seconds, bool autoPush = false);
+//	virtual BufferData makeScratchSeconds(float seconds, bool autoPush = false);
 
 	/**
 	 * Create a new scratch pad with which data may be sent efficiently. The
@@ -292,10 +294,10 @@ public:
 	 * @param seconds The size of the data chunk required in seconds.
 	 * @param autoPush If true, then on destruction of the returned BufferData
 	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semantic scope.
+	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSecond(bool autoPush = false) { return makeScratchSeconds(1., autoPush); }
+//	virtual BufferData makeScratchSecond(bool autoPush = false) { return makeScratchSeconds(1., autoPush); }
 
 	/**
 	 * Transfers @a data down the connection to its sink.
@@ -308,7 +310,7 @@ public:
 	 *
 	 * @param data The data to be transferred down this connection.
 	 */
-	virtual void push(const BufferData &data) = 0;
+	void push(BufferData const& data) { type().asA<TransmissionType>().polishData(const_cast<BufferData&>(data), theSource, theSourceIndex); pushBE(data); }
 
 	/**
 	 * Get the maximum amount of scratch samples we can make that won't cause

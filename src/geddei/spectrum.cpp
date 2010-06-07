@@ -23,43 +23,8 @@
 namespace SignalTypes
 {
 
-Spectrum::Spectrum(uint size, float frequency, float _max, float _min):
-	SignalType(size, frequency, _max, _min)
-{
-}
-
-bool FreqSteppedSpectrum::sameAsBE(const SignalType *cmp) const
-{
-	return SignalType::sameAsBE(cmp) && dynamic_cast<const FreqSteppedSpectrum *>(cmp)->theStep == theStep;
-}
-
-void FreqSteppedSpectrum::serialise(QSocketSession &sink) const
-{
-	SignalType::serialise(sink);
-	sink.safeSendWord(theStep);
-}
-
-void FreqSteppedSpectrum::deserialise(QSocketSession &source)
-{
-	SignalType::deserialise(source);
-	theStep = source.safeReceiveWord<float>();
-}
-
-bool PeriodSteppedSpectrum::sameAsBE(const SignalType *cmp) const
-{
-	return SignalType::sameAsBE(cmp) && dynamic_cast<const PeriodSteppedSpectrum *>(cmp)->theStep == theStep;
-}
-
-void PeriodSteppedSpectrum::serialise(QSocketSession &sink) const
-{
-	SignalType::serialise(sink);
-	sink.safeSendWord(theStep);
-}
-
-void PeriodSteppedSpectrum::deserialise(QSocketSession &source)
-{
-	SignalType::deserialise(source);
-	theStep = source.safeReceiveWord<float>();
-}
+TRANSMISSION_TYPE_CPP(Spectrum);
+TRANSMISSION_TYPE_CPP(FreqSteppedSpectrum);
+TRANSMISSION_TYPE_CPP(PeriodSteppedSpectrum);
 
 }

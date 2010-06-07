@@ -70,18 +70,18 @@ bool MLConnection::require(uint samples, uint preferSamples)
 	while (1)
 	{
 		int np = theReader->nextPlunger();
-		if (np != -1 && (uint)np < samples * type().scope())
+		if (np != -1 && (uint)np < samples * type().size())
 		{
 			theReader->skipElements(np);
 			theReader->skipPlunger();
 			theSink->plunged(theSinkIndex);
 		}
-		else if (np != -1 && (uint)np < preferSamples * type().scope())
+		else if (np != -1 && (uint)np < preferSamples * type().size())
 		{
 			return true;
 		}
 		else
-			return theReader->elementsReady() >= preferSamples * type().scope();
+			return theReader->elementsReady() >= preferSamples * type().size();
 	}
 }
 
@@ -150,10 +150,12 @@ bool MLConnection::plungeSync(uint samples) const
 	}
 #endif
 
-	BufferData ret = theReader->readElements(theType->scope() * samples, false);
+	BufferData ret = theReader->readElements(theType->size() * samples, false);
 	theSink->checkExit();
 	if (ret.plunger())
 	{
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 		return false;
@@ -174,7 +176,14 @@ const BufferData MLConnection::readElements(uint elements)
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, true);
 		theSink->checkExit();
-		if (!ret.plunger()) return ret;
+		if (!ret.plunger())
+		{
+			m_samplesRead += elements / theType->size();
+			m_latestPeeked = min(m_latestPeeked, m_samplesRead);
+			return ret;
+		}
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		// This is a workaround for a buggy gcc (3.2.2).
 		// If it wasn't here stuff wouldn't get freed up in the buffer.
 		// As it is, there are deallocation problems, since the last instance of ret
@@ -197,7 +206,13 @@ const BufferData MLConnection::peekElements(uint elements)
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, false);
 		theSink->checkExit();
-		if (!ret.plunger()) return ret;
+		if (!ret.plunger())
+		{
+			m_latestPeeked = m_samplesRead + elements / theType->size();
+			return ret;
+		}
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 	}
@@ -215,6 +230,8 @@ void MLConnection::sinkStopped()
 
 void MLConnection::reset()
 {
+	m_samplesRead = 0;
+	m_latestPeeked = 0;
 }
 
 void MLConnection::resetType()
@@ -223,7 +240,7 @@ void MLConnection::resetType()
 	theType = 0;
 }
 
-void MLConnection::setType(const SignalType *type)
+void MLConnection::setType(const TransmissionType *type)
 {
 	delete theType;
 	theType = type->copy();
@@ -241,7 +258,7 @@ Connection::Tristate MLConnection::isReadyYet()
 	return theSink->isGoingYet();
 }
 
-const SignalTypeRef MLConnection::type()
+const SignalTypeRef MLConnection::type() const
 {
 	if (!theType) theType = (theConnection->type().thePtr ? theConnection->type().thePtr->copy() : 0);
 	return SignalTypeRef(theType);

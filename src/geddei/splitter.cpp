@@ -58,9 +58,9 @@ void Splitter::pushScratch(const BufferData &data)
 	data.invalidate();
 }
 
-const SignalTypeRef Splitter::type()
+const SignalTypeRef Splitter::type() const
 {
-	theSource->confirmTypes();
+	const_cast<Splitter*>(this)->theSource->confirmTypes();
 	return SignalTypeRef(theType);
 }
 
@@ -103,7 +103,7 @@ Connection::Tristate Splitter::isReadyYet()
 	return ret;
 }
 
-void Splitter::setType(const SignalType *type)
+void Splitter::setType(const TransmissionType *type)
 {
 	delete theType;
 	theType = type->copy();
@@ -153,7 +153,7 @@ BufferData Splitter::makeScratchElements(uint elements, bool autoPush)
 	return ret;
 }
 
-void Splitter::push(const BufferData &data)
+void Splitter::pushBE(const BufferData &data)
 {
 	QList<LxConnection*>::iterator i = theConnections.begin();
 	for (i++; i != theConnections.end(); i++)

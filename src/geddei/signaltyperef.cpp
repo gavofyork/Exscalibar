@@ -26,19 +26,19 @@ using namespace Geddei;
 namespace Geddei
 {
 
-bool SignalTypeRef::operator==(const SignalType &p)
+bool SignalTypeRef::operator==(const TransmissionType &p)
 {
 	assert(thePtr);
-	return thePtr->sameAs(&p);
+	return thePtr->isEqualTo(&p);
 }
 
 bool SignalTypeRef::operator==(const SignalTypeRef &p)
 {
 	assert(thePtr);
-	return thePtr->sameAs(p.thePtr);
+	return thePtr->isEqualTo(p.thePtr);
 }
 
-SignalTypeRef &SignalTypeRef::operator=(const SignalType &p)
+SignalTypeRef &SignalTypeRef::operator=(const TransmissionType &p)
 {
 	delete thePtr;
 	thePtr = p.copy();
@@ -52,22 +52,16 @@ SignalTypeRef &SignalTypeRef::operator=(const SignalTypeRef &p)
 	return *this;
 }
 
-uint SignalTypeRef::scope() const
+uint SignalTypeRef::size() const
 {
 	assert(thePtr);
-	return thePtr->scope();
+	return thePtr->size();
 }
 
 QString SignalTypeRef::info() const
 {
 	assert(thePtr);
 	return thePtr->info();
-}
-
-float SignalTypeRef::frequency() const
-{
-	assert(thePtr);
-	return thePtr->frequency();
 }
 
 }

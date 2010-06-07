@@ -40,37 +40,37 @@ BufferData::BufferData(bool valid) : theWritePointer(0)
 	theVisibleSize = valid ? Undefined : 0;
 }
 
-BufferData::BufferData(uint size, uint scope, float *data, ScratchOwner *scratch, BufferInfo::Legacy endType, uint offset, uint mask) : theWritePointer(0)
+BufferData::BufferData(uint size, uint sampleSize, float *data, ScratchOwner *scratch, BufferInfo::Legacy endType, uint offset, uint mask) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(size, scope, data ? data : new float[size], scratch, endType, mask, true, BufferInfo::Write, data ? BufferInfo::Foreign : BufferInfo::Managed, false);
+	theInfo = new BufferInfo(size, sampleSize, data ? data : new float[size], scratch, endType, mask, true, BufferInfo::Write, data ? BufferInfo::Foreign : BufferInfo::Managed, false);
 	theOffset = offset;
 	theVisibleSize = size;
 }
 
-BufferData::BufferData(uint size, uint scope, float *data, ScreenOwner *screen, BufferInfo::Legacy endType, uint offset, uint mask) : theWritePointer(0)
+BufferData::BufferData(uint size, uint sampleSize, float *data, ScreenOwner *screen, BufferInfo::Legacy endType, uint offset, uint mask) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(size, scope, data ? data : new float[size], screen, endType, mask, true, BufferInfo::Read, data ? BufferInfo::Foreign : BufferInfo::Managed, false);
+	theInfo = new BufferInfo(size, sampleSize, data ? data : new float[size], screen, endType, mask, true, BufferInfo::Read, data ? BufferInfo::Foreign : BufferInfo::Managed, false);
 	theOffset = offset;
 	theVisibleSize = size;
 }
 
-BufferData::BufferData(uint size, uint scope) : theWritePointer(0)
+BufferData::BufferData(uint size, uint sampleSize) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(size, scope, new float[size], 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Managed, false);
+	theInfo = new BufferInfo(size, sampleSize, new float[size], 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Managed, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
 
-BufferData::BufferData(const float *data, uint size, uint scope) : theWritePointer(0)
+BufferData::BufferData(const float *data, uint size, uint sampleSize) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(size, scope, (float *)data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Read, BufferInfo::Foreign, false);
+	theInfo = new BufferInfo(size, sampleSize, (float *)data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Read, BufferInfo::Foreign, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
 
-BufferData::BufferData(float *data, uint size, uint scope) : theWritePointer(0)
+BufferData::BufferData(float *data, uint size, uint sampleSize) : theWritePointer(0)
 {
-	theInfo = new BufferInfo(size, scope, data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Foreign, false);
+	theInfo = new BufferInfo(size, sampleSize, data, 0, BufferInfo::Ignore, ~(uint)(0), true, BufferInfo::Write, BufferInfo::Foreign, false);
 	theVisibleSize = size;
 	theOffset = 0;
 }
@@ -115,13 +115,13 @@ BufferData &BufferData::operator=(const BufferData &source)
 ostream &operator<<(ostream &out, const BufferData &me)
 {
 	out << "[ ";
-	if (me.theInfo->theScope == 1)
+	if (me.theInfo->m_sampleSize == 1)
 		for (uint i = 0; i < me.theVisibleSize; i++)
 			out << me[i] << " ";
 	else
-		for (uint i = 0; i < me.theVisibleSize; i += me.theInfo->theScope)
+		for (uint i = 0; i < me.theVisibleSize; i += me.theInfo->m_sampleSize)
 		{	out << "( ";
-			for (uint j = 0; j < me.theInfo->theScope; j++)
+			for (uint j = 0; j < me.theInfo->m_sampleSize; j++)
 				out << me[i + j] << " ";
 			out << ") ";
 		}
@@ -192,7 +192,7 @@ BufferData &BufferData::dontRollOver(bool makeCopy)
 	if (!isNull() && rollsOver())
 	{	BufferData temp(*this);
 		BufferData *ret = this;
-		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
+		(*ret) = BufferData(theVisibleSize, theInfo->m_sampleSize);
 		if (makeCopy) ret->copyFrom(temp);
 	}
 	return *this;
@@ -203,7 +203,7 @@ const BufferData &BufferData::dontRollOver(bool makeCopy) const
 	if (!isNull() && rollsOver())
 	{	const BufferData temp(*this);
 		BufferData *ret = (BufferData *)this;
-		(*ret) = BufferData(theVisibleSize, theInfo->theScope);
+		(*ret) = BufferData(theVisibleSize, theInfo->m_sampleSize);
 		if (makeCopy) ret->copyFrom(temp);
 	}
 	return *this;
@@ -212,42 +212,42 @@ const BufferData &BufferData::dontRollOver(bool makeCopy) const
 const BufferData BufferData::sample(uint index) const
 {
 #ifdef EDEBUG
-	assert(theInfo->theScope);
+	assert(theInfo->m_sampleSize);
 	assert(index < samples());
 #endif
-	return mid(index * theInfo->theScope, theInfo->theScope);
+	return mid(index * theInfo->m_sampleSize, theInfo->m_sampleSize);
 }
 
 BufferData BufferData::sample(uint index)
 {
 #ifdef EDEBUG
-	assert(theInfo->theScope);
+	assert(theInfo->m_sampleSize);
 	assert(index < samples());
 #endif
-	return mid(index * theInfo->theScope, theInfo->theScope);
+	return mid(index * theInfo->m_sampleSize, theInfo->m_sampleSize);
 }
 
 const BufferData BufferData::samples(uint index, uint amount) const
 {
 #ifdef EDEBUG
-	assert(theInfo->theScope);
+	assert(theInfo->m_sampleSize);
 	assert(index + amount <= samples());
 #endif
-	return mid(index * theInfo->theScope, theInfo->theScope * amount);
+	return mid(index * theInfo->m_sampleSize, theInfo->m_sampleSize * amount);
 }
 
 BufferData BufferData::samples(uint index, uint amount)
 {
 #ifdef EDEBUG
-	assert(theInfo->theScope);
+	assert(theInfo->m_sampleSize);
 	assert(index + amount <= samples());
 #endif
-	return mid(index * theInfo->theScope, theInfo->theScope * amount);
+	return mid(index * theInfo->m_sampleSize, theInfo->m_sampleSize * amount);
 }
 /*
 void BufferData::debugInfo() const
 {
-	qDebug("Elements/scope/samples: %d/%d/%d", theSize, theScope, theSize / theScope);
+	qDebug("Elements/sampleSize/samples: %d/%d/%d", theSize, m_sampleSize, theSize / m_sampleSize);
 	qDebug("Mask/Offset/Data: %d/%d/%p", theMask, theOffset, theData);
 	qDebug("Valid/EndType: %d/%d", *theValid, (int)*theEndType);
 	qDebug("Aux/Life/Type: %p/%d/%d", theAux, (int)theLife, (int)theType);

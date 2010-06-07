@@ -68,15 +68,15 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 	BufferData pass = outs[0];
 	BufferData har = outs[1];
 
-	int sc = m_signal.scope();
+	int sc = m_signal.bins();
 
 	pass.copyFrom(in);
 
-	for (uint i = 0; i < m_signal.scope(); i++)
+	for (uint i = 0; i < m_signal.bins(); i++)
 		har[i] = 0.f;
 
 	float total = 0.f;
-	for (uint i = 0; i < m_signal.scope(); i++)
+	for (uint i = 0; i < m_signal.bins(); i++)
 		total += in[i];
 
 	for (int n = 0; n < m_maxPass; n++)
@@ -130,7 +130,7 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 		for (int ph = 0; ph < i / kkkfkfkf; ph++)
 		{
 			phens[ph] = 0.f;
-			for (int k = 0; k < m_signal.scope() * kkkfkfkf / i; k++)
+			for (int k = 0; k < m_signal.bins() * kkkfkfkf / i; k++)
 			{
 				phens[ph] += in[k * i / kkkfkfkf + ph];
 			}
@@ -138,17 +138,17 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 		}
 //		qSort(phens, phens+(i / kkkfkfkf));
 		har[i] = max(0.f, phens[0] / (tphen - phens[0]));
-//		float avg = total / (m_signal.scope() * kkkfkfkf / i);	// avg en per phase
+//		float avg = total / (m_signal.bins() * kkkfkfkf / i);	// avg en per phase
 //		float med = phens[i / kkkfkfkf / 2];
-//		har[i] = mphen;//max(0.f, mphen / med);// / (total / m_signal.scope());//lphen;*/
+//		har[i] = mphen;//max(0.f, mphen / med);// / (total / m_signal.bins());//lphen;*/
 //	}
-/*	for (int i = max<int>(2, m_signal.frequencyBand(m_lowerBand)); i < (m_signal.scope() - 1) / 2; i++)
+/*	for (int i = max<int>(2, m_signal.frequencyBand(m_lowerBand)); i < (m_signal.bins() - 1) / 2; i++)
 	{
 		float en = pass[i];
 		float mb = i;
 		float men = en;
 		float maxen = total / i;
-		for (int j = i; j < (int)m_signal.scope() / 2; j += i)
+		for (int j = i; j < (int)m_signal.bins() / 2; j += i)
 		{
 			en += pass[j];
 			if (pass[j] > men)
@@ -159,7 +159,7 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 		}
 		if (en - men > m_deltaThreshold && en / men > m_ratioThreshold && men > maxen * m_maxThreshold)
 		{
-			for (int j = i; j < (int)m_signal.scope() / 2; j += i)
+			for (int j = i; j < (int)m_signal.bins() / 2; j += i)
 				pass[j] = 0;
 			har[i] = en;
 		}
@@ -172,7 +172,7 @@ bool SpectralHarmonics::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, Sig
 		return false;
 	m_signal = inTypes[0].asA<FreqSteppedSpectrum>();
 	outTypes[0] = inTypes[0];
-	outTypes[1] = FreqSteppedSpectrum(inTypes[0].scope(), inTypes[0].frequency(), m_signal.step() / m_harmonics, m_signal.maxAmplitude(), m_signal.minAmplitude());
+	outTypes[1] = FreqSteppedSpectrum(m_signal.bins(), m_signal.frequency(), m_signal.step() / m_harmonics, m_signal.maxAmplitude(), m_signal.minAmplitude());
 	return true;
 }
 

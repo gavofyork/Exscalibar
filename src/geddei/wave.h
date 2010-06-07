@@ -31,21 +31,18 @@ namespace SignalTypes
 {
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing time-domain wave offset data.
+ * @brief A TransmissionType refinement for describing time-domain wave offset data.
  * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to define a signal stream that comprises samples
  * of a single element, where each element represents an offset from a defined
  * zero.
  */
-class DLLEXPORT Wave: public SignalType
+class DLLEXPORT Wave: public Signal
 {
-	virtual uint id() const { return 1; }
-	virtual SignalType *copyBE() const { return new Wave(theFrequency); }
+	TRANSMISSION_TYPE(Wave, Signal);
 
 public:
-	virtual QString info() const { return QString("<div><b>Wave</b></div>") + SignalType::info(); }
-
 	/**
 	 * The constructor.
 	 *
@@ -54,7 +51,11 @@ public:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	Wave(float frequency = 0) : SignalType(1, frequency, 1.f, -1.f) {}
+	Wave(float frequency = 0) : Signal(1, frequency, 1.f, -1.f) {}
+
+	virtual QString info() const { return QString("<div><b>Wave</b></div>") + Signal::info(); }
+
+	TT_NO_MEMBERS;
 };
 
 }

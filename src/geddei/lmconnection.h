@@ -47,12 +47,12 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	friend class Processor;
 
 	//* Reimplementations from Connection
-	virtual const SignalTypeRef type();
+	virtual const SignalTypeRef type() const;
 
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
 	virtual Tristate isReadyYet();
-	virtual void setType(const SignalType *type);
+	virtual void setType(const TransmissionType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();

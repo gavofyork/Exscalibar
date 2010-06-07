@@ -98,7 +98,7 @@ void LRConnection::enforceMinimum(uint size)
 	theSink.safeSendWord(size);
 }
 
-void LRConnection::setType(const SignalType *type)
+void LRConnection::setType(const TransmissionType *type)
 {
 	theSink.sendByte(SetType);
 	type->send(theSink);
@@ -113,10 +113,11 @@ void LRConnection::resetType()
 	theType = 0;
 }
 
-const SignalTypeRef LRConnection::type()
+const SignalTypeRef LRConnection::type() const
 {
-	if (theSource->confirmTypes()) return SignalTypeRef(theType);
-	return SignalTypeRef(theType = 0);
+	if (const_cast<LRConnection*>(this)->theSource->confirmTypes())
+		return SignalTypeRef(const_cast<LRConnection*>(this)->theType);
+	return SignalTypeRef(const_cast<LRConnection*>(this)->theType = 0);
 }
 
 void LRConnection::bufferWaitForFree()

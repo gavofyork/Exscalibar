@@ -97,7 +97,7 @@ bool Bandwise::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRe
 		int lastBand = 0;
 		for (int i = 0; i < m_bins.size(); i++)
 		{
-			int band = (i + 1) * in.scope() / m_bins.size();
+			int band = (i + 1) * in.arity() / m_bins.size();
 			m_bins[i] = band - lastBand;
 			lastBand = band;
 		}

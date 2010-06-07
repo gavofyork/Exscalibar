@@ -33,16 +33,25 @@ using namespace SignalTypes;
 
 class Delta: public SubProcessor
 {
+public:
+	Delta(): SubProcessor("Delta") {}
+
+private:
 	virtual void initFromProperties (const Properties &) { setupSamplesIO(2, 1, 1); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	{
+		outTypes[0] = inTypes[0];
+		m_arity = inTypes[0].asA<TransmissionType>().arity();
+		return true;
+	}
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
-		for (uint i = 0; i < ins[0].scope(); i++)
+		for (uint i = 0; i < m_arity; i++)
 			outs[0](0, i) = ins[0](1, i) - ins[0](0, i);
 	}
 	virtual QString simpleText() const { return QChar(0x2206); }
-public:
-	Delta(): SubProcessor("Delta") {}
+
+	uint m_arity;
 };
 
 EXPORT_CLASS(Delta, 0,1,0, SubProcessor);
@@ -52,7 +61,7 @@ class Extract: public SubProcessor
 	uint m_index;
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Element Index", 0, "Index of the element to extract."); }
 	virtual void updateFromProperties(Properties const& _p) { m_index = _p["Element Index"].toInt(); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Value(inTypes[0].frequency(), inTypes[0].asA<SignalType>().maxAmplitude(), inTypes[0].asA<SignalType>().minAmplitude()); return m_index < inTypes[0].scope(); }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Signal>()) return false; outTypes[0] = Value(inTypes[0].asA<Signal>().frequency(), inTypes[0].asA<Signal>().maxAmplitude(), inTypes[0].asA<Signal>().minAmplitude()); return m_index < inTypes[0].asA<Signal>().arity(); }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		outs[0][0] = ins[0][m_index];
@@ -68,11 +77,11 @@ class Invert: public SubProcessor
 {
 	uint m_min;
 	uint m_max;
-	uint m_scope;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes; m_min = inTypes[0].asA<SignalType>().minAmplitude(); m_scope = inTypes[0].scope(); m_max = inTypes[0].asA<SignalType>().maxAmplitude(); return true; }
+	uint m_arity;
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Signal>()) return false; outTypes = inTypes; m_min = inTypes[0].asA<Signal>().minAmplitude(); m_arity = inTypes[0].asA<Signal>().arity(); m_max = inTypes[0].asA<Signal>().maxAmplitude(); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
-		for (uint i = 0; i < m_scope; i++)
+		for (uint i = 0; i < m_arity; i++)
 			outs[0][i] = m_max - ins[0][i] + m_min;
 	}
 	virtual QString simpleText() const { return QChar(0x21F5); }
@@ -85,11 +94,15 @@ EXPORT_CLASS(Invert, 0,1,0, SubProcessor);
 
 class Sum: public SubProcessor
 {
+public:
+	Sum();
+
+private:
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 	virtual QString simpleText() const { return QChar(0x2211); }
-public:
-	Sum();
+
+	uint m_arity;
 };
 
 Sum::Sum(): SubProcessor("Sum")
@@ -98,14 +111,17 @@ Sum::Sum(): SubProcessor("Sum")
 
 bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	outTypes = Value(inTypes[0].frequency());
+	if (!inTypes[0].isA<Signal>())
+		return false;
+	m_arity = inTypes[0].asA<Signal>().arity();
+	outTypes = Value(inTypes[0].asA<Signal>().frequency());
 	return true;
 }
 
 void Sum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
 	outs[0][0] = 0.;
-	for (uint i = 0; i < ins[0].elements(); i++)
+	for (uint i = 0; i < m_arity; i++)
 		outs[0][0] += ins[0][i];
 }
 

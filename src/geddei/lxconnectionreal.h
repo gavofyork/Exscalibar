@@ -41,12 +41,12 @@ class Source;
  * unspecified; several virtual methods are provided to hook onto the data transfer
  * mechanism.
  */
-class LxConnectionReal: public LxConnection
+class DLLEXPORT LxConnectionReal: public LxConnection
 {
 	uint theLastElementsFree;
 
 	//* Reimplementation from LxConnection
-	virtual void push(const BufferData &data);
+	virtual void pushBE(const BufferData &data);
 
 protected:
 	/**

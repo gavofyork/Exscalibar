@@ -49,10 +49,10 @@ BufferData LxConnection::makeScratchSamples(uint samples, bool autoPush)
 	return makeScratchElements(theType->elementsFromSamples(samples), autoPush);
 }
 
-BufferData LxConnection::makeScratchSeconds(float seconds, bool autoPush)
+/*BufferData LxConnection::makeScratchSeconds(float seconds, bool autoPush)
 {
 	return makeScratchElements(theType->elementsFromSeconds(seconds), autoPush);
-}
+}*/
 
 BufferData LxConnection::makeScratchElements(uint elements, bool autoPush)
 {
@@ -61,7 +61,7 @@ BufferData LxConnection::makeScratchElements(uint elements, bool autoPush)
 		theScratch = new float[elements];
 		theScratchSize = elements;
 	}
-	const BufferData &ret = BufferData(elements, theType->scope(), theScratch, dynamic_cast<ScratchOwner *>(this), autoPush ? BufferInfo::Activate : BufferInfo::Forget);
+	const BufferData &ret = BufferData(elements, theType->size(), theScratch, dynamic_cast<ScratchOwner *>(this), autoPush ? BufferInfo::Activate : BufferInfo::Forget);
 	lastScratch = ret.identity();
 	return ret;
 }

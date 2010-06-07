@@ -39,7 +39,7 @@ bool LLConnection::pullType()
 	return theType;
 }
 
-void LLConnection::setType(const SignalType *type)
+void LLConnection::setType(const TransmissionType *type)
 {
 	delete theType;
 	theType = type->copy();

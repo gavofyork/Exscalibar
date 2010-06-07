@@ -39,6 +39,7 @@ public:
 	Peakify() : SubProcessor("Peakify") {}
 
 	int m_algorithm;
+	uint m_bins;
 
 private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
@@ -58,7 +59,7 @@ void Peakify::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		out[0] = in[0];
 		int peak = 0;
-		for (uint i = 1; i < in.scope(); i++)
+		for (uint i = 1; i < m_bins; i++)
 			if (peak > -1)
 				if (in[i] < in[i - 1])	// roll down.
 				{
@@ -89,11 +90,11 @@ void Peakify::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 		out[0] = 0;
 		out[1] = 0;
 		out[2] = 0;
-		out[in.scope() - 1] = 0;
+		out[m_bins - 1] = 0;
 		float off = in[0];
-		for (uint i = 2; i < in.scope(); i++)
+		for (uint i = 2; i < m_bins; i++)
 			off = min(off, in[i]);
-		for (uint i = 3; i < in.scope() - 1; i++)
+		for (uint i = 3; i < m_bins - 1; i++)
 			if (in[i] > in[i - 1] && in[i] > in[i + 1]) // peak
 				out[i] = (in[i] + max(in[i - 1], in[i + 1])) / 2.f - off;
 			else
@@ -107,6 +108,7 @@ bool Peakify::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRef
 {
 	if (!inTypes[0].isA<Spectrum>())
 		return false;
+	m_bins = inTypes[0].asA<Spectrum>().bins();
 	outTypes = inTypes;
 	return true;
 }

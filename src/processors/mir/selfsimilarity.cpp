@@ -73,20 +73,20 @@ static inline float magnitudeGreater(const float *x, const float *y, uint bandWi
 
 class Distance: public SubProcessor
 {
-	uint m_scope;
+	uint m_arity;
 	float(*m_distance)(const float *, const float *, const uint);
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const
 	{
 		float const* p = in[0].readPointer();
-		out[0][0] = m_distance(p, p + m_scope, m_scope);
+		out[0][0] = m_distance(p, p + m_arity, m_arity);
 	}
 	virtual void initFromProperties(Properties const&) { setupSamplesIO(2, 1, 1); }
 	virtual void updateFromProperties(Properties const& _p);
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 	{
-		m_scope = inTypes[0].scope();
-		outTypes[0] = Value(inTypes[0].frequency());
+		m_arity = inTypes[0].asA<TransmissionType>().arity();
+		outTypes[0] = Value(inTypes[0].asA<Signal>().frequency());
 		return true;
 	}
 	virtual PropertiesInfo specifyProperties() const;
@@ -170,8 +170,8 @@ void SelfSimilarity::processOwnChunks(const BufferDatas &in, BufferDatas &out, u
 bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency(), 1.f / inTypes[0].frequency());
-	theBandWidth = inTypes[0].scope();
+	outTypes[0] = SquareMatrix(theSize, inTypes[0].asA<Spectrum>().frequency(), 1.f / inTypes[0].asA<Spectrum>().frequency());
+	theBandWidth = inTypes[0].asA<Spectrum>().bins();
 	return true;
 }
 

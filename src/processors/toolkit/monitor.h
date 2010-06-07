@@ -58,7 +58,7 @@ class DLLEXPORT Monitor: public HeavyProcessor
 	QFastWaitCondition thePlunge;
 	uint thePlungersCaught;
 
-	uint theScope;
+	uint m_arity;
 	float theFrequency;
 
 	uint theTotalSamples;
@@ -86,7 +86,7 @@ public:
 	 *
 	 * @return The total number of elements to flow through this object.
 	 */
-	uint elementsProcessed() { return theTotalSamples * theScope; }
+	uint elementsProcessed() { return theTotalSamples * m_arity; }
 
 	/**
 	 * Determine the number of samples that flowed through this object.

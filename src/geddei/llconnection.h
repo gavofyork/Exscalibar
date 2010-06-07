@@ -47,8 +47,8 @@ class DLLEXPORT LLConnection: public LxConnectionReal, public xLConnectionReal
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
 	virtual Tristate isReadyYet();
-	virtual const SignalTypeRef type() { return xLConnectionReal::type(); }
-	virtual void setType(const SignalType *type);
+	virtual const SignalTypeRef type() const { return xLConnectionReal::type(); }
+	virtual void setType(const TransmissionType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();

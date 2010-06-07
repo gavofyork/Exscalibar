@@ -87,9 +87,11 @@ void Monitor::specifyOutputSpace(QVector<uint> &samples)
 
 bool Monitor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
+	if (!inTypes[0].isA<Signal>())
+		return false;
 	outTypes[0] = inTypes[0];
-	theScope = inTypes[0].scope();
-	theFrequency = inTypes[0].frequency();
+	m_arity = inTypes[0].asA<Signal>().arity();
+	theFrequency = inTypes[0].asA<Signal>().frequency();
 	return true;
 }
 

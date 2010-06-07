@@ -54,8 +54,8 @@ bool SimpleSplit::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
 	Spectrum s = inTypes[0].asA<Spectrum>();
-	theWidth = s.scope() / multiplicity();
-	s.setScope(theWidth);
+	theWidth = s.bins() / multiplicity();
+	s.setBins(theWidth);
 	outTypes = s;
 	return true;
 }

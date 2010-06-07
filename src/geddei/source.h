@@ -69,6 +69,8 @@ public:
 	 */
 	virtual const Processor *processor() const;
 
+	virtual double secondsPassed() const = 0;
+
 	/**
 	 * Virtual destructor.
 	 */

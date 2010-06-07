@@ -1,0 +1,94 @@
+/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "qfactoryexporter.h"
+
+#include "signaltype.h"
+#include "bufferdata.h"
+#include "processor.h"
+#include "buffer.h"
+using namespace Geddei;
+
+class PeakFinder : public CoProcessor
+{
+public:
+	PeakFinder();
+
+private:
+	virtual bool processorStarted();
+	virtual int process();
+	virtual void processorStopped();
+	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties(Properties const& _p);
+	virtual void updateFromProperties(Properties const& _p);
+	virtual QString simpleText() const { return QChar(0x21FB); }
+};
+
+PeakFinder::PeakFinder(): CoProcessor("PeakFinder")
+{
+}
+
+bool PeakFinder::processorStarted()
+{
+	return true;
+}
+
+int PeakFinder::process()
+{
+	const BufferData in = input(0).peekSamples(3);
+	if (in[0] < in[1] && in[2] < in[1])
+	{
+		BufferData out = output(0).makeScratchSample();
+		out[0] = in[1];
+		out[1] = in[1] + max(in[0], in[2]);
+	}
+	input(0).readSample();
+	return DidWork;
+}
+
+void PeakFinder::processorStopped()
+{
+}
+
+bool PeakFinder::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+{
+	if (!_inTypes[0].isA<Signal>() || _inTypes[0].asA<Signal>().arity() != 1)
+		return false;
+	_outTypes[0] = Mark(2);
+	return true;
+}
+
+void PeakFinder::initFromProperties(Properties const& _p)
+{
+	updateFromProperties(_p);
+	setupIO(1, 1);
+}
+
+void PeakFinder::updateFromProperties(Properties const&)
+{
+}
+
+PropertiesInfo PeakFinder::specifyProperties() const
+{
+	return PropertiesInfo
+			("Example", false, "Example description. { Units }");
+}
+
+EXPORT_CLASS(PeakFinder, 0,1,0, Processor);
+

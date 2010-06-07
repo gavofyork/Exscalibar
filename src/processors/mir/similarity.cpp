@@ -95,7 +95,7 @@ void Similarity::processor()
 bool Similarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes[0] = SquareMatrix(theSize, inTypes[0].frequency() / theStep, inTypes[0].frequency());
+	outTypes[0] = SquareMatrix(theSize, inTypes[0].asA<Spectrum>().frequency() / theStep, inTypes[0].asA<Spectrum>().frequency());
 	return true;
 }
 

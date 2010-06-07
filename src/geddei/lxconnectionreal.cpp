@@ -29,7 +29,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-void LxConnectionReal::push(const BufferData &data)
+void LxConnectionReal::pushBE(const BufferData &data)
 {
 	if (MESSAGES) qDebug("LxConnectionReal::push(): (size=%d)", data.elements());
 

@@ -23,6 +23,9 @@
 namespace SignalTypes
 {
 
+TRANSMISSION_TYPE_CPP(Value);
+TRANSMISSION_TYPE_CPP(MultiValue);
+
 static const Qt::GlobalColor s_colours[] = {
 	Qt::black,
 	Qt::darkRed,
@@ -42,7 +45,7 @@ static const Qt::GlobalColor s_colours[] = {
 };
 
 MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, QVector<MultiValue::Config> const& _c, int _l):
-	SignalType(_scope, _frequency, _max, _min), m_labeled(_l)
+	Signal(_scope, _frequency, _max, _min), m_labeled(_l)
 {
 	if (_c.isEmpty())
 	{
@@ -64,7 +67,7 @@ MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, Q
 }
 
 MultiValue::MultiValue(float _scope, float _frequency, QVector<MultiValue::Config> const& _c, int _l):
-	SignalType(_scope, _frequency), m_labeled(_l)
+	Signal(_scope, _frequency), m_labeled(_l)
 {
 	m_config = _c;
 	updateMM();
@@ -87,10 +90,10 @@ void MultiValue::updateMM()
 		theMin = min(theMin, m_config[i].min);
 	}
 }
-
+/*
 void MultiValue::serialise(QSocketSession &sink) const
 {
-	SignalType::serialise(sink);
+	TransmissionType::serialise(sink);
 	foreach (Config c, m_config)
 	{
 		sink.safeSendWord((uint32_t)c.fore.rgba());
@@ -105,7 +108,7 @@ void MultiValue::serialise(QSocketSession &sink) const
 
 void MultiValue::deserialise(QSocketSession &source)
 {
-	SignalType::deserialise(source);
+	TransmissionType::deserialise(source);
 	foreach (Config c, m_config)
 	{
 		c.fore.setRgba(source.safeReceiveWord<QRgb>());
@@ -117,6 +120,6 @@ void MultiValue::deserialise(QSocketSession &source)
 		c.units = QString::fromUtf8(source.receiveString());
 	}
 }
-
+*/
 }
 

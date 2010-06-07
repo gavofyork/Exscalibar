@@ -218,12 +218,14 @@ protected:
 	xLConnection(Sink *newSink, uint newSinkIndex);
 
 public:
+	virtual double secondsPassed() const = 0;
+
 	/**
 	 * Retrieves the type of signal this connection transfers.
 	 *
-	 * @return A SignalTypeRef of this conection's SignalType.
+	 * @return A SignalTypeRef of this conection's TransmissionType.
 	 */
-	virtual const SignalTypeRef type() { return SignalTypeRef(theType); }
+	virtual const SignalTypeRef type() const { return SignalTypeRef(const_cast<xLConnection*>(this)->theType); }
 
 	/**
 	 * Blocks until at least @a samples are ready to be read (or peeked) on the
@@ -309,7 +311,7 @@ public:
 	 *
 	 * @return A BufferData object containing the second of data read.
 	 */
-	const BufferData readSecond() { return readElements(theType->elementsFromSeconds(1.)); }
+//	const BufferData readSecond() { return readElements(theType->elementsFromSeconds(1.)); }
 
 	/**
 	 * Read a number of seconds' worth of signal data from the connection. This
@@ -324,7 +326,7 @@ public:
 	 * @return A BufferData object containing the data read. This is guarenteed
 	 * to be exactly @a seconds seconds of signal data.
 	 */
-	const BufferData readSeconds(float seconds) { return readElements(theType->elementsFromSeconds(seconds)); }
+//	const BufferData readSeconds(float seconds) { return readElements(theType->elementsFromSeconds(seconds)); }
 
 	/**
 	 * Read a single sample from the connection. This will block until a sample
@@ -368,7 +370,7 @@ public:
 	 *
 	 * @return A BufferData object containing the second of data read.
 	 */
-	const BufferData peekSecond() { return peekElements(theType->elementsFromSeconds(1.)); }
+//	const BufferData peekSecond() { return peekElements(theType->elementsFromSeconds(1.)); }
 
 	/**
 	 * Read a number of seconds' worth of signal data from the connection. This
@@ -379,7 +381,7 @@ public:
 	 * @return A BufferData object containing the data read. This is guarenteed
 	 * to be exactly @a seconds seconds of signal data.
 	 */
-	const BufferData peekSeconds(float seconds) { return peekElements(theType->elementsFromSeconds(seconds)); }
+//	const BufferData peekSeconds(float seconds) { return peekElements(theType->elementsFromSeconds(seconds)); }
 
 	/**
 	 * Get the capacity of the buffer. Any reads above this amount will block

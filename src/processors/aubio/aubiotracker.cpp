@@ -72,7 +72,7 @@ bool AubioTracker::verifyAndSpecifyTypes(const SignalTypeRefs & _i, SignalTypeRe
 {
 	if (!_i[0].isA<Wave>())
 		return false;
-	_o[0] = Value(_i[0].frequency() / 512, 1, 0);
+	_o[0] = Value(_i[0].asA<Signal>().frequency() / 512, 1, 0);
 	return true;
 }
 

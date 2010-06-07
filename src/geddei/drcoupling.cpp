@@ -104,7 +104,7 @@ void DRCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint
 	for (uint i = 0; i < _ins.size(); i++)
 	{	// TODO: maybe take this into BufferData?
 		theRemote.safeSendWord(_ins[i].elements());
-		theRemote.safeSendWord(_ins[i].scope());
+		theRemote.safeSendWord(_ins[i].sampleSize());
 		if (_ins[i].rollsOver())
 		{	theRemote.safeSendWordArray((int *)_ins[i].firstPart(), _ins[i].sizeFirstPart());
 			theRemote.safeSendWordArray((int *)_ins[i].secondPart(), _ins[i].sizeSecondPart());
@@ -115,7 +115,7 @@ void DRCoupling::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint
 	theRemote.safeSendWord(_outs.size());
 	for (uint i = 0; i < _outs.size(); i++)
 	{	theRemote.safeSendWord(_outs[i].elements());
-		theRemote.safeSendWord(_outs[i].scope());
+		theRemote.safeSendWord(_outs[i].sampleSize());
 	}
 	theRemote.safeSendWord(_chunks);
 	if (MESSAGES) qDebug("< DRCoupling::processChunks()");

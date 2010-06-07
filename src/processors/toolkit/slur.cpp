@@ -29,15 +29,14 @@ using namespace std;
 #include "buffer.h"
 using namespace Geddei;
 
-class Slur: public SubProcessor
+class Slur: public StatefulSubProcessor
 {
 public:
-	Slur() : SubProcessor("Slur") {}
+	Slur() : StatefulSubProcessor("Slur") {}
 
 private:
-	inline float maxAround(BufferData const& _b, uint i, uint s) const
+	inline float maxAround(BufferData const& _b, uint i, uint s, uint sc) const
 	{
-		int sc = _b.scope();
 		float ret = _b(i, s);
 		for (int p = -m_precision / 2; p <= m_precision / 2; p++)
 			ret = max(ret, _b(i, clamp<int>(p+s, 0, sc)));
@@ -61,13 +60,13 @@ void Slur::processOwnChunks(BufferDatas const& _in, BufferDatas& _out, uint _ch)
 {
 	for (uint i = 0; i < _ch; i++)
 		for (int s = 0; s < m_current.count(); s++)
-			_out[0](i, s) = m_current[s] = lerp(m_current[s], maxAround(_in[0], i, s), m_quantity);
+			_out[0](i, s) = m_current[s] = lerp(m_current[s], maxAround(_in[0], i, s, m_current.size()), m_quantity);
 }
 
 bool Slur::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	outTypes = inTypes;
-	m_current.resize(inTypes[0].scope());
+	m_current.resize(inTypes[0].asA<TransmissionType>().arity());
 	for (int i = 0; i < m_current.size(); i++)
 		m_current[i] = 0.f;
 	return true;

@@ -52,9 +52,9 @@ void Recorder::processor()
 				if (thePrintSample)
 					stream << theCurrentSample << theFieldDelimiter;
 				if (thePrintTime)
-					stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
+					stream << (float(theCurrentSample) / input(0).type().asA<Signal>().frequency()) << theFieldDelimiter;
 				for (uint j = 0; j < numInputs(); j++)
-					for (uint i = 0; i < input(i).type().scope(); i++)
+					for (uint i = 0; i < input(i).type().asA<Signal>().arity(); i++)
 						stream << "0" << theFieldDelimiter;
 			}
 		if (theCurrentSample || theCurrentSection)
@@ -64,7 +64,7 @@ void Recorder::processor()
 		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
 		if (thePrintTime)
-			stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
+			stream << (float(theCurrentSample) / input(0).type().asA<Signal>().frequency()) << theFieldDelimiter;
 		for (uint i = 0; i < numInputs(); i++)
 		{
 			if (MESSAGES) qDebug("= Recorder::processor(): Reading from input %d...", i);
@@ -94,9 +94,9 @@ void Recorder::receivedPlunger()
 		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
 		if (thePrintTime)
-			stream << (float(theCurrentSample) / input(0).type().frequency()) << theFieldDelimiter;
+			stream << (float(theCurrentSample) / input(0).type().asA<Signal>().frequency()) << theFieldDelimiter;
 		for (uint j = 0; j < numInputs(); j++)
-			for (uint i = 0; i < input(i).type().scope(); i++)
+			for (uint i = 0; i < input(i).type().asA<Signal>().arity(); i++)
 				stream << "0" << theFieldDelimiter;
 	}
 	theCurrentSection++;
@@ -104,9 +104,12 @@ void Recorder::receivedPlunger()
 	// Skip to next file?
 }
 
-bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs &)
 {
-//	theScope = inTypes[0].scope();
+	for (uint i = 0; i < _inTypes.count(); i++)
+		if (!_inTypes[i].isA<Signal>())
+			return false;
+//	m_arity = inTypes[0].arity();
 //	theFrequency = inTypes[0].frequency();
 	return true;
 }

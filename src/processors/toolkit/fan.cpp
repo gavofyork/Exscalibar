@@ -47,8 +47,7 @@ Fan::Fan(): SubProcessor("Fan", Out)
 bool Fan::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	for (uint i = 0; i < outTypes.count(); i++)
-		outTypes[i] = Spectrum(inTypes[0].scope() / outTypes.count(), inTypes[0].frequency());
+	outTypes = Spectrum(inTypes[0].asA<Spectrum>().bins() / outTypes.count(), inTypes[0].asA<Signal>().frequency());
 	return true;
 }
 

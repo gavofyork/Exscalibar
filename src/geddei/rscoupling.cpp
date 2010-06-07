@@ -86,10 +86,10 @@ void RSCoupling::run()
 			if (MESSAGES) qDebug("RSC: SpecifyTypes...");
 			SignalTypeRefs inTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < inTypes.count(); i++)
-				inTypes.mutablePtrAt(i) = SignalType::receive(theSession);
+				inTypes.mutablePtrAt(i) = TransmissionType::receive(theSession);
 			SignalTypeRefs outTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < outTypes.count(); i++)
-				outTypes.mutablePtrAt(i) = SignalType::receive(theSession);
+				outTypes.mutablePtrAt(i) = TransmissionType::receive(theSession);
 
 			SignalTypeRefs dummyOutTypes(outTypes.count());
 			if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
@@ -106,8 +106,8 @@ void RSCoupling::run()
 			BufferDatas ins(channels);
 			for (uint i = 0; i < ins.size(); i++)
 			{	uint size = theSession.safeReceiveWord<int>();
-				uint scope = theSession.safeReceiveWord<int>();
-				BufferData *data = new BufferData(size, scope);
+				uint sampleSize = theSession.safeReceiveWord<int>();
+				BufferData *data = new BufferData(size, sampleSize);
 				theSession.safeReceiveWordArray((int *)data->firstPart(), size);
 				ins.setData(i, data);
 			}

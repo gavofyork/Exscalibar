@@ -38,6 +38,7 @@ private:
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	int m_type;
+	uint m_arity;
 };
 
 PropertiesInfo WeightedSum::specifyProperties() const
@@ -52,7 +53,10 @@ void WeightedSum::updateFromProperties(Properties const& _p)
 
 bool WeightedSum::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	_outTypes = Value(_inTypes[0].frequency());
+	if (!_inTypes[0].isA<Signal>())
+		return false;
+	_outTypes = Value(_inTypes[0].asA<Signal>().frequency());
+	m_arity = _inTypes[0].asA<Signal>().arity();
 	return true;
 }
 
@@ -62,14 +66,14 @@ void WeightedSum::processChunks(BufferDatas const& _in, BufferDatas& _out, uint 
 		for (uint i = 0; i < _c; i++)
 		{
 			_out[0][i] = 0.f;
-			for (uint s = 0; s < _in[0].scope(); s++)
+			for (uint s = 0; s < m_arity; s++)
 				_out[0][i] += _in[0](i, s);
 		}
 	else if (m_type == 1)
 		for (uint i = 0; i < _c; i++)
 		{
 			_out[0][i] = 0.f;
-			for (uint s = 0; s < _in[0].scope(); s++)
+			for (uint s = 0; s < m_arity; s++)
 				_out[0][i] += _in[0](i, s) * s;
 		}
 }

@@ -46,7 +46,7 @@ class Grapher: public CoProcessor
 	uint m_viewWidthSamples;
 	uint m_spu;
 
-	uint m_scope;
+	uint m_arity;
 	QVector<MultiValue::Config> m_config;
 
 	float m_viewWidth;
@@ -251,8 +251,10 @@ void Grapher::processorStopped()
 
 bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
 {
-	m_viewWidthSamples = (uint)(_inTypes[0].frequency() * m_viewWidth);
-	m_scope = max(1u, _inTypes[0].scope());
+	if (!_inTypes[0].isA<Signal>())
+		return false;
+	m_viewWidthSamples = (uint)(_inTypes[0].asA<Signal>().frequency() * m_viewWidth);
+	m_arity = max(1u, _inTypes[0].asA<Signal>().arity());
 	if (_inTypes[0].isA<MultiValue>())
 	{
 		m_config = _inTypes[0].asA<MultiValue>().config();
@@ -260,13 +262,13 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 	}
 	else
 	{
-		m_config.resize(m_scope);
+		m_config.resize(m_arity);
 		m_units = (m_labeled == -1) ? 0 : m_labeled;
-		for (uint i = 0; i < m_scope; i++)
+		for (uint i = 0; i < m_arity; i++)
 		{
 			m_config[i].index = i;
-			m_config[i].min = _inTypes[0].asA<SignalType>().minAmplitude();
-			m_config[i].max = _inTypes[0].asA<SignalType>().maxAmplitude();
+			m_config[i].min = _inTypes[0].asA<Signal>().minAmplitude();
+			m_config[i].max = _inTypes[0].asA<Signal>().maxAmplitude();
 		}
 	}
 	m_mins.resize(m_config.size());
@@ -277,14 +279,14 @@ bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRe
 		m_mins[i] = m_config[i].min * m_config[i].conversion;
 		m_incs[i] = m_deltas[i] = (m_config[i].max - m_config[i].min) * m_config[i].conversion;
 	}
-	setupVisual(m_viewWidthSamples, 20, m_spu * 1000 / _inTypes[0].frequency());
+	setupVisual(m_viewWidthSamples, 20, m_spu * 1000 / _inTypes[0].asA<Signal>().frequency());
 	return true;
 }
 
 void Grapher::initFromProperties(Properties const& _p)
 {
 	setupIO(1, 0);
-	m_scope = 1;
+	m_arity = 1;
 	m_spu = _p["Samples/Update"].toInt();
 	m_viewWidth = _p["View Width"].toDouble();
 	updateFromProperties(_p);

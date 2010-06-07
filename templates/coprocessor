@@ -7,10 +7,10 @@ private:
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
 	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties(const Properties &properties);
-	virtual void updateFromProperties(const Properties &properties);
+	virtual void initFromProperties(Properties const& _p);
+	virtual void updateFromProperties(Properties const& _p);
 	virtual QString simpleText() const { return QChar(0x21FB); }
 };
 
@@ -36,15 +36,15 @@ void _NAME_::processorStopped()
 {
 }
 
-bool _NAME_::verifyAndSpecifyTypes(SignalTypeRefs const& inTypes, SignalTypeRefs& outTypes)
+bool _NAME_::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
 {
-	outTypes[0] = inTypes[0];
-	return outTypes[0].isA<Spectrum>();
+	_outTypes[0] = _inTypes[0];
+	return _outTypes[0].isA<Spectrum>();
 }
 
-void _NAME_::initFromProperties(Properties const& p)
+void _NAME_::initFromProperties(Properties const& _p)
 {
-	updateFromProperties(p);
+	updateFromProperties(_p);
 	setupIO(1, 1);
 }
 
@@ -55,7 +55,7 @@ void _NAME_::updateFromProperties(Properties const&)
 PropertiesInfo _NAME_::specifyProperties() const
 {
 	return PropertiesInfo
-			("Example", false, "Example description. { Units }")
+			("Example", false, "Example description.", false, "Ë");
 }
 
 EXPORT_CLASS(_NAME_, 0,1,0, Processor);

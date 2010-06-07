@@ -51,12 +51,12 @@ class xLConnectionReal: public xLConnection
 	// Reimplementations from Connection
 	friend class Processor;
 public:
-	virtual const SignalTypeRef type();
+	virtual const SignalTypeRef type() const;
 
 	// Reimplementations from xLConnection
 	friend class RLConnection;
 private:
-	virtual void reset() { theBuffer.clear(); }
+	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; theBuffer.clear(); }
 	virtual void sinkStopping();
 	virtual void sinkStopped();
 	virtual uint elementsReady() const;
@@ -67,15 +67,19 @@ private:
 	virtual BufferReader *newReader() { return new BufferReader(&theBuffer); }
 	virtual void killReader();
 	virtual void resurectReader();
-	virtual uint capacity() const { return theBuffer.size() / theType->scope(); }
+	virtual uint capacity() const { return theBuffer.size() / theType->size(); }
 	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
 	virtual bool plungeSync(uint samples) const;
 	virtual bool require(uint samples, uint preferSamples = Undefined);
+	virtual double secondsPassed() const { return type().isA<Signal>() ? m_latestPeeked / (double)(type().asA<Signal>().frequency()) : 0.0; }
 
 protected:
 	friend class BobPort;
 	Buffer theBuffer;
 	BufferReader *theReader;
+	mutable uint64_t m_samplesRead;
+	mutable uint64_t m_latestPeeked;
+
 
 	/**
 	 * Extracts the type from the source end of the connection.

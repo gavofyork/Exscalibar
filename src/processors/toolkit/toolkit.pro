@@ -34,7 +34,9 @@ SOURCES += monitor.cpp \
 	stress.cpp \
 	recorder.cpp \
 	alsaplayer.cpp \
-    slur.cpp
+    slur.cpp \
+    Convolver.cpp \
+    PeakFinder.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

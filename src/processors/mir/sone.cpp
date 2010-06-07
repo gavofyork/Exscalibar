@@ -54,8 +54,8 @@ bool Terhardt::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRe
 	const Spectrum &in = inTypes[0].asA<Spectrum>();
 	outTypes = inTypes;
 	delete [] theMult;
-	theMult = new float[in.scope()];
-	for (uint i = 0; i < in.scope(); i++)
+	theMult = new float[in.arity()];
+	for (uint i = 0; i < in.arity(); i++)
 	{
 		float f = in.bandFrequency(i);
 		float Adb = -3.64f * pow(f * 0.001f, -0.8f) + 6.5f * exp(-0.6 * pow(0.001f * f - 3.3f, 2.f)) - .001f * pow(.001f * f, 4.f);
@@ -163,10 +163,10 @@ void Histogram::initFromProperties(const Properties &p)
 bool Histogram::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	theColumns = inTypes[0].scope();
-	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].frequency() / theStep, 0, 0);
-	theCount = uint(thePeriod * inTypes[0].frequency());
-	theStep = uint(theOverlap * inTypes[0].frequency());
+	theColumns = inTypes[0].asA<TransmissionType>().arity();
+	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].asA<Signal>().frequency() / theStep, 0, 0);
+	theCount = uint(thePeriod * inTypes[0].asA<Signal>().frequency());
+	theStep = uint(theOverlap * inTypes[0].asA<Signal>().frequency());
 	setupSamplesIO(theCount, theStep, 1);
 
 	delete [] theWindow;

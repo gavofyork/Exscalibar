@@ -46,7 +46,7 @@ class Processor;
 class DLLEXPORT MLConnection: public xLConnection
 {
 	//* Reimplementations from Connection
-	virtual const SignalTypeRef type();
+	virtual const SignalTypeRef type() const;
 
 	//* Reimplementations from xLConnection
 	virtual void reset();
@@ -67,6 +67,8 @@ class DLLEXPORT MLConnection: public xLConnection
 protected:
 	LMConnection *theConnection;
 	BufferReader *theReader;
+	mutable uint64_t m_samplesRead;
+	mutable uint64_t m_latestPeeked;
 
 public:
 	/**
@@ -84,7 +86,7 @@ public:
 	/**
 	 * Sets the (wouldbe cached) type of the connection.
 	 */
-	void setType(const SignalType *type);
+	void setType(const TransmissionType *type);
 
 	/**
 	 * Notifies the Sink that a fresh stream of plungers may be coming from the
@@ -105,6 +107,7 @@ public:
 	 */
 	void noMorePlungers();
 
+	virtual double secondsPassed() const { return type().isA<Signal>() ? m_latestPeeked / (double)(type().asA<Signal>().frequency()) : 0.0; }
 
 	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();

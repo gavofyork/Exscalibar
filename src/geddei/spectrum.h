@@ -31,7 +31,7 @@ namespace SignalTypes
 {
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing 1-D spectral data.
+ * @brief A TransmissionType refinement for describing 1-D spectral data.
  * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to describe a signal type that is a vector of
@@ -39,12 +39,22 @@ namespace SignalTypes
  * significant attributes, the frequency by which each individual spectrum
  * arrives from the source, and the stepping between spectral bands.
  */
-class DLLEXPORT Spectrum: public SignalType
+class DLLEXPORT Spectrum: public Signal
 {
-	virtual uint id() const { return 2; }
-	virtual SignalType *copyBE() const { return new Spectrum(theScope, theFrequency, theMax, theMin); }
+	TRANSMISSION_TYPE(Spectrum, Signal);
 
 public:
+	/**
+	 * Create a new TransmissionType to represent a spectrum.
+	 *
+	 * @param size The number of bands in each spectrum.
+	 * @param frequency The number of times the source will emit a spectrum
+	 * per second of signal time (in Hz).
+	 * @param step The increase in audio frequency (in Hz) per band. It is
+	 * currently assumed that the signal is a monotonically stepped spectrum.
+	 */
+	inline Spectrum(uint bins = 1, float frequency = 1, float _max = 1.f, float _min = 0.f): Signal(bins, frequency, _max, _min) {}
+
 	/**
 	 * Determines the frequency represented by a specific band.
 	 *
@@ -65,9 +75,10 @@ public:
 	 * Gets the number of bands in the spectra of the signal to which this
 	 * type refers.
 	 *
-	 * @return The number of bands.
+	 * @return The number of band bins.
 	 */
-	virtual uint size() const { return theScope; }
+	virtual uint bins() const { return arity(); }
+	virtual void setBins(uint _n) { setArity(_n); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -77,22 +88,11 @@ public:
 	 */
 	virtual float nyquist() const { return 0.f; }
 
-	virtual QString info() const { return QString("<div><b>Spectrum</b></div><div>Bin range: %1,%2-%3,%4 Hz</div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(scope() - 2)).arg(bandFrequency(scope() - 1)) + SignalType::info(); }
-
-	/**
-	 * Create a new SignalType to represent a spectrum.
-	 *
-	 * @param size The number of bands in each spectrum.
-	 * @param frequency The number of times the source will emit a spectrum
-	 * per second of signal time (in Hz).
-	 * @param step The increase in audio frequency (in Hz) per band. It is
-	 * currently assumed that the signal is a monotonically stepped spectrum.
-	 */
-	Spectrum(uint size = 1, float frequency = 0, float _max = 1.f, float _min = 0.f);
+	virtual QString info() const { return QString("<div><b>Spectrum</b></div><div>Bin range: %1,%2-%3,%4 Hz</div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(size() - 2)).arg(bandFrequency(size() - 1)) + Signal::info(); }
 };
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing 1-D spectral data.
+ * @brief A TransmissionType refinement for describing 1-D spectral data.
  * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to describe a signal type that is a vector of
@@ -102,16 +102,20 @@ public:
  */
 class DLLEXPORT FreqSteppedSpectrum: public Spectrum
 {
-	virtual void serialise(QSocketSession &sink) const;
-	virtual void deserialise(QSocketSession &source);
-	virtual uint id() const { return 5; }
-	virtual bool sameAsBE(const SignalType *cmp) const;
-	virtual SignalType *copyBE() const { return new FreqSteppedSpectrum(theScope, theFrequency, theStep, theMax, theMin); }
-
-protected:
-	float theStep; ///< Step between spectral bands of represented Spectrum in Hz.
+	TRANSMISSION_TYPE(FreqSteppedSpectrum, Spectrum);
 
 public:
+	/**
+	 * Create a new TransmissionType to represent a spectrum.
+	 *
+	 * @param size The number of bands in each spectrum.
+	 * @param frequency The number of times the source will emit a spectrum
+	 * per second of signal time (in Hz).
+	 * @param step The increase in audio frequency (in Hz) per band. It is
+	 * currently assumed that the signal is a monotonically stepped spectrum.
+	 */
+	FreqSteppedSpectrum(uint bins = 1, float frequency = 1, float step = 1, float _max = 1.f, float _min = 0.f) : Spectrum(bins, frequency, _max, _min), theStep(step) {}
+
 	/**
 	 * Determines the frequency represented by a specific band.
 	 *
@@ -126,7 +130,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return min((uint)(_freq / theStep), (uint)(scope() - 1)); }
+	virtual uint frequencyBand(float _freq) const { return min((uint)(_freq / theStep), (uint)(bins() - 1)); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -134,7 +138,7 @@ public:
 	 *
 	 * @return The Nyquist frequency.
 	 */
-	virtual float nyquist() const { return float(theScope) * theStep; }
+	virtual float nyquist() const { return float(bins()) * theStep; }
 
 	/**
 	 * Gets the difference in audio frequency between each band in the
@@ -146,30 +150,28 @@ public:
 
 	virtual QString info() const { return QString("<div><b>FreqSteppedSpectrum</b></div><div>Step: %1 Hz</div>").arg(theStep) + Spectrum::info(); }
 
-	/**
-	 * Create a new SignalType to represent a spectrum.
-	 *
-	 * @param size The number of bands in each spectrum.
-	 * @param frequency The number of times the source will emit a spectrum
-	 * per second of signal time (in Hz).
-	 * @param step The increase in audio frequency (in Hz) per band. It is
-	 * currently assumed that the signal is a monotonically stepped spectrum.
-	 */
-	FreqSteppedSpectrum(uint size = 1, float frequency = 0, float step = 1, float _max = 1.f, float _min = 0.f) : Spectrum(size, frequency, _max, _min), theStep(step) {}
+protected:
+	float theStep; ///< Step between spectral bands of represented Spectrum in Hz.
+
+	TT_1_MEMBER(theStep);
 };
 
 class DLLEXPORT PeriodSteppedSpectrum: public Spectrum
 {
-	virtual void serialise(QSocketSession &sink) const;
-	virtual void deserialise(QSocketSession &source);
-	virtual uint id() const { return 7; }
-	virtual bool sameAsBE(const SignalType *cmp) const;
-	virtual SignalType *copyBE() const { return new PeriodSteppedSpectrum(theScope, theFrequency, theStep, theMax, theMin); }
-
-protected:
-	float theStep; ///< Step between spectral bands of represented Spectrum in s.
+	TRANSMISSION_TYPE(PeriodSteppedSpectrum, Spectrum);
 
 public:
+	/**
+	 * Create a new TransmissionType to represent a spectrum.
+	 *
+	 * @param size The number of bands in each spectrum.
+	 * @param frequency The number of times the source will emit a spectrum
+	 * per second of signal time (in Hz).
+	 * @param step The increase in audio frequency (in s) per band. It is
+	 * currently assumed that the signal is a monotonically stepped spectrum.
+	 */
+	PeriodSteppedSpectrum(uint bins = 1, float frequency = 1, float step = 1, float _max = 1.f, float _min = 0.f) : Spectrum(bins, frequency, _max, _min), theStep(step) {}
+
 	/**
 	 * Determines the frequency represented by a specific band.
 	 *
@@ -184,7 +186,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return max(0u, min((uint)(theStep / max(0.0001f, _freq)), (uint)(scope() - 1))); }
+	virtual uint frequencyBand(float _freq) const { return max(0u, min((uint)(theStep / max(0.0001f, _freq)), (uint)(bins() - 1))); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -204,16 +206,10 @@ public:
 
 	virtual QString info() const { return QString("<div><b>PeriodSteppedSpectrum</b></div><div>Step: %1 s</div>").arg(theStep) + Spectrum::info(); }
 
-	/**
-	 * Create a new SignalType to represent a spectrum.
-	 *
-	 * @param size The number of bands in each spectrum.
-	 * @param frequency The number of times the source will emit a spectrum
-	 * per second of signal time (in Hz).
-	 * @param step The increase in audio frequency (in s) per band. It is
-	 * currently assumed that the signal is a monotonically stepped spectrum.
-	 */
-	PeriodSteppedSpectrum(uint size = 1, float frequency = 0, float step = 1, float _max = 1.f, float _min = 0.f) : Spectrum(size, frequency, _max, _min), theStep(step) {}
+protected:
+	float theStep; ///< Step between spectral bands of represented Spectrum in s.
+
+	TT_1_MEMBER(theStep);
 };
 
 

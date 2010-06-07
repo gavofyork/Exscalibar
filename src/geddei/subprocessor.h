@@ -81,7 +81,7 @@ class RSCoupling;
  * Exactly one of processChunk() and processChunks() needs to be implemented:
  * processChunk() is the simpler of the two allowing you to specify the input
  * to output process as a single event. processChunks gives you, the developer,
- * slightly more scope for optimisation allowing you to keep an internal state
+ * slightly morescope for optimisation allowing you to keep an internal state
  * between multiple consecutive chunks. Obviously, use of this state cannot be
  * relied upon for correct creation of the outputs, but if the answers to a
  * previous chunk's calculation may be used to speed up a later chunk's

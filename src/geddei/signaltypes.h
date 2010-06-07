@@ -19,7 +19,7 @@
 #pragma once
 
 /**
- * @defgroup SignalTypes Classes derived from SignalType.
+ * @defgroup SignalTypes Classes derived from TransmissionType.
  * @brief Module containing classes for describing different types of Signal.
  * @author Gav Wood <gav@kde.org>
  *

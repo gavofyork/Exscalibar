@@ -31,7 +31,7 @@ using namespace SignalTypes;
 
 class CrossSimilarity: public SubProcessor
 {
-	int theScope, theCount;
+	int theArity, theCount;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
@@ -45,16 +45,18 @@ void CrossSimilarity::processChunk(const BufferDatas &in, BufferDatas &out) cons
 	for (int i = 0; i < theCount; i++)
 		for (int ii = 0; ii < theCount; ii++)
 		{	out[0][i * theCount + ii] = 0.;
-			for (int j = 0; j < theScope; j++)
-				out[0][i * theCount + ii] += (1. - abs(in[i][j] - in[ii][j])) / float(theScope);
+			for (int j = 0; j < theArity; j++)
+				out[0][i * theCount + ii] += (1. - abs(in[i][j] - in[ii][j])) / float(theArity);
 		}
 }
 
 bool CrossSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	theScope = inTypes[0].scope();
+	if (!inTypes[0].isA<SquareMatrix>())
+		return false;
+	theArity = inTypes[0].asA<TransmissionType>().arity();
 	theCount = multiplicity();
-	outTypes[0] = SquareMatrix(theCount, inTypes[0].frequency());
+	outTypes[0] = SquareMatrix(theCount, inTypes[0].asA<SquareMatrix>().frequency());
 	return true;
 }
 

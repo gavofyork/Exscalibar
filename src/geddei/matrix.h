@@ -31,24 +31,30 @@ namespace SignalTypes
 {
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing 2-D matrix data.
+ * @brief A TransmissionType refinement for describing 2-D matrix data.
  * @author Gav Wood <gav@kde.org>
  */
-class DLLEXPORT Matrix: public SignalType
+class DLLEXPORT Matrix: public Signal
 {
-	virtual void serialise(QSocketSession &sink) const;
-	virtual void deserialise(QSocketSession &source);
-	virtual uint id() const { return 3; }
-	virtual SignalType *copyBE() const { return new Matrix(theWidth, theHeight, theFrequency); }
-	virtual bool sameAsBE(const SignalType *cmp) const;
-
-protected:
-	uint theWidth; ///< Width of the represented matrix in elements.
-	uint theHeight; ///< Height of the represented matrix in elements.
-	float thePitchWidth; ///< Pitch width of the represented matrix.
-	float thePitchHeight; ///< Pitch height of the represented matrix.
+	TRANSMISSION_TYPE(Matrix, Signal);
 
 public:
+	/**
+	 * Constrictor for a new matrix whose row size is equal to column size.
+	 *
+	 * @param width The number of columns.
+	 * @param height The number of rows.
+	 * @param frequency The number of matrices that are required to represent a
+	 * second of signal time.
+	 * @param pitchWidth The theoretical number of elements in a row that would
+	 * represent a second in signal time. Of course this property may be left
+	 * as its default (0) if it makes no sense for the data.
+	 * @param pitchHeight The theoretical number of elements in a column that
+	 * would represent a second in signal time. Of course this property may be
+	 * left as its default (0) if it makes no sense for the data.
+	 */
+	Matrix(uint width = 1, uint height = 1, float frequency = 0, float pitchWidth = 0, float pitchHeight = 0) : Signal(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
+
 	/**
 	 * Get the number of columns in the matrix this object represents.
 	 *
@@ -78,27 +84,19 @@ public:
 	 */
 	float pitchHeight() const { return thePitchHeight; }
 
-	virtual QString info() const { return QString("<div><b>Matrix</b></div><div>Dimensions: %1x%2</div><div>Pitch: %3x%4 s</div>").arg(theWidth).arg(theHeight).arg(thePitchWidth).arg(thePitchHeight) + SignalType::info(); }
+	virtual QString info() const { return QString("<div><b>Matrix</b></div><div>Dimensions: %1x%2</div><div>Pitch: %3x%4 s</div>").arg(theWidth).arg(theHeight).arg(thePitchWidth).arg(thePitchHeight) + Signal::info(); }
 
-	/**
-	 * Constrictor for a new matrix whose row size is equal to column size.
-	 *
-	 * @param width The number of columns.
-	 * @param height The number of rows.
-	 * @param frequency The number of matrices that are required to represent a
-	 * second of signal time.
-	 * @param pitchWidth The theoretical number of elements in a row that would
-	 * represent a second in signal time. Of course this property may be left
-	 * as its default (0) if it makes no sense for the data.
-	 * @param pitchHeight The theoretical number of elements in a column that
-	 * would represent a second in signal time. Of course this property may be
-	 * left as its default (0) if it makes no sense for the data.
-	 */
-	Matrix(uint width = 1, uint height = 1, float frequency = 0, float pitchWidth = 0, float pitchHeight = 0) : SignalType(width * height, frequency), theWidth(width), theHeight(height), thePitchWidth(pitchWidth), thePitchHeight(pitchHeight) {}
+protected:
+	uint theWidth; ///< Width of the represented matrix in elements.
+	uint theHeight; ///< Height of the represented matrix in elements.
+	float thePitchWidth; ///< Pitch width of the represented matrix.
+	float thePitchHeight; ///< Pitch height of the represented matrix.
+
+	TT_4_MEMBERS(theWidth, theHeight, thePitchWidth, thePitchHeight);
 };
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing 2-D square matrix data.
+ * @brief A TransmissionType refinement for describing 2-D square matrix data.
  * @author Gav Wood <gav@kde.org>
  *
  * This is very similar to the Matrix class except that it describes only data
@@ -107,12 +105,23 @@ public:
  */
 class DLLEXPORT SquareMatrix: public Matrix
 {
-	virtual uint id() const { return 4; }
-	virtual SignalType *copyBE() const { return new SquareMatrix(theWidth, theFrequency, thePitchWidth); }
+	TRANSMISSION_TYPE(SquareMatrix, Matrix);
 
 public:
 	/**
-	 * Get the size of the matrix this SignalType represents.
+	 * Constrictor for a new matrix whose row size is equal to column size.
+	 *
+	 * @param size The number of rows (or columns).
+	 * @param frequency The number of matrices that are required to represent a
+	 * second of signal time.
+	 * @param pitch The theoretical number of elements in a row that would
+	 * represent a second in signal time. Of course this property may be left
+	 * as its default (0) if it makes no sense for the data.
+	 */
+	SquareMatrix(uint size = 1, float frequency = 0., float pitch = 0.) : Matrix(size, size, frequency, pitch, pitch) {}
+
+	/**
+	 * Get the size of the matrix this TransmissionType represents.
 	 *
 	 * The sample size is therefore equal to size() * size().
 	 *
@@ -130,17 +139,7 @@ public:
 	 */
 	float pitch() const { return thePitchWidth; }
 
-	/**
-	 * Constrictor for a new matrix whose row size is equal to column size.
-	 *
-	 * @param size The number of rows (or columns).
-	 * @param frequency The number of matrices that are required to represent a
-	 * second of signal time.
-	 * @param pitch The theoretical number of elements in a row that would
-	 * represent a second in signal time. Of course this property may be left
-	 * as its default (0) if it makes no sense for the data.
-	 */
-	SquareMatrix(uint size = 1, float frequency = 0., float pitch = 0.) : Matrix(size, size, frequency, pitch, pitch) {}
+	TT_NO_MEMBERS;
 };
 
 }

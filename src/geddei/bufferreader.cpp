@@ -199,7 +199,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 	lastRead->theValid = true;
 	lastRead->theAccessibleSize = ready;
 	lastRead->theEndType = autoFree ? BufferInfo::Activate : BufferInfo::Forget;
-	lastRead->theScope = theBuffer->theType->scope();
+	lastRead->m_sampleSize = theBuffer->theType->size();
 	lastRead->theValid = true;
 	lastRead->thePlunger = (ready < elements);
 

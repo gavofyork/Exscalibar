@@ -60,7 +60,8 @@ private:
 
 public: //TODO make private:
 	// Info about the data - these never change in the lifetime of the data
-	uint theMask, theAccessibleSize, theScope;
+	uint theMask, theAccessibleSize;
+	uint m_sampleSize;
 	mutable Auxilliary *theAux;
 	bool theValid;
 	Access theType;
@@ -161,9 +162,9 @@ public:
 
 	BufferInfo(float *data, Auxilliary *aux, uint mask, const Payload life, const Access type):
 		theCounter(0), theResident(true), theMask(mask), theAux(aux), theType(type), theLife(life), theData(data) {}
-	BufferInfo(uint accessibleSize, uint scope, float *data, Auxilliary *aux, const Legacy endType,
+	BufferInfo(uint accessibleSize, uint sampleSize, float *data, Auxilliary *aux, const Legacy endType,
 		uint mask, bool valid, const Access type, const Payload life, bool plunger):
-		theCounter(1), theResident(false), theMask(mask), theAccessibleSize(accessibleSize), theScope(scope), theAux(aux),
+		theCounter(1), theResident(false), theMask(mask), theAccessibleSize(accessibleSize), m_sampleSize(sampleSize), theAux(aux),
 		theValid(valid), theType(type), theLife(life), theEndType(endType), theData(data), thePlunger(plunger) {}
 };
 

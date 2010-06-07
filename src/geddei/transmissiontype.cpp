@@ -16,14 +16,31 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "transmissiontype.h"
 #include "qsocketsession.h"
+using namespace Geddei;
 
-#include "matrix.h"
-
-namespace SignalTypes
+namespace Geddei
 {
 
-TRANSMISSION_TYPE_CPP(Matrix);
-TRANSMISSION_TYPE_CPP(SquareMatrix);
+TransmissionTypeRegistrar* TransmissionTypeRegistrar::s_one = 0;
+
+TransmissionType::TransmissionType(uint _size):
+	theSize(_size)
+{}
+
+void TransmissionType::send(QSocketSession& _sink) const
+{
+	_sink.sendString(type().toUtf8());
+	// TODO: serialise
+}
+
+TransmissionType* TransmissionType::receive(QSocketSession& _source)
+{
+	TransmissionType* s = TransmissionTypeRegistrar::get()->create(QString::fromUtf8(_source.receiveString()));
+	// TODO: deserialise.
+	return s;
+}
 
 }
+

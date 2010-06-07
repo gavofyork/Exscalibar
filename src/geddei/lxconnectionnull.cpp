@@ -27,7 +27,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-void LxConnectionNull::push(const BufferData &)
+void LxConnectionNull::pushBE(const BufferData &)
 {
 	theSource->checkExit();
 }

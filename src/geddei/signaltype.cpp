@@ -17,79 +17,53 @@
  */
 
 #include "signaltype.h"
-#include "qsocketsession.h"
+#include "source.h"
 using namespace Geddei;
-
-#include "value.h"
-#include "wave.h"
-#include "spectrum.h"
-#include "matrix.h"
-using namespace SignalTypes;
 
 namespace Geddei
 {
 
-SignalType::SignalType(uint scope, float frequency, float _max, float _min): theMin(min(_min, _max)), theMax(max(_min, _max))
+TRANSMISSION_TYPE_CPP(Signal);
+
+Signal::Signal(uint _arity, float _frequency, float _max, float _min):
+	TransmissionType	(_arity),
+	theFrequency		(_frequency),
+	theMin				(min(_min, _max)),
+	theMax				(max(_min, _max))
 {
-	theScope = scope;
-	theFrequency = frequency;
 }
 
-void SignalType::send(QSocketSession &sink) const
+QString Signal::info() const
 {
-	sink.safeSendWord((uint32_t)id());
-	serialise(sink);
+	return QString("<div><b>Signal</b></div><div>Frequency: %1 Hz</div><div>Range: %3-%4</div>").arg(theFrequency).arg(theMin).arg(theMax) + TransmissionType::info();
 }
 
-SignalType *SignalType::receive(QSocketSession &source)
+TRANSMISSION_TYPE_CPP(Mark);
+
+void Mark::polishData(BufferData& _d, Source* _s, uint) const
 {
-	SignalType *s = create(source.safeReceiveWord<uint32_t>());
-	s->deserialise(source);
-	return s;
+	setTimestamp(_d, _s->secondsPassed());
 }
 
-void SignalType::serialise(QSocketSession &sink) const
+void Mark::setTimestamp(BufferData& _d, double _ts)
 {
-	sink.safeSendWord((uint32_t)theScope);
-	sink.safeSendWord(theFrequency);
-	sink.safeSendWord(theMin);
-	sink.safeSendWord(theMax);
+	union { double d; float f[2]; } ts;
+	ts.d = _ts;
+	for (uint s = _d.sampleSize() - 2; s < _d.elements(); s += _d.sampleSize())
+		(_d[s] = ts.f[0]), (_d[s + 1] = ts.f[1]);
 }
 
-void SignalType::deserialise(QSocketSession &source)
+double Mark::timestamp(BufferData const& _data)
 {
-	theScope = source.safeReceiveWord<int32_t>();
-	theFrequency = source.safeReceiveWord<float>();
-	theMin = source.safeReceiveWord<float>();
-	theMax = source.safeReceiveWord<float>();
+	union { double d; float f[2]; } ts;
+	ts.f[0] = _data[_data.sampleSize() - 2];
+	ts.f[1] = _data[_data.sampleSize() - 1];
+	return ts.d;
 }
 
-SignalType *SignalType::create(uint id)
+QString Mark::info() const
 {
-	switch (id)
-	{
-		case 0: return new Value;
-		case 1: return new Wave;
-		case 2: return new Spectrum;
-		case 3: return new Matrix;
-		case 4: return new SquareMatrix;
-		default: return 0;
-	}
+	return QString("<div><b>Mark</b></div>") + TransmissionType::info();
 }
-
-/*ostream &operator<<(ostream &out, const SignalType &me)
-{
-	if (me == SignalType::null)
-		return out << "null";
-	out << "[ " << me.theScope << "x" << me.theFrequency << "Hz - ";
-	switch (me.theFormat)
-	{	case SignalType::NoFormat: out << "NoFormat"; break;
-		case SignalType::Wave: out << "Wave"; break;
-		case SignalType::Spectrum: out << "Spectrum"; break;
-		case SignalType::Matrix: out << "Matrix"; break;
-		case SignalType::Unknown: out << "Unknown"; break;
-	}
-	return out << " ]";
-}*/
 
 }

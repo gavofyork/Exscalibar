@@ -34,7 +34,7 @@ using namespace SignalTypes;
 class Normalise: public HeavyProcessor
 {
 	QVector<float> f;
-	uint theOutputSpace, theScope;
+	uint theOutputSpace, m_arity;
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &);
@@ -64,7 +64,7 @@ void Normalise::initFromProperties(const Properties &p)
 
 bool Normalise::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 {
-	theScope = in[0].scope();
+	m_arity = in[0].asA<TransmissionType>().arity();
 	out[0] = in[0];
 	return true;
 }
@@ -130,7 +130,7 @@ void Normalise::receivedPlunger()
 */
 	delta = maxi - mini;
 	if (!delta) delta = 1.;
-	BufferData d(f.size(), theScope);
+	BufferData d(f.size(), m_arity);
 	for (uint i = 0; i < (uint)f.size(); i++)
 		d[i] = finite(f[i]) ? std::min(1.f, std::max(0.f, (f[i] - mini) / delta)) : 0.;
 	output(0) << d;

@@ -59,7 +59,7 @@ class Buffer: public ScratchOwner
 	uint theLogSize, theSize, theMask, theUsed;
 	uint readPos, writePos;
 	BufferInfo *lastScratch;
-	SignalType *theType;
+	TransmissionType *theType;
 	QVector<const Processor *> theTrapdoors;
 	QList<uint> thePlungers;
 	QList<BufferReader*> theReaders;
@@ -191,9 +191,9 @@ public:
 	void resize(uint size);
 
 	/**
-	 * Sets the buffer's SignalType. Causes a clear() (see caveats for clear()).
+	 * Sets the buffer's TransmissionType. Causes a clear() (see caveats for clear()).
 	 */
-	void setType(const SignalType *type);
+	void setType(const TransmissionType *type);
 
 	/**
 	 * Returns the size of the buffer.
@@ -203,7 +203,7 @@ public:
 	/**
 	 * Returns the type of the buffer.
 	 */
-	const SignalType *type() const { return theType; }
+	const TransmissionType *type() const { return theType; }
 
 	/**
 	 * Some syntactic sugar, if you're into that sort of thing.
@@ -212,7 +212,7 @@ public:
 
 	void debug();
 
-	Buffer(uint size, const SignalType *type = 0);
+	Buffer(uint size, const TransmissionType *type = 0);
 	virtual ~Buffer();
 };
 

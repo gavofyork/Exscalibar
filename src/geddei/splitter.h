@@ -38,7 +38,7 @@ class Processor;
  * @author Gav Wood <gav@kde.org>
  *
  */
-class Splitter: public LxConnection, public Source
+class DLLEXPORT Splitter: public LxConnection, public Source
 {
 	//* Reimplementations from Source
 	virtual void checkExit();
@@ -48,7 +48,7 @@ class Splitter: public LxConnection, public Source
 	virtual const Processor *processor() const { return dynamic_cast<Processor *>(theSource); }
 
 	//* Reimplementations from Connection
-	virtual const SignalTypeRef type();
+	virtual const SignalTypeRef type() const;
 
 	//* Reimplementations from ScratchOwner, LxConnection
 	virtual void pushScratch(const BufferData &data);
@@ -57,13 +57,13 @@ class Splitter: public LxConnection, public Source
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
 	virtual Tristate isReadyYet();
-	virtual void setType(const SignalType *type);
+	virtual void setType(const TransmissionType *type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();
 	virtual void reset();
 	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
-	virtual void push(const BufferData &data);
+	virtual void pushBE(const BufferData &data);
 	virtual void pushPlunger();
 	virtual void startPlungers();
 	virtual void plungerSent();
@@ -72,6 +72,7 @@ class Splitter: public LxConnection, public Source
 	virtual uint maximumScratchElementsEver();
 	virtual void enforceMinimum(uint elements);
 	virtual uint bufferElementsFree();
+	virtual double secondsPassed() const { return theSource->secondsPassed(); }
 
 	QList<LxConnection*> theConnections;
 

@@ -47,7 +47,7 @@ Magnitude::Magnitude(): SubProcessor("Magnitude")
 bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
 {
 	if (!in[0].isA<Spectrum>()) return false;
-	out = Value(in[0].frequency());
+	out = Value(in[0].asA<Spectrum>().frequency());
 	return true;
 }
 

@@ -58,7 +58,8 @@ HEADERS += buffer.h \
 	processorport.h \
 	signaltyperef.h \
 	value.h \
-	groupable.h
+	groupable.h \
+    transmissiontype.h
 SOURCES += buffer.cpp \
 	bufferinfo.cpp \
 	bufferdata.cpp \
@@ -107,7 +108,8 @@ SOURCES += buffer.cpp \
 	signaltyperef.cpp \
 	globals.cpp \
 	groupable.cpp \
-    value.cpp
+    value.cpp \
+    transmissiontype.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

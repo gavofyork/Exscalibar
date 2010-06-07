@@ -32,7 +32,7 @@ using namespace SignalTypes;
 
 class DownSample : public SubProcessor
 {
-	uint theCount, theScope, theStep;
+	uint theCount, m_arity, theStep;
 	enum { Mean = 0, Max, Min };
 	uint theConsolidate;
 
@@ -48,7 +48,7 @@ public:
 void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	if (theCount <= 1)
-		if (theScope > 1)
+		if (m_arity > 1)
 			for (uint i = 0; i < chunks; i++)
 				outs[0].sample(i).copyFrom(ins[0].sample(i * theStep));
 		else
@@ -56,34 +56,36 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint c
 				outs[0][i] = ins[0][i * theStep];
 	else
 	{	for (uint j = 0; j < chunks; j++)
-			for (uint i = 0; i < theScope; i++)
+			for (uint i = 0; i < m_arity; i++)
 				outs[0](j, i) = 0;
 		for (uint j = 0; j < chunks; j++)
 		{	for (uint i = 0; i < theCount; i++)
 			{	BufferData d = ins[0].sample(i + j*theStep);
 				const float *inSample = d.readPointer();
 				if (theConsolidate == Mean)
-					for (uint k = 0; k < theScope; k++)
+					for (uint k = 0; k < m_arity; k++)
 						outs[0](j, k) += inSample[k];
 				else if (theConsolidate == Max)
-					for (uint k = 0; k < theScope; k++)
+					for (uint k = 0; k < m_arity; k++)
 						if (outs[0](j, k) < inSample[k] || !k) outs[0](j, k) = inSample[k];
 				else if (theConsolidate == Min)
-					for (uint k = 0; k < theScope; k++)
+					for (uint k = 0; k < m_arity; k++)
 						if (outs[0](j, k) > inSample[k] || !k) outs[0](j, k) = inSample[k];
 			}
 		}
 		for (uint j = 0; j < chunks; j++)
-			for (uint i = 0; i < theScope; i++)
+			for (uint i = 0; i < m_arity; i++)
 				outs[0](j, i) /= theCount;
 	}
 }
 
 bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	theScope = inTypes[0].scope();
+	if (!inTypes[0].isA<Signal>())
+		return false;
+	m_arity = inTypes[0].asA<Signal>().arity();
 	outTypes = inTypes[0];
-	outTypes[0].asA<SignalType>().setFrequency(inTypes[0].frequency() / (float)theStep);
+	outTypes[0].asA<Signal>().setFrequency(inTypes[0].asA<Signal>().frequency() / (float)theStep);
 	return true;
 }
 
@@ -145,7 +147,7 @@ class SuitableSplit: public SubProcessor
 	float theBass, theTreble;
 	int theBand[4];
 	virtual void initFromProperties (const Properties &) { setupIO(1, 3); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].scope() - 4); return true; }
+	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Spectrum>()) return false; outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].asA<Spectrum>().bins() - 4); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{	cerr << "Sizes: i=" << ins[0].elements() << ", o = " << outs[0].elements() << ", " << outs[1].elements() << ", " << outs[2].elements() << endl;
 	}

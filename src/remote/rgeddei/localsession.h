@@ -59,7 +59,7 @@ class RemoteDomProcessor;
  * Qt's event-driven loop. The easy way to do this is to use QSubApp.
  *
  * Tip: It is usually a good idea to declare the LocalSession object in the
- * global scope.
+ * globalscope.
  */
 class DLLEXPORT LocalSession: private ProcessorForwarder, private ProcessorGroup
 {

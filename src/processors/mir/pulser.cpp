@@ -168,13 +168,14 @@ void Pulser::processorStopped()
 
 bool Pulser::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
 {
-	if (inTypes[0].scope() != 1) return false;
+	if (inTypes[0].asA<TransmissionType>().arity() != 1)
+		return false;
 	if (m_dynamicPrior)
 	{
 		if (!inTypes[1].isA<MultiValue>() && !inTypes[1].isA<Value>()) return false;
 	}
-	m_frequency = inTypes[0].frequency();
-	outTypes[0] = MultiValue(10, inTypes[0].frequency(), 1, 0, QVector<MultiValue::Config>()
+	m_frequency = inTypes[0].asA<Signal>().frequency();
+	outTypes[0] = MultiValue(10, inTypes[0].asA<Signal>().frequency(), 1, 0, QVector<MultiValue::Config>()
 		<< MultiValue::Config(QColor(0, 0, 0, 64), QColor(0, 0, 0, 64))
 		<< MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
 		<< MultiValue::Config(Qt::blue, Qt::transparent, 1, 0, 2, 100, "%")

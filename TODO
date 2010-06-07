@@ -1,4 +1,8 @@
-Tonaliser: allow for higher precision: 12 should be configurable.
+Sigmoid activator.
+- Will have to track frequency.
+- Probably best to use PeakRoller.
+
+Minimum over T combined with activator function?
 
 Rake-max with min-req activation energy searcher.
 - Can return most certain periods w/probabilities.
@@ -6,9 +10,17 @@ Rake-max with min-req activation energy searcher.
 
 Frequency sweep recogniser?
 
-Peak finder has momentum?!
+Peak finder has momentum.
+- Getting vaguely to bottom drops it.
+- Allows it to engulf minor peaks at either side.
+- Record area, height (according to cubic interp), rel height (against shoulders)
 
-Sigmoid activator.
+Harmonic sounds analysis.
+- Want a harmonics profile for each sound.
+- More robust determination of frequency, and colation of all harmonics.
+- Need to recognise low-frequency harmonic sounds.
+  - Not to confuse with high-energy transient noise.
+  - Greater accuracy required on harmonics fitting.
 
 18+
 
@@ -18,6 +30,8 @@ Allow dragging of subprocs around.
 
 Latcher - possibly as part of core (e.g. dump all samples on line except more recent - always return most recent).
 Latch as a Connection that sits between a connection and a processor.
+LxConnection::push needs to write Marks...
+
 
 Automatic splitting when connecting single to multiple.
 Allow connections single to multiplicative & singles.

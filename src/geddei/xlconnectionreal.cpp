@@ -81,18 +81,18 @@ bool xLConnectionReal::require(uint samples, uint preferSamples)
 	while (1)
 	{
 		int np = theReader->nextPlunger();
-		if (np != -1 && (uint)np < samples * type().scope())
+		if (np != -1 && (uint)np < samples * type().size())
 		{
 			theReader->skipElements(np);
 			theReader->skipPlunger();
 			theSink->plunged(theSinkIndex);
 		}
-		else if (np != -1 && (uint)np < preferSamples * type().scope())
+		else if (np != -1 && (uint)np < preferSamples * type().size())
 		{
 			return true;
 		}
 		else
-			return theReader->elementsReady() >= preferSamples * type().scope();
+			return theReader->elementsReady() >= preferSamples * type().size();
 	}
 }
 
@@ -130,8 +130,8 @@ bool xLConnectionReal::plungeSync(uint samples) const
 	}
 #endif
 
-	if (MESSAGES) qDebug("xLC::plungeSync(%d): Peeking %d elements...", samples, theType->scope() * samples);
-	BufferData ret = theReader->readElements(theType->scope() * samples, false);
+	if (MESSAGES) qDebug("xLC::plungeSync(%d): Peeking %d elements...", samples, theType->size() * samples);
+	BufferData ret = theReader->readElements(theType->size() * samples, false);
 	theSink->checkExit();
 	if (ret.plunger())
 	{
@@ -139,6 +139,8 @@ bool xLConnectionReal::plungeSync(uint samples) const
 		theReader->haveRead(ret);
 		if (MESSAGES) qDebug("xLC: Plunging sink...");
 		theSink->plunged(theSinkIndex);
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		return false;
 	}
 	if (MESSAGES) qDebug("xLC: Plunger not found; read must have succeeded.");
@@ -164,7 +166,14 @@ const BufferData xLConnectionReal::readElements(uint elements)
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, true);
 		theSink->checkExit();
-		if (!ret.plunger()) return ret;
+		if (!ret.plunger())
+		{
+			m_samplesRead += elements / theType->size();
+			m_latestPeeked = min(m_latestPeeked, m_samplesRead);
+			return ret;
+		}
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		// This is a workaround for a buggy gcc (3.2.2).
 		// If it wasn't here stuff wouldn't get freed up in the buffer.
 		// As it is, there are deallocation problems, since the last instance of ret
@@ -187,7 +196,13 @@ const BufferData xLConnectionReal::peekElements(uint elements)
 	while (1)
 	{	BufferData ret = theReader->readElements(elements, false);
 		theSink->checkExit();
-		if (!ret.plunger()) return ret;
+		if (!ret.plunger())
+		{
+			m_latestPeeked = m_samplesRead + elements / theType->size();
+			return ret;
+		}
+		m_samplesRead = 0;
+		m_latestPeeked = 0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 	}
@@ -205,9 +220,9 @@ void xLConnectionReal::sinkStopped()
 	theBuffer.closeTrapdoor(dynamic_cast<Processor *>(theSink));
 }
 
-const SignalTypeRef xLConnectionReal::type()
+const SignalTypeRef xLConnectionReal::type() const
 {
-	if (!theType) pullType();
+	if (!theType) const_cast<xLConnectionReal*>(this)->pullType();
 	return SignalTypeRef(theType);
 }
 

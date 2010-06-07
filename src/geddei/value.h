@@ -34,22 +34,19 @@ namespace SignalTypes
 {
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing generic single-value data.
+ * @brief A TransmissionType refinement for describing generic single-value data.
  * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to define a signal stream that comprises samples
  * of a single element. The meaning of each element is undefined.
  *
- * It is the simplest SignalType-derived class.
+ * It is the simplest TransmissionType-derived class.
  */
-class DLLEXPORT Value: public SignalType
+class DLLEXPORT Value: public Signal
 {
-	virtual uint id() const { return 0; }
-	virtual SignalType *copyBE() const { return new Value(theFrequency, theMax, theMin); }
+	TRANSMISSION_TYPE(Value, Signal);
 
 public:
-	virtual QString info() const { return QString("<div><b>Value</b></div>") + SignalType::info(); }
-
 	/**
 	 * The constructor.
 	 *
@@ -59,20 +56,26 @@ public:
 	 * If there is no clear way of defining this, you may choose to use the
 	 * default value of zero, which will serve the purpose of "not applicable".
 	 */
-	Value(float frequency = 1, float _max = 1.f, float _min = 0.f) : SignalType(1, frequency, _max, _min) {}
+	Value(float frequency = 1, float _max = 1.f, float _min = 0.f) : Signal(1, frequency, _max, _min) {}
+
+	virtual QString info() const { return QString("<div><b>Value</b></div>") + Signal::info(); }
+
+	TT_NO_MEMBERS;
 };
 
 /** @ingroup SignalTypes
- * @brief A SignalType refinement for describing generic single-value data.
+ * @brief A TransmissionType refinement for describing generic single-value data.
  * @author Gav Wood <gav@kde.org>
  *
  * This class can be used to define a signal stream that comprises samples
  * of a single element. The meaning of each element is undefined.
  *
- * It is the simplest SignalType-derived class.
+ * It is the simplest TransmissionType-derived class.
  */
-class DLLEXPORT MultiValue: public SignalType
+class DLLEXPORT MultiValue: public Signal
 {
+	TRANSMISSION_TYPE(MultiValue, Signal);
+
 public:
 	struct Config
 	{
@@ -85,6 +88,7 @@ public:
 		QString units;
 
 		Config(QColor _f = Qt::black, QColor _b = Qt::transparent, float _max = 1.f, float _min = 0.f, int _i = -1, float _c = 1.f, QString const& _u = QString::null): index(_i), fore(_f), back(_b), min(std::min(_min, _max)), max(std::max(_min, _max)), conversion(_c), units(_u) {}
+		bool operator==(Config const&) const { return true; }
 	};
 
 	/**
@@ -106,19 +110,16 @@ public:
 
 	inline int labeled() const { return m_labeled; }
 
-	virtual QString info() const { return QString("<div><b>MultiValue</b></div>") + SignalType::info(); }
+	virtual QString info() const { return QString("<div><b>MultiValue</b></div>") + Signal::info(); }
 
 protected:
-	virtual uint id() const { return 6; }
-	virtual void serialise(QSocketSession &sink) const;
-	virtual void deserialise(QSocketSession &source);
-	virtual SignalType* copyBE() const { return new MultiValue(theScope, theFrequency, theMax, theMin, m_config); }
-
 	void updateMM();
 	void normalise();
 
 	int m_labeled;
 	QVector<Config> m_config;
+
+	TT_2_MEMBERS(m_labeled, m_config);
 };
 
 }

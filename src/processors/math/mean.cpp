@@ -30,7 +30,7 @@ using namespace Geddei;
 
 class Mean : public SubProcessor
 {
-	uint theSize;
+	uint m_arity;
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
 	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
@@ -42,11 +42,11 @@ public:
 void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks) const
 {
 	for (uint c = 0; c < chunks; c++)
-		for (uint j = 0; j < theSize; j++)
+		for (uint j = 0; j < m_arity; j++)
 			outs[0](c, j) = 0.;
 	for (uint i = 0; i < multiplicity(); i++)
 		for (uint c = 0; c < chunks; c++)
-			for (uint j = 0; j < theSize; j++)
+			for (uint j = 0; j < m_arity; j++)
 				outs[0](c, j) += ins[i](c, j) / float(multiplicity());
 }
 
@@ -55,7 +55,7 @@ bool Mean::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &
 	if (!inTypes.count())
 		return false;
 	outTypes[0] = inTypes[0];
-	theSize = inTypes[0].scope();
+	m_arity = inTypes[0].asA<TransmissionType>().arity();
 	return true;
 }
 

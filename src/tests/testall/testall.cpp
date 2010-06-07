@@ -88,7 +88,7 @@ public:
 
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint)
 	{
-		for (int i = 0; i < in[0].elements(); i++)
+		for (uint i = 0; i < in[0].elements(); i++)
 			out[0][i] = in[0][i];
 	}
 

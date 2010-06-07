@@ -96,7 +96,7 @@ bool Checkerboard::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 {
 	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();
-	outTypes[0] = Value(inTypes[0].frequency());
+	outTypes[0] = Value(inTypes[0].asA<SquareMatrix>().frequency());
 	return true;
 }
 

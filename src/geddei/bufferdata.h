@@ -263,8 +263,8 @@ class DLLEXPORT BufferData
 	 */
 	void ignoreDeath() const { theInfo->theEndType = BufferInfo::Ignore; }
 
-	BufferData(uint size, uint scope, float *data, ScratchOwner *scratch = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
-	BufferData(uint size, uint scope, float *data, ScreenOwner *screen = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
+	BufferData(uint size, uint sampleSize, float *data, ScratchOwner *scratch = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
+	BufferData(uint size, uint sampleSize, float *data, ScreenOwner *screen = 0, BufferInfo::Legacy endType = BufferInfo::Ignore, uint offset = 0, uint mask = 0xffffffff);
 
 	BufferData(BufferInfo *info, uint offset);
 
@@ -353,18 +353,18 @@ public:
 	uint elements() const { return theVisibleSize; }
 
 	/** @internal
-	 * Get the scope of the signal data.
+	 * Get the sampleSize of the signal data.
 	 *
-	 * @return The scope of the signal data.
+	 * @return The sampleSize of the signal data.
 	 */
-	uint scope() const { return theInfo->theScope; }
+	uint sampleSize() const { return theInfo->m_sampleSize; }
 
 	/**
 	 * Used to get the number of elements inside the data chunk.
 	 *
 	 * @return The number of samples in the data.
 	 */
-	uint samples() const { return theInfo->theScope ? theVisibleSize / theInfo->theScope : 0; }
+	uint samples() const { return theInfo->m_sampleSize ? theVisibleSize / theInfo->m_sampleSize : 0; }
 
 	uint checksum() const { uint ret = 0; for (uint i = 0; i < elements(); i++) ret += *(uint const*)&(operator[](i)); return ret; }
 
@@ -378,7 +378,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -399,7 +399,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -415,7 +415,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -430,7 +430,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -446,7 +446,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -465,7 +465,7 @@ public:
 	 *
 	 * @note The returned object is merely an illusionary object; the new
 	 * object will, if pushed into a buffer, still push the same data as this
-	 * one would. The scope of the transformation is only use this in so far
+	 * one would. The sampleSize of the transformation is only use this in so far
 	 * as reading from or writing to the this object. It has no effect on other
 	 * external actions or objects.
 	 *
@@ -517,17 +517,17 @@ public:
 	 *
 	 * @param i The sample to be accessed.
 	 * @param j The element of sample @a i to be accessed. This must be
-	 * less than the size (scope) of a sample.
+	 * less than the size (sampleSize) of a sample.
 	 * @return The value of the element at position @a j in sample @a i .
 	 */
 	const float &operator()(uint i, uint j) const
 	{
 #ifdef EDEBUG
 		assert(theInfo->theValid);
-		assert(i * theInfo->theScope + j < theVisibleSize);
-		assert(j < theInfo->theScope || !theInfo->theScope);
+		assert(i * theInfo->m_sampleSize + j < theVisibleSize);
+		assert(j < theInfo->m_sampleSize || !theInfo->m_sampleSize);
 #endif
-		return theInfo->theData[(i * theInfo->theScope + j + theOffset) & theInfo->theMask];
+		return theInfo->theData[(i * theInfo->m_sampleSize + j + theOffset) & theInfo->theMask];
 	}
 
 	/** @overload
@@ -540,15 +540,15 @@ public:
 	 *
 	 * @param i The sample to be accessed.
 	 * @param j The element of sample @a i to be accessed. This must be
-	 * less than the size (scope) of a sample.
+	 * less than the size (sampleSize) of a sample.
 	 * @return The value of the element at position @a j in sample @a i .
 	 */
 	float &operator()(uint i, uint j)
 	{
 #ifdef EDEBUG
 		assert(theInfo->theValid);
-		assert(i * theInfo->theScope + j < theVisibleSize);
-		assert(j < theInfo->theScope || !theInfo->theScope);
+		assert(i * theInfo->m_sampleSize + j < theVisibleSize);
+		assert(j < theInfo->m_sampleSize || !theInfo->m_sampleSize);
 		if (theInfo->theType == BufferInfo::Read)
 			qWarning("*** WARNING: You should use a _const_ BufferData object for all reads, or you\n"
 					 "             might accidentally taint the data.\n");
@@ -556,7 +556,7 @@ public:
 			qWarning("*** WARNING: You still have a borrowed array active. Changing any data before\n"
 					 "             that has been returned will not do anything.\n");
 #endif
-		return theInfo->theData[(i * theInfo->theScope + j + theOffset) & theInfo->theMask];
+		return theInfo->theData[(i * theInfo->m_sampleSize + j + theOffset) & theInfo->theMask];
 	}
 
 	/** @overload
@@ -657,7 +657,7 @@ public:
 	 * data yet, so array wont contain anything.
 	 *
 	 * The pointer returned will only be valid as long as this object exists.
-	 * As soon as this object goes out of scope, the pointer will become
+	 * As soon as this object goes out of sampleSize, the pointer will become
 	 * invalid. This means that the following code is incorrect:
 	 *
 	 * @code
@@ -670,7 +670,7 @@ public:
 	 * This is because by the time we come to write to the array, the
 	 * BufferData object used to make the borrowArray() call (given by
 	 * d.sample(0)) will have been destroyed through being anonymous and
-	 * therefore out of scope. The endWritePointer() call will be useless since
+	 * therefore out of sampleSize. The endWritePointer() call will be useless since
 	 * it is being called on a different instance.
 	 *
 	 * You must instead deanonymise it with a named BufferData instance:
@@ -759,10 +759,10 @@ public:
 	 * systems.
 	 *
 	 * @param size The size of this BufferData object in elements.
-	 * @param scope The number of elements contained in each sample. This
+	 * @param sampleSize The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(uint size, uint scope = 1);
+	BufferData(uint size, uint sampleSize = 1);
 
 	/**
 	 * Creates a read-only BufferData object whose data is foreign.
@@ -774,10 +774,10 @@ public:
 	 * @param size The size of this BufferData object in elements. This must
 	 * not be larger than the size of the data given in @a data or memory
 	 * corruption will occur.
-	 * @param scope The number of elements contained in each sample. This
+	 * @param sampleSize The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(const float *data, uint size, uint scope = 1);
+	BufferData(const float *data, uint size, uint sampleSize = 1);
 
 	/** @overload
 	 * Creates a writable BufferData object whose data is foreign.
@@ -788,10 +788,10 @@ public:
 	 * @param size The size of this BufferData object in elements. This must
 	 * not be larger than the size of the data given in @a data or memory
 	 * corruption will occur.
-	 * @param scope The number of elements contained in each sample. This
+	 * @param sampleSize The number of elements contained in each sample. This
 	 * must be a divisor of @a size.
 	 */
-	BufferData(float *data, uint size, uint scope = 1);
+	BufferData(float *data, uint size, uint sampleSize = 1);
 
 	/**
 	 * Copy constructor. Acts like the assignment operator in that it adopts

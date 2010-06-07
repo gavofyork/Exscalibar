@@ -111,7 +111,7 @@ class DLLEXPORT BailException
  * methods. This can also be done on init().
  *
  * Connections between Processors may be created and destroyed with the
- * connect() and disconnect() methods. The SignalType validity and consistency
+ * connect() and disconnect() methods. The TransmissionType validity and consistency
  * of the network may be checked (before the processors have been started) with
  * the confirmTypes() method. split() and share() may be used to fork outputs
  * for connection to multiple destinations.
@@ -145,7 +145,7 @@ class DLLEXPORT BailException
  * process() is the most significant method, as it is here you define what job
  * the Processor actually "does".
  *
- * Each input or output may have an arbitrary SignalType to describe the data
+ * Each input or output may have an arbitrary TransmissionType to describe the data
  * that flows down it. Outputs' SignalTypes must be specified with the
  * verifyAndSpecifyTypes() and inputs' SignalTypes may be constrained also.
  *
@@ -637,6 +637,8 @@ public:
 	 */
 	void init(const QString &name = "", const Properties &properties = Properties()) { doInit(name, 0, properties); }
 	virtual void update(Properties const& _p) { updateFromProperties(_p); }
+
+	virtual double secondsPassed() const;
 
 	/**
 	 * Checks if the previously called init() has failed.

@@ -71,7 +71,7 @@ bool PeakRoller::processorStarted()
 	m_balls.resize(multiplicity());
 	for (uint i = 0; i < multiplicity(); i++)
 	{
-		m_balls[i].position = input(0).type().scope() / 2;
+		m_balls[i].position = input(0).type().asA<TransmissionType>().arity() / 2;
 		m_balls[i].inertia = 0;
 	}
 
@@ -86,7 +86,7 @@ static float dist(float _a, float _b, float)
 
 int PeakRoller::process()
 {
-	int s = input(0).type().scope();
+	int s = input(0).type().asA<TransmissionType>().arity();
 	float in[s];
 	input(0).readSample().copyTo(in);
 	in[s - 1] = 0;
@@ -115,7 +115,7 @@ int PeakRoller::process()
 			}
 		}
 		if (!maxPeak)
-			maxPeak = rand() % input(0).type().scope();
+			maxPeak = rand() % input(0).type().asA<TransmissionType>().arity();
 		m_balls[b].position = Geddei::lerp(m_balls[b].position, m_balls[b].position + (maxPeak > m_balls[b].position ? 1 : -1), pow(1 - m_balls[b].inertia, m_weight));
 		//* (in[maxPeak] - max(in[floor(m_position)], in[ceil(m_position)]))
 		m_balls[b].inertia = Geddei::lerp(m_balls[b].inertia, max(in[(int)floor(m_balls[b].position)], in[(int)ceil(m_balls[b].position)]) / max(.001f, in[maxPeak]), m_inertiaFactor);
@@ -138,12 +138,12 @@ bool PeakRoller::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalType
 	if (!inTypes[0].isA<Spectrum>())
 		return false;
 	// inTypes[0].asA<Spectrum>().bandFrequency(1)
-	// inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1)
+	// inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1)
 	for (uint i = 0; i < multiplicity(); i++)
-		outTypes[i] = MultiValue(3, inTypes[0].frequency(), QVector<MultiValue::Config>()
+		outTypes[i] = MultiValue(3, inTypes[0].asA<Signal>().frequency(), QVector<MultiValue::Config>()
 								 << MultiValue::Config(Qt::red, QColor(255, 0, 0, 32), 1, 0, 1, 100, "%")
-								 << MultiValue::Config(QColor(0, 0, 0, 64), Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(1), inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1), 2, 60.f, "bpm")
-								 << MultiValue::Config(Qt::black, Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].scope() - 1), inTypes[0].asA<Spectrum>().bandFrequency(1), 0, 60.f, "bpm"), 2);
+								 << MultiValue::Config(QColor(0, 0, 0, 64), Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(1), inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1), 2, 60.f, "bpm")
+								 << MultiValue::Config(Qt::black, Qt::transparent, inTypes[0].asA<Spectrum>().bandFrequency(inTypes[0].asA<Spectrum>().bins() - 1), inTypes[0].asA<Spectrum>().bandFrequency(1), 0, 60.f, "bpm"), 2);
 	return true;
 }
 

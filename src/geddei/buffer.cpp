@@ -93,7 +93,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(uint size, const SignalType *type) : theDataFlux(QFastMutex::Recursive)
+Buffer::Buffer(uint size, const TransmissionType *type) : theDataFlux(QFastMutex::Recursive)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -378,7 +378,7 @@ BufferData Buffer::makeScratchElements(uint elements, bool autoPush)
 	lastScratch->theValid = true;
 	lastScratch->theAccessibleSize = elements;
 	lastScratch->theEndType = autoPush ? BufferInfo::Activate : BufferInfo::Forget;
-	lastScratch->theScope = theType->scope();
+	lastScratch->m_sampleSize = theType->size();
 	lastScratch->theValid = true;
 
 	if (MESSAGES) qDebug("< Creating BufferData...");
@@ -513,7 +513,7 @@ void Buffer::clear()
 	if (MESSAGES) qDebug("< clear");
 }
 
-void Buffer::setType(const SignalType *type)
+void Buffer::setType(const TransmissionType *type)
 {
 	delete theType;
 	theType = type->copy();

@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <limits>
 #include <cmath>
 
@@ -94,6 +96,10 @@ namespace Geddei
 		if (u.i == -8388608)
 			return -1;
 		return 0;
+	}
+	inline bool isFinite(float _x)
+	{
+		return (*(uint32_t const*)(&_x)) != 0x7fc00000 && (*(uint32_t const*)(&_x)) != 0xff800000 && (*(uint32_t const*)(&_x)) != 0x7f800000;
 	}
 
 	DLLEXPORT const char *getVersion();
