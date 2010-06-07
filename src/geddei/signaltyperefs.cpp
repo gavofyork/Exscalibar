@@ -25,7 +25,7 @@ using namespace std;
 
 namespace Geddei
 {
-
+/*
 SignalTypeRefs::SignalTypeRefs(const SignalTypeRefs &src): theImplicitCopying(true)
 {
 
@@ -147,5 +147,5 @@ void SignalTypeRefs::copyInto(QList<TransmissionType*> &dest)
 	for (uint i = 0; i < theCount; i++)
 		dest.append(theData[i]->copy());
 }
-
+*/
 }

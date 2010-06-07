@@ -41,7 +41,7 @@ namespace Geddei
  */
 class DLLEXPORT LxConnectionNull: public LxConnection
 {
-	virtual const SignalTypeRef type() const { return SignalTypeRef(const_cast<LxConnectionNull*>(this)->theType); }
+	virtual SignalTypeRef const& type() const { return theType; }
 	virtual void pushBE(const BufferData &);
 	virtual void pushPlunger() {}
 	virtual void startPlungers() {}
@@ -50,8 +50,8 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual uint maximumScratchElements(const uint) { return Undefined; }
 	virtual uint maximumScratchElementsEver() { return Undefined; }
 	virtual BufferData makeScratchElements(const uint, bool = false) { return BufferData::fake(); }
-	virtual void setType(const TransmissionType *type) { theType = type->copy(); }
-	virtual void resetType() { delete theType; theType = 0L; }
+	virtual void setType(SignalTypeRef const& _type) { theType = _type; }
+	virtual void resetType() { theType.nullify(); }
 	virtual bool waitUntilReady() { return 1; }
 	virtual Tristate isReadyYet() { return Succeeded; }
 	virtual void sourceStopping() {}

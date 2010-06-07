@@ -71,11 +71,11 @@ void DRCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRef
 	// Send inTypes.count(), Go through each of inTypes, sending each one.
 	theRemote.safeSendWord(inTypes.count());
 	for (uint i = 0; i < inTypes.count(); i++)
-		inTypes.ptrAt(0)->send(theRemote);
+		inTypes[i]->send(theRemote);
 	// Do same from outTypes.
 	theRemote.safeSendWord(outTypes.count());
 	for (uint i = 0; i < outTypes.count(); i++)
-		outTypes.ptrAt(0)->send(theRemote);
+		outTypes[i]->send(theRemote);
 	if (MESSAGES) qDebug("< DRCoupling::specifyTypes()");
 }
 

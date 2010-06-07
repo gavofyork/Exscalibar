@@ -29,13 +29,10 @@ namespace Geddei
 
 Connection::Connection()
 {
-	theType = 0;
 }
 
 Connection::~Connection()
 {
-	delete theType;
-	theType = 0;
 }
 
 }

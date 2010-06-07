@@ -93,7 +93,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(uint size, const TransmissionType *type) : theDataFlux(QFastMutex::Recursive)
+Buffer::Buffer(uint size, SignalTypeRef const& _type) : theDataFlux(QFastMutex::Recursive)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -109,7 +109,7 @@ Buffer::Buffer(uint size, const TransmissionType *type) : theDataFlux(QFastMutex
 	theUsed = 0;
 	theData = new float[theSize];
 	for (uint i = 0; i < theSize; i++) theData[i] = i + 0.666;
-	theType = type ? type->copy() : 0;
+	theType = _type;
 	lastScratch = new BufferInfo(theData, this, theMask, BufferInfo::Foreign, BufferInfo::Write);
 	if (MESSAGES) qDebug("Creating new scratch: %p", lastScratch);
 	lastScratch->thePlunger = false;
@@ -125,7 +125,6 @@ Buffer::~Buffer()
 	while (theReaders.size())
 		delete theReaders.takeLast();
 	delete [] theData;
-	delete theType;
 	theData = 0;
 	theDataFlux.unlock();
 	if (MESSAGES) qDebug("< ~Buffer");
@@ -513,10 +512,9 @@ void Buffer::clear()
 	if (MESSAGES) qDebug("< clear");
 }
 
-void Buffer::setType(const TransmissionType *type)
+void Buffer::setType(SignalTypeRef const& _type)
 {
-	delete theType;
-	theType = type->copy();
+	theType = _type;
 	clear();
 }
 

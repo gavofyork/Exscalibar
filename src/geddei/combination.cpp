@@ -133,7 +133,7 @@ bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTyp
 	SignalTypeRefs r(1);
 	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
 	{
-		theInterScope = r[0].size();
+		theInterScope = r[0]->size();
 		if (!theY->verifyAndSpecifyTypes(r, outTypes))
 			return false;
 		if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)

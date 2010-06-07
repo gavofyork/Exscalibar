@@ -86,10 +86,10 @@ void RSCoupling::run()
 			if (MESSAGES) qDebug("RSC: SpecifyTypes...");
 			SignalTypeRefs inTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < inTypes.count(); i++)
-				inTypes.mutablePtrAt(i) = TransmissionType::receive(theSession);
+				TransmissionType::receive(theSession, inTypes[i]);
 			SignalTypeRefs outTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < outTypes.count(); i++)
-				outTypes.mutablePtrAt(i) = TransmissionType::receive(theSession);
+				TransmissionType::receive(theSession, outTypes[i]);
 
 			SignalTypeRefs dummyOutTypes(outTypes.count());
 			if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))

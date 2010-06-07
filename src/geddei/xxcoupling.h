@@ -29,9 +29,6 @@
 namespace Geddei
 {
 
-class SignalTypeRefs;
-class Properties;
-
 /** @internal @ingroup Geddei
  * @brief Abstract class to define the Sub/DomProcessor coupling mechanism.
  * @author Gav Wood <gav@kde.org>

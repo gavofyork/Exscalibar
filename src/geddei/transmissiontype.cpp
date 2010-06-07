@@ -17,6 +17,7 @@
  */
 
 #include "transmissiontype.h"
+#include "signaltyperef.h"
 #include "qsocketsession.h"
 using namespace Geddei;
 
@@ -35,11 +36,10 @@ void TransmissionType::send(QSocketSession& _sink) const
 	// TODO: serialise
 }
 
-TransmissionType* TransmissionType::receive(QSocketSession& _source)
+void TransmissionType::receive(QSocketSession& _source, Type<TransmissionType>& _return)
 {
 	TransmissionType* s = TransmissionTypeRegistrar::get()->create(QString::fromUtf8(_source.receiveString()));
-	// TODO: deserialise.
-	return s;
+	_return = s;
 }
 
 }

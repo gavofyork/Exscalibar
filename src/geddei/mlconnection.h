@@ -46,7 +46,7 @@ class Processor;
 class DLLEXPORT MLConnection: public xLConnection
 {
 	//* Reimplementations from Connection
-	virtual const SignalTypeRef type() const;
+	virtual SignalTypeRef const& type() const;
 
 	//* Reimplementations from xLConnection
 	virtual void reset();
@@ -86,7 +86,7 @@ public:
 	/**
 	 * Sets the (wouldbe cached) type of the connection.
 	 */
-	void setType(const TransmissionType *type);
+	void setType(SignalTypeRef const& _type);
 
 	/**
 	 * Notifies the Sink that a fresh stream of plungers may be coming from the

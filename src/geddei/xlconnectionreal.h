@@ -53,7 +53,7 @@ class xLConnectionReal: public xLConnection
 	// Reimplementations from Connection
 	friend class Processor;
 public:
-	virtual const SignalTypeRef type() const;
+	virtual const SignalTypeRef& type() const;
 
 	// Reimplementations from xLConnection
 	friend class RLConnection;

@@ -58,10 +58,10 @@ void Splitter::pushScratch(const BufferData &data)
 	data.invalidate();
 }
 
-const SignalTypeRef Splitter::type() const
+SignalTypeRef const& Splitter::type() const
 {
 	const_cast<Splitter*>(this)->theSource->confirmTypes();
-	return SignalTypeRef(theType);
+	return theType;
 }
 
 void Splitter::checkExit()
@@ -103,18 +103,16 @@ Connection::Tristate Splitter::isReadyYet()
 	return ret;
 }
 
-void Splitter::setType(const TransmissionType *type)
+void Splitter::setType(SignalTypeRef const& _type)
 {
-	delete theType;
-	theType = type->copy();
+	theType = _type;
 	foreach (LxConnection* i, theConnections)
-		i->setType(type);
+		i->setType(_type);
 }
 
 void Splitter::resetType()
 {
-	delete theType;
-	theType = 0;
+	theType.nullify();
 	foreach (LxConnection* i, theConnections)
 		i->resetType();
 }

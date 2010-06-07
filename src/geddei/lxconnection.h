@@ -20,7 +20,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "connection.h"
 #include "bufferdata.h"
 #include "signaltyperef.h"
@@ -122,7 +121,7 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 * @param type The TransmissionType object this connection's type should be set
 	 * to.
 	 */
-	virtual void setType(const TransmissionType *type) = 0;
+	virtual void setType(SignalTypeRef const& _type) = 0;
 
 	/**
 	 * Resets the type so that a further setType call will be needed.
@@ -226,7 +225,7 @@ public:
 	 *
 	 * @return A SignalTypeRef of this conection's TransmissionType.
 	 */
-	virtual const SignalTypeRef type() const { return SignalTypeRef(const_cast<LxConnection*>(this)->theType); }
+	virtual SignalTypeRef const& type() const { return theType; }
 
 	/**
 	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but

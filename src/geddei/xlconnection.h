@@ -225,7 +225,7 @@ public:
 	 *
 	 * @return A SignalTypeRef of this conection's TransmissionType.
 	 */
-	virtual const SignalTypeRef type() const { return SignalTypeRef(const_cast<xLConnection*>(this)->theType); }
+	virtual SignalTypeRef const& type() const { return theType; }
 
 	/**
 	 * Blocks until at least @a samples are ready to be read (or peeked) on the

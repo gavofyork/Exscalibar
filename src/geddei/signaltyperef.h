@@ -22,6 +22,7 @@
 #include <typeinfo>
 #endif
 
+#include "signaltyperef.h"
 #include <qstring.h>
 
 namespace Geddei
@@ -74,9 +75,10 @@ class TransmissionType;
  * mySignalType = aSignalTypeRef.asA<Spectrum>();
  * @endcode
  */
+#if 0
 class DLLEXPORT SignalTypeRef
 {
-	TransmissionType *&thePtr;
+	TransmissionType *&m_ptr;
 
 	friend class SignalTypeRefs;
 	friend class xLConnectionReal;
@@ -94,7 +96,7 @@ class DLLEXPORT SignalTypeRef
 	 *
 	 * @param ptr The pointer to the data to be represented.
 	 */
-	SignalTypeRef(TransmissionType *&ptr) : thePtr(ptr) {}
+	SignalTypeRef(TransmissionType *&ptr) : m_ptr(ptr) {}
 
 public:
 	/**
@@ -104,7 +106,7 @@ public:
 	 * @return true iff we reference an object of type @a T.
 	 */
 	template<class T>
-	bool isA() const { return dynamic_cast<const T *>(thePtr); }
+	bool isA() const { return dynamic_cast<const T *>(m_ptr); }
 
 	/**
 	 * Return a reference of class @a T that we represent. If we cannot
@@ -120,9 +122,9 @@ public:
 #ifdef EDEBUG
 		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a TransmissionType %s from an object of type %s.\n"
-				   "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
+				   "           Bailing.", typeid(T).name(), typeid(*m_ptr).name());
 #endif
-		return *(dynamic_cast<const T *>(thePtr));
+		return *(dynamic_cast<const T *>(m_ptr));
 	}
 
 	/** @overload
@@ -139,9 +141,9 @@ public:
 #ifdef EDEBUG
 		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a TransmissionType %s from an object of type %s.\n"
-				   "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
+				   "           Bailing.", typeid(T).name(), typeid(*m_ptr).name());
 #endif
-		return *(dynamic_cast<T *>(thePtr));
+		return *(dynamic_cast<T *>(m_ptr));
 	}
 
 	/**
@@ -207,19 +209,18 @@ public:
 	 * For the explicit copy constructor we actually make a copy of ourselves.
 	 *
 	 * @note This is semantically the opposite of what happens in the
-	 * assignment operator, where we actually copy the data at thePtr.
+	 * assignment operator, where we actually copy the data at m_ptr.
 	 *
 	 * @param src The source pointer reference to be copied.
 	 */
-	SignalTypeRef(const SignalTypeRef &src) : thePtr(src.thePtr) {}
+	SignalTypeRef(const SignalTypeRef &src) : m_ptr(src.m_ptr) {}
 };
-
+#else
 template<class TT>
 class DLLEXPORT Type
 {
-	TT* thePtr;
-
-	friend class SignalTypeRefs;
+	template<class T> friend class Types;
+	friend class TransmissionType;
 	friend class xLConnectionReal;
 	friend class LxConnectionNull;
 	friend class xLConnection;
@@ -230,14 +231,20 @@ class DLLEXPORT Type
 	friend class Splitter;
 	friend class Processor;
 
-	/**
-	 * Simple, private constructor.
-	 *
-	 * @param ptr The pointer to the data to be represented.
-	 */
-	Type(TT* ptr) : thePtr(ptr) {}
-
 public:
+	/** @internal
+	 * For the explicit copy constructor we actually make a copy of ourselves.
+	 *
+	 * @note This is semantically the opposite of what happens in the
+	 * assignment operator, where we actually copy the data at m_ptr.
+	 *
+	 * @param src The source pointer reference to be copied.
+	 */
+	Type(TT const& src = TT()) : m_ptr(src.copy()) {}
+	Type(Type<TT> const& _p) : m_ptr(_p.m_ptr->copy()) {}
+	template<class T> Type(Type<T> const& _p) : m_ptr((_p.type() == TT::staticType()) ? static_cast<TT*>(_p.m_ptr->copy()) : new TT) {}
+	~Type() { delete m_ptr; }
+
 	/**
 	 * Check to see if the TransmissionType-based object we reference is actually an
 	 * instance of some particular type (@a T).
@@ -245,7 +252,7 @@ public:
 	 * @return true iff we reference an object of type @a T.
 	 */
 	template<class T>
-	bool isA() const { return dynamic_cast<const T *>(thePtr); }
+	bool isA() const { return dynamic_cast<const T *>(m_ptr); }
 
 	/**
 	 * Return a reference of class @a T that we represent. If we cannot
@@ -261,9 +268,9 @@ public:
 #ifdef EDEBUG
 		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a TransmissionType %s from an object of type %s.\n"
-				   "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
+				   "           Bailing.", typeid(T).name(), typeid(*m_ptr).name());
 #endif
-		return *(dynamic_cast<const T *>(thePtr));
+		return *(dynamic_cast<const T *>(m_ptr));
 	}
 
 	/** @overload
@@ -280,15 +287,13 @@ public:
 #ifdef EDEBUG
 		if (!isA<T>())
 			qFatal("*** FATAL: Attempting to attain a TransmissionType %s from an object of type %s.\n"
-				   "           Bailing.", typeid(T).name(), typeid(*thePtr).name());
+				   "           Bailing.", typeid(T).name(), typeid(*m_ptr).name());
 #endif
-		return *(dynamic_cast<T *>(thePtr));
+		return *(dynamic_cast<T *>(m_ptr));
 	}
 
-	TT* operator*() const { return thePtr; }
-	TT* operator->() const { return thePtr; }
-
-	QString info() const { return thePtr->info(); }
+	TT* operator*() const { return m_ptr; }
+	TT* operator->() const { return m_ptr; }
 
 	/**
 	 * Assignment operator. This will turn us into a copy of the TransmissionType
@@ -299,7 +304,17 @@ public:
 	 * be made and adopted.
 	 * @return A reference to this object.
 	 */
-	Type<TT>& operator=(TransmissionType const& _p) { if (_p.type() == TT::staticType()) { delete thePtr; thePtr = static_cast<TT*>(_p.copy()); } return *this; }
+	Type<TT>& operator=(TransmissionType const& _p)
+	{
+		if (dynamic_cast<TT const*>(&_p))
+		{
+			delete m_ptr;
+			TransmissionType* c = _p.copy();
+			assert(dynamic_cast<TT*>(c));
+			m_ptr = static_cast<TT*>(c);
+		}
+		return *this;
+	}
 
 	/**
 	 * Assignment operator. This will turn us into a copy of the SignalTypeRef
@@ -310,7 +325,7 @@ public:
 	 * will be made and adopted.
 	 * @return A reference to this object.
 	 */
-	Type<TT> &operator=(Type<TT> const& _p) { delete thePtr; thePtr = _p.thePtr->copy(); return *this; }
+	Type<TT> &operator=(Type<TT> const& _p) { if (_p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } return *this; }
 
 	/**
 	 * Check to see if we are the same as some other TransmissionType. This not only
@@ -320,7 +335,8 @@ public:
 	 * @param p The type against which to be compared.
 	 * @return true iff we are completely equivalent.
 	 */
-	bool operator==(TransmissionType const& _p) { return thePtr && thePtr->isEqualTo(&_p); }
+	bool operator==(TransmissionType const& _p) const { return m_ptr && m_ptr->isEqualTo(&_p); }
+	bool operator!=(TransmissionType const& _p) const { return !operator==(_p); }
 
 	/** @overload
 	 * Check to see if we are the same as some other TransmissionType. This not only
@@ -330,21 +346,25 @@ public:
 	 * @param p The type against which to be compared.
 	 * @return true iff we are completely equivalent.
 	 */
-	template<class T> bool operator==(Type<T> const& _p) { return thePtr && _p.thePtr && thePtr->isEqualTo(_p.thePtr); }
+	template<class T> bool operator==(Type<T> const& _p) const { return m_ptr && _p.m_ptr && m_ptr->isEqualTo(_p.m_ptr); }
+	template<class T> bool operator!=(Type<T> const& _p) const { return !operator==(_p); }
 
-	/** @internal
-	 * For the explicit copy constructor we actually make a copy of ourselves.
-	 *
-	 * @note This is semantically the opposite of what happens in the
-	 * assignment operator, where we actually copy the data at thePtr.
-	 *
-	 * @param src The source pointer reference to be copied.
-	 */
-	Type(TT const& src) : thePtr(src.copy()) {}
-	template<class T> Type(Type<T> const& _p) : thePtr((_p.type() == TT::staticType()) ? static_cast<TT*>(_p.thePtr->copy()) : 0) {}
-	~Type() { delete thePtr; }
+	void nullify() { operator=(TransmissionType()); }
+	uint isNull() const { return m_ptr->isNull(); }
+
+	/// Convenience methods.
+	uint size() const { return m_ptr->size(); }
+	uint arity() const { return m_ptr->arity(); }
+	QString type() const { return m_ptr->type(); }
+	QString info() const { return m_ptr->info(); }
+
+private:
+	Type<TT>& operator=(TT* _toBeAdopted) { assert(m_ptr); m_ptr = _toBeAdopted; return *this; }
+
+	TT* m_ptr;
 };
 
+typedef Type<TransmissionType> SignalTypeRef;
 
-
+#endif
 }

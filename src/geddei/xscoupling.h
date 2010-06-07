@@ -32,8 +32,6 @@ namespace Geddei
 {
 
 class SubProcessor;
-class Properties;
-class SignalTypeRefs;
 
 /** @internal @ingroup Geddei
  * @brief Refinement of a Coupling for RHS attachment to a SubProcessor object.

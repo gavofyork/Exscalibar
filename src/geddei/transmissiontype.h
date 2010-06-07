@@ -24,6 +24,7 @@ using namespace std;
 
 #include <QMap>
 #include <QString>
+#include <QDebug>
 
 #include <qglobal.h>
 #include <memberinfo.h>
@@ -36,6 +37,7 @@ namespace Geddei
 
 class BufferData;
 class Source;
+template<class T> class Type;
 
 /** @ingroup Geddei
  * @brief Base class for describing a signal that may be transferred in a Connection.
@@ -68,8 +70,8 @@ class DLLEXPORT TransmissionType
 	friend class RLConnection;
 	friend class DRCoupling;
 	friend class RSCoupling;
-	friend class SignalTypeRefs;
-	friend class SignalTypeRef;
+	template<class T> friend class Types;
+	template<class T> friend class Type;
 	friend class Buffer;
 	friend class Splitter;
 	friend class MLConnection;
@@ -81,6 +83,17 @@ class DLLEXPORT TransmissionType
 	friend class LxConnectionNull;
 
 public:
+	/**
+	 * Basic constructor.
+	 *
+	 * @param sampleSize The sampleSize of the signal. That is, how many elements (single
+	 * values) is takes to adequatly define a single reading, or sample. For a
+	 * simple time-based offset single, this will be 1, but for more complex
+	 * signals such as spectra, matrices or whatever, this will be more.
+	 *
+	 * Zero, the default, indicates an invalid type.
+	 */
+	TransmissionType(uint _size = 0u);
 
 	/**
 	 * Virtual destructor.
@@ -90,7 +103,8 @@ public:
 	/**
 	 * "Official" type name of this transmission type.
 	 */
-	virtual QString type() const = 0;
+	virtual QString type() const { return staticType(); }
+	inline static QString staticType() { return "TransmissionType"; }
 
 	/**
 	 * Descriptive bit of HTML about this class.
@@ -129,17 +143,9 @@ public:
 	 */
 	uint size() const { return theSize; }
 
-protected:
-	/**
-	 * Basic constructor.
-	 *
-	 * @param sampleSize The sampleSize of the signal. That is, how many elements (single
-	 * values) is takes to adequatly define a single reading, or sample. For a
-	 * simple time-based offset single, this will be 1, but for more complex
-	 * signals such as spectra, matrices or whatever, this will be more.
-	 */
-	TransmissionType(uint _size = 1u);
+	bool isNull() const { return theSize == 0; }
 
+protected:
 	/**
 	 * Number of (metadata) elements in each sample that are reserved for use by
 	 * this TransmissionType.
@@ -178,7 +184,7 @@ private:
 	 * @return A new TransmissionType-derived object which is equivalent to that sent
 	 * from the opposite end.
 	 */
-	static TransmissionType* receive(QSocketSession &source);
+	static void receive(QSocketSession &source, Type<TransmissionType>& _return);
 
 	/**
 	 * Duplicate this TransmissionType object.
@@ -190,7 +196,7 @@ private:
 	/**
 	 * Determine whether given TT is a duplicate of this object.
 	 */
-	virtual bool isEqualTo(TransmissionType const* _cmp) const = 0;
+	virtual bool isEqualTo(TransmissionType const* _cmp) const { return _cmp->type() == staticType(); }
 
 	/**
 	 * Number of individual observation elements that this datum contains.
@@ -227,14 +233,17 @@ struct DLLEXPORT TransmissionTypeRegistrar
 	{
 		if (m_list.contains(_type))
 			return m_list.value(_type)->create();
-		return 0;
+		return new TransmissionType;
 	}
 
 	TransmissionType* copy(TransmissionType const* _src)
 	{
+		cout << _src << endl;
+		cout << typeid(_src).name() << endl;
+		qDebug() << _src->type();
 		if (m_list.contains(_src->type()))
 			return m_list.value(_src->type())->copy(_src);
-		return 0;
+		return new TransmissionType;
 	}
 
 	QMap<QString, TransmissionTypeRegistrationFace*> m_list;

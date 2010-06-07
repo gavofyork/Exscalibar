@@ -615,8 +615,8 @@ bool Processor::confirmTypes()
 			if (!theOutputs[i])
 				theOutputs[i] = new LxConnectionNull(this, i);
 			if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
-			theOutputs[i]->setType(theTypesCache.ptrAt(i));
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->size() * 2);
+			theOutputs[i]->setType(theTypesCache[i]);
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache[i]->size() * 2);
 		}
 		return true;
 	}
@@ -633,8 +633,8 @@ bool Processor::confirmTypes()
 			theErrorWritten.wakeAll();
 			return false;
 		}
-		const TransmissionType *t = (*i)->type().thePtr;
-		if (!t)
+		SignalTypeRef t = (*i)->type();
+		if (t.isNull())
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d is null - exiting with error.", qPrintable(name()), ii);
 			theTypesConfirmed = false;
 			QFastMutexLocker lock(&theErrorSystem);
@@ -644,11 +644,14 @@ bool Processor::confirmTypes()
 			return false;
 		}
 		// We copy this pointer's data now, and inTypes will autodelete it on exit from function.
-		inTypes.copyData(ii, t);
+		inTypes[ii] = t;
 	}
 	assert(inTypes.count() == (uint)theInputs.size());
 
 	theTypesCache.resize(theOutputs.size());
+
+	for (int i = 0; i < theTypesCache.count(); i++)
+		qDebug() << i << ": " << theTypesCache[i].type();
 
 	// Do a quick check to make sure that we're going by the multiplicity rules
 	if ((theMulti&In) && inTypes.count())
@@ -674,7 +677,10 @@ bool Processor::confirmTypes()
 
 	// NOTE: DomProcessor::verifyAndSpecifyTypes depends on this code.
 	if ((theMulti&Out) && theTypesCache.count())
-	{	if (!theTypesCache.populated(0))
+	{
+		for (int i = 0; i < theTypesCache.count(); i++)
+			qDebug() << i << ": " << theTypesCache[i].type();
+		if (!theTypesCache.populated(0))
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) No output type specified.", qPrintable(name()));
 			theTypesConfirmed = false;
 			QFastMutexLocker lock(&theErrorSystem);
@@ -683,9 +689,14 @@ bool Processor::confirmTypes()
 			theErrorWritten.wakeAll();
 			return false;
 		}
-		theTypesCache.setFill(theTypesCache.ptrAt(0), false);
+		theTypesCache.fillEmpty(theTypesCache[0]);
+		for (int i = 0; i < theTypesCache.count(); i++)
+			qDebug() << i << ": " << theTypesCache[i].type();
 		// TODO: Enforce the same basic class rule.
 	}
+
+	for (int i = 0; i < theTypesCache.count(); i++)
+		qDebug() << i << ": " << theTypesCache[i].type();
 
 	{
 		qDebug() << name();
@@ -711,12 +722,14 @@ bool Processor::confirmTypes()
 		{
 			if (!theOutputs[i])
 				theOutputs[i] = new LxConnectionNull(this, i);
-			if (!theTypesCache.populated(i))
+			if (theTypesCache[i].isNull())
 				qFatal("*** FATAL: TypesCache has unpopulated entry (%d in %s). Bailing.", i, qPrintable(name()));
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
-			theOutputs[i]->setType(theTypesCache.ptrAt(i));
+			qDebug() << i << ": " << theTypesCache[i]->type();
+			qDebug() << *theTypesCache[i];
+			theOutputs[i]->setType(theTypesCache[i]);
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache.ptrAt(i)->size() * 2);
+			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache[i]->size() * 2);
 		}
 	}
 

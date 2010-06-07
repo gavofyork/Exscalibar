@@ -36,21 +36,19 @@ LLConnection::LLConnection(Source *newSource, uint sourceIndex, Sink *newSink, u
 bool LLConnection::pullType()
 {
 	theSource->confirmTypes();
-	return theType;
+	return !theType.isNull();
 }
 
-void LLConnection::setType(const TransmissionType *type)
+void LLConnection::setType(SignalTypeRef const& _type)
 {
-	delete theType;
-	theType = type->copy();
+	theType = _type;
 	theBuffer.setType(theType);
 }
 
 void LLConnection::resetType()
 {
 	if (MESSAGES) qDebug("LLConnection: Resetting type...");
-	delete theType;
-	theType = 0;
+	theType = TransmissionType();
 
 	// TODO: should really reset the buffer's type...
 	theBuffer.clear();

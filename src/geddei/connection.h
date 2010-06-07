@@ -53,7 +53,7 @@ public:
 	};
 
 protected:
-	mutable TransmissionType *theType;
+	mutable SignalTypeRef theType;
 
 public:
 	/**
@@ -61,7 +61,7 @@ public:
 	 *
 	 * Should ask source processor if the type is unknown.
 	 */
-	virtual const SignalTypeRef type() const = 0;
+	virtual SignalTypeRef const& type() const = 0;
 
 	/**
 	 * Makes the writing/reading buffer at least @a elements big.

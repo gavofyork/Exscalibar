@@ -25,7 +25,7 @@ using namespace Geddei;
 
 namespace Geddei
 {
-
+/*
 bool SignalTypeRef::operator==(const TransmissionType &p)
 {
 	assert(thePtr);
@@ -63,5 +63,5 @@ QString SignalTypeRef::info() const
 	assert(thePtr);
 	return thePtr->info();
 }
-
+*/
 }

@@ -236,14 +236,12 @@ void MLConnection::reset()
 
 void MLConnection::resetType()
 {
-	delete theType;
-	theType = 0;
+	theType.nullify();
 }
 
-void MLConnection::setType(const TransmissionType *type)
+void MLConnection::setType(SignalTypeRef const& _type)
 {
-	delete theType;
-	theType = type->copy();
+	theType = _type;
 }
 
 bool MLConnection::waitUntilReady()
@@ -258,10 +256,11 @@ Connection::Tristate MLConnection::isReadyYet()
 	return theSink->isGoingYet();
 }
 
-const SignalTypeRef MLConnection::type() const
+SignalTypeRef const& MLConnection::type() const
 {
-	if (!theType) theType = (theConnection->type().thePtr ? theConnection->type().thePtr->copy() : 0);
-	return SignalTypeRef(theType);
+	if (theType.isNull())
+		theType = theConnection->type();
+	return theType;
 }
 
 }

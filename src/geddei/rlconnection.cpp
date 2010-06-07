@@ -110,8 +110,7 @@ void RLConnection::run()
 		}
 		case SetType:
 		{	if (MESSAGES) qDebug("= RLC::run(): SetType");
-			delete theType;
-			theType = TransmissionType::receive(theSource);
+			TransmissionType::receive(theSource, theType);
 			if (MESSAGES) qDebug("= RLC::run(): theBuffer.setType()");
 			theBuffer.setType(theType);
 			if (MESSAGES) qDebug("= RLC::run(): Make lock");
@@ -124,8 +123,7 @@ void RLConnection::run()
 		}
 		case ResetType:
 		{	if (MESSAGES) qDebug("= RLC::run(): ResetType");
-			delete theType;
-			theType = 0;
+			theType.nullify();
 			theBuffer.clear();
 //			theBuffer.reset();
 			break;
@@ -209,7 +207,7 @@ bool RLConnection::pullType()
 {
 	QFastMutexLocker lock(&theGotTypeM);
 	while (!theHaveType) theGotType.wait(&theGotTypeM);
-	return theType;
+	return !theType.isNull();
 }
 
 }

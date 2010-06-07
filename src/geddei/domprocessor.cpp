@@ -241,7 +241,7 @@ bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTy
 
 	// Now we need a quick hack here since if we're a MultiOut, all outTypes==outTypes[0]:
 	if ((theMulti&Out) && outTypes.count() && outTypes.populated(0))
-		outTypes.setFill(outTypes.ptrAt(0), false);
+		outTypes.fillEmpty(outTypes[0]);
 
 	if (ret)
 		foreach (DxCoupling* w, theWorkers)
