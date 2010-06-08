@@ -49,9 +49,11 @@ template<class T> class Typeds;
 
 #define TRANSMISSION_TYPE(Name, Super) \
 public: \
+	Name(NullTransmissionTypeType _n): Super(_n) {} \
 	virtual QString type() const { return staticType(); } \
 	inline static QString staticType() { return #Name; } \
 protected: \
+	template<class T> friend class Typed; \
 	virtual bool isEqualTo(TransmissionType const* _cmp) const { return _cmp->type() == staticType() && *static_cast<Name const*>(_cmp) == *this; } \
 	static TypeRegistration<Name> s_reg; \
 	TT_INHERITED_CLASS(Name, Super);
@@ -89,6 +91,9 @@ class DLLEXPORT TransmissionType
 	template<class T> friend class Typeds;
 	template<class T> friend class Typed;
 
+protected:
+	enum NullTransmissionTypeType { NullTransmissionType };
+
 public:
 	/**
 	 * Basic constructor.
@@ -97,10 +102,9 @@ public:
 	 * values) is takes to adequatly define a single reading, or sample. For a
 	 * simple time-based offset single, this will be 1, but for more complex
 	 * signals such as spectra, matrices or whatever, this will be more.
-	 *
-	 * Zero, the default, indicates an invalid type.
 	 */
-	TransmissionType(uint _size = 0u);
+	inline TransmissionType(uint _size = 1u): m_size(max(_size, 1u)) {}
+	inline TransmissionType(NullTransmissionTypeType): m_size(0) {}
 
 	/**
 	 * Virtual destructor.
@@ -116,13 +120,13 @@ public:
 	/**
 	 * Descriptive bit of HTML about this class.
 	 */
-	virtual QString info() const { return QString("<div><b>TransmissionType</b></div><div>Size: %2</div><div>Arity: %3</div>").arg(theSize).arg(arity()); }
+	virtual QString info() const { return QString("<div><b>TransmissionType</b></div><div>Size: %2</div><div>Arity: %3</div>").arg(m_size).arg(arity()); }
 
 	/**
 	 * @return The number of single value elements per sample of the
 	 * data represented by this TransmissionType that the user may assign themselves.
 	 */
-	inline uint arity() const { return theSize - reserved(); }
+	inline uint arity() const { return m_size - reserved(); }
 	inline void setArity(uint _n) { setSize(_n + reserved()); }
 
 	/**
@@ -132,7 +136,7 @@ public:
 	 * @return The number of samples that @a elements constitute. This will be
 	 * less than or equal to @a elements .
 	 */
-	uint samples(uint elements) const { return theSize ? (elements / theSize) : 0; }
+	uint samples(uint elements) const { return m_size ? (elements / m_size) : 0; }
 
 	/**
 	 * Get the number of elements a number of samples represents.
@@ -141,16 +145,16 @@ public:
 	 * @return The number of elements represented by @a samples . This will be
 	 * greater than or equal to @a samples .
 	 */
-	uint elementsFromSamples(uint samples) const { return samples * theSize; }
+	uint elementsFromSamples(uint samples) const { return samples * m_size; }
 
 	/**
 	 * @return The sampleSize, or number of single value elements per sample of the
 	 * data represented by this TransmissionType, including Type-specific metadata
 	 * that is not explicitly written by the user.
 	 */
-	uint size() const { return theSize; }
+	uint size() const { return m_size; }
 
-	bool isNull() const { return theSize == 0; }
+	bool isNull() const { return m_size == 0u; }
 
 	/**
 	 * Post-process the output data in some way.
@@ -190,7 +194,7 @@ protected:
 	 *
 	 * @param sampleSize The new sampleSize.
 	 */
-	void setSize(uint _n) { theSize = _n; }
+	void setSize(uint _n) { m_size = max(_n, 1u); }
 
 private:
 	/**
@@ -208,9 +212,9 @@ private:
 	/**
 	 * Number of individual observation elements that this datum contains.
 	 */
-	uint theSize;
+	uint m_size;
 
-	TT_1_MEMBER(theSize);
+	TT_1_MEMBER(m_size);
 };
 
 }

@@ -28,7 +28,7 @@ using namespace Geddei;
 
 #include "wave.h"
 #include "value.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 /*
 aubio_onset_energy;
 aubio_onset_specdiff;
@@ -72,7 +72,7 @@ bool AubioTracker::verifyAndSpecifyTypes(const Types & _i, Types & _o)
 {
 	if (!_i[0].isA<Wave>())
 		return false;
-	_o[0] = Value(_i[0].asA<Contiguous>().frequency() / 512, 1, 0);
+	_o[0] = Value(_i[0].asA<Contiguous>().frequency() / 512, Value::Config(1, 0));
 	return true;
 }
 
@@ -100,7 +100,7 @@ int AubioTracker::process()
 {
 	{
 		BufferData in = input(0).readSamples(512);
-		in.copyTo(rin->data[0]);
+		in.copyTo(rin->data[0], 512);
 	}
 	aubio_tempo(bt,rin,out);
 	BufferData bout = output(0).makeScratchSample(true);

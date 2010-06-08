@@ -31,7 +31,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #ifdef HAVE_FFTW
 
@@ -95,7 +95,7 @@ bool Cepstrum::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
 //	qDebug("PC: %f, %f, %f...", ins[0][0], ins[0][1], ins[0][2]);
-	ins[0].copyTo(theIn);
+	ins[0].copyTo(theIn, theBins);
 	fftwf_execute(thePlan);
 	for (uint i = 0; i < theBins / 2; i++)
 		theOut[i] /= theBins;

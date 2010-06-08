@@ -6,7 +6,7 @@ system("echo Cflags: -fexceptions -I$${PREFIX}/include >> exscalibar.pc"):
 TEMPLATE = subdirs
 INSTALLS += pc headers
 headers.path = $$PREFIX/include
-headers.files = Geddei SignalTypes rGeddei QtExtra *.h
+headers.files = Geddei CoreTypes rGeddei QtExtra *.h
 pc.path = /usr/lib/pkgconfig
 pc.files = *.pc
 

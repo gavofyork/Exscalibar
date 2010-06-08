@@ -47,10 +47,10 @@ protected: \
 protected: \
 	typedef PT __FIRST_MEMBER; \
 public: \
-	static const int memberCount = __FIRST_MEMBER::memberCount; \
 	inline static const MemberDefinition* memberInfo() { static MemberDefinition s_mi[memberCount]; static bool ft = true; if (ft) __FIRST_MEMBER::fillMemberInfo(s_mi+memberCount); ft = false; return s_mi; } \
 	inline bool operator==(__THIS_CLASS const& _cmp) const { return &_cmp && __FIRST_MEMBER::compare(this, &_cmp);; } \
-	inline bool operator!=(__THIS_CLASS const& _cmp) const { return !operator==(_cmp); }
+	inline bool operator!=(__THIS_CLASS const& _cmp) const { return !operator==(_cmp); } \
+	static const int memberCount = __FIRST_MEMBER::memberCount
 
 #define TT_BASE_CLASS(NAME) protected: typedef NAME __THIS_CLASS; typedef NAME __BASE_CLASS; typedef FirstMemberDeclaration<__THIS_CLASS> __INITIAL_MEMBER;
 #define TT_INHERITED_CLASS(NAME, SUPER) protected: typedef NAME __THIS_CLASS; typedef SUPER __SUPER_CLASS; typedef SUPER::__BASE_CLASS __BASE_CLASS; typedef SUPER::__FIRST_MEMBER __INITIAL_MEMBER;

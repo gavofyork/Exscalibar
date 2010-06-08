@@ -28,8 +28,8 @@ using namespace std;
 #include "geddei.h"
 using namespace Geddei;
 
-#include "signaltypes.h"
-using namespace TransmissionTypes;
+#include "coretypes.h"
+using namespace Geddei;
 
 class Normalise: public HeavyProcessor
 {

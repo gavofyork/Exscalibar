@@ -255,6 +255,7 @@ struct AllowedValue
 static const QList<AllowedValue> AVfrequency = AV(20.f, 20000.f, AllowedValue::Log10);
 static const QList<AllowedValue> AVunity = AV(0.f, 1.f, AllowedValue::Linear);
 static const QList<AllowedValue> AVlogUnity = AV(0.f, 1.f, AllowedValue::Log2);
+static const QList<AllowedValue> AVbool = AV("Off", "O", false) AVand("On", "|", true);
 
 /** @internal
  * Class to hold any extra data for each Property of the the PropertiesInfo

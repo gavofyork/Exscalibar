@@ -22,7 +22,7 @@
 using namespace Geddei;
 
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -49,7 +49,7 @@ public:
 int Oscilloscope::process()
 {
 	BufferData d = input(0).readSamples(m_last.count());
-	d.copyTo(m_last.data());
+	d.copyTo(m_last);
 	return DidWork;
 }
 

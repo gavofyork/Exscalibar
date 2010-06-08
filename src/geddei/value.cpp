@@ -20,7 +20,7 @@
 
 #include "value.h"
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 TRANSMISSION_TYPE_CPP(Value);
@@ -44,18 +44,18 @@ static const Qt::GlobalColor s_colours[] = {
 	Qt::gray
 };
 
-MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, QVector<MultiValue::Config> const& _c, int _l):
+MultiValue::MultiValue(uint _scope, float _frequency, float _max, float _min, QVector<MultiValue::Config> const& _c, int _l):
 	Contiguous(_scope, _frequency, _max, _min), m_labeled(_l)
 {
 	if (_c.isEmpty())
 	{
 		m_config.resize(_scope);
-		for (int c = 0; c < _scope; c++)
+		for (uint c = 0; c < _scope; c++)
 		{
 			m_config[c].back = Qt::transparent;
 			m_config[c].fore = s_colours[c % 15];
-			m_config[c].max = max(_min, _max);
-			m_config[c].min = min(_min, _max);
+			m_config[c].max = ::max(_min, _max);
+			m_config[c].min = ::min(_min, _max);
 		}
 	}
 	else
@@ -66,7 +66,7 @@ MultiValue::MultiValue(float _scope, float _frequency, float _max, float _min, Q
 	normalise();
 }
 
-MultiValue::MultiValue(float _scope, float _frequency, QVector<MultiValue::Config> const& _c, int _l):
+MultiValue::MultiValue(uint _scope, float _frequency, QVector<MultiValue::Config> const& _c, int _l):
 	Contiguous(_scope, _frequency), m_labeled(_l)
 {
 	m_config = _c;
@@ -86,8 +86,8 @@ void MultiValue::updateMM()
 	theMin = m_config.size() ? m_config[0].min : 1.f;
 	for (int i = 1; i < m_config.size(); i++)
 	{
-		theMax = max(theMax, m_config[i].max);
-		theMin = min(theMin, m_config[i].min);
+		theMax = ::max(theMax, m_config[i].max);
+		theMin = ::min(theMin, m_config[i].min);
 	}
 }
 /*

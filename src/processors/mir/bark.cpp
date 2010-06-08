@@ -24,7 +24,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 //template<class C> inline C max(C a, C b) { return a > b ? a : b; }
 

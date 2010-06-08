@@ -24,7 +24,7 @@
 using namespace Geddei;
 
 #include "value.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class WeightedSum: public SubProcessor
 {

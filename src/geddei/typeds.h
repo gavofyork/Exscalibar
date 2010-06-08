@@ -156,7 +156,7 @@ public:
 				m_data[i] = _f;
 	}
 
-private:
+//private:
 	/**
 	 * Copies all the TransmissionType objects into the @a dest list.
 	 *

@@ -26,7 +26,7 @@
 #endif
 using namespace Geddei;
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 class DLLEXPORT Contiguous: public TransmissionType
@@ -55,9 +55,9 @@ public:
 
 	virtual QString info() const;
 
-	float minAmplitude() const { return theMin; }
-	float maxAmplitude() const { return theMax; }
-	void setRange(float _max, float _min) { theMin = min(_min, _max); theMax = max(_min, _max); }
+	float min() const { return theMin; }
+	float max() const { return theMax; }
+	void setRange(float _one, float _other) { theMin = ::min(_one, _other); theMax = ::max(_one, _other); }
 
 	/**
 	 * @return The frequency, or number of samples per Contiguous-time second of

@@ -30,7 +30,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #define AutoPropertiesStart
 
@@ -171,7 +171,7 @@ bool SpectralHarmonics::verifyAndSpecifyTypes(const Types &inTypes, Types &outTy
 		return false;
 	m_signal = inTypes[0].asA<FreqSteppedSpectrum>();
 	outTypes[0] = inTypes[0];
-	outTypes[1] = FreqSteppedSpectrum(m_signal.bins(), m_signal.frequency(), m_signal.step() / m_harmonics, m_signal.maxAmplitude(), m_signal.minAmplitude());
+	outTypes[1] = FreqSteppedSpectrum(m_signal.bins(), m_signal.frequency(), m_signal.step() / m_harmonics, m_signal.max(), m_signal.min());
 	return true;
 }
 

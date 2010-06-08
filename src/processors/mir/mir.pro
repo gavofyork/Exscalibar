@@ -48,3 +48,4 @@ CONFIG += plugin
 VERSION = $$OURVERSION
 
 HEADERS +=
+

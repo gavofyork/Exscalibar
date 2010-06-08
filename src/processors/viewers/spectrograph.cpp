@@ -19,10 +19,8 @@
 #include "qfactoryexporter.h"
 #include "buffer.h"
 #include "processor.h"
+#include <CoreTypes>
 using namespace Geddei;
-
-#include "value.h"
-using namespace TransmissionTypes;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -37,6 +35,7 @@ class Spectrograph: public CoProcessor
 	float m_delta;
 	float m_viewWidth;
 	uint m_viewWidthSamples;
+	uint m_bins;
 
 	virtual bool processorStarted();
 	virtual int process();
@@ -56,8 +55,8 @@ int Spectrograph::process()
 {
 	BufferData d = input(0).readSample();
 	QVector<float> x;
-	x.resize(d.elements());
-	d.copyTo(x.data());
+	x.resize(m_bins);
+	d.copyTo(x);
 	l_points.lock();
 	m_points.append(x);
 	while ((uint)m_points.size() > m_viewWidthSamples)
@@ -115,14 +114,15 @@ void Spectrograph::processorStopped()
 
 bool Spectrograph::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
-	if (!_inTypes[0].isA<Spectrum>())
-		return false;
-	m_viewWidthSamples = (uint)(_inTypes[0].asA<Contiguous>().frequency() * m_viewWidth);
-	m_display = QPixmap(m_viewWidthSamples, _inTypes[0].asA<Spectrum>().bins());
+	Typed<Spectrum> in = _inTypes[0];
+	if (!in) return false;
+	m_viewWidthSamples = (uint)(in->frequency() * m_viewWidth);
+	m_bins = in->bins();
+	m_display = QPixmap(m_viewWidthSamples, in->bins());
 	m_display.fill(Qt::white);
 	setupVisual(m_display.width(), m_display.height(), 30);
-	m_min = _inTypes[0].asA<Contiguous>().minAmplitude();
-	m_delta = _inTypes[0].asA<Contiguous>().maxAmplitude() - _inTypes[0].asA<Contiguous>().minAmplitude();
+	m_min = in->min();
+	m_delta = in->max() - in->min();
 	return true;
 }
 

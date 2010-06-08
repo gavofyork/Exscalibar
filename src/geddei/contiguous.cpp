@@ -19,7 +19,7 @@
 #include "contiguous.h"
 using namespace Geddei;
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 TRANSMISSION_TYPE_CPP(Contiguous);
@@ -27,8 +27,8 @@ TRANSMISSION_TYPE_CPP(Contiguous);
 Contiguous::Contiguous(uint _arity, float _frequency, float _max, float _min):
 	TransmissionType	(_arity),
 	theFrequency		(_frequency),
-	theMin				(min(_min, _max)),
-	theMax				(max(_min, _max))
+	theMin				(::min(_min, _max)),
+	theMax				(::max(_min, _max))
 {
 }
 

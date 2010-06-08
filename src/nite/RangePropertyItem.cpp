@@ -54,7 +54,6 @@ void RangePropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsItem*,
 {
 	QRectF ga = gauge();
 	float bd = propertyItem()->bd();
-	deepRect(_p, ga, true, QColor::fromHsv(0, 0, 96), true, bd, false);
 
 	double ov = withProperties()->property(propertyItem()->key()).toDouble();
 
@@ -67,18 +66,27 @@ void RangePropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsItem*,
 	else if (m_a.scale == AllowedValue::Log10)
 		v = log10(ov / m_a.from.toDouble()) / log10(m_a.to.toDouble() / m_a.from.toDouble());
 
-	QLinearGradient g(ga.topLeft(), ga.bottomLeft());
-	g.setColorAt(0, QColor::fromHsvF(0, 0, .9f));
-	g.setColorAt(.49f, QColor::fromHsvF(0, 0, .825f));
-	g.setColorAt(.51f, QColor::fromHsvF(0, 0, .675f));
-	g.setColorAt(1, QColor::fromHsvF(0, 0, .5f));
-	QRectF merc = ga.adjusted(0, 0, round((v - 1.f) * ga.width()), 0);
-	_p->fillRect(merc, g);
-	_p->setPen(QPen(QColor(0, 0, 0, 32), bd / 2));
-	_p->drawRect(merc.adjusted(bd / 4, bd / 4, -bd / 4, -bd / 4));
-	if ((1.f - v) * ga.width() > bd / 4 && v * ga.width() > bd / 4)
+	if (v >= 0.f && v <= 1.f)
 	{
-		_p->setPen(QPen(QColor(0, 0, 0, 64), bd / 2));
-		_p->drawLine(QPointF(merc.right() + bd / 4, ga.top()), QPointF(merc.right() + bd / 4, ga.bottom()));
+		deepRect(_p, ga, true, QColor::fromHsv(0, 0, 96), true, bd, false);
+		QLinearGradient g(ga.topLeft(), ga.bottomLeft());
+		g.setColorAt(0, QColor::fromHsvF(0, 0, .9f));
+		g.setColorAt(.49f, QColor::fromHsvF(0, 0, .825f));
+		g.setColorAt(.51f, QColor::fromHsvF(0, 0, .675f));
+		g.setColorAt(1, QColor::fromHsvF(0, 0, .5f));
+		QRectF merc = ga.adjusted(0, 0, round((v - 1.f) * ga.width()), 0);
+		_p->fillRect(merc, g);
+		_p->setPen(QPen(QColor(0, 0, 0, 32), bd / 2));
+		_p->drawRect(merc.adjusted(bd / 4, bd / 4, -bd / 4, -bd / 4));
+		if ((1.f - v) * ga.width() > bd / 4 && v * ga.width() > bd / 4)
+		{
+			_p->setPen(QPen(QColor(0, 0, 0, 64), bd / 2));
+			_p->drawLine(QPointF(merc.right() + bd / 4, ga.top()), QPointF(merc.right() + bd / 4, ga.bottom()));
+		}
+	}
+	else
+	{
+		_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
+		_p->drawRoundedRect(ga.adjusted(-.5f, -.5f, 0.5f, 0.5f), 1, 1);
 	}
 }

@@ -23,12 +23,12 @@
  * @brief Module containing classes for describing different types of Contiguous.
  * @author Gav Wood <gav@kde.org>
  *
- * Any classes used from this module are in namespace TransmissionTypes. Make sure
+ * Any classes used from this module are in namespace Geddei. Make sure
  * you either manually specify it with SignalTypes::ClassName or use it at
  * the start of your code with:
  *
  * @code
- * using namespace TransmissionTypes;
+ * using namespace Geddei;
  * @endcode
  */
 

@@ -27,7 +27,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #define BINS 24
 #define CEPSTRA BINS

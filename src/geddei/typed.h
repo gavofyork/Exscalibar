@@ -78,6 +78,7 @@ template<class TT>
 class DLLEXPORT Typed
 {
 	friend class TransmissionType;
+	template<class T> friend class Typed;
 
 public:
 	/** @internal
@@ -89,8 +90,8 @@ public:
 	 * @param src The source pointer reference to be copied.
 	 */
 	Typed(TT const& src = TT()) : m_ptr(src.copy()) {}
-	Typed(Typed<TT> const& _p) : m_ptr(_p.m_ptr->copy()) {}
-	template<class T> Typed(Typed<T> const& _p) : m_ptr((_p.type() == TT::staticType()) ? static_cast<TT*>(_p.m_ptr->copy()) : new TT) {}
+	Typed(Typed<TT> const& _p) : m_ptr(static_cast<TT*>(_p.m_ptr->copy())) {}
+	template<class T> Typed(Typed<T> const& _p) : m_ptr(_p.isA<TT>() ? static_cast<TT*>(_p.m_ptr->copy()) : new TT(TransmissionType::NullTransmissionType)) {}
 	~Typed() { delete m_ptr; }
 
 	/**
@@ -140,7 +141,7 @@ public:
 		return *(dynamic_cast<T *>(m_ptr));
 	}
 
-	TT* operator*() const { return m_ptr; }
+	TT& operator*() const { return *m_ptr; }
 	TT* operator->() const { return m_ptr; }
 
 	/**
@@ -159,6 +160,8 @@ public:
 			delete m_ptr;
 			m_ptr = static_cast<TT*>(_p.copy());
 		}
+		else
+			nullify();
 		return *this;
 	}
 
@@ -171,8 +174,9 @@ public:
 	 * will be made and adopted.
 	 * @return A reference to this object.
 	 */
-	Typed<TT> &operator=(Typed<TT> const& _p) { if (_p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } return *this; }
+	Typed<TT> &operator=(Typed<TT> const& _p) { if (_p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } else nullify(); return *this; }
 
+	template<class T> Typed<TT> &operator=(Typed<T> const& _p) { if (_p.isA<TT>() && _p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } else nullify(); return *this; }
 	/**
 	 * Check to see if we are the same as some other TransmissionType. This not only
 	 * checks that we are the same type but also checks that our parameters are
@@ -195,8 +199,9 @@ public:
 	template<class T> bool operator==(Typed<T> const& _p) const { return m_ptr && _p.m_ptr && m_ptr->isEqualTo(_p.m_ptr); }
 	template<class T> bool operator!=(Typed<T> const& _p) const { return !operator==(_p); }
 
-	void nullify() { operator=(TransmissionType()); }
+	void nullify() { operator=(TT(TransmissionType::NullTransmissionType)); }
 	uint isNull() const { return m_ptr->isNull(); }
+	inline operator bool() const { return !isNull(); }
 
 	/// Convenience methods.
 	uint size() const { return m_ptr->size(); }

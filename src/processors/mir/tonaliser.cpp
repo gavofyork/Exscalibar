@@ -25,7 +25,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Tonaliser: public SubProcessor
 {
@@ -82,7 +82,7 @@ bool Tonaliser::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 		}
 		m_bands[b] = ob;
 	}
-	_outTypes[0] = Spectrum(m_bc.count(), _inTypes[0].asA<Spectrum>().frequency(), _inTypes[0].asA<Spectrum>().maxAmplitude(), _inTypes[0].asA<Spectrum>().minAmplitude());
+	_outTypes[0] = Spectrum(m_bc.count(), _inTypes[0].asA<Spectrum>().frequency(), _inTypes[0].asA<Spectrum>().max(), _inTypes[0].asA<Spectrum>().min());
 	return true;
 }
 

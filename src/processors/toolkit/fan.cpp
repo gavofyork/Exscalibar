@@ -28,33 +28,40 @@ using namespace std;
 #include "geddei.h"
 using namespace Geddei;
 
-#include "signaltypes.h"
-using namespace TransmissionTypes;
+#include "coretypes.h"
+using namespace Geddei;
 
 class Fan: public SubProcessor
 {
+public:
+	Fan();
+
+private:
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 
-public:
-	Fan();
+	uint m_outBins;
 };
 
 Fan::Fan(): SubProcessor("Fan", Out)
 {
 }
 
-bool Fan::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+bool Fan::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	outTypes = Spectrum(inTypes[0].asA<Spectrum>().bins() / outTypes.count(), inTypes[0].asA<Contiguous>().frequency());
+	Typed<Spectrum> in = _inTypes[0];
+	if (!in) return false;
+	m_outBins = in->bins() / _outTypes.count();
+	// Should be FreqSteppedSpectrum with offset if possible.
+	// In general add a method to Spectrum to get a new type based on subset.
+	_outTypes = Spectrum(m_outBins, in->frequency());
 	return true;
 }
 
 void Fan::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
 	for (uint i = 0, k = 0; i < outs.count(); i++)
-		for (uint j = 0; j < outs[i].elements(); j++,k++)
+		for (uint j = 0; j < m_outBins; j++,k++)
 			outs[i][j] = ins[0][k];
 }
 

@@ -24,7 +24,7 @@
 using namespace Geddei;
 
 #include "value.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Rectify: public SubProcessor
 {
@@ -41,6 +41,7 @@ private:
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	int m_type;
+	uint m_arity;
 };
 
 PropertiesInfo Rectify::specifyProperties() const
@@ -56,20 +57,20 @@ void Rectify::updateFromProperties(Properties const& _p)
 bool Rectify::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	_outTypes = _inTypes[0];
+	m_arity = _inTypes[0]->arity();
 	return true;
 }
 
-void Rectify::processChunks(BufferDatas const& _in, BufferDatas& _out, uint) const
+void Rectify::processChunks(BufferDatas const& _in, BufferDatas& _out, uint _c) const
 {
-	if (m_type == HalfWaveRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] < 0.f ? 0.f : _in[0][i];
-	else if (m_type == FullWaveRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] < 0.f ? -_in[0][i] : _in[0][i];
-	else if (m_type == SquaredRectification)
-		for (uint i = 0; i < _in[0].elements(); i++)
-			_out[0][i] = _in[0][i] * _in[0][i];
+	for (uint c = 0; c < _c; c++)
+		for (uint i = 0; i < m_arity; i++)
+			if (m_type == HalfWaveRectification)
+				_out[0](c, i) = _in[0](c, i) < 0.f ? 0.f : _in[0](c, i);
+			else if (m_type == FullWaveRectification)
+				_out[0](c, i) = _in[0](c, i) < 0.f ? -_in[0](c, i) : _in[0](c, i);
+			else if (m_type == SquaredRectification)
+				_out[0](c, i) = _in[0](c, i) * _in[0](c, i);
 }
 
 EXPORT_CLASS(Rectify, 0,3,0, SubProcessor);

@@ -322,7 +322,8 @@ public:
 	 * @param source *must* be the same size as this, i.e. elements()
 	 * floats long. If not you'll get memory corruption.
 	 */
-	void copyFrom(const float *source);
+	void copyFrom(const float *source, uint _size);
+	inline void copyFrom(QVector<float> const& _v) { copyFrom(_v.data(), _v.size()); }
 
 	/**
 	 * Copies all this data into a float array given by @a destination.
@@ -330,7 +331,8 @@ public:
 	 * @param destination *must* be the same size as this, i.e. elements()
 	 * floats long. If not you'll get memory corruption.
 	 */
-	void copyTo(float *destination) const;
+	void copyTo(float *destination, uint _size) const;
+	inline void copyTo(QVector<float>& _v) const { copyTo(_v.data(), _v.size()); }
 
 	/**
 	 * Used for checking if this data chunk was terminated by a plunger.

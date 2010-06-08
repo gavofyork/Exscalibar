@@ -24,7 +24,7 @@ using namespace Geddei;
 #include "recorder.h"
 
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Trivial: public HeavyProcessor
 {

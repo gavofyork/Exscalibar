@@ -27,7 +27,7 @@
 #endif
 using namespace Geddei;
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 /** @ingroup SignalTypes
@@ -130,7 +130,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return min((uint)(_freq / theStep), (uint)(bins() - 1)); }
+	virtual uint frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -186,7 +186,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return max(0u, min((uint)(theStep / max(0.0001f, _freq)), (uint)(bins() - 1))); }
+	virtual uint frequencyBand(float _freq) const { return clamp((uint)(bins() - 1), 0u, (uint)(theStep / ::max(0.0001f, _freq))); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be

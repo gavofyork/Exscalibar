@@ -20,7 +20,7 @@
 
 #include "spectrum.h"
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 TRANSMISSION_TYPE_CPP(Spectrum);

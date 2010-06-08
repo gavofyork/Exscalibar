@@ -24,7 +24,7 @@
 using namespace Geddei;
 
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -50,7 +50,7 @@ public:
 
 int Matrigraph::process()
 {
-	input(0).readSample().copyTo(m_last.data());
+	input(0).readSample().copyTo(m_last);
 	m_isNew = true;
 	return DidWork;
 }

@@ -26,37 +26,36 @@ using namespace std;
 #include "qfactoryexporter.h"
 
 #include "geddei.h"
+#include "coretypes.h"
 using namespace Geddei;
-
-#include "signaltypes.h"
-using namespace TransmissionTypes;
 
 class Magnitude: public SubProcessor
 {
+public:
+	Magnitude(): SubProcessor("Magnitude") {}
+
+private:
 	virtual bool verifyAndSpecifyTypes(const Types &in, Types &out);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 
-public:
-	Magnitude();
+	uint m_arity;
 };
 
-Magnitude::Magnitude(): SubProcessor("Magnitude")
+bool Magnitude::verifyAndSpecifyTypes(Types const& _in, Types& _out)
 {
-}
-
-bool Magnitude::verifyAndSpecifyTypes(const Types &in, Types &out)
-{
-	if (!in[0].isA<Spectrum>()) return false;
-	out = Value(in[0].asA<Spectrum>().frequency());
+	Typed<Spectrum> i(_in[0]);
+	if (!i) return false;
+	_out = Value(i->frequency());
+	m_arity = i->arity();
 	return true;
 }
 
-void Magnitude::processChunk(const BufferDatas &in, BufferDatas &out) const
+void Magnitude::processChunk(BufferDatas const& _in, BufferDatas& _out) const
 {
-	out[0][0] = 0.;
-	for (uint i = 0; i < in[0].elements(); i++)
-		out[0][0] += in[0][i] * in[0][i];
-	out[0][0] = sqrt(out[0][0]);
+	_out[0][0] = 0.;
+	for (uint i = 0; i < m_arity; i++)
+		_out[0][0] += _in[0][i] * _in[0][i];
+	_out[0][0] = sqrt(_out[0][0]);
 }
 
 EXPORT_CLASS(Magnitude, 0,1,0, SubProcessor);

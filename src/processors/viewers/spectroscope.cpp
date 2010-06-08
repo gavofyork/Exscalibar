@@ -22,7 +22,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 /** @internal
  * @author Gav Wood <gav@kde.org>
@@ -56,7 +56,7 @@ public:
 
 int Spectroscope::process()
 {
-	input(0).readSample().copyTo(m_last.data());
+	input(0).readSample().copyTo(m_last);
 	if (m_autoScale)
 	{
 		float frameMin = INT_MAX;
@@ -100,8 +100,8 @@ bool Spectroscope::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
 		return false;
-	m_minAmp = _inTypes[0].asA<Spectrum>().minAmplitude();
-	m_deltaAmp = _inTypes[0].asA<Spectrum>().maxAmplitude() - m_minAmp;
+	m_minAmp = _inTypes[0].asA<Spectrum>().min();
+	m_deltaAmp = _inTypes[0].asA<Spectrum>().max() - m_minAmp;
 	m_curMin = m_minAmp;
 	m_curMax = m_minAmp + m_deltaAmp;
 	m_last.resize(_inTypes[0].asA<Spectrum>().size());

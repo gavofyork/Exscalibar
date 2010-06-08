@@ -33,7 +33,7 @@
 using namespace Geddei;
 
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class ALSAPlayer: public CoProcessor
 {
@@ -131,7 +131,7 @@ int ALSAPlayer::process()
 	for (uint c = 0; c < theChannels; c++)
 	{
 		d[c] = input(c).readSamples(thePeriodSize, false);
-		assert(d[c].elements() == thePeriodSize);
+		assert(d[c].samples() == thePeriodSize);
 	}
 	for (uint i = 0; i < thePeriodSize; i++)
 		for (uint c = 0; c < theChannels; c++)

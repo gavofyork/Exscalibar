@@ -30,7 +30,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Peakify : public SubProcessor
 {

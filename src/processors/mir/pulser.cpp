@@ -30,7 +30,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Pulser : public CoProcessor
 {
@@ -264,9 +264,9 @@ void StaticValue::processorStopped()
 {
 }
 
-bool StaticValue::verifyAndSpecifyTypes(Types const&, Types& outTypes)
+bool StaticValue::verifyAndSpecifyTypes(Types const&, Types& _outTypes)
 {
-	outTypes[0] = Value(1, 0, m_value);
+	_outTypes[0] = Value(1, MultiValue::Config(Qt::black, Qt::transparent, 0, m_value));
 	return true;
 }
 

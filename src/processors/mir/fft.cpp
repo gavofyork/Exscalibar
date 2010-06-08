@@ -32,7 +32,7 @@ using namespace Geddei;
 
 #include "spectrum.h"
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #define PI 3.1415926535898
 

@@ -26,7 +26,7 @@
 using namespace Geddei;
 
 #include "spectrum.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class Bandwise: public SubProcessor
 {
@@ -114,7 +114,7 @@ bool Bandwise::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	}
 
 	for (int i = 0; i < m_bins.count(); i++)
-		outTypes[i] = FreqSteppedSpectrum(max(1u, m_bins[i]), in.frequency(), in.step(), in.maxAmplitude(), in.minAmplitude());	// Wrong - doesn't give first band's freq offset.
+		outTypes[i] = FreqSteppedSpectrum(max(1u, m_bins[i]), in.frequency(), in.step(), in.max(), in.min());	// Wrong - doesn't give first band's freq offset.
 
 	return true;
 }

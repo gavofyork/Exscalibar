@@ -60,6 +60,7 @@ void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsIt
 
 	float c = withProperties()->propertiesInfo(propertyItem()->key()).allowed.count();
 
+	c = syms.count();
 	if (v != -1)
 	{
 		float vf = round(ga.width() * v / c);
@@ -73,18 +74,18 @@ void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsIt
 	f.setPixelSize(ga.height() - 1);
 	f.setBold(true);
 	_p->setFont(f);
-	for (int i = 0; i < c; i++)
-	{
-		float vf = round(ga.width() * i / c);
-		float vt = round(ga.width() * (i + 1) / c);
-		QRectF vr(ga.left() + vf, ga.top(), vt - vf, ga.height());
-		_p->setPen(QColor(0, 0, 0, 96));
-		if (i == v)
+	for (int i = 0; i < syms.count(); i++)
 		{
-			_p->drawText(vr.translated(0, 1.f), Qt::AlignCenter, syms[i]);
-			_p->setPen(Qt::white);
+			float vf = round(ga.width() * i / c);
+			float vt = round(ga.width() * (i + 1) / c);
+			QRectF vr(ga.left() + vf, ga.top(), vt - vf, ga.height());
+			_p->setPen(QColor(0, 0, 0, 96));
+			if (i == v)
+			{
+				_p->drawText(vr.translated(0, 1.f), Qt::AlignCenter, syms[i]);
+				_p->setPen(Qt::white);
+			}
+			_p->drawText(vr.translated(0, 0.f), Qt::AlignCenter, syms[i]);
 		}
-		_p->drawText(vr.translated(0, 0.f), Qt::AlignCenter, syms[i]);
-	}
 
 }

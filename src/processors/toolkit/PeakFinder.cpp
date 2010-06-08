@@ -25,7 +25,7 @@ using namespace Geddei;
 
 #include "contiguous.h"
 #include "mark.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class PeakFinder : public CoProcessor
 {

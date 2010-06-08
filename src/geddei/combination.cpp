@@ -75,7 +75,7 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 		assert(theResident->samples() > cachedSamples);
 
 		// copy the last cachedSamples samples to the cache.
-		theResident->rightSamples(cachedSamples).copyTo(cache);
+		theResident->rightSamples(cachedSamples).copyTo(cache, cachedSamples * theInterScope);
 
 		if (theResident->samples() < interSamples)
 		{
@@ -87,7 +87,7 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 		cachedSamples = 0;
 	if (!theResident)
 		theResident = new BufferData(interSamples * theInterScope, theInterScope);
-	theResident->leftSamples(cachedSamples).copyFrom(cache);
+	theResident->leftSamples(cachedSamples).copyFrom(cache, cachedSamples * theInterScope);
 
 	BufferDatas d(1);
 

@@ -27,7 +27,7 @@
 using namespace Geddei;
 
 #include "contiguous.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #include "monitor.h"
 

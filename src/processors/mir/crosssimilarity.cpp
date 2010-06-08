@@ -26,7 +26,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class CrossSimilarity: public SubProcessor
 {

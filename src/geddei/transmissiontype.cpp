@@ -24,10 +24,6 @@ using namespace Geddei;
 namespace Geddei
 {
 
-TransmissionType::TransmissionType(uint _size):
-	theSize(_size)
-{}
-
 void TransmissionType::send(QSocketSession& _sink) const
 {
 	_sink.sendString(type().toUtf8());

@@ -133,28 +133,29 @@ bool BufferData::plunger() const
 	return theInfo->thePlunger;
 }
 
-void BufferData::copyFrom(const float *source)
+void BufferData::copyFrom(float const* _source, uint _size)
 {
 	if (isNull())
 		return;
 	if (rollsOver())
-	{	memcpy(firstPart(), source, sizeFirstPart() * 4);
-		memcpy(secondPart(), source + sizeFirstPart(), sizeSecondPart() * 4);
+	{	memcpy(firstPart(), _source, min(_size, sizeFirstPart()) * 4);
+		memcpy(secondPart(), _source + sizeFirstPart(), clamp<int>(_size - sizeFirstPart(), 0u, sizeSecondPart()) * 4);
 	}
 	else
-		memcpy(firstPart(), source, sizeOnlyPart() * 4);
+		memcpy(firstPart(), _source, min(_size, sizeOnlyPart()) * 4);
 }
 
-void BufferData::copyTo(float *destination) const
+void BufferData::copyTo(float* _destination, uint _size) const
 {
 	if (isNull())
 		return;
 	if (rollsOver())
-	{	memcpy(destination, firstPart(), sizeFirstPart() * 4);
-		memcpy(destination + sizeFirstPart(), secondPart(), sizeSecondPart() * 4);
+	{
+		memcpy(_destination, firstPart(), min(_size, sizeFirstPart()) * 4);
+		memcpy(_destination + sizeFirstPart(), secondPart(), clamp<int>(_size - sizeFirstPart(), 0u, sizeSecondPart()) * 4);
 	}
 	else
-		memcpy(destination, firstPart(), sizeOnlyPart() * 4);
+		memcpy(_destination, firstPart(), min(_size, sizeOnlyPart()) * 4);
 }
 
 void BufferData::copyFrom(const BufferData &data)

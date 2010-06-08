@@ -41,6 +41,8 @@
 #include "transmissiontype.h"
 #include "type.h"
 #include "types.h"
+#include "contiguous.h"
+#include "mark.h"
 #else
 #include <geddei/multiprocessorcreator.h>
 #include <geddei/multiprocessor.h>
@@ -62,6 +64,8 @@
 #include <geddei/transmissiontype.h>
 #include <geddei/type.h>
 #include <geddei/types.h>
+#include <geddei/contiguous.h>
+#include <geddei/mark.h>
 #endif
 
 /**

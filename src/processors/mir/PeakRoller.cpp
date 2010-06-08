@@ -31,7 +31,7 @@ using namespace Geddei;
 #include "value.h"
 #include "spectrum.h"
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class PeakRoller : public CoProcessor
 {
@@ -88,7 +88,7 @@ int PeakRoller::process()
 {
 	int s = input(0).type().asA<TransmissionType>().arity();
 	float in[s];
-	input(0).readSample().copyTo(in);
+	input(0).readSample().copyTo(in, s);
 	in[s - 1] = 0;
 
 	QList<int> ordered;

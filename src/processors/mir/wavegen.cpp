@@ -26,7 +26,7 @@ using namespace std;
 using namespace Geddei;
 
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class WaveGen: public CoProcessor
 {

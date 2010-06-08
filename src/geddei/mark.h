@@ -26,7 +26,7 @@
 #endif
 using namespace Geddei;
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 /**

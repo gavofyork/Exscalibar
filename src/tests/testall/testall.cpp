@@ -22,8 +22,8 @@ using namespace std;
 #include "geddei.h"
 using namespace Geddei;
 
-#include "signaltypes.h"
-using namespace TransmissionTypes;
+#include "coretypes.h"
+using namespace Geddei;
 
 #include "monitor.h"
 
@@ -86,10 +86,11 @@ class Transparent: public SubProcessor
 public:
 	Transparent() : SubProcessor("Transparent") {}
 
-	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint)
+	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint _ch)
 	{
-		for (uint i = 0; i < in[0].elements(); i++)
-			out[0][i] = in[0][i];
+		for (uint c = 0; c < _ch; c++)
+			for (uint i = 0; i < 64; i++)
+				out[0](c, i) = in[0](c, i);
 	}
 
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)

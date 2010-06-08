@@ -31,7 +31,7 @@ using namespace Geddei;
 #include "spectrum.h"
 #include "value.h"
 #include "matrix.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 static inline float cosineDistance(const float *x, const float *y, uint bandWidth)
 {

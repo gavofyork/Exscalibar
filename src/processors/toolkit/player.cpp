@@ -34,7 +34,7 @@
 using namespace Geddei;
 
 #include "wave.h"
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 #include "player.h"
 

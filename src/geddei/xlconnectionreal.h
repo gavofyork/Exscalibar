@@ -31,7 +31,7 @@
 #include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
-using namespace TransmissionTypes;
+using namespace Geddei;
 
 class BobPort;
 

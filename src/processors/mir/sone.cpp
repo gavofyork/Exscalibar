@@ -21,46 +21,48 @@ using namespace std;
 
 #include "qfactoryexporter.h"
 
-#include "Geddei"
+#include <Geddei>
+#include <CoreTypes>
 using namespace Geddei;
-
-#include "SignalTypes"
-using namespace TransmissionTypes;
 
 class Terhardt : public SubProcessor
 {
+public:
+	Terhardt() : SubProcessor("Terhardt") {}
+
+private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QString simpleText() const { return "T"; }
 
-public:
-	float *theMult;
-	Terhardt() : SubProcessor("Terhardt"), theMult(NULL) {}
-	~Terhardt() { delete [] theMult; }
+	uint m_bins;
+
+	QVector<float> theMult;
 };
 
 void Terhardt::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for (uint i = 0; i < ins[0].elements(); i++)
-	{
+	for (int i = 0; i < theMult.size(); i++)
 		outs[0][i] = ins[0][i] * theMult[i];
-	}
 }
 
-bool Terhardt::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+bool Terhardt::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
-	// TODO: should only take a "stepped spectrum" in.
-	if (!inTypes[0].isA<Spectrum>()) return false;
-	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes = inTypes;
-	delete [] theMult;
-	theMult = new float[in.arity()];
-	for (uint i = 0; i < in.arity(); i++)
+	Typed<Spectrum> in(_inTypes[0]);
+	if (!in) return false;
+
+	theMult.resize(in->bins());
+	for (int i = 0; i < theMult.size(); i++)
 	{
-		float f = in.bandFrequency(i);
+		float f = in->bandFrequency(i);
 		float Adb = -3.64f * pow(f * 0.001f, -0.8f) + 6.5f * exp(-0.6 * pow(0.001f * f - 3.3f, 2.f)) - .001f * pow(.001f * f, 4.f);
 		theMult[i] = f > 0.f ? exp(Adb / 10.f) : 0.f;
 	}
+
+	// TODO: Set range to what it really is given band range and in's range.
+	//in->setRange();
+
+	_outTypes[0] = in;
 	return true;
 }
 
@@ -68,17 +70,20 @@ EXPORT_CLASS(Terhardt, 1,0,1, SubProcessor);
 
 class Sone : public SubProcessor
 {
+public:
+	Sone() : SubProcessor("Sone") {}
+
+private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QString simpleText() const { return "S"; }
 
-public:
-	Sone() : SubProcessor("Sone") {}
+	uint m_bins;
 };
 
 void Sone::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 {
-	for (uint i = 0; i < ins[0].elements(); i++)
+	for (uint i = 0; i < m_bins; i++)
 	{
 		// outs[0][i] => dB below max.
 		// assume -90dB is SPL
@@ -88,13 +93,15 @@ void Sone::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-bool Sone::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+bool Sone::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
-	// TODO: should only take a "stepped spectrum" in.
-	if (!inTypes[0].isA<Spectrum>()) return false;
-//	const Spectrum &in = inTypes[0].asA<Spectrum>();
-	outTypes[0] = inTypes[0];
-	outTypes[0].asA<Spectrum>().setRange(60, 0);
+	Typed<Spectrum> in = _inTypes[0];
+	if (!in) return false;
+
+	m_bins = in->bins();
+	in->setRange(0, 60);
+	_outTypes[0] = in;
+
 	return true;
 }
 

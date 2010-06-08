@@ -1,0 +1,6 @@
+#ifdef __GEDDEI_BUILD
+#include "coretypes.h"
+#else
+#include <geddei/coretypes.h>
+#endif
+

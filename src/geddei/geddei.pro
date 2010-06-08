@@ -52,7 +52,6 @@ HEADERS += buffer.h \
 	xscoupling.h \
 	xxcoupling.h \
 	globals.h \
-	signaltypes.h \
 	processorport.h \
 	value.h \
 	groupable.h \
@@ -63,7 +62,8 @@ HEADERS += buffer.h \
     typeds.h \
     typed.h \
     type.h \
-    types.h
+    types.h \
+    coretypes.h
 SOURCES += buffer.cpp \
 	bufferinfo.cpp \
 	bufferdata.cpp \

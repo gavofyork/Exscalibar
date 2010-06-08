@@ -18,7 +18,7 @@
 
 #include "wave.h"
 
-namespace TransmissionTypes
+namespace Geddei
 {
 
 TRANSMISSION_TYPE_CPP(Wave);
