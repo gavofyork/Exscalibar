@@ -176,7 +176,7 @@ public:
 	/**
 	 * Returns the type of the buffer.
 	 */
-	SignalTypeRef const& type() const { return theBuffer->type(); }
+	Type const& type() const { return theBuffer->type(); }
 
 	/**
 	 * Returns the size of the buffer.

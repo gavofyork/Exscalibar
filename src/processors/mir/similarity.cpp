@@ -51,7 +51,7 @@ class Similarity : public HeavyProcessor
 
 protected:
 	virtual void processor();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void specifyInputSpace(QVector<uint> &samples) { samples[0] = theSize; }
@@ -91,7 +91,7 @@ void Similarity::processor()
 	}
 }
 
-bool Similarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Similarity::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
 	outTypes[0] = SquareMatrix(theSize, inTypes[0].asA<Spectrum>().frequency() / theStep, inTypes[0].asA<Spectrum>().frequency());

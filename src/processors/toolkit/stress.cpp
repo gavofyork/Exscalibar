@@ -36,7 +36,7 @@ class Stress: public SubProcessor
 	uint m_arity;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 
 public:
 	Stress() : SubProcessor("Stress") {}
@@ -53,7 +53,7 @@ void Stress::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-bool Stress::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Stress::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes[0] = inTypes[0];
 	m_arity = inTypes[0].asA<TransmissionType>().arity();

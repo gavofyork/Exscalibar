@@ -32,8 +32,8 @@ class ConnectionItem: public QGraphicsPathItem, public Magnetic
 public:
 	ConnectionItem(InputItem* _to, OutputItem* _from);
 
-	enum { Type = UserType + 4 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 4 };
+	virtual int type() const { return ItemType; }
 
 	InputItem* to() const { return m_to; }
 	OutputItem* from() const { return m_from; }

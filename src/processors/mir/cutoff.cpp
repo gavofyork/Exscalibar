@@ -35,7 +35,7 @@ class CutOff : public SubProcessor
 	uint theFrom, theTo, theSize;
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual QString simpleText() const { return QChar(0x2702); }
@@ -52,7 +52,7 @@ void CutOff::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunk
 		outs[0].sample(i).copyFrom(ins[0].mid(i * theSize + theFrom, theTo - theFrom));
 }
 
-bool CutOff::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool CutOff::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
 	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();

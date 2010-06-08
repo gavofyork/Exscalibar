@@ -31,8 +31,8 @@ protected:
 	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
 
-	enum { Type = UserType + 6 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 6 };
+	virtual int type() const { return ItemType; }
 
 	BaseItem* m_baseItem;
 };

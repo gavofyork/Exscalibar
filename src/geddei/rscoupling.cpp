@@ -19,7 +19,7 @@
 #include "commandcodes.h"
 #include "rscoupling.h"
 #include "properties.h"
-#include "signaltyperefs.h"
+#include "types.h"
 using namespace Geddei;
 
 #define MESSAGES 0
@@ -84,14 +84,14 @@ void RSCoupling::run()
 		case SpecifyTypes:
 		{
 			if (MESSAGES) qDebug("RSC: SpecifyTypes...");
-			SignalTypeRefs inTypes(theSession.safeReceiveWord<int>());
+			Types inTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < inTypes.count(); i++)
-				TransmissionType::receive(theSession, inTypes[i]);
-			SignalTypeRefs outTypes(theSession.safeReceiveWord<int>());
+				inTypes[i] = TransmissionType::receive(theSession);
+			Types outTypes(theSession.safeReceiveWord<int>());
 			for (uint i = 0; i < outTypes.count(); i++)
-				TransmissionType::receive(theSession, outTypes[i]);
+				outTypes[i] = TransmissionType::receive(theSession);
 
-			SignalTypeRefs dummyOutTypes(outTypes.count());
+			Types dummyOutTypes(outTypes.count());
 			if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
 				qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
 			theSubProc->theOutTypes = outTypes;

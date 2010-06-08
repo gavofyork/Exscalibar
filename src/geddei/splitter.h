@@ -48,7 +48,7 @@ class DLLEXPORT Splitter: public LxConnection, public Source
 	virtual const Processor *processor() const { return dynamic_cast<Processor *>(theSource); }
 
 	//* Reimplementations from Connection
-	virtual SignalTypeRef const& type() const;
+	virtual Type const& type() const;
 
 	//* Reimplementations from ScratchOwner, LxConnection
 	virtual void pushScratch(const BufferData &data);
@@ -57,7 +57,7 @@ class DLLEXPORT Splitter: public LxConnection, public Source
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
 	virtual Tristate isReadyYet();
-	virtual void setType(SignalTypeRef const& _type);
+	virtual void setType(Type const& _type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();

@@ -33,7 +33,7 @@ class DownSample : public SubProcessor
 
 	virtual QString simpleText() const { return QChar(0x290B); }
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -76,7 +76,7 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint c
 	}
 }
 
-bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DownSample::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Contiguous>())
 		return false;

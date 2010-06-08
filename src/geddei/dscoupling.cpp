@@ -70,9 +70,9 @@ bool DSCoupling::isReady()
 	return m_isReady;
 }
 
-void DSCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes)
+void DSCoupling::specifyTypes(const Types &inTypes, const Types &outTypes)
 {
-	SignalTypeRefs dummyOutTypes(outTypes.count());
+	Types dummyOutTypes(outTypes.count());
 
 	if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
 	{	qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");

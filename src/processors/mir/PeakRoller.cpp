@@ -42,7 +42,7 @@ private:
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -133,7 +133,7 @@ void PeakRoller::processorStopped()
 {
 }
 
-bool PeakRoller::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool PeakRoller::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>())
 		return false;

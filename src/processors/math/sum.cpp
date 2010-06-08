@@ -38,7 +38,7 @@ public:
 
 private:
 	virtual void initFromProperties (const Properties &) { setupSamplesIO(2, 1, 1); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
 		outTypes[0] = inTypes[0];
 		m_arity = inTypes[0].asA<TransmissionType>().arity();
@@ -61,7 +61,7 @@ class Extract: public SubProcessor
 	uint m_index;
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Element Index", 0, "Index of the element to extract."); }
 	virtual void updateFromProperties(Properties const& _p) { m_index = _p["Element Index"].toInt(); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency(), inTypes[0].asA<Contiguous>().maxAmplitude(), inTypes[0].asA<Contiguous>().minAmplitude()); return m_index < inTypes[0].asA<Contiguous>().arity(); }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency(), inTypes[0].asA<Contiguous>().maxAmplitude(), inTypes[0].asA<Contiguous>().minAmplitude()); return m_index < inTypes[0].asA<Contiguous>().arity(); }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		outs[0][0] = ins[0][m_index];
@@ -78,7 +78,7 @@ class Invert: public SubProcessor
 	uint m_min;
 	uint m_max;
 	uint m_arity;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes = inTypes; m_min = inTypes[0].asA<Contiguous>().minAmplitude(); m_arity = inTypes[0].asA<Contiguous>().arity(); m_max = inTypes[0].asA<Contiguous>().maxAmplitude(); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { if (!inTypes[0].isA<Contiguous>()) return false; outTypes = inTypes; m_min = inTypes[0].asA<Contiguous>().minAmplitude(); m_arity = inTypes[0].asA<Contiguous>().arity(); m_max = inTypes[0].asA<Contiguous>().maxAmplitude(); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{
 		for (uint i = 0; i < m_arity; i++)
@@ -98,7 +98,7 @@ public:
 	Sum();
 
 private:
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 	virtual QString simpleText() const { return QChar(0x2211); }
 
@@ -109,7 +109,7 @@ Sum::Sum(): SubProcessor("Sum")
 {
 }
 
-bool Sum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Sum::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Contiguous>())
 		return false;

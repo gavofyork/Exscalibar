@@ -33,7 +33,7 @@ MultiPlayer::MultiPlayer(): HeavyProcessor("MultiPlayer", OutConst, Guarded)
 {
 }
 
-bool MultiPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool MultiPlayer::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 {
 	outTypes = Wave(theRate);
 	return true;

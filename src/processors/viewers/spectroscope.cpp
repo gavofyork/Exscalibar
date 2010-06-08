@@ -43,7 +43,7 @@ class Spectroscope: public CoProcessor
 
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -96,7 +96,7 @@ void Spectroscope::processorStopped()
 {
 }
 
-bool Spectroscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Spectroscope::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
 		return false;

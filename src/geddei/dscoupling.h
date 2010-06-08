@@ -46,7 +46,7 @@ class DSCoupling: public DxCoupling, public xSCoupling, public QTask
 public:
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);
 	virtual bool isReady();
-	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
+	virtual void specifyTypes(const Types &inTypes, const Types &outTypes);
 	virtual void initFromProperties(const Properties &p);
 	virtual void go();
 	virtual void stop();

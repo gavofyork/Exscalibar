@@ -98,7 +98,7 @@ void LRConnection::enforceMinimum(uint size)
 	theSink.safeSendWord(size);
 }
 
-void LRConnection::setType(SignalTypeRef const& _type)
+void LRConnection::setType(Type const& _type)
 {
 	theSink.sendByte(SetType);
 	_type->send(theSink);
@@ -111,7 +111,7 @@ void LRConnection::resetType()
 	theType.nullify();
 }
 
-SignalTypeRef const& LRConnection::type() const
+Type const& LRConnection::type() const
 {
 	if (!const_cast<LRConnection*>(this)->theSource->confirmTypes())
 		theType.nullify();

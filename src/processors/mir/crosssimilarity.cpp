@@ -33,7 +33,7 @@ class CrossSimilarity: public SubProcessor
 	int theArity, theCount;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 
 public:
 	CrossSimilarity(): SubProcessor("CrossSimilarity", In) {}
@@ -49,7 +49,7 @@ void CrossSimilarity::processChunk(const BufferDatas &in, BufferDatas &out) cons
 		}
 }
 
-bool CrossSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool CrossSimilarity::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<SquareMatrix>())
 		return false;

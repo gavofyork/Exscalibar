@@ -33,7 +33,7 @@ using namespace TransmissionTypes;
 
 class Magnitude: public SubProcessor
 {
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
+	virtual bool verifyAndSpecifyTypes(const Types &in, Types &out);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 
 public:
@@ -44,7 +44,7 @@ Magnitude::Magnitude(): SubProcessor("Magnitude")
 {
 }
 
-bool Magnitude::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+bool Magnitude::verifyAndSpecifyTypes(const Types &in, Types &out)
 {
 	if (!in[0].isA<Spectrum>()) return false;
 	out = Value(in[0].asA<Spectrum>().frequency());

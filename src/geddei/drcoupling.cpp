@@ -63,7 +63,7 @@ void DRCoupling::setCredentials(const QString &remoteHost, uint remoteKey, uint 
 	theRemoteSubProcessorKey = remoteSubProcessorKey;
 }
 
-void DRCoupling::specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes)
+void DRCoupling::specifyTypes(const Types &inTypes, const Types &outTypes)
 {
 	if (MESSAGES) qDebug("> DRCoupling::specifyTypes()");
 	QFastMutexLocker lock(&theComm);

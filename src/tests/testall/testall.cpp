@@ -36,7 +36,7 @@ public:
 	{
 		setupIO(0, 1);
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &outTypes)
 	{
 		n = 0;
 		outTypes[0] = Value();
@@ -69,7 +69,7 @@ public:
 			out[0].sample(i).copyFrom(in[0].mid(i * 1024, 2048));
 	}
 
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const&, SignalTypeRefs& _outTypes)
+	virtual bool verifyAndSpecifyTypes(Types const&, Types& _outTypes)
 	{
 		_outTypes[0] = FreqSteppedSpectrum(2048, 1);
 		return true;
@@ -92,7 +92,7 @@ public:
 			out[0][i] = in[0][i];
 	}
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
 		outTypes = inTypes;
 		return true;

@@ -22,11 +22,11 @@
 #ifdef __GEDDEI_BUILD
 #include "connection.h"
 #include "bufferdata.h"
-#include "signaltyperef.h"
+#include "type.h"
 #else
 #include <geddei/connection.h>
 #include <geddei/bufferdata.h>
-#include <geddei/signaltyperef.h>
+#include <geddei/type.h>
 #endif
 using namespace Geddei;
 
@@ -121,7 +121,7 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	 * @param type The TransmissionType object this connection's type should be set
 	 * to.
 	 */
-	virtual void setType(SignalTypeRef const& _type) = 0;
+	virtual void setType(Type const& _type) = 0;
 
 	/**
 	 * Resets the type so that a further setType call will be needed.
@@ -223,9 +223,9 @@ public:
 	/**
 	 * Retrieves the type of signal this connection transfers.
 	 *
-	 * @return A SignalTypeRef of this conection's TransmissionType.
+	 * @return A Type of this conection's TransmissionType.
 	 */
-	virtual SignalTypeRef const& type() const { return theType; }
+	virtual Type const& type() const { return theType; }
 
 	/**
 	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but

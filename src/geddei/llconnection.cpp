@@ -39,7 +39,7 @@ bool LLConnection::pullType()
 	return !theType.isNull();
 }
 
-void LLConnection::setType(SignalTypeRef const& _type)
+void LLConnection::setType(Type const& _type)
 {
 	theType = _type;
 	theBuffer.setType(theType);

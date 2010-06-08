@@ -58,7 +58,7 @@ private:
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual QString simpleText() const { return "S"; }
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(40, 96, 160); }
@@ -82,7 +82,7 @@ void Convolver::processOwnChunks(BufferDatas const& _in, BufferDatas& _out, uint
 	}
 }
 
-bool Convolver::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Convolver::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes = inTypes;
 	m_arity = inTypes[0].asA<TransmissionType>().arity();

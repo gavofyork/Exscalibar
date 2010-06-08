@@ -33,7 +33,7 @@ class Bark : public SubProcessor
 	uint theBins[24], bandWidth, theUsedBins;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual QString simpleText() const { return "B"; }
 
@@ -64,7 +64,7 @@ void Bark::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 //	qDebug("Bark: Max in = %f, max out = %f", ins[0][maxi], outs[0][maxo]);
 }
 
-bool Bark::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Bark::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
 	const FreqSteppedSpectrum &in = inTypes[0].asA<FreqSteppedSpectrum>();

@@ -87,7 +87,7 @@ void Monitor::specifyOutputSpace(QVector<uint> &samples)
 	samples[0] = input(0).capacity() / 2;
 }
 
-bool Monitor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Monitor::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Contiguous>())
 		return false;

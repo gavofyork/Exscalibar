@@ -38,7 +38,7 @@ class Normalise: public HeavyProcessor
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out);
+	virtual bool verifyAndSpecifyTypes(const Types &in, Types &out);
 	virtual void specifyOutputSpace(QVector<uint> &out);
 	virtual void processor();
 	virtual void receivedPlunger();
@@ -62,7 +62,7 @@ void Normalise::initFromProperties(const Properties &p)
 	setupIO(1, 1);
 }
 
-bool Normalise::verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+bool Normalise::verifyAndSpecifyTypes(const Types &in, Types &out)
 {
 	m_arity = in[0].asA<TransmissionType>().arity();
 	out[0] = in[0];

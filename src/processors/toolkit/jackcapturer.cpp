@@ -42,7 +42,7 @@ public:
 	virtual void processorStopped();
 	virtual int canProcess();
 	virtual int process();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 
 	virtual void initFromProperties(const Properties &_p)
 	{
@@ -195,7 +195,7 @@ void JackCapturer::processorStopped()
 	m_client = 0;
 }
 
-bool JackCapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool JackCapturer::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 {
 	outTypes = Wave(m_frequency);
 	return true;
@@ -259,7 +259,7 @@ class JackCapturer: public HeavyProcessor
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out);
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &out);
 	virtual bool processorStarted();
 	virtual void processor();
 	virtual void processorStopped();
@@ -292,7 +292,7 @@ void JackCapturer::initFromProperties(const Properties &)
 	}
 }
 
-bool JackCapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out)
+bool JackCapturer::verifyAndSpecifyTypes(const Types &, Types &out)
 {
 	out = Wave(theFreq);
 	return true;

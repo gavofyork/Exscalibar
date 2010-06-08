@@ -82,7 +82,7 @@ class Distance: public SubProcessor
 	}
 	virtual void initFromProperties(Properties const&) { setupSamplesIO(2, 1, 1); }
 	virtual void updateFromProperties(Properties const& _p);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
 		m_arity = inTypes[0].asA<TransmissionType>().arity();
 		outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency());
@@ -123,7 +123,7 @@ class SelfSimilarity : public SubProcessor
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual QString simpleText() const { return QChar(0x2258); }
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(40, 96, 160); }
@@ -166,7 +166,7 @@ void SelfSimilarity::processOwnChunks(const BufferDatas &in, BufferDatas &out, u
 	return;
 }
 
-bool SelfSimilarity::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool SelfSimilarity::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
 	outTypes[0] = SquareMatrix(theSize, inTypes[0].asA<Spectrum>().frequency(), 1.f / inTypes[0].asA<Spectrum>().frequency());

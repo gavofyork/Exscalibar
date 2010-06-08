@@ -28,7 +28,7 @@ class DLLEXPORT Add: public HeavyProcessor
 {
 	int count;
 	virtual void processor();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual QString simpleText() const { return "+"; }
 public:
@@ -52,7 +52,7 @@ void Add::processor()
 	}
 }
 
-bool Add::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Add::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes.allSame()) return false;
 	outTypes[0] = inTypes[0];

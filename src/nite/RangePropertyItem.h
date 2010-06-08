@@ -34,8 +34,8 @@ public:
 	virtual void			mouseMoveEvent(QGraphicsSceneMouseEvent* _e) { mousePressEvent(_e); }
 	virtual void			paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);
 
-	enum { Type = UserType + 18 };
-	virtual int				type() const { return Type; }
+	enum { ItemType = UserType + 18 };
+	virtual int				type() const { return ItemType; }
 
 private:
 	AllowedValue m_a;

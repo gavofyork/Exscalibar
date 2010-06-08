@@ -33,7 +33,7 @@ class Mean : public SubProcessor
 	uint m_arity;
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QString simpleText() const { return QChar(0x2A0F); }
 public:
 	Mean() : SubProcessor("Mean", In) {}
@@ -50,7 +50,7 @@ void Mean::processChunks(const BufferDatas &ins, BufferDatas &outs, uint chunks)
 				outs[0](c, j) += ins[i](c, j) / float(multiplicity());
 }
 
-bool Mean::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Mean::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes.count())
 		return false;

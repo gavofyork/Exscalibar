@@ -16,52 +16,20 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-using namespace std;
+#pragma once
 
+#include <exscalibar.h>
+#ifdef __GEDDEI_BUILD
 #include "transmissiontype.h"
-#include "signaltyperef.h"
-using namespace Geddei;
+#include "typed.h"
+#else
+#include <geddei/transmissiontype.h>
+#include <geddei/typed.h>
+#endif
 
 namespace Geddei
 {
-/*
-bool SignalTypeRef::operator==(const TransmissionType &p)
-{
-	assert(thePtr);
-	return thePtr->isEqualTo(&p);
-}
 
-bool SignalTypeRef::operator==(const SignalTypeRef &p)
-{
-	assert(thePtr);
-	return thePtr->isEqualTo(p.thePtr);
-}
+typedef Typed<TransmissionType> Type;
 
-SignalTypeRef &SignalTypeRef::operator=(const TransmissionType &p)
-{
-	delete thePtr;
-	thePtr = p.copy();
-	return *this;
-}
-
-SignalTypeRef &SignalTypeRef::operator=(const SignalTypeRef &p)
-{
-	delete thePtr;
-	thePtr = p.thePtr->copy();
-	return *this;
-}
-
-uint SignalTypeRef::size() const
-{
-	assert(thePtr);
-	return thePtr->size();
-}
-
-QString SignalTypeRef::info() const
-{
-	assert(thePtr);
-	return thePtr->info();
-}
-*/
 }

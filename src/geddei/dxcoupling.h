@@ -89,7 +89,7 @@ public:
 	 * @param outTypes The "array" of types that describe the output
 	 * connection(s).
 	 */
-	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes) = 0;
+	virtual void specifyTypes(const Types &inTypes, const Types &outTypes) = 0;
 
 	/**
 	 * Used by the LHS to initialise the properties of the SubProcessor.

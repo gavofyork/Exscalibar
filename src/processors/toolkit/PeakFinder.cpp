@@ -36,7 +36,7 @@ private:
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(Properties const& _p);
 	virtual void updateFromProperties(Properties const& _p);
@@ -69,7 +69,7 @@ void PeakFinder::processorStopped()
 {
 }
 
-bool PeakFinder::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool PeakFinder::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	if (!_inTypes[0].isA<Contiguous>() || _inTypes[0].asA<Contiguous>().arity() != 1)
 		return false;

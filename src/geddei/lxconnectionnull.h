@@ -20,10 +20,10 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-#include "signaltyperef.h"
+#include "type.h"
 #include "lxconnection.h"
 #else
-#include <geddei/signaltyperef.h>
+#include <geddei/type.h>
 #include <geddei/lxconnection.h>
 #endif
 using namespace Geddei;
@@ -41,7 +41,7 @@ namespace Geddei
  */
 class DLLEXPORT LxConnectionNull: public LxConnection
 {
-	virtual SignalTypeRef const& type() const { return theType; }
+	virtual Type const& type() const { return theType; }
 	virtual void pushBE(const BufferData &);
 	virtual void pushPlunger() {}
 	virtual void startPlungers() {}
@@ -50,7 +50,7 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual uint maximumScratchElements(const uint) { return Undefined; }
 	virtual uint maximumScratchElementsEver() { return Undefined; }
 	virtual BufferData makeScratchElements(const uint, bool = false) { return BufferData::fake(); }
-	virtual void setType(SignalTypeRef const& _type) { theType = _type; }
+	virtual void setType(Type const& _type) { theType = _type; }
 	virtual void resetType() { theType.nullify(); }
 	virtual bool waitUntilReady() { return 1; }
 	virtual Tristate isReadyYet() { return Succeeded; }

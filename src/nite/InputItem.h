@@ -45,8 +45,8 @@ public:
 
 	QString const& typeInfo() const { return m_typeInfo; }
 
-	enum { Type = UserType + 2 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 2 };
+	virtual int type() const { return ItemType; }
 
 protected:
 	uint		m_index;

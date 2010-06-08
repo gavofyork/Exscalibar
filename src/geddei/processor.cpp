@@ -621,7 +621,7 @@ bool Processor::confirmTypes()
 		return true;
 	}
 
-	SignalTypeRefs inTypes(theInputs.count());
+	Types inTypes(theInputs.count());
 	uint ii = 0;
 	for (QVector<xLConnection *>::Iterator i = theInputs.begin(); i != theInputs.end(); i++,ii++)
 	{	if (!*i)
@@ -633,7 +633,7 @@ bool Processor::confirmTypes()
 			theErrorWritten.wakeAll();
 			return false;
 		}
-		SignalTypeRef t = (*i)->type();
+		Type t = (*i)->type();
 		if (t.isNull())
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d is null - exiting with error.", qPrintable(name()), ii);
 			theTypesConfirmed = false;
@@ -649,9 +649,6 @@ bool Processor::confirmTypes()
 	assert(inTypes.count() == (uint)theInputs.size());
 
 	theTypesCache.resize(theOutputs.size());
-
-	for (int i = 0; i < theTypesCache.count(); i++)
-		qDebug() << i << ": " << theTypesCache[i].type();
 
 	// Do a quick check to make sure that we're going by the multiplicity rules
 	if ((theMulti&In) && inTypes.count())
@@ -678,8 +675,6 @@ bool Processor::confirmTypes()
 	// NOTE: DomProcessor::verifyAndSpecifyTypes depends on this code.
 	if ((theMulti&Out) && theTypesCache.count())
 	{
-		for (int i = 0; i < theTypesCache.count(); i++)
-			qDebug() << i << ": " << theTypesCache[i].type();
 		if (!theTypesCache.populated(0))
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) No output type specified.", qPrintable(name()));
 			theTypesConfirmed = false;
@@ -690,16 +685,10 @@ bool Processor::confirmTypes()
 			return false;
 		}
 		theTypesCache.fillEmpty(theTypesCache[0]);
-		for (int i = 0; i < theTypesCache.count(); i++)
-			qDebug() << i << ": " << theTypesCache[i].type();
 		// TODO: Enforce the same basic class rule.
 	}
 
-	for (int i = 0; i < theTypesCache.count(); i++)
-		qDebug() << i << ": " << theTypesCache[i].type();
-
 	{
-		qDebug() << name();
 		QVector<uint> sizes(theInputs.count());
 		specifyInputSpace(sizes);
 		int ii = 0;
@@ -725,8 +714,6 @@ bool Processor::confirmTypes()
 			if (theTypesCache[i].isNull())
 				qFatal("*** FATAL: TypesCache has unpopulated entry (%d in %s). Bailing.", i, qPrintable(name()));
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
-			qDebug() << i << ": " << theTypesCache[i]->type();
-			qDebug() << *theTypesCache[i];
 			theOutputs[i]->setType(theTypesCache[i]);
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
 			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache[i]->size() * 2);

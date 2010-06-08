@@ -22,10 +22,10 @@
 #ifdef __GEDDEI_BUILD
 
 #include "transmissiontype.h"
-#include "signaltyperef.h"
+#include "type.h"
 #else
 #include <geddei/transmissiontype.h>
-#include <geddei/signaltyperef.h>
+#include <geddei/type.h>
 #endif
 using namespace Geddei;
 
@@ -53,7 +53,7 @@ public:
 	};
 
 protected:
-	mutable SignalTypeRef theType;
+	mutable Type theType;
 
 public:
 	/**
@@ -61,7 +61,7 @@ public:
 	 *
 	 * Should ask source processor if the type is unknown.
 	 */
-	virtual SignalTypeRef const& type() const = 0;
+	virtual Type const& type() const = 0;
 
 	/**
 	 * Makes the writing/reading buffer at least @a elements big.

@@ -40,7 +40,7 @@ class PlungeGenerator : public HeavyProcessor
 			}
 		}
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 
 public:
@@ -58,7 +58,7 @@ class PlungeDetector : public HeavyProcessor
 		}
 	}
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
 		outTypes[0] = inTypes[0];
 		return true;
@@ -91,7 +91,7 @@ class PlungeEater : public HeavyProcessor
 		}
 	}
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &)
 	{
 		return true;
 	}

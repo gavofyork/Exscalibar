@@ -39,7 +39,7 @@
 #include "sink.h"
 #include "multisource.h"
 #include "multisink.h"
-#include "signaltyperefs.h"
+#include "types.h"
 #include "processorport.h"
 #include "groupable.h"
 #else
@@ -55,7 +55,7 @@
 #include <geddei/sink.h>
 #include <geddei/multisource.h>
 #include <geddei/multisink.h>
-#include <geddei/signaltyperefs.h>
+#include <geddei/types.h>
 #include <geddei/processorport.h>
 #include <geddei/groupable.h>
 #endif
@@ -214,7 +214,7 @@ private:
 	//@{
 	/** Typing subsystem. */
 	mutable QFastMutex theConfirming;
-	SignalTypeRefs theTypesCache;
+	Types theTypesCache;
 	QVector<uint> theSizesCache;
 	bool theTypesConfirmed;
 	//@}
@@ -543,7 +543,7 @@ protected:
 	 * @return true if @a inTypes is valid and @a outTypes is populated correctly.
 	 */
 	//TODO: enforce the same basic class rule.
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) = 0;
 
 	/**
 	 * Reimplement to force the inputs' buffer size to be at least samples big, explicitly

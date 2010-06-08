@@ -34,7 +34,7 @@ class Oscilloscope: public CoProcessor
 
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(Properties const& _p);
@@ -73,7 +73,7 @@ void Oscilloscope::processorStopped()
 {
 }
 
-bool Oscilloscope::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Oscilloscope::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	return _inTypes.count() == 1 && _inTypes[0].isA<Wave>();
 }

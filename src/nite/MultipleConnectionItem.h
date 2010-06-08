@@ -35,8 +35,8 @@ class MultipleConnectionItem: public QGraphicsPathItem, public Magnetic
 public:
 	MultipleConnectionItem(MultipleInputItem* _to, MultipleOutputItem* _from);
 
-	enum { Type = UserType + 9 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 9 };
+	virtual int type() const { return ItemType; }
 
 	MultipleInputItem* to() const { return m_to; }
 	MultipleOutputItem* from() const { return m_from; }

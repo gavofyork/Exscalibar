@@ -33,7 +33,7 @@ class DiagonalSum : public SubProcessor
 	float m_alpha;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const
 	{
 		return PropertiesInfo	("Alpha", 1.f, "Alpha value for the power function.", true, QChar(0x03B1), QList<AllowedValue>() << AllowedValue("Alpha", QChar(0x03B1), 0.f, 2.f));
@@ -48,7 +48,7 @@ public:
 	DiagonalSum() : SubProcessor("DiagonalSum") {}
 };
 
-bool DiagonalSum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DiagonalSum::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<SquareMatrix>()) return false;
 	theSize = inTypes[0].asA<SquareMatrix>().size();

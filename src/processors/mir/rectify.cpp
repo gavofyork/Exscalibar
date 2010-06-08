@@ -37,7 +37,7 @@ private:
 	virtual QString simpleText() const { return QChar(0x236D); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	int m_type;
@@ -53,7 +53,7 @@ void Rectify::updateFromProperties(Properties const& _p)
 	m_type = _p.get("Type").toInt();
 }
 
-bool Rectify::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool Rectify::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	_outTypes = _inTypes[0];
 	return true;

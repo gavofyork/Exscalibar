@@ -41,8 +41,8 @@ public:
 	MultiSource* source() const;
 	bool isConnected() const;
 
-	enum { Type = UserType + 13 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 13 };
+	virtual int type() const { return ItemType; }
 
 private:
 	virtual void interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);

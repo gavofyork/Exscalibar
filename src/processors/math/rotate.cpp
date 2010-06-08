@@ -35,7 +35,7 @@ private:
 	virtual QString simpleText() const { return QChar(0x2933); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	QString		m_file;
@@ -56,7 +56,7 @@ void Rotate::initFromProperties(Properties const& _p)
 	setupIO(Undefined, Undefined);
 }
 
-bool Rotate::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool Rotate::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	if (!m_file.isEmpty())
 	{

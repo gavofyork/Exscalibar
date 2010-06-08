@@ -57,7 +57,7 @@ class Grapher: public CoProcessor
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -249,7 +249,7 @@ void Grapher::processorStopped()
 {
 }
 
-bool Grapher::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	if (!_inTypes[0].isA<Contiguous>())
 		return false;

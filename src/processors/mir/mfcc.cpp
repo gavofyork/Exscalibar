@@ -37,7 +37,7 @@ class MFCC : public SubProcessor
 	uint theMarkers[BINS + 2], bandWidth;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 
 public:
 	MFCC() : SubProcessor("MFCC") {}
@@ -69,7 +69,7 @@ void MFCC::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 float toMel(float hertz) { return 1127.01048 * log(1.0 + hertz / 700.0); }
 float toHertz(float mel) { return 700.0 * (exp(mel / 1127.01048 - 1.0)); }
 
-bool MFCC::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool MFCC::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
 	const FreqSteppedSpectrum &in = inTypes[0].asA<FreqSteppedSpectrum>();

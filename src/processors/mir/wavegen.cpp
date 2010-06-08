@@ -37,7 +37,7 @@ class WaveGen: public CoProcessor
 	int m_chunksLeft;
 	int m_hadChunks;
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void specifyOutputSpace(QVector<uint> &samples);
@@ -79,7 +79,7 @@ int WaveGen::process()
 	return DidWork;
 }
 
-bool WaveGen::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool WaveGen::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 {
 	outTypes[0] = Wave(theRate);
 	return true;

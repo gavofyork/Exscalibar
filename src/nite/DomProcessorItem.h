@@ -37,8 +37,8 @@ public:
 	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 
-	enum { Type = UserType + 14 };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType + 14 };
+	virtual int			type() const { return ItemType; }
 
 protected:
 	virtual void		geometryChanged();

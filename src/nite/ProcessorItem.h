@@ -41,8 +41,8 @@ public:
 	ProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 	~ProcessorItem() { delete m_processor; }
 
-	enum { Type = UserType + 1 };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType + 1 };
+	virtual int			type() const { return ItemType; }
 
 	virtual bool		isRunning() const { return processor() && processor()->isRunning(); }
 	virtual float		cyclePoint() const { return (processor()->guardsCrossed() % 36) * 360.0 / 36; }

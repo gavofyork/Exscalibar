@@ -49,12 +49,12 @@ class ProcessorForwarder;
 class DLLEXPORT LRConnection: public LxConnectionReal
 {
 	//* Reimplementations from Connection
-	virtual SignalTypeRef const& type() const;
+	virtual Type const& type() const;
 
 	//* Reimplementations from LxConnection
 	virtual bool waitUntilReady();
 	virtual Tristate isReadyYet();
-	virtual void setType(SignalTypeRef const& _type);
+	virtual void setType(Type const& _type);
 	virtual void resetType();
 	virtual void sourceStopping();
 	virtual void sourceStopped();

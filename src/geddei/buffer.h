@@ -30,12 +30,12 @@ using namespace std;
 #ifdef __GEDDEI_BUILD
 #include "qfastwaitcondition.h"
 #include "bufferdata.h"
-#include "signaltyperef.h"
+#include "type.h"
 #include "transmissiontype.h"
 #else
 #include <qtextra/qfastwaitcondition.h>
 #include <geddei/bufferdata.h>
-#include <geddei/signaltyperef.h>
+#include <geddei/type.h>
 #include <geddei/transmissiontype.h>
 #endif
 using namespace Geddei;
@@ -61,7 +61,7 @@ class Buffer: public ScratchOwner
 	uint theLogSize, theSize, theMask, theUsed;
 	uint readPos, writePos;
 	BufferInfo *lastScratch;
-	SignalTypeRef theType;
+	Type theType;
 	QVector<const Processor *> theTrapdoors;
 	QList<uint> thePlungers;
 	QList<BufferReader*> theReaders;
@@ -195,7 +195,7 @@ public:
 	/**
 	 * Sets the buffer's type. Causes a clear() (see caveats for clear()).
 	 */
-	void setType(SignalTypeRef const& _type);
+	void setType(Type const& _type);
 
 	/**
 	 * Returns the size of the buffer.
@@ -205,7 +205,7 @@ public:
 	/**
 	 * Returns the type of the buffer.
 	 */
-	SignalTypeRef const& type() const { return theType; }
+	Type const& type() const { return theType; }
 
 	/**
 	 * Some syntactic sugar, if you're into that sort of thing.
@@ -214,7 +214,7 @@ public:
 
 	void debug();
 
-	Buffer(uint size, SignalTypeRef const& _type = SignalTypeRef());
+	Buffer(uint size, Type const& _type = Type());
 	virtual ~Buffer();
 };
 

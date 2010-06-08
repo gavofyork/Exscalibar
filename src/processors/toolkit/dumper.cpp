@@ -41,7 +41,7 @@ class Dumper: public HeavyProcessor
 
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Commas", false, "Separate values by commas")("Output", "/tmp/data", "The filename in to which data should be written.")("Binary", true, "Write data in binary (false for text)")("Floats", false, "Use binary floats instead of bytes."); }
 	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &);
 	virtual void processor();
 	virtual void processorStopped();
 
@@ -63,7 +63,7 @@ void Dumper::initFromProperties(const Properties &p)
 	setupIO(Undefined, 0);
 }
 
-bool Dumper::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+bool Dumper::verifyAndSpecifyTypes(const Types &, Types &)
 {
 	return true;
 }

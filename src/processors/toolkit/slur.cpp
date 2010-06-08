@@ -46,7 +46,7 @@ private:
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual QString simpleText() const { return "S"; }
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(40, 96, 160); }
@@ -63,7 +63,7 @@ void Slur::processOwnChunks(BufferDatas const& _in, BufferDatas& _out, uint _ch)
 			_out[0](i, s) = m_current[s] = lerp(m_current[s], maxAround(_in[0], i, s, m_current.size()), m_quantity);
 }
 
-bool Slur::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Slur::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes = inTypes;
 	m_current.resize(inTypes[0].asA<TransmissionType>().arity());

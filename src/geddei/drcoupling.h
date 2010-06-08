@@ -55,7 +55,7 @@ class DRCoupling: virtual public DxCoupling
 	//* Reimplementations from xxCoupling (used by DxCoupling)
 	virtual void go() {}
 	virtual void stop() {}
-	virtual void specifyTypes(const SignalTypeRefs &inTypes, const SignalTypeRefs &outTypes);
+	virtual void specifyTypes(const Types &inTypes, const Types &outTypes);
 	virtual void initFromProperties(const Properties &p);
 	virtual void defineIO(uint inputs, uint outputs);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _chunks);

@@ -27,7 +27,7 @@ using namespace Geddei;
 class Split : public HeavyProcessor
 {
 	virtual void processor();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 public:
 	Split(): HeavyProcessor("Split", Out, Guarded) {}
@@ -48,7 +48,7 @@ void Split::processor()
 	}
 }
 
-bool Split::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Split::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes = inTypes[0];
 	return true;

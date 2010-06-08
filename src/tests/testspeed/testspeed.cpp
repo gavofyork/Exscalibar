@@ -40,7 +40,7 @@ class MySource: public HeavyProcessor
 			}
 		}
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Value(); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &outTypes) { outTypes[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 	virtual void specifyOutputSpace(QVector<uint> &o) { o[0] = 10; }
 public:
@@ -61,7 +61,7 @@ class MySink: public HeavyProcessor
 //	sched_yield();
 		}
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
 	MySink(): HeavyProcessor("MySink", NotMulti, Guarded) {}
@@ -78,7 +78,7 @@ class LatencySource: public HeavyProcessor
 			output(0).makeScratchSamples(1, true)[0] = *((float *)&t);
 		}
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &out) { out[0] = Value(); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &out) { out[0] = Value(); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 public:
 	LatencySource(): HeavyProcessor("LatencySource") {}
@@ -99,7 +99,7 @@ class LatencySink: public HeavyProcessor
 			delete t;
 		}
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 public:
 	float latency() const { return float(theElapsedSum) / float(theSamples); }
@@ -108,7 +108,7 @@ public:
 
 class PassThrough: public SubProcessor
 {
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &in, SignalTypeRefs &out)
+	virtual bool verifyAndSpecifyTypes(const Types &in, Types &out)
 	{
 		out = in;
 		return true;

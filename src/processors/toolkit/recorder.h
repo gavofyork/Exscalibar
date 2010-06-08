@@ -57,7 +57,7 @@ class DLLEXPORT Recorder: public HeavyProcessor
 {
 	virtual void processor();
 	virtual PropertiesInfo specifyProperties() const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &);
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &);
 	virtual void initFromProperties(const Properties &p);
 	virtual void receivedPlunger();
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }

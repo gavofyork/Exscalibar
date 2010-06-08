@@ -25,8 +25,8 @@ class SelectionPropertyItem: public BasePropertyItem
 public:
 	SelectionPropertyItem(PropertyItem* _p, QRectF const& _r): BasePropertyItem(_p, _r) {}
 
-	enum { Type = UserType + 19 };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType + 19 };
+	virtual int			type() const { return ItemType; }
 
 	virtual void		mousePressEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void		paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);

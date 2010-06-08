@@ -43,7 +43,7 @@ private:
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -165,7 +165,7 @@ void Pulser::processorStopped()
 {
 }
 
-bool Pulser::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Pulser::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (inTypes[0].asA<TransmissionType>().arity() != 1)
 		return false;
@@ -234,7 +234,7 @@ private:
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -264,7 +264,7 @@ void StaticValue::processorStopped()
 {
 }
 
-bool StaticValue::verifyAndSpecifyTypes(SignalTypeRefs const&, SignalTypeRefs& outTypes)
+bool StaticValue::verifyAndSpecifyTypes(Types const&, Types& outTypes)
 {
 	outTypes[0] = Value(1, 0, m_value);
 	return true;

@@ -37,7 +37,7 @@ public:
 
 private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual QString simpleText() const { return QChar(0x21F6); }
@@ -83,7 +83,7 @@ void Bandwise::initFromProperties(Properties const& _p)
 	setupIO(1, m_bins.size());
 }
 
-bool Bandwise::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Bandwise::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>())
 		return false;

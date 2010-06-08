@@ -19,14 +19,14 @@
 #include <cassert>
 using namespace std;
 
-#include "signaltyperefs.h"
-#include "signaltyperef.h"
+#include "types.h"
+#include "type.h"
 #include "transmissiontype.h"
 
 namespace Geddei
 {
 /*
-SignalTypeRefs::SignalTypeRefs(const SignalTypeRefs &src): theImplicitCopying(true)
+Types::Types(const Types &src): theImplicitCopying(true)
 {
 
 	theCount = src.theCount;
@@ -35,7 +35,7 @@ SignalTypeRefs::SignalTypeRefs(const SignalTypeRefs &src): theImplicitCopying(tr
 		theData[i] = src.theData[i]->copy();
 }
 
-SignalTypeRefs::SignalTypeRefs(QList<TransmissionType*> &src): theImplicitCopying(true)
+Types::Types(QList<TransmissionType*> &src): theImplicitCopying(true)
 {
 	theCount = src.count();
 	theData = new const TransmissionType *[theCount];
@@ -43,21 +43,21 @@ SignalTypeRefs::SignalTypeRefs(QList<TransmissionType*> &src): theImplicitCopyin
 		theData[i] = src.at(i)->copy();
 }
 
-SignalTypeRefs::SignalTypeRefs(uint count, bool implicitCopying) : theCount(count), theImplicitCopying(implicitCopying)
+Types::Types(uint count, bool implicitCopying) : theCount(count), theImplicitCopying(implicitCopying)
 {
 	theData = new const TransmissionType *[count];
 	for (uint i = 0; i < theCount; i++)
 		theData[i] = 0;
 }
 
-SignalTypeRefs::~SignalTypeRefs()
+Types::~Types()
 {
 	for (uint i = 0; i < theCount; i++)
 		delete theData[i];
 	delete [] theData;
 }
 
-SignalTypeRefs &SignalTypeRefs::operator=(const SignalTypeRefs &src)
+Types &Types::operator=(const Types &src)
 {
 	for (uint i = 0; i < theCount; i++)
 		delete theData[i];
@@ -69,7 +69,7 @@ SignalTypeRefs &SignalTypeRefs::operator=(const SignalTypeRefs &src)
 	return *this;
 }
 
-SignalTypeRefs &SignalTypeRefs::operator=(const TransmissionType &src)
+Types &Types::operator=(const TransmissionType &src)
 {
 	for (uint i = 0; i < theCount; i++)
 		if (theData[i] != &src)
@@ -79,7 +79,7 @@ SignalTypeRefs &SignalTypeRefs::operator=(const TransmissionType &src)
 	return *this;
 }
 
-SignalTypeRefs &SignalTypeRefs::operator=(const SignalTypeRef &src)
+Types &Types::operator=(const Type &src)
 {
 	for (uint i = 0; i < theCount; i++)
 		if (theData[i] != src.thePtr)
@@ -89,7 +89,7 @@ SignalTypeRefs &SignalTypeRefs::operator=(const SignalTypeRef &src)
 	return *this;
 }
 
-bool SignalTypeRefs::allSame() const
+bool Types::allSame() const
 {
 	if (!theData[0]) return false;
 	for (uint i = 1; i < theCount; i++)
@@ -98,7 +98,7 @@ bool SignalTypeRefs::allSame() const
 	return true;
 }
 
-void SignalTypeRefs::resize(uint count)
+void Types::resize(uint count)
 {
 	for (uint i = 0; i < theCount; i++)
 		delete theData[i];
@@ -109,13 +109,13 @@ void SignalTypeRefs::resize(uint count)
 		theData[i] = 0;
 }
 
-void SignalTypeRefs::setData(uint i, const TransmissionType *d)
+void Types::setData(uint i, const TransmissionType *d)
 {
 	delete theData[i];
 	theData[i] = d;
 }
 
-void SignalTypeRefs::setFill(const TransmissionType *d, bool replaceExisting)
+void Types::setFill(const TransmissionType *d, bool replaceExisting)
 {
 	bool okToDel = true;
 	for (uint i = 0; i < theCount; i++)
@@ -135,13 +135,13 @@ void SignalTypeRefs::setFill(const TransmissionType *d, bool replaceExisting)
 	if (!theCount || okToDel) delete d;
 }
 
-void SignalTypeRefs::copyData(uint i, const TransmissionType *d)
+void Types::copyData(uint i, const TransmissionType *d)
 {
 	delete theData[i];
 	theData[i] = d->copy();
 }
 
-void SignalTypeRefs::copyInto(QList<TransmissionType*> &dest)
+void Types::copyInto(QList<TransmissionType*> &dest)
 {
 	dest.clear();
 	for (uint i = 0; i < theCount; i++)

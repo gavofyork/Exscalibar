@@ -53,7 +53,7 @@ class AubioTracker: public CoProcessor
 	virtual void processorStopped();
 	virtual int canProcess();
 	virtual int process();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(40, 0, 160); }
 	virtual void initFromProperties(Properties const&)
 	{
@@ -68,7 +68,7 @@ public:
 	AubioTracker(): CoProcessor("AubioTracker") {}
 };
 
-bool AubioTracker::verifyAndSpecifyTypes(const SignalTypeRefs & _i, SignalTypeRefs & _o)
+bool AubioTracker::verifyAndSpecifyTypes(const Types & _i, Types & _o)
 {
 	if (!_i[0].isA<Wave>())
 		return false;

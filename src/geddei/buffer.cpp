@@ -93,7 +93,7 @@ void Buffer::updateUNSAFE()
 	theDataOut.wakeAll();
 }
 
-Buffer::Buffer(uint size, SignalTypeRef const& _type) : theDataFlux(QFastMutex::Recursive)
+Buffer::Buffer(uint size, Type const& _type) : theDataFlux(QFastMutex::Recursive)
 {
 	theDataFlux.lock();
 	theSize = 4;
@@ -512,7 +512,7 @@ void Buffer::clear()
 	if (MESSAGES) qDebug("< clear");
 }
 
-void Buffer::setType(SignalTypeRef const& _type)
+void Buffer::setType(Type const& _type)
 {
 	theType = _type;
 	clear();

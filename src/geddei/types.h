@@ -18,38 +18,18 @@
 
 #pragma once
 
-#include <QtGui>
-#include <QtXml>
+#include <exscalibar.h>
+#ifdef __GEDDEI_BUILD
+#include "transmissiontype.h"
+#include "typeds.h"
+#else
+#include <geddei/transmissiontype.h>
+#include <geddei/typeds.h>
+#endif
 
-#include <Geddei>
-using namespace Geddei;
-
-#include "InputItem.h"
-
-class ProcessorItem;
-class MultiProcessorItem;
-
-class MultipleInputItem: public InputItem
+namespace Geddei
 {
-public:
-	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
-	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
-	void setMultiplicity(uint _m);
-	MultiSink* sink() const;
+typedef Typeds<TransmissionType> Types;
 
-	// This or processorItem() will return non-zero.
-	MultiProcessorItem* multiProcessorItem() const;
-
-	bool isConnected() const;
-
-	virtual void interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-
-	virtual void typesConfirmed();
-
-	enum { ItemType = UserType + 12 };
-	virtual int type() const { return ItemType; }
-
-private:
-	uint		m_multiplicity;
-};
+}

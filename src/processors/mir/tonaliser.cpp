@@ -37,7 +37,7 @@ private:
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(Properties const&);
 	virtual void updateFromProperties(Properties const&properties);
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	QVector<int> m_bands;
@@ -61,7 +61,7 @@ void Tonaliser::updateFromProperties(Properties const&)
 {
 }
 
-bool Tonaliser::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool Tonaliser::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	if (!_inTypes[0].isA<Spectrum>())
 		return false;
@@ -113,7 +113,7 @@ private:
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &) { setupIO(1, 1); setupSamplesIO(1, 1, 1); }
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	uint m_arity;
@@ -128,7 +128,7 @@ void Deaverage::updateFromProperties(Properties const&)
 {
 }
 
-bool Deaverage::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool Deaverage::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	if (_inTypes[0].asA<TransmissionType>().arity() == 1)
 		return false;

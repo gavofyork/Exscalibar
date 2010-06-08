@@ -37,7 +37,7 @@ class Matrigraph: public CoProcessor
 
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
@@ -81,7 +81,7 @@ void Matrigraph::processorStopped()
 {
 }
 
-bool Matrigraph::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs&)
+bool Matrigraph::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	if (_inTypes.count() != 1 || !_inTypes[0].isA<Matrix>())
 		return false;

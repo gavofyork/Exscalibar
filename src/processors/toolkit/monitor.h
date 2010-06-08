@@ -49,7 +49,7 @@ class DLLEXPORT Monitor: public HeavyProcessor
 	virtual bool processorStarted();
 	virtual void processor();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual void receivedPlunger();
 	virtual void specifyOutputSpace(QVector<uint> &samples);

@@ -51,7 +51,7 @@ class FFT: public SubProcessor
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QString simpleText() const { return QChar(0x237c); }
 
 public:
@@ -112,7 +112,7 @@ class FFT : public SubProcessor
 	float *real, *imag;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -220,7 +220,7 @@ void FFT::initFromProperties(const Properties &properties)
 
 #endif
 
-bool FFT::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool FFT::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Wave>()) return false;
 	outTypes[0] = FreqSteppedSpectrum(theSize / 2 + 1, inTypes[0].asA<Contiguous>().frequency() / float(theStep), inTypes[0].asA<Contiguous>().frequency() / float(theSize));

@@ -48,7 +48,7 @@ class ALSAPlayer: public CoProcessor
 	virtual void processorStopped();
 	virtual int canProcess();
 	virtual int process();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
 	virtual void initFromProperties(const Properties &_p)
 	{
@@ -72,7 +72,7 @@ public:
 
 QMutex g_alsaLock;
 
-bool ALSAPlayer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &)
+bool ALSAPlayer::verifyAndSpecifyTypes(const Types &, Types &)
 {
 	return true;
 }

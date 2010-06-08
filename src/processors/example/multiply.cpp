@@ -28,7 +28,7 @@ class Multiply: public HeavyProcessor
 {
 	int count;
 	virtual void processor();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual QString simpleText() const { return QChar(0x00D7); }
 public:
@@ -51,7 +51,7 @@ void Multiply::processor()
 	}
 }
 
-bool Multiply::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Multiply::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes.allSame()) return false;
 	outTypes[0] = inTypes[0];

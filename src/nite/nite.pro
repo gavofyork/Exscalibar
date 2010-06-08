@@ -36,7 +36,7 @@ HEADERS += GeddeiNite.h \
     MultipleOutputItem.h \
     SubsContainer.h \
     MultiDomProcessorItem.h \
-    IncompleteMultipleConnectionItem.h \
+	IncompleteMultipleConnectionItem.h \
     Scheduled.h \
     Magnetic.h \
     WithProperties.h \

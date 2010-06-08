@@ -30,14 +30,34 @@ using namespace std;
 #include <memberinfo.h>
 #include <exscalibar.h>
 
+#ifdef __GEDDEI_BUILD
+#include "typeregistrar.h"
+#else
+#include <geddei/typeregistrar.h>
+#endif
+
 class QSocketSession;
 
 namespace Geddei
 {
 
-class BufferData;
 class Source;
-template<class T> class Type;
+class BufferData;
+
+template<class T> class Typed;
+template<class T> class Typeds;
+
+#define TRANSMISSION_TYPE(Name, Super) \
+public: \
+	virtual QString type() const { return staticType(); } \
+	inline static QString staticType() { return #Name; } \
+protected: \
+	virtual bool isEqualTo(TransmissionType const* _cmp) const { return _cmp->type() == staticType() && *static_cast<Name const*>(_cmp) == *this; } \
+	static TypeRegistration<Name> s_reg; \
+	TT_INHERITED_CLASS(Name, Super);
+
+#define TRANSMISSION_TYPE_CPP(Name) \
+	TypeRegistration<Name> Name::s_reg(#Name);
 
 /** @ingroup Geddei
  * @brief Base class for describing a signal that may be transferred in a Connection.
@@ -66,21 +86,8 @@ class DLLEXPORT TransmissionType
 {
 	TT_BASE_CLASS(TransmissionType);
 
-	friend class LRConnection;
-	friend class RLConnection;
-	friend class DRCoupling;
-	friend class RSCoupling;
-	template<class T> friend class Types;
-	template<class T> friend class Type;
-	friend class Buffer;
-	friend class Splitter;
-	friend class MLConnection;
-	friend class LMConnection;
-	friend class LxConnection;
-	friend class LLConnection;
-	friend class Processor;
-	friend class SubProcessor;
-	friend class LxConnectionNull;
+	template<class T> friend class Typeds;
+	template<class T> friend class Typed;
 
 public:
 	/**
@@ -145,13 +152,6 @@ public:
 
 	bool isNull() const { return theSize == 0; }
 
-protected:
-	/**
-	 * Number of (metadata) elements in each sample that are reserved for use by
-	 * this TransmissionType.
-	 */
-	virtual uint reserved() const { return 0u; }
-
 	/**
 	 * Post-process the output data in some way.
 	 *
@@ -159,14 +159,6 @@ protected:
 	 */
 	virtual void polishData(BufferData&, Source*, uint) const {}
 
-	/**
-	 * Sets the sampleSize of this TransmissionType.
-	 *
-	 * @param sampleSize The new sampleSize.
-	 */
-	void setSize(uint _n) { theSize = _n; }
-
-private:
 	/**
 	 * Sends this TransmissionType object to the given QSocketSession object.
 	 *
@@ -184,14 +176,29 @@ private:
 	 * @return A new TransmissionType-derived object which is equivalent to that sent
 	 * from the opposite end.
 	 */
-	static void receive(QSocketSession &source, Type<TransmissionType>& _return);
+	static Typed<TransmissionType> receive(QSocketSession &source);
 
+protected:
+	/**
+	 * Number of (metadata) elements in each sample that are reserved for use by
+	 * this TransmissionType.
+	 */
+	virtual uint reserved() const { return 0u; }
+
+	/**
+	 * Sets the sampleSize of this TransmissionType.
+	 *
+	 * @param sampleSize The new sampleSize.
+	 */
+	void setSize(uint _n) { theSize = _n; }
+
+private:
 	/**
 	 * Duplicate this TransmissionType object.
 	 *
 	 * @return A duplicate of this object.
 	 */
-	inline TransmissionType* copy() const;
+	inline TransmissionType* copy() const { return TypeRegistrar::get()->copy(this); }
 
 	/**
 	 * Determine whether given TT is a duplicate of this object.
@@ -205,86 +212,5 @@ private:
 
 	TT_1_MEMBER(theSize);
 };
-
-struct DLLEXPORT TransmissionTypeRegistrationFace
-{
-	inline TransmissionTypeRegistrationFace(QString const& _type);
-	virtual inline ~TransmissionTypeRegistrationFace();
-	virtual QString type() const = 0;
-	virtual TransmissionType* create() const = 0;
-	virtual TransmissionType* copy(TransmissionType const* _src) const = 0;
-};
-
-struct DLLEXPORT TransmissionTypeRegistrar
-{
-	static TransmissionTypeRegistrar* get() { return s_one ? s_one : (s_one = new TransmissionTypeRegistrar); }
-
-	void registerType(TransmissionTypeRegistrationFace* _ttr, QString const& _t)
-	{
-		m_list.insert(_t, _ttr);
-	}
-
-	void unregisterType(TransmissionTypeRegistrationFace* _ttr)
-	{
-		m_list.remove(m_list.key(_ttr));
-	}
-
-	TransmissionType* create(QString const& _type)
-	{
-		if (m_list.contains(_type))
-			return m_list.value(_type)->create();
-		return new TransmissionType;
-	}
-
-	TransmissionType* copy(TransmissionType const* _src)
-	{
-		cout << _src << endl;
-		cout << typeid(_src).name() << endl;
-		qDebug() << _src->type();
-		if (m_list.contains(_src->type()))
-			return m_list.value(_src->type())->copy(_src);
-		return new TransmissionType;
-	}
-
-	QMap<QString, TransmissionTypeRegistrationFace*> m_list;
-	static TransmissionTypeRegistrar* s_one;
-};
-
-inline TransmissionTypeRegistrationFace::TransmissionTypeRegistrationFace(QString const& _type)
-{
-	TransmissionTypeRegistrar::get()->registerType(this, _type);
-}
-
-inline TransmissionTypeRegistrationFace::~TransmissionTypeRegistrationFace()
-{
-	TransmissionTypeRegistrar::get()->unregisterType(this);
-}
-
-template<class T>
-struct TransmissionTypeRegistration: public TransmissionTypeRegistrationFace
-{
-	TransmissionTypeRegistration(QString const& _t): TransmissionTypeRegistrationFace(_t) {}
-	virtual QString type() const { return T::staticType(); }
-	virtual TransmissionType* create() const { return new T; }
-	virtual TransmissionType* copy(TransmissionType const* _src) const { return new T(*static_cast<T const*>(_src)); }
-};
-
-#define TRANSMISSION_TYPE(Name, Super) \
-public: \
-	virtual QString type() const { return staticType(); } \
-	inline static QString staticType() { return #Name; } \
-protected: \
-	virtual bool isEqualTo(TransmissionType const* _cmp) const { return _cmp->type() == staticType() && *static_cast<Name const*>(_cmp) == *this; } \
-	static TransmissionTypeRegistration<Name> s_reg; \
-	TT_INHERITED_CLASS(Name, Super);
-
-#define TRANSMISSION_TYPE_CPP(Name) \
-	TransmissionTypeRegistration<Name> Name::s_reg(#Name);
-
-
-inline TransmissionType* TransmissionType::copy() const
-{
-	return TransmissionTypeRegistrar::get()->copy(this);
-}
 
 }

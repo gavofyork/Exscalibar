@@ -67,14 +67,14 @@ void LMConnection::reset()
 	theBuffer.clear();
 }
 
-SignalTypeRef const& LMConnection::type() const
+Type const& LMConnection::type() const
 {
 	if (theType.isNull())
 		const_cast<LMConnection*>(this)->theSource->confirmTypes();
 	return theType;
 }
 
-void LMConnection::setType(SignalTypeRef const& _type)
+void LMConnection::setType(Type const& _type)
 {
 	theType = _type;
 	foreach (MLConnection* i, theConnections)

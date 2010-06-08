@@ -106,7 +106,7 @@ void Recorder::receivedPlunger()
 	// Skip to next file?
 }
 
-bool Recorder::verifyAndSpecifyTypes(const SignalTypeRefs& _inTypes, SignalTypeRefs &)
+bool Recorder::verifyAndSpecifyTypes(const Types& _inTypes, Types &)
 {
 	for (uint i = 0; i < _inTypes.count(); i++)
 		if (!_inTypes[i].isA<Contiguous>())

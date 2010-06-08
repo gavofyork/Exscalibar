@@ -37,8 +37,8 @@ public:
 	BaseItem(Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 	~BaseItem();
 
-	enum { Type = UserType };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType };
+	virtual int			type() const { return ItemType; }
 
 	void				setPos(qreal _x, qreal _y) { QGraphicsItem::setPos(floor(_x) + .5f, floor(_y) + .5f); }
 	void				setPos(QPointF _p) { QGraphicsItem::setPos(floor(_p.x()) + .5f, floor(_p.y()) + .5f); }

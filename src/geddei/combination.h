@@ -47,7 +47,7 @@ private:
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &p);
 	virtual void updateFromProperties(Properties const&p);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual QString type() const { return theX->type() + "&" + theY->type(); }
 
 	SubProcessor *theX;

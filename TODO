@@ -1,3 +1,5 @@
+Repot SignalTypeRef/SignalTypeRefs
+
 Sigmoid activator.
 - Will have to track frequency.
 - Probably best to use PeakRoller.

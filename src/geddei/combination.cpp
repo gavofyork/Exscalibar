@@ -127,10 +127,10 @@ void Combination::updateFromProperties(const Properties& _p)
 	theX->updateFromProperties(p);
 }
 
-bool Combination::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Combination::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	resetTime();
-	SignalTypeRefs r(1);
+	Types r(1);
 	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
 	{
 		theInterScope = r[0]->size();

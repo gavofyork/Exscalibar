@@ -28,8 +28,8 @@ class WithProperties: public QGraphicsItem
 public:
 	WithProperties(QGraphicsItem* _p, Properties const& _pr = Properties()): QGraphicsItem(_p), m_properties(_pr) {}
 
-	enum { Type = UserType + 16 };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType + 16 };
+	virtual int			type() const { return ItemType; }
 
 	inline QVariant					property(QString const& _key) const { return properties()[_key]; }
 	inline PropertiesDatum			propertiesInfo(QString const& _key) const { return propertiesInfo().datum(_key); }

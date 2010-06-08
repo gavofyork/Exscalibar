@@ -31,8 +31,8 @@ public:
 	void setTo(QPointF _to);
 	OutputItem* from() const;
 
-	enum { Type = UserType + 5 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 5 };
+	virtual int type() const { return ItemType; }
 
 private:
 	QPointF	m_to;

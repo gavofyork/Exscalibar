@@ -116,7 +116,7 @@ class DLLEXPORT DomProcessor: public CoProcessor
 	virtual int process();
 	virtual void wantToStopNow();
 	virtual void haveStoppedNow();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);

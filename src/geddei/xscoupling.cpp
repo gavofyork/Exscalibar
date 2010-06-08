@@ -17,7 +17,7 @@
  */
 
 #include "properties.h"
-#include "signaltyperefs.h"
+#include "types.h"
 #include "subprocessor.h"
 #include "xscoupling.h"
 

@@ -24,12 +24,12 @@
 #include "connection.h"
 #include "bufferdata.h"
 #include "bufferreader.h"
-#include "signaltyperef.h"
+#include "type.h"
 #else
 #include <geddei/connection.h>
 #include <geddei/bufferdata.h>
 #include <geddei/bufferreader.h>
-#include <geddei/signaltyperef.h>
+#include <geddei/type.h>
 #endif
 using namespace Geddei;
 
@@ -223,9 +223,9 @@ public:
 	/**
 	 * Retrieves the type of signal this connection transfers.
 	 *
-	 * @return A SignalTypeRef of this conection's TransmissionType.
+	 * @return A Type of this conection's TransmissionType.
 	 */
-	virtual SignalTypeRef const& type() const { return theType; }
+	virtual Type const& type() const { return theType; }
 
 	/**
 	 * Blocks until at least @a samples are ready to be read (or peeked) on the

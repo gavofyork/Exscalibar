@@ -27,13 +27,13 @@
 #include "globals.h"
 #include "properties.h"
 #include "bufferdatas.h"
-#include "signaltyperefs.h"
+#include "types.h"
 #else
 #include <qtextra/qfastwaitcondition.h>
 #include <geddei/globals.h>
 #include <geddei/properties.h>
 #include <geddei/bufferdatas.h>
-#include <geddei/signaltyperefs.h>
+#include <geddei/types.h>
 #endif
 
 namespace Geddei
@@ -111,7 +111,7 @@ class DLLEXPORT SubProcessor
 	QString theType;
 	uint theNumInputs, theNumOutputs, theIn, theOut, theStep;
 	MultiplicityType theMulti;
-	SignalTypeRefs theOutTypes;
+	Types theOutTypes;
 	//@}
 
 	//@{
@@ -155,7 +155,7 @@ class DLLEXPORT SubProcessor
 	 * in fact does an extra thing, namely records the outTypes for later use.
 	 * DO NOT call verifyAndSpecifyTypes(...) directly: Use proxyVSTypes(...) instead.
 	 */
-	bool proxyVSTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
+	bool proxyVSTypes(const Types &inTypes, Types &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
 
 	/** @internal
 	 * (Re)defines the number of inputs/outputs after any multiplicity concerns are
@@ -237,7 +237,7 @@ protected:
 	 * @sa proxyVSTypes(), for internal development.
 	 */
 	//TODO: enforce the same basic class rule.
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) = 0;
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) = 0;
 
 	/**
 	 * Initialises from the given @a properties. Should call setupIO() (and

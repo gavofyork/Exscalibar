@@ -69,7 +69,7 @@ bool Player::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	return true;
 }
 
-bool Player::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool Player::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 {
 	outTypes = Wave(m_rate);
 	return true;

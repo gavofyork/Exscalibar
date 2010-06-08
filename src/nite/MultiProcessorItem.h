@@ -34,8 +34,8 @@ public:
 	MultiProcessorItem(QString const& _type, Properties const& _pr = Properties(), QString const& _name = QString::null, QSizeF const& _size = QSizeF(0, 0));
 	~MultiProcessorItem();
 
-	enum { Type = UserType + 7 };
-	virtual int			type() const { return Type; }
+	enum { ItemType = UserType + 7 };
+	virtual int			type() const { return ItemType; }
 
 	virtual QString		typeName() const { return m_processor->type(); }
 	virtual QString		name() const { return multiProcessor() ? multiProcessor()->name() : QString::null; }

@@ -44,7 +44,7 @@ class PlungeGenerator : public HeavyProcessor
 		}
 		plunge();
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes) { outTypes[0] = Wave(22050); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &outTypes) { outTypes[0] = Wave(22050); return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(0, 1); }
 
 public:
@@ -62,7 +62,7 @@ class PlungeDetector : public HeavyProcessor
 		}
 	}
 
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &) { return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &) { return true; }
 	virtual void initFromProperties(const Properties &) { setupIO(1, 0); }
 	virtual void receivedPlunger()
 	{
@@ -76,7 +76,7 @@ class Add: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = in[0][0] + in[0][2] + in[0][4]; out[0][1] = in[0][1] + in[0][3]; }
 	virtual void initFromProperties(const Properties &) { setupSamplesIO(5, 3, 2); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Add() : SubProcessor("Add") {}
 };
@@ -85,7 +85,7 @@ class Sub: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = (in[0][0] - in[0][1]) + (in[0][2] - in[0][3]); }
 	virtual void initFromProperties(const Properties &) { setupSamplesIO(4, 2, 1); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Sub() : SubProcessor("Sub") {}
 };
@@ -94,7 +94,7 @@ class Diff: public SubProcessor
 {
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const { out[0][0] = ::abs(in[0][0] - in[1][0]); }
 	virtual void initFromProperties(const Properties &) { setupIO(2, 1); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { outTypes = inTypes[0]; return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { outTypes = inTypes[0]; return true; }
 public:
 	Diff() : SubProcessor("Diff", InConst) {}
 };

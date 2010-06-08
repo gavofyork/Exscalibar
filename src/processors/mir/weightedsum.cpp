@@ -35,7 +35,7 @@ private:
 	virtual QString simpleText() const { return QChar(0x2140); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void updateFromProperties(const Properties &properties);
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	int m_type;
@@ -52,7 +52,7 @@ void WeightedSum::updateFromProperties(Properties const& _p)
 	m_type = _p.get("Type").toInt();
 }
 
-bool WeightedSum::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
+bool WeightedSum::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
 	if (!_inTypes[0].isA<Contiguous>())
 		return false;

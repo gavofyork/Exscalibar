@@ -220,7 +220,7 @@ void xLConnectionReal::sinkStopped()
 	theBuffer.closeTrapdoor(dynamic_cast<Processor *>(theSink));
 }
 
-SignalTypeRef const& xLConnectionReal::type() const
+Type const& xLConnectionReal::type() const
 {
 	if (theType.isNull())
 		const_cast<xLConnectionReal*>(this)->pullType();

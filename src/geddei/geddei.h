@@ -39,8 +39,8 @@
 #include "processorport.h"
 #include "properties.h"
 #include "transmissiontype.h"
-#include "signaltyperef.h"
-#include "signaltyperefs.h"
+#include "type.h"
+#include "types.h"
 #else
 #include <geddei/multiprocessorcreator.h>
 #include <geddei/multiprocessor.h>
@@ -60,8 +60,8 @@
 #include <geddei/processorport.h>
 #include <geddei/properties.h>
 #include <geddei/transmissiontype.h>
-#include <geddei/signaltyperef.h>
-#include <geddei/signaltyperefs.h>
+#include <geddei/type.h>
+#include <geddei/types.h>
 #endif
 
 /**

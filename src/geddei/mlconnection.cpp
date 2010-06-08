@@ -239,7 +239,7 @@ void MLConnection::resetType()
 	theType.nullify();
 }
 
-void MLConnection::setType(SignalTypeRef const& _type)
+void MLConnection::setType(Type const& _type)
 {
 	theType = _type;
 }
@@ -256,7 +256,7 @@ Connection::Tristate MLConnection::isReadyYet()
 	return theSink->isGoingYet();
 }
 
-SignalTypeRef const& MLConnection::type() const
+Type const& MLConnection::type() const
 {
 	if (theType.isNull())
 		theType = theConnection->type();

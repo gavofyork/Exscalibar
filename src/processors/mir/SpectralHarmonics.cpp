@@ -41,7 +41,7 @@ public:
 
 private:
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
@@ -165,7 +165,7 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 	}*/
 }
 
-bool SpectralHarmonics::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool SpectralHarmonics::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>())
 		return false;

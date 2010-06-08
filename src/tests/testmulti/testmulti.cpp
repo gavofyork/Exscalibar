@@ -37,7 +37,7 @@ class DownSample : public SubProcessor
 	uint theConsolidate;
 
 	virtual void processChunks(const BufferDatas &in, BufferDatas &out, uint chunks) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties(const Properties &properties);
 
@@ -79,7 +79,7 @@ void DownSample::processChunks(const BufferDatas &ins, BufferDatas &outs, uint c
 	}
 }
 
-bool DownSample::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DownSample::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Contiguous>())
 		return false;
@@ -124,7 +124,7 @@ class SpectrumSource: public HeavyProcessor
 		}
 		plunge();
 	}
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &, Types &outTypes)
 	{
 		outTypes[0] = Spectrum(theWidth, 1);
 		return true;
@@ -147,7 +147,7 @@ class SuitableSplit: public SubProcessor
 	float theBass, theTreble;
 	int theBand[4];
 	virtual void initFromProperties (const Properties &) { setupIO(1, 3); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes) { if (!inTypes[0].isA<Spectrum>()) return false; outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].asA<Spectrum>().bins() - 4); return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes) { if (!inTypes[0].isA<Spectrum>()) return false; outTypes[0] = Spectrum(2); outTypes[1] = Spectrum(2); outTypes[2] = Spectrum(inTypes[0].asA<Spectrum>().bins() - 4); return true; }
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	{	cerr << "Sizes: i=" << ins[0].elements() << ", o = " << outs[0].elements() << ", " << outs[1].elements() << ", " << outs[2].elements() << endl;
 	}

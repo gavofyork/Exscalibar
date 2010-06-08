@@ -39,8 +39,8 @@ public:
 
 	QPointF tip() const;
 
-	enum { Type = UserType + 3 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 3 };
+	virtual int type() const { return ItemType; }
 
 protected:
 	virtual QRectF boundingRect() const;

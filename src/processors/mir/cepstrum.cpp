@@ -45,7 +45,7 @@ class Cepstrum : public SubProcessor
 	float *theIn, *theOut;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &properties);
 	virtual PropertiesInfo specifyProperties() const
 	{
@@ -75,7 +75,7 @@ Cepstrum::~Cepstrum()
 	if (thePlan) fftwf_destroy_plan(thePlan);
 }
 
-bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Cepstrum::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
 	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();
@@ -111,7 +111,7 @@ class Cepstrum : public SubProcessor
 	uint theBins;
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 
 public:
 	Cepstrum() : SubProcessor("Cepstrum") {}
@@ -127,7 +127,7 @@ void Cepstrum::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 	}
 }
 
-bool Cepstrum::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Cepstrum::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<FreqSteppedSpectrum>()) return false;
 	const FreqSteppedSpectrum &s = inTypes[0].asA<FreqSteppedSpectrum>();

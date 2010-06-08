@@ -29,7 +29,7 @@ class SignalSink: public HeavyProcessor
 protected:
 	virtual void processor();
 	virtual void initFromProperties(const Properties &props);
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &/*inTypes*/, SignalTypeRefs &/*outTypes*/) { return true; }
+	virtual bool verifyAndSpecifyTypes(const Types &/*inTypes*/, Types &/*outTypes*/) { return true; }
 public:
 	SignalSink(): HeavyProcessor("SignalSink") {}
 };

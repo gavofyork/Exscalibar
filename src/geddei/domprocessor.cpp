@@ -229,7 +229,7 @@ int DomProcessor::process()
 	}
 }
 
-bool DomProcessor::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool DomProcessor::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	// We can use just verifyAndSpecifyTypes here, since the outTypes will be recorded
 	// for our primary in the for loop later anyway (assuming they're valid).

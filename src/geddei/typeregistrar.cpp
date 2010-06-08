@@ -16,40 +16,27 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <QtGui>
-#include <QtXml>
-
-#include <Geddei>
+#include "transmissiontype.h"
+#include "typeregistrar.h"
 using namespace Geddei;
 
-#include "InputItem.h"
-
-class ProcessorItem;
-class MultiProcessorItem;
-
-class MultipleInputItem: public InputItem
+namespace Geddei
 {
-public:
-	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
-	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
-	void setMultiplicity(uint _m);
-	MultiSink* sink() const;
+TypeRegistrar* TypeRegistrar::s_one = 0;
 
-	// This or processorItem() will return non-zero.
-	MultiProcessorItem* multiProcessorItem() const;
+TransmissionType* TypeRegistrar::create(QString const& _type)
+{
+	if (m_list.contains(_type))
+		return m_list.value(_type)->create();
+	return new TransmissionType;
+}
 
-	bool isConnected() const;
+TransmissionType* TypeRegistrar::copy(TransmissionType const* _src)
+{
+	if (m_list.contains(_src->type()))
+		return m_list.value(_src->type())->copy(_src);
+	return new TransmissionType;
+}
 
-	virtual void interPaint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
-
-	virtual void typesConfirmed();
-
-	enum { ItemType = UserType + 12 };
-	virtual int type() const { return ItemType; }
-
-private:
-	uint		m_multiplicity;
-};
+}

@@ -31,8 +31,8 @@ public:
 	void setTo(QPointF _to);
 	MultipleOutputItem* from() const;
 
-	enum { Type = UserType + 10 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 10 };
+	virtual int type() const { return ItemType; }
 
 private:
 	QPointF	m_to;

@@ -33,7 +33,7 @@ using namespace TransmissionTypes;
 
 class Fan: public SubProcessor
 {
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void processChunk(const BufferDatas &ins, BufferDatas &outs) const;
 
 public:
@@ -44,7 +44,7 @@ Fan::Fan(): SubProcessor("Fan", Out)
 {
 }
 
-bool Fan::verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+bool Fan::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
 	outTypes = Spectrum(inTypes[0].asA<Spectrum>().bins() / outTypes.count(), inTypes[0].asA<Contiguous>().frequency());
@@ -66,7 +66,7 @@ class CustomSegment: public SubProcessor
 	QValueVector<uint> theBands;
 	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Band0", 8, "")("Band1", 8, "")("Band2", 8, ""); }
 	virtual void initFromProperties (const Properties &p) { setupIO(1, 3, 1, 1, 1); theBands.resize(3); theBands[0] = p["Band0"].toInt(); theBands[1] = p["Band1"].toInt(); theBands[2] = p["Band2"].toInt(); }
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes)
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
 		if (!inTypes[0].isA<Spectrum>()) return false;
 		for (uint i = 0; i < theBands.count(); i++)

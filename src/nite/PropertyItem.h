@@ -35,8 +35,8 @@ public:
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
-	enum { Type = UserType + 16 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 16 };
+	virtual int type() const { return ItemType; }
 
 protected:
 	bool m_isDynamic;
@@ -63,8 +63,8 @@ public:
 
 	virtual bool			sceneEvent(QEvent* _e);
 
-	enum { Type = UserType + 20 };
-	virtual int				type() const { return Type; }
+	enum { ItemType = UserType + 20 };
+	virtual int				type() const { return ItemType; }
 
 	QRectF m_rect;
 };

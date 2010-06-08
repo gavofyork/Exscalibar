@@ -61,7 +61,7 @@ class ALSACapturer: public CoProcessor
 	virtual void processorStopped();
 	virtual int canProcess();
 	virtual int process();
-	virtual bool verifyAndSpecifyTypes(const SignalTypeRefs &inTypes, SignalTypeRefs &outTypes);
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
 	virtual void initFromProperties(const Properties &_p)
 	{
 		theDevice = _p["Device"].toString();
@@ -100,7 +100,7 @@ public:
 	ALSACapturer(): CoProcessor("ALSACapturer", OutConst), thePcmHandle(0) {}
 };
 
-bool ALSACapturer::verifyAndSpecifyTypes(const SignalTypeRefs &, SignalTypeRefs &outTypes)
+bool ALSACapturer::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 {
 	for (uint i = 0; i < theChannels; i++)
 		outTypes[i] = Wave(theFrequency);

@@ -58,7 +58,7 @@ void Splitter::pushScratch(const BufferData &data)
 	data.invalidate();
 }
 
-SignalTypeRef const& Splitter::type() const
+Type const& Splitter::type() const
 {
 	const_cast<Splitter*>(this)->theSource->confirmTypes();
 	return theType;
@@ -103,7 +103,7 @@ Connection::Tristate Splitter::isReadyYet()
 	return ret;
 }
 
-void Splitter::setType(SignalTypeRef const& _type)
+void Splitter::setType(Type const& _type)
 {
 	theType = _type;
 	foreach (LxConnection* i, theConnections)

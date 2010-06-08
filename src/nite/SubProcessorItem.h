@@ -47,8 +47,8 @@ public:
 
 	QString spType() const { return m_type; }
 
-	enum { Type = UserType + 8 };
-	virtual int type() const { return Type; }
+	enum { ItemType = UserType + 8 };
+	virtual int type() const { return ItemType; }
 
 	virtual void setProperty(QString const& _key, QVariant const& _value);
 	void setDefaultProperties(PropertiesInfo const& _p) { setPropertiesInfo(_p); }
