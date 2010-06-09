@@ -1,3 +1,4 @@
+
 /* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
@@ -19,10 +20,12 @@
 #include <Plugin>
 using namespace Geddei;
 
-class PeakFinder : public CoProcessor
+class Generator : public CoProcessor
 {
 public:
-	PeakFinder();
+	Generator(): CoProcessor("Generator") {}
+
+	double m_secs;
 
 private:
 	virtual bool processorStarted();
@@ -33,65 +36,53 @@ private:
 	virtual void initFromProperties(Properties const& _p);
 	virtual void updateFromProperties(Properties const& _p);
 	virtual QString simpleText() const { return QChar(0x21FB); }
-
-	bool m_goingUp;
+	virtual double secondsPassed() const;
 };
 
-PeakFinder::PeakFinder(): CoProcessor("PeakFinder")
-{
-}
-
-bool PeakFinder::processorStarted()
-{
-	return true;
-}
-
-int PeakFinder::process()
-{
-	{
-		const BufferData in = input(0).peekSamples(3);
-		if (in(0, 0) < in(1, 0) && in(1, 0) <= in(2, 0) || in(0, 0) <= in(1, 0) && in(1, 0) < in(2, 0))
-			m_goingUp = true;
-		else if (in(0, 0) < in(1, 0) && in(1, 0) > in(2, 0) || m_goingUp == true)
-		{
-			BufferData out = output(0).makeScratchSample();
-			out[0] = in[1];
-			out[1] = in[1] + max(in[0], in[2]);
-			output(0) << out;
-			m_goingUp = false;
-		}
-	}
-	input(0).readSample();
-	return DidWork;
-}
-
-void PeakFinder::processorStopped()
-{
-}
-
-bool PeakFinder::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
-{
-	if (!_inTypes[0].isA<Contiguous>() || _inTypes[0].asA<Contiguous>().arity() != 1)
-		return false;
-	_outTypes[0] = Mark(2);
-	return true;
-}
-
-void PeakFinder::initFromProperties(Properties const& _p)
-{
-	updateFromProperties(_p);
-	setupIO(1, 1);
-}
-
-void PeakFinder::updateFromProperties(Properties const&)
-{
-}
-
-PropertiesInfo PeakFinder::specifyProperties() const
+PropertiesInfo Generator::specifyProperties() const
 {
 	return PropertiesInfo
 			("Example", false, "Example description. { Units }");
 }
 
-EXPORT_CLASS(PeakFinder, 0,1,0, Processor);
+void Generator::initFromProperties(Properties const& _p)
+{
+	updateFromProperties(_p);
+	setupIO(0, 1);
+}
+
+void Generator::updateFromProperties(Properties const&)
+{
+}
+
+bool Generator::verifyAndSpecifyTypes(Types const&, Types& _outTypes)
+{
+	_outTypes = Mark(0);
+	qDebug() << _outTypes[0].arity();
+	return true;
+}
+
+bool Generator::processorStarted()
+{
+	m_secs = 0.0;
+	return true;
+}
+
+double Generator::secondsPassed() const
+{
+	return m_secs;
+}
+
+int Generator::process()
+{
+	output(0) << output(0).makeScratchSample();
+	m_secs+=1.0;
+	return -1000;
+}
+
+void Generator::processorStopped()
+{
+}
+
+EXPORT_CLASS(Generator, 0,1,0, Processor);
 

@@ -63,7 +63,8 @@ HEADERS += buffer.h \
     typed.h \
     type.h \
     types.h \
-    coretypes.h
+    coretypes.h \
+    plugin.h
 SOURCES += buffer.cpp \
 	bufferinfo.cpp \
 	bufferdata.cpp \

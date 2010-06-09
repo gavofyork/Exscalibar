@@ -34,6 +34,8 @@ xLConnectionReal::xLConnectionReal(Sink *newSink, uint newSinkIndex, uint buffer
 	: xLConnection(newSink, newSinkIndex), theBuffer(bufferSize)
 {
 	theReader = new BufferReader(&theBuffer);
+	m_samplesRead = 0;
+	m_latestPeeked = 0;
 }
 
 xLConnectionReal::~xLConnectionReal()
@@ -218,6 +220,8 @@ void xLConnectionReal::sinkStopped()
 {
 	if (MESSAGES) qDebug("xLConnectionReal::sinkStopped(): theReader=%p", theReader);
 	theBuffer.closeTrapdoor(dynamic_cast<Processor *>(theSink));
+	m_samplesRead = 0;
+	m_latestPeeked = 0;
 }
 
 Type const& xLConnectionReal::type() const

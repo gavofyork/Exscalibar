@@ -103,8 +103,8 @@ public:
 	 * simple time-based offset single, this will be 1, but for more complex
 	 * signals such as spectra, matrices or whatever, this will be more.
 	 */
-	inline TransmissionType(uint _size = 1u): m_size(max(_size, 1u)) {}
-	inline TransmissionType(NullTransmissionTypeType): m_size(0) {}
+	inline TransmissionType(NullTransmissionTypeType = NullTransmissionType): m_size(0) {}
+	inline TransmissionType(uint _size): m_size(max(_size, 1u)) {}
 
 	/**
 	 * Virtual destructor.

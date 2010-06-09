@@ -36,7 +36,8 @@ SOURCES += monitor.cpp \
 	alsaplayer.cpp \
     slur.cpp \
     Convolver.cpp \
-    PeakFinder.cpp
+    PeakFinder.cpp \
+    Generator.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

@@ -39,10 +39,12 @@ private:
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
-//	virtual void specifyInputSpace(QVector<uint>& _s) { _s[0] = m_spu; }
-	virtual void requireInputSpace(QVector<uint>& _s) { _s[0] = 1; }
+	virtual void specifyInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.size(); i++) _s[i] = input(i).type().isA<Mark>() ? 1 : max<uint>(1, input(i).type().asA<Contiguous>().frequency() / 30); }
+	virtual void requireInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.size(); i++) _s[i] = 1; }
 	void updateLimits(QSizeF const& _s, float _ppl) const;
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
+	virtual uint cyclesAvailable(QVector<uint> const& _inputs) const { return anyInput(_inputs); }
+	virtual void receivedPlunger() { m_latePoint = 0.0; }
 
 	struct ChannelInfo
 	{
@@ -63,7 +65,6 @@ private:
 
 	mutable QList<ChannelInfo> m_config;
 
-	QVector<uint> m_viewWidthSamples;
 	QVector<uint> m_arity;
 
 	mutable double m_latePoint;
@@ -74,7 +75,8 @@ private:
 	int m_labeledOR;
 
 	mutable QPixmap m_display;
-	mutable QPixmap m_grid;
+	mutable QPixmap m_units;
+	mutable QPixmap m_time;
 	mutable QPixmap m_labels;
 	typedef QMultiMap<double, QVector<float> > MarkData;
 	mutable QVector<MarkData> m_mPoints;
@@ -86,7 +88,7 @@ private:
 PropertiesInfo Grapher::specifyProperties() const
 {
 	return PropertiesInfo	("Inputs", 1, "Number of inputs.", false, "n", AV(1, 16))
-							("View Width", 5, "The width of the view (seconds).", false)
+							("View Width", 5, "The width of the view (seconds).", true, "w", AV(0.1, 100, AllowedValue::Log10))
 							("Antialias", false, "Antialiasing of lines.", true, "A", AVbool)
 							("Labeled", -1, "The subgraph index for the unit labels. { -1: Default; >= 0 }", true, "g", AV("Auto", "?", -1) AVand(0, 16))
 							("Zoom", 1, "The input zoom factor.", true, "x", AV(0.00001, 100000, AllowedValue::Log10));
@@ -95,7 +97,6 @@ PropertiesInfo Grapher::specifyProperties() const
 void Grapher::initFromProperties(Properties const& _p)
 {
 	setupIO(_p["Inputs"].toInt(), 0);
-	m_viewWidth = _p["View Width"].toDouble();
 	updateFromProperties(_p);
 }
 
@@ -105,37 +106,35 @@ void Grapher::updateFromProperties(Properties const& _p)
 	m_antialiasing = _p["Antialias"].toBool();
 	m_labeledOR = _p["Labeled"].toInt();
 	m_labeled = (m_labeledOR == -1) ? m_labeled : m_labeledOR;
+	m_viewWidth = _p["View Width"].toDouble();
 	m_rejig = true;
 }
 
 bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 {
 	m_arity.resize(_inTypes.count());
-	m_viewWidthSamples.resize(_inTypes.count());
 
 	m_config.clear();
 
 	for (uint i = 0; i < _inTypes.count(); i++)
-		if (Typed<MultiValue> in = _inTypes[0])
+		if (Typed<MultiValue> in = _inTypes[i])
 		{
 			m_labeled = (m_labeledOR == -1) ? in->labeled() + m_config.size() : m_labeledOR;
 			m_arity[i] = max(1u, in->arity());
-			m_viewWidthSamples[i] = (uint)(in->frequency() * m_viewWidth);
 			for (int ii = 0; ii < in->config().size(); ii++)
 				m_config.append(ChannelInfo(i, in->config()[ii], in->frequency()));
 		}
-		else if (Typed<Contiguous> in = _inTypes[0])
+		else if (Typed<Contiguous> in = _inTypes[i])
 		{
 			m_labeled = (m_labeledOR == -1) ? m_config.size() : m_labeledOR;
 			m_arity[i] = max(1u, in->arity());
-			m_viewWidthSamples[i] = (uint)(in->frequency() * m_viewWidth);
 			for (uint ii = 0; ii < in->arity(); ii++)
 				m_config.append(ChannelInfo(i, MultiValue::Config(in->max(), in->min(), ii), in->frequency()));
 		}
-		else if (Typed<Mark> in = _inTypes[0])
+		else if (Typed<Mark> in = _inTypes[i])
 		{
-			(void)in;
-			m_config.append(ChannelInfo(i));
+			m_config.append(ChannelInfo(i, MultiValue::Config(in->max(0), in->min(0), 0), 0));
+			m_arity[i] = in.arity();
 		}
 		else
 			return false;
@@ -148,7 +147,7 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 		m_config[i].min = m_config[i].config.min * m_config[i].config.conversion;
 		m_config[i].inc = m_config[i].delta = (m_config[i].config.max - m_config[i].config.min) * m_config[i].config.conversion;
 	}
-	setupVisual(m_viewWidth * 20, 20, 20);
+	setupVisual(100, 50, 20);
 	return true;
 }
 
@@ -171,39 +170,64 @@ bool Grapher::processorStarted()
 
 int Grapher::process()
 {
+	int cycles = 0;
 	for (uint i = 0; i < numInputs(); i++)
 	{
 		BufferData d = input(i).readSamples(0, true);
+		l_points.lock();
 		for (uint s = 0; s < d.samples(); s++)
 		{
+			cycles++;
 			QVector<float> x(m_arity[i]);
-			d.copyTo(x);
-			l_points.lock();
+			d.sample(s).copyTo(x);
 
-			if (m_config[i].config.conversion == 0.f)
+			if (input(i).type().isA<Mark>())
 			{
 				m_mPoints[i].insert(Mark::timestamp(d.sample(s)), x);
 			}
 			else
 			{
 				m_cPoints[i].append(x);
-				while ((uint)m_cPoints[i].size() > m_viewWidthSamples[i] + 1)
+				uint ms = input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1;
+				while ((uint)m_cPoints[i].size() > ms)
 					m_cPoints[i].removeFirst();
 			}
-			l_points.unlock();
 		}
+		l_points.unlock();
 	}
-	return DidWork;
+	return cycles;
 }
 
 void Grapher::processorStopped()
 {
 }
 
+template<class T>
+static T graphParameters(T _min, T _max, T _divisions, T* o_from = 0, T* o_delta = 0)
+{
+	T uMin = _min;
+	T uMax = _max;
+	T l10 = log10((uMax - uMin) / _divisions * 5.5f);
+	T mt = pow(10.f, l10 - floor(l10));
+	T ep = pow(10.f, floor(l10));
+	T inc = (mt > 6.f) ? ep * 2.f : (mt > 3.f) ? ep : (mt > 1.2f) ? ep / 2.f : ep / 5.f;
+	if (o_delta && o_from)
+	{
+		(*o_from) = floor(uMin / inc) * inc;
+		(*o_delta) = (ceil(uMax / inc) - floor(uMin / inc)) * inc;
+	}
+	else if (o_from)
+	{
+		(*o_from) = ceil(uMin / inc) * inc;
+	}
+	return inc;
+}
+
 void Grapher::updateLimits(QSizeF const& _s, float _ppl) const
 {
 	for (int i = 0; i < m_config.size(); i++)
-	{
+		m_config[i].inc = graphParameters<float>(m_config[i].config.min * m_config[i].config.conversion / m_gain, m_config[i].config.max * m_config[i].config.conversion / m_gain, _s.height() / _ppl, &(m_config[i].min), &(m_config[i].delta));
+/*	{
 		float uMin = m_config[i].config.min * m_config[i].config.conversion / m_gain;
 		float uMax = m_config[i].config.max * m_config[i].config.conversion / m_gain;
 		float l10 = logf((uMax - uMin) / (_s.height() / _ppl) * 5.5f) / logf(10.f);
@@ -212,7 +236,7 @@ void Grapher::updateLimits(QSizeF const& _s, float _ppl) const
 		m_config[i].inc = (mt > 6.f) ? ep * 2.f : (mt > 3.f) ? ep : (mt > 1.2f) ? ep / 2.f : ep / 5.f;
 		m_config[i].min = floor(uMin / m_config[i].inc) * m_config[i].inc;
 		m_config[i].delta = ceil(uMax / m_config[i].inc) * m_config[i].inc - m_config[i].min;
-	}
+	}*/
 }
 
 // TODO: on plunge reset latepoints.
@@ -252,9 +276,9 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			QPainter p(&m_labels);
 			p.setFont(f);
 
-			m_grid = QPixmap(_s.width(), _s.height());
-			m_grid.fill(Qt::white);
-			QPainter q(&m_grid);
+			m_units = QPixmap(_s.width(), _s.height());
+			m_units.fill(Qt::white);
+			QPainter q(&m_units);
 			q.setPen(Qt::lightGray);
 			for (float yp = m_config[m_labeled].min + m_config[m_labeled].inc; yp < m_config[m_labeled].min + m_config[m_labeled].delta; yp += m_config[m_labeled].inc)
 			{
@@ -280,8 +304,8 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		for (int cii = 0; cii < m_config.size(); cii++)
 		{
 			ChannelInfo& ci = m_config[cii];
-			if (ci.config.conversion == 0.f)
-				ci.latePoint = mp[ci.input].keys().last();
+			if (ci.frequency == 0.f)
+				ci.latePoint = mp[ci.input].size() ? mp[ci.input].keys().last() : 0.0;
 			else
 				ci.latePoint += max<int>(0, cp[ci.input].size() - 1) / ci.frequency;
 			newLatePoint = max(newLatePoint, ci.latePoint);
@@ -293,10 +317,37 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			m_latePoint += pixelOff * m_viewWidth / _s.width();
 			m_display.scroll(-pixelOff, 0, m_display.rect());
 
-			QPainter p(&m_display);
-			p.setRenderHint(QPainter::Antialiasing, false);
-			p.setCompositionMode(QPainter::CompositionMode_Source);
-			p.fillRect(_s.width() - pixelOff, 0, pixelOff, _s.height(), Qt::transparent);
+			{
+				QPainter p(&m_display);
+				p.setRenderHint(QPainter::Antialiasing, false);
+				p.setCompositionMode(QPainter::CompositionMode_Source);
+				p.fillRect(_s.width() - pixelOff, 0, pixelOff, _s.height(), Qt::transparent);
+			}
+			m_time = QPixmap(_s.width(), _s.height());
+			m_time.fill(Qt::transparent);
+			QPainter p(&m_time);
+			p.setFont(f);
+			double from;
+			double inc = graphParameters<double>(m_latePoint - m_viewWidth, m_latePoint, (double)_s.width() / 30.0, &from);
+			for (double i = from; i < m_latePoint; i += inc)
+			{
+				float x = (i - m_latePoint) * _s.width() / m_viewWidth + _s.width() - 2.f;
+				p.setPen(Qt::lightGray);
+				p.drawLine(QPointF(x, 0), QPointF(x, _s.height()));
+
+				if (x > _s.width() - 20.f || x < 20.f)
+					continue;
+
+				QString t = QString::number(i, 'g', 3);
+				QRectF pos(x - 20.f, 0.f, 40.f, f.pixelSize() + 2);
+				p.setPen(QColor(255, 255, 255, 192));
+				for (float x = -1; x < 2; x++)
+					for (float y = -1; y < 2; y++)
+						if (x != y && x != 1 - y)
+							p.drawText(pos.translated(x, y), Qt::AlignHCenter|Qt::AlignTop, t);
+				p.setPen(Qt::black);
+				p.drawText(pos, Qt::AlignHCenter|Qt::AlignTop, t);
+			}
 		}
 
 		QPainter p(&m_display);
@@ -306,15 +357,20 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		foreach (ChannelInfo ci, m_config)
 		{
 			p.save();
-			// basic scaling:
-			// basic transform: newLatePoint -
+
 			MultiValue::Config cf = ci.config;
 			float mn = ci.min;
 			float dl = ci.delta;
-			if (cf.conversion == 0.f)
+			if (ci.frequency == 0.f)
 			{
-				QMap<double, QVector<float> > const& d = mp[ci.input];
-				lp[cfi] = d.value(d.keys().last())[0];
+				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
+				{
+					float x = (i.key() - m_latePoint) * _s.width() / m_viewWidth + _s.width() - 2.f;
+					if (i.value().size())
+						p.fillRect(QRectF(x - 2.f, _s.height(), 4.f, Y(i.value()[0], mn, dl) - _s.height()), QBrush(cf.fore));
+					else
+						p.fillRect(QRectF(x - 2.f, 0, 4.f, _s.height()), QBrush(cf.fore));
+				}
 			}
 			else if (cp[ci.input].size())
 			{
@@ -323,7 +379,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				float lv = d[0][cf.index] * cf.conversion;
 				lp[cfi] = lv;
 
-				p.translate(_s.width(), 0.f);
+				p.translate(_s.width() - 2.f, 0.f);
 				p.scale(_s.width() / m_viewWidth, 1.f);
 				p.translate(ci.latePoint - m_latePoint, 0.f);
 				p.scale(1.f / ci.frequency, 1.f);
@@ -345,14 +401,14 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 						// Transition to none;
 						p.setPen(Qt::NoPen);
 						p.setBrush(cf.fore);
-						p.drawEllipse(QPointF(i - 1, Y(lv, mn, dl)), .5, (float)_s.width() / (float)m_viewWidthSamples[ci.input] / (float)_s.height() / 2);
+						p.drawEllipse(QPointF(i - 1, Y(lv, mn, dl)), .5, (float)_s.width() / (ci.frequency * m_viewWidth) / (float)_s.height() / 2);
 					}
 					else if (isInf(lv) == -1 && !isInf(tv))
 					{
 						// Transition from none;
 						p.setPen(Qt::NoPen);
 						p.setBrush(cf.fore);
-						p.drawEllipse(QPointF(i, Y(tv, mn, dl)), .5, (float)_s.width() / (float)m_viewWidthSamples[ci.input] / (float)_s.height() / 2);
+						p.drawEllipse(QPointF(i, Y(tv, mn, dl)), .5, (float)_s.width() / (ci.frequency * m_viewWidth) / (float)_s.height() / 2);
 					}
 					else if (!isInf(lv) && !isInf(tv))
 					{
@@ -361,18 +417,10 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 							p.setPen(Qt::NoPen);
 							p.setBrush(cf.back);
 							QVector<QPointF> ps(4);
-							/*qDebug() << lv << cfi;
-							float y = Y(lv, mn, dl);
-							qDebug() << y;
-							ps[0] = QPointF(i - 1, y);
-							y = Y(tv, mn, dl);
-							qDebug() << y;
-							ps[1] = QPointF(i, y);*/
 							ps[0] = QPointF(i - 1, Y(lv, mn, dl));
 							ps[1] = QPointF(i, Y(tv, mn, dl));
 							ps[2] = QPointF(i, _s.height());
 							ps[3] = QPointF(i - 1, _s.height());
-							qDebug() << ps;
 							p.drawPolygon(ps.data(), 4);
 						}
 						if (cf.fore != Qt::transparent)
@@ -391,7 +439,8 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	_p.setRenderHint(QPainter::SmoothPixmapTransform, false);
 	_p.setRenderHint(QPainter::Antialiasing, false);
 	_p.translate(0.5, 0.5);
-	_p.drawPixmap(0, 0, m_grid);
+	_p.drawPixmap(0, 0, m_units);
+	_p.drawPixmap(0, 0, m_time);
 	_p.drawPixmap(0, 0, m_display);
 	_p.drawPixmap(0, 0, m_labels);
 /*	if (m_labeled < (uint)m_config.size() && m_config[m_labeled].config.index < lp.size())

@@ -25,6 +25,30 @@ namespace Geddei
 
 TRANSMISSION_TYPE_CPP(Mark);
 
+Mark::Mark(uint _arity, QVector<float> const& _maxs, QVector<float> const& _mins):
+	TransmissionType(_arity + 2), m_mins(_arity), m_maxs(_arity)
+{
+	for (uint i = 0; i < _arity; i++)
+	{
+		m_maxs[i] = 1.f;
+		m_mins[i] = 0.f;
+		if ((int)i < _maxs.size())
+			if ((int)i < _mins.size())
+			{
+				m_mins[i] = ::min(_mins[i], _maxs[i]);
+				m_maxs[i] = ::max(_mins[i], _maxs[i]);
+			}
+			else
+			{
+				((_maxs[i] > 0.f) ? m_maxs[i] : m_mins[i]) = _maxs[i];
+			}
+		else if ((int)i < _mins.size())
+		{
+			((_mins[i] > 0.f) ? m_maxs[i] : m_mins[i]) = _mins[i];
+		}
+	}
+}
+
 void Mark::polishData(BufferData& _d, Source* _s, uint) const
 {
 	setTimestamp(_d, _s->secondsPassed());
@@ -48,7 +72,7 @@ double Mark::timestamp(BufferData const& _data)
 
 QString Mark::info() const
 {
-	return QString("<div><b>Mark</b></div>") + TransmissionType::info();
+	return QString("<div><b>Mark</b></div><div>Range: %s - %s</div>").arg(arity() ? m_mins[0] : 0).arg(arity() ? m_maxs[0] : 0) + TransmissionType::info();
 }
 
 }

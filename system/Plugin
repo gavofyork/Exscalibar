@@ -1,0 +1,6 @@
+#ifdef __GEDDEI_BUILD
+#include "plugin.h"
+#else
+#include <geddei/plugin.h>
+#endif
+

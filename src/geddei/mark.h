@@ -41,7 +41,7 @@ class DLLEXPORT Mark: public TransmissionType
 	TRANSMISSION_TYPE(Mark, TransmissionType);
 
 public:
-	Mark(uint _arity = 0): TransmissionType(_arity + 2) {}
+	Mark(uint _arity = 0, QVector<float> const& _maxs = QVector<float>(), QVector<float> const& _mins = QVector<float>());
 
 	/**
 	 * Virtual destructor.
@@ -55,7 +55,14 @@ public:
 	static void setTimestamp(BufferData& _data, double _ts);
 	static double timestamp(BufferData const& _data);
 
-	TT_NO_MEMBERS;
+	float min(uint _i) const { return (_i < arity()) ? m_mins[_i] : 0.f; }
+	float max(uint _i) const { return (_i < arity()) ? m_maxs[_i] : 1.f; }
+	void setRange(uint _i, float _one, float _other) { if (_i < arity()) { m_mins[_i] = ::min(_one, _other); m_maxs[_i] = ::max(_one, _other); } }
+
+	QVector<float> m_mins;
+	QVector<float> m_maxs;
+
+	TT_2_MEMBERS(m_mins, m_maxs);
 };
 
 }

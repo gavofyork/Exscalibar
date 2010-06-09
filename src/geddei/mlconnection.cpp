@@ -33,6 +33,8 @@ MLConnection::MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection)
 {
 	theConnection->theConnections.append(this);
 	theReader = new BufferReader(&(theConnection->theBuffer));
+	m_samplesRead = 0;
+	m_latestPeeked = 0;
 }
 
 MLConnection::~MLConnection()
@@ -226,6 +228,8 @@ void MLConnection::sinkStopping()
 void MLConnection::sinkStopped()
 {
 	theConnection->closeBufferTrapdoor(dynamic_cast<Processor *>(theSink));
+	m_samplesRead = 0;
+	m_latestPeeked = 0;
 }
 
 void MLConnection::reset()

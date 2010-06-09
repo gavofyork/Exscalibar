@@ -43,7 +43,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
-	theWidth(32), theHeight(32), theMinWidth(32), theMinHeight(32), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(16), theHeight(6), theMinWidth(16), theMinHeight(6), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -1211,12 +1211,18 @@ int CoProcessor::cyclesReady()
 		else if (mSpace[i] > 0)
 			cycles = min(cycles, bFree / mSpace[i]);
 	}
-	for (uint i = 0; i < numInputs(); i++)
+
+	if (numInputs())
 	{
-		if (!theInputs[i]->require(rData[i], mData[i]))
-			return 0;
-		cycles = min(cycles, max(1u, theInputs[i]->samplesReady() / mData[i]));
+		QVector<uint> is(numInputs());
+		for (uint i = 0; i < numInputs(); i++)
+			if (theInputs[i]->require(rData[i], mData[i]))
+				is[i] = theInputs[i]->samplesReady() / max(1u, mData[i]);
+			else
+				is[i] = Undefined;
+		cycles = min(cycles, cyclesAvailable(is));
 	}
+
 	return cycles;
 }
 
