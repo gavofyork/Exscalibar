@@ -29,35 +29,41 @@ PropertyItem::PropertyItem(QGraphicsItem* _p, QRectF const& _r, QString const& _
 	m_key			(_k),
 	m_bd			(2)
 {
-	QRectF widget(_r);
-	widget.setHeight(s_widgetHeight);
 	int selectors = 0;
 	m_isDynamic = withProperties()->propertiesInfo(m_key).isDynamic;
 	foreach (AllowedValue i, withProperties()->propertiesInfo(m_key).allowed)
 	{
-		QGraphicsItem* it = 0;
+		BasePropertyItem* it = 0;
 		if (i.to.isNull() && !selectors++)
-			it = new SelectionPropertyItem(this, widget);
+			it = new SelectionPropertyItem(this, _r);
 		else if (i.to.isNull())
 			continue;
 		else
-			it = new RangePropertyItem(this, widget, i);
-		widget.translate(0, it->boundingRect().height());
+			it = new RangePropertyItem(this, _r, i);
 	}
-	m_rect = QRectF(_r.left(), _r.top(), _r.width(), widget.top() - _r.top());
+	resize(_r);
+}
+
+float PropertyItem::minWidth() const
+{
+	float ret = s_widgetHeight;
+	foreach (BasePropertyItem* i, filterRelaxed<BasePropertyItem>(childItems()))
+		ret += i->minWidth() + 2.f;
+	return ret;
 }
 
 void PropertyItem::resize(QRectF const& _r)
 {
-	QRectF widget(_r);
-	widget.setHeight(s_widgetHeight);
+	QRectF widget = _r.translated(s_widgetHeight, 2.f);
+	widget.setHeight(s_widgetHeight - 4.f);
 	foreach (BasePropertyItem* i, filterRelaxed<BasePropertyItem>(childItems()))
 	{
+		widget.setWidth(i->minWidth());
 		i->resize(widget);
-		widget.translate(0, i->boundingRect().height());
+		widget.translate(i->minWidth() + 2.f, 0);
 	}
 	prepareGeometryChange();
-	m_rect = QRectF(_r.left(), _r.top(), _r.width(), widget.top() - _r.top());
+	m_rect = QRectF(_r.left(), _r.top(), widget.left() - _r.left() - 2.f, s_widgetHeight);
 }
 
 void PropertyItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
@@ -69,11 +75,11 @@ void PropertyItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*
 	f.setBold(true);
 	_p->setFont(f);
 	QRectF r = m_rect;
-	r.setWidth(floor(s_widgetHeight * .7f));
+	r.setWidth(floor(s_widgetHeight));
 	_p->setPen(QColor(0, 0, 0, 96));
-	_p->drawText(r.translated(0, 1.f), Qt::AlignCenter, withProperties()->propertiesInfo().symbolOf(m_key));
+	_p->drawText(r.translated(0, 1.f), Qt::AlignRight, withProperties()->propertiesInfo().symbolOf(m_key));
 	_p->setPen(Qt::white);
-	_p->drawText(r.translated(0, 0.f), Qt::AlignCenter, withProperties()->propertiesInfo().symbolOf(m_key));
+	_p->drawText(r.translated(0, 0.f), Qt::AlignRight, withProperties()->propertiesInfo().symbolOf(m_key));
 }
 
 void BasePropertyItem::resize(QRectF const& _r)

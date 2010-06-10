@@ -167,6 +167,7 @@ private:
 	QString theName;
 	const QString theType;
 	int theWidth, theHeight, theRedrawPeriod, theMinWidth, theMinHeight;
+	bool m_isResizable;
 	//@}
 
 	//@{
@@ -410,7 +411,7 @@ protected:
 	 * be redrawn in milliseconds. A value of zero means no explicit redraw.
 	 * @sa setupIO()
 	 */
-	void setupVisual(uint width, uint height, uint redrawPeriod = 0, uint minWidth = 32, uint minHeight = 32);
+	void setupVisual(uint width, uint height, uint redrawPeriod = 0, uint minWidth = 32, uint minHeight = 32, bool _isResizable = false);
 
 	/**
 	 * Reimplement for to define how the processor should be drawn visually.
@@ -918,6 +919,8 @@ public:
 	 * @return The image's height.
 	 */
 	uint height() const { return theHeight; }
+
+	bool isResizable() const { return m_isResizable; }
 
 	/**
 	 * Gets the (automatic) redraw period of the processor in milliseconds. Used by

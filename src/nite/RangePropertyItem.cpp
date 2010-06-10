@@ -50,6 +50,11 @@ void RangePropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 	withProperties()->setProperty(propertyItem()->key(), f);
 }
 
+float RangePropertyItem::minWidth() const
+{
+	return 50.f;
+}
+
 void RangePropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	QRectF ga = gauge();

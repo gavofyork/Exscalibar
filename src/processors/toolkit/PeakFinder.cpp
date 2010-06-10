@@ -50,9 +50,9 @@ int PeakFinder::process()
 {
 	{
 		const BufferData in = input(0).peekSamples(3);
-		if (in(0, 0) < in(1, 0) && in(1, 0) <= in(2, 0) || in(0, 0) <= in(1, 0) && in(1, 0) < in(2, 0))
+		if ((in(0, 0) < in(1, 0) && in(1, 0) <= in(2, 0)) || (in(0, 0) <= in(1, 0) && in(1, 0) < in(2, 0)))
 			m_goingUp = true;
-		else if (in(0, 0) < in(1, 0) && in(1, 0) > in(2, 0) || m_goingUp == true)
+		else if ((in(0, 0) < in(1, 0) && in(1, 0) > in(2, 0)) || m_goingUp == true)
 		{
 			BufferData out = output(0).makeScratchSample();
 			out[0] = in[1];
@@ -89,8 +89,7 @@ void PeakFinder::updateFromProperties(Properties const&)
 
 PropertiesInfo PeakFinder::specifyProperties() const
 {
-	return PropertiesInfo
-			("Example", false, "Example description. { Units }");
+	return PropertiesInfo();
 }
 
 EXPORT_CLASS(PeakFinder, 0,1,0, Processor);

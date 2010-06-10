@@ -27,7 +27,8 @@
 
 const QSizeF portSize = QSizeF(8.f, 12.f);
 const QSizeF multiPortSize = QSizeF(20.f, 12.f);
-const double portLateralMargin = 4.0;
+const double portLongalMargin = 4.0;
+const double portLateralMargin = 2.0;
 
 const float widgetMarginP = 0.f;
 
@@ -44,7 +45,7 @@ ProcessorItem::ProcessorItem(QString const& _type, Properties const& _pr, QSizeF
 
 QSizeF ProcessorItem::centreMin() const
 {
-	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin / 2));
+	return QSizeF(m_processor->minWidth(), max((double)m_processor->minHeight(), max(m_processor->numInputs(), m_processor->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin - 1.f));
 }
 
 void ProcessorItem::togglePause()
@@ -180,7 +181,7 @@ void ProcessorItem::geometryChanged()
 			(mii = new MultipleInputItem(this, multiPortSize))->hide();
 		else
 			mii = filter<MultipleInputItem>(childItems())[0];
-		mii->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2);/* + (portLateralMargin + i->size().height()) * i->index());*/
+		mii->setPos(1.f - portLateralMargin, portLongalMargin * 3 / 2);/* + (portLateralMargin + i->size().height()) * i->index());*/
 	}
 	foreach (InputItem* ii, filter<InputItem>(childItems()))
 		if ((int)ii->index() < iis.count())
@@ -191,7 +192,7 @@ void ProcessorItem::geometryChanged()
 		if (!iis[i])
 			iis[i] = new InputItem(i, this, portSize);
 	foreach (InputItem* i, iis)
-		i->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
+		i->setPos(1.f - portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + i->size().height()) * i->index());
 
 	QVector<OutputItem*> ois(m_processor->numOutputs() == Undefined ? 0 : m_processor->numOutputs(), 0);
 	if (m_processor->multi() & Out)
@@ -201,7 +202,7 @@ void ProcessorItem::geometryChanged()
 			(moi = new MultipleOutputItem(this, multiPortSize))->hide();
 		else
 			moi = filter<MultipleOutputItem>(childItems())[0];
-		moi->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2);
+		moi->setPos(centreRect().width() + portLateralMargin, portLongalMargin * 3 / 2);
 	}
 
 	foreach (OutputItem* oi, filter<OutputItem>(childItems()))
@@ -213,7 +214,7 @@ void ProcessorItem::geometryChanged()
 		if (!ois[i])
 			ois[i] = new OutputItem(i, this, portSize);
 	foreach (OutputItem* i, ois)
-		i->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + i->size().height()) * i->index());
+		i->setPos(centreRect().width() + portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + i->size().height()) * i->index());
 
 	updateMultiDisplay();
 	BaseItem::geometryChanged();

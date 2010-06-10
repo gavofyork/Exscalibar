@@ -23,11 +23,15 @@
 class SelectionPropertyItem: public BasePropertyItem
 {
 public:
-	SelectionPropertyItem(PropertyItem* _p, QRectF const& _r): BasePropertyItem(_p, _r) {}
+	SelectionPropertyItem(PropertyItem* _p, QRectF const& _r);
 
 	enum { ItemType = UserType + 19 };
 	virtual int			type() const { return ItemType; }
 
+	virtual float		minWidth() const;
 	virtual void		mousePressEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void		paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);
+
+private:
+	QStringList			m_syms;
 };

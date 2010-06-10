@@ -67,8 +67,9 @@ public:
 
 	virtual float		marginSize() const;
 
+	QSizeF				controlsSize() const;
 	QRectF				centreRect() const { return QRectF(QPointF(0, 0), m_size); }
-	QRectF				clientRect() const { return QRectF(QPointF(0, 0), m_size - QSizeF(0, m_widgetsHeight)); }
+	QRectF				clientRect() const { return QRectF(QPointF(0, 0), m_size - QSizeF(0, m_controlsSize.height())); }
 	virtual QRectF		outlineRect() const;
 	virtual QRectF		boundingRect() const;
 	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return outlineRect().adjusted(-ms, -ms, ms, ms); }
@@ -88,6 +89,7 @@ protected:
 
 	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
+	QSizeF				interiorMin() const;
 	virtual QSizeF		centreMin() const { return QSizeF(0.f, 0.f); }
 	virtual QSizeF		centrePref() const { return QSizeF(32.f, 32.f); }
 	virtual void		paintOutline(QPainter* _p);
@@ -95,6 +97,7 @@ protected:
 	virtual QColor		outlineColour() const { return QColor::fromHsv(0, 220, 200); }
 	virtual void		paintCentre(QPainter* _p);
 	virtual uint		redrawPeriod() const { return 0; }
+	virtual bool		isResizable() const { return false; }
 
 	void				importDom(QDomElement& _item, QGraphicsScene* _scene);
 	void				exportDom(QDomElement& _item, QDomDocument& _doc) const;
@@ -112,10 +115,10 @@ private:
 
 	QRectF				resizeRect() const;
 
-	QGraphicsRectItem*	m_statusBar;
-	PauseItem*			m_pauseItem;
+//	QGraphicsRectItem*	m_statusBar;
+//	PauseItem*			m_pauseItem;
 
-	float				m_widgetsHeight;
+	QSizeF				m_controlsSize;
 
 	QSizeF				m_size;
 	int					m_timerId;

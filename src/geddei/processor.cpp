@@ -43,7 +43,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
-	theWidth(16), theHeight(6), theMinWidth(16), theMinHeight(6), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(16), theHeight(6), theMinWidth(16), theMinHeight(6), m_isResizable(false), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
@@ -474,12 +474,8 @@ bool Processor::draw(QPainter& _p, QSizeF const& _s) const
 bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
 	QRectF area(QPointF(0, 0), _s);
-/*	QRadialGradient g(area.center(), area.width() * 2 / 3, area.center());
-	g.setColorAt(0, specifyOutlineColour().lighter(125));
-	g.setColorAt(1, specifyOutlineColour().darker(150));
-	_p.fillRect(area, g);*/
 
-	_p.setFont(QFont("Helvetica", min(_s.width(), _s.height()) * 3 / 5, QFont::Black, false));
+	_p.setFont(QFont("Helvetica", min(_s.width(), _s.height()), QFont::Black, false));
 
 	_p.setPen(QColor(0, 0, 0, 192));
 	_p.drawText(area.translated(0, 1), Qt::AlignCenter, simpleText());
@@ -493,13 +489,14 @@ bool Processor::paintProcessor(QPainter& _p, QSizeF const& _s) const
 	return true;
 }
 
-void Processor::setupVisual(uint width, uint height, uint redrawPeriod, uint minWidth, uint minHeight)
+void Processor::setupVisual(uint width, uint height, uint redrawPeriod, uint minWidth, uint minHeight, bool _isResizable)
 {
 	theWidth = width;
 	theHeight = height;
 	theRedrawPeriod = redrawPeriod;
 	theMinWidth = minWidth;
 	theMinHeight = minHeight;
+	m_isResizable = _isResizable;
 }
 
 bool Processor::go()

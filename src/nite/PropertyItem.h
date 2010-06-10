@@ -32,6 +32,7 @@ public:
 	inline float bd() const { return m_bd; }
 	inline QString const& key() const { return m_key; }
 	inline void resize(QRectF const& _n);
+	float minWidth() const;
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
@@ -56,10 +57,11 @@ public:
 	void					resize(QRectF const& _r);
 	virtual PropertyItem*	propertyItem() const { return dynamic_cast<PropertyItem*>(parentItem()); }
 	virtual WithProperties*	withProperties() const { return propertyItem()->withProperties(); }
-	QRectF					gauge() const { return QRectF(m_rect.adjusted(floor(m_rect.height() * .7f) + propertyItem()->bd(), propertyItem()->bd(), -propertyItem()->bd(), -propertyItem()->bd())); }
+	QRectF					gauge() const { return QRectF(m_rect); }
 	virtual QRectF			boundingRect() const { return m_rect; }
 	virtual void			paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void			paintItem(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) {}
+	virtual float			minWidth() const { return 30.f; }
 
 	virtual bool			sceneEvent(QEvent* _e);
 

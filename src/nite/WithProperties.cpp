@@ -24,6 +24,6 @@ void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
 	m_propertiesInfo = _i;
 	m_dynamicKeys.clear();
 	foreach (QString k, _i.keys())
-//		if (_i.isDynamic(k))
+		if (_i.datum(k).allowed.size())
 			m_dynamicKeys << k;
 }

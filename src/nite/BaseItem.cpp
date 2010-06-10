@@ -25,25 +25,25 @@
 #include "InputItem.h"
 #include "OutputItem.h"
 
-static const double cornerSize = 4.0;
+static const double cornerSize = 2.0;
 static const double statusHeight = 8.0;
 static const double statusMargin = 2.0;
 
 BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
 	WithProperties	(0, _pr),
-	m_widgetsHeight	(0),
 	m_size			(_size),
 	m_timerId		(-1),
 	m_resizing		(false)
 {
 	assert(m_size.height() < 100000);
+/*
 	m_statusBar = new QGraphicsRectItem(this);
 	m_statusBar->setPen(Qt::NoPen);
 	m_statusBar->setBrush(QColor(255, 255, 255, 16));
 
 	m_pauseItem = new PauseItem(m_statusBar, this, statusHeight);
 	m_pauseItem->setPos(0, 0);
-
+*/
 	setAcceptHoverEvents(true);
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
 }
@@ -76,28 +76,28 @@ void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
 	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
 		delete i;
 
-	m_widgetsHeight = 0.f;
+	m_controlsSize = QSizeF(-5.f, 0.f);
 	foreach (QString k, m_dynamicKeys)
 	{
 		PropertyItem* item = new PropertyItem(this, QRectF(0, 0, m_size.width(), 0), k);
-		m_widgetsHeight += item->boundingRect().height();
+		m_controlsSize = QSizeF(m_controlsSize.width() + item->minWidth() + 5.f, max<float>(m_controlsSize.height(), item->boundingRect().height()));
 	}
 	checkWidgets();
 }
 
 void BaseItem::checkWidgets()
 {
-	QRectF widget(widgetMarginP, m_size.height() - m_widgetsHeight + widgetMarginP, m_size.width() - widgetMarginP * 2, 0);
+	QRectF widget(widgetMarginP, m_size.height() - m_controlsSize.height() + widgetMarginP, 0/*m_size.width() - widgetMarginP * 2*/, m_controlsSize.height());
 	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
 	{
 		i->resize(widget);
-		widget.translate(0, i->boundingRect().height());
+		widget.translate(i->boundingRect().width() + 5.f, 0);
 	}
 }
 
 void BaseItem::tick()
 {
-	m_pauseItem->tick();
+//	m_pauseItem->tick();
 }
 
 void BaseItem::timerEvent(QTimerEvent*)
@@ -110,14 +110,24 @@ void BaseItem::propertiesChanged(QString const&)
 	geometryChanged();
 }
 
+QSizeF BaseItem::controlsSize() const
+{
+	return m_controlsSize;
+}
+
+QSizeF BaseItem::interiorMin() const
+{
+	return QSizeF(max(controlsSize().width(), centreMin().width()), centreMin().height() + controlsSize().height());
+}
+
 void BaseItem::geometryChanged()
 {
 	prepareGeometryChange();
 	if (!m_size.isValid())
 		m_size = centrePref();
-	m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height() + m_widgetsHeight, m_size.height()));
-	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(cornerSize * 2.f, statusMargin));
-	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 5.f, statusHeight));
+	m_size = QSizeF(max(interiorMin().width(), m_size.width()), max(interiorMin().height(), m_size.height()));
+//	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(cornerSize * 2.f, statusMargin));
+//	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 5.f, statusHeight));
 
 	checkWidgets();
 
@@ -140,12 +150,18 @@ QRectF BaseItem::outlineRect() const
 	assert(statusHeight < 100000);
 	assert(statusMargin < 100000);
 	assert(m_size.height() < 100000);
-	return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, statusHeight + 2 * statusMargin + 1);
+	if (isResizable())
+		return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, statusHeight + 2 * statusMargin + 1);
+	else
+		return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, cornerSize + 1);
 }
 
 QRectF BaseItem::resizeRect() const
 {
-	return QRectF(outlineRect().bottomRight(), QSizeF(-(statusHeight + cornerSize), -(statusHeight + cornerSize)));
+	if (isResizable())
+		return QRectF(outlineRect().bottomRight(), QSizeF(-(statusHeight + cornerSize), -(statusHeight + cornerSize)));
+	else
+		return QRectF(0, 0, 0, 0);
 }
 
 void BaseItem::prepYourself(ProcessorGroup&)
@@ -260,7 +276,7 @@ void BaseItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 			m_size = m_size + QSizeF(best.x(), 0);
 		if (fabs(best.y()) < 5)
 			m_size = m_size + QSizeF(0, best.y());
-		m_size = QSizeF(max(centreMin().width(), m_size.width()), max(centreMin().height() + m_widgetsHeight, m_size.height()));
+		m_size = QSizeF(max(interiorMin().width(), m_size.width()), max(interiorMin().height(), m_size.height()));
 		geometryChanged();
 	}
 	else
@@ -369,11 +385,14 @@ void BaseItem::paintOutline(QPainter* _p)
 		_p->drawLine(o.left() + mp, o.top(), o.left(), o.top() + mp);
 		_p->drawLine(o.right(), o.top() + mp, o.right() - mp, o.top());
 	}*/
-	_p->setPen(QPen(outlineColour().darker(), 1));
-	for (int i = 0; i < 4; i++)
+	if (isResizable())
 	{
-		double mp = (statusHeight + cornerSize) * (4.0 - i) / 4.0;
-		_p->drawLine(o.right() - statusMargin, o.bottom() - mp, o.right() - mp, o.bottom() - statusMargin);
+		_p->setPen(QPen(outlineColour().darker(), 1));
+		for (int i = 0; i < 4; i++)
+		{
+			double mp = (statusHeight + cornerSize) * (4.0 - i) / 4.0;
+			_p->drawLine(o.right() - statusMargin, o.bottom() - mp, o.right() - mp, o.bottom() - statusMargin);
+		}
 	}
 
 	if (isSelected())
@@ -393,7 +412,10 @@ void BaseItem::importDom(QDomElement& _item, QGraphicsScene* _scene)
 		if (n.toElement().tagName() == "property")
 			m_properties[n.toElement().attribute("name")] = n.toElement().attribute("value");
 	prepareGeometryChange();
-	m_size = QSizeF(_item.attribute("w").toDouble(), _item.attribute("h").toDouble());
+	if (isResizable())
+		m_size = QSizeF(_item.attribute("w").toDouble(), _item.attribute("h").toDouble());
+	else
+		m_size = QSizeF(0, 0);
 	_scene->addItem(this);
 	setPos(_item.attribute("x").toDouble(), _item.attribute("y").toDouble());
 	setName(_item.attribute("name"));
@@ -403,8 +425,11 @@ void BaseItem::exportDom(QDomElement& _item, QDomDocument& _doc) const
 {
 	_item.setAttribute("x", pos().x());
 	_item.setAttribute("y", pos().y());
-	_item.setAttribute("w", m_size.width());
-	_item.setAttribute("h", m_size.height());
+	if (isResizable())
+	{
+		_item.setAttribute("w", m_size.width());
+		_item.setAttribute("h", m_size.height());
+	}
 	_item.setAttribute("name", name());
 
 	foreach (QString k, m_properties.keys())

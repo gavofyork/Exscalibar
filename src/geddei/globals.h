@@ -101,6 +101,28 @@ namespace Geddei
 	{
 		return (*(uint32_t const*)(&_x)) != 0x7fc00000 && (*(uint32_t const*)(&_x)) != 0xff800000 && (*(uint32_t const*)(&_x)) != 0x7f800000;
 	}
+	template<class T>
+	static T graphParameters(T _min, T _max, T _divisions, T* o_from = 0, T* o_delta = 0, bool _forceMinor = false)
+	{
+		T uMin = _min;
+		T uMax = _max;
+		T l10 = log10((uMax - uMin) / _divisions * 5.5f);
+		T mt = pow(10.f, l10 - floor(l10));
+		T ep = pow(10.f, floor(l10));
+		T inc = _forceMinor
+				? ((mt > 6.f) ? ep / 2.f : (mt > 3.f) ? ep / 5.f : (mt > 1.2f) ? ep / 10.f : ep / 20.f)
+				: ((mt > 6.f) ? ep * 2.f : (mt > 3.f) ? ep : (mt > 1.2f) ? ep / 2.f : ep / 5.f);
+		if (o_delta && o_from)
+		{
+			(*o_from) = floor(uMin / inc) * inc;
+			(*o_delta) = (ceil(uMax / inc) - floor(uMin / inc)) * inc;
+		}
+		else if (o_from)
+		{
+			(*o_from) = ceil(uMin / inc) * inc;
+		}
+		return inc;
+	}
 
 	DLLEXPORT const char *getVersion();
 	DLLEXPORT uint getConfig();

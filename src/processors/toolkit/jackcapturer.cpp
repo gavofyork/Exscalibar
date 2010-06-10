@@ -47,15 +47,17 @@ public:
 	virtual void initFromProperties(const Properties &_p)
 	{
 		m_name = _p["Name"].toString();
-		jackOpen();
-		jack_client_close(m_client);
-		m_client = 0;
-
 		m_ports.clear();
-		Port p;
-		p.lastChunk.resize(m_bufferSize);
-		for (int i = 0; i < _p["Channels"].toInt(); i++)
-			m_ports.append(p);
+		if (jackOpen())
+		{
+			jack_client_close(m_client);
+			m_client = 0;
+
+			Port p;
+			p.lastChunk.resize(m_bufferSize);
+			for (int i = 0; i < _p["Channels"].toInt(); i++)
+				m_ports.append(p);
+		}
 		setupIO(0, m_ports.count());
 	}
 	virtual void updateFromProperties(Properties const&) {}

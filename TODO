@@ -1,4 +1,19 @@
-Time lines in Grapher should change according to size/time scale.
+Should fill Mark's TSs with infs, then only put apparent TS in if non-inf.
+- Peakify should interpolate for inter-sample peaks.
+
+Kill pausebutton/roller.
+Allow processor to say fixed size - if so kill resize handle.
+
+Scroll time, don't redraw.
+
+Make sure mouse up events aren't obscured by a shadow of proc above.
+
+Colouriser.
+
+Smaller widgets.
+Bigger Subs.
+
+min of three last samples in FFT to separate noise.
 
 SprectralTransform template.
 

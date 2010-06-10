@@ -22,6 +22,16 @@ using namespace Geddei;
 #include "WithProperties.h"
 #include "SelectionPropertyItem.h"
 
+
+SelectionPropertyItem::SelectionPropertyItem(PropertyItem* _p, QRectF const& _r):
+	BasePropertyItem(_p, _r)
+{
+	m_syms.clear();
+	foreach (AllowedValue i, withProperties()->propertiesInfo(propertyItem()->key()).allowed)
+		if (i.to.isNull())
+			m_syms << i.symbol;
+}
+
 void SelectionPropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
 	assert(withProperties());
@@ -37,6 +47,11 @@ void SelectionPropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 			o--;
 }
 
+float SelectionPropertyItem::minWidth() const
+{
+	return m_syms.count() * 10.f;
+}
+
 void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	QRectF ga = gauge();
@@ -44,23 +59,19 @@ void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsIt
 	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
 	_p->drawRoundedRect(ga.adjusted(-.5f, -.5f, 0.5f, 0.5f), 1, 1);
 
-	QStringList syms;
-
 	int j = 0;
 	int v = -1;
 	foreach (AllowedValue i, withProperties()->propertiesInfo(propertyItem()->key()).allowed)
 		if (i.to.isNull())
 		{
-			syms << i.symbol;
 			if (i.from == withProperties()->property(propertyItem()->key()))
 				v = j;
 			else
 				j++;
 		}
 
-	float c = withProperties()->propertiesInfo(propertyItem()->key()).allowed.count();
+	float c = m_syms.count();
 
-	c = syms.count();
 	if (v != -1)
 	{
 		float vf = round(ga.width() * v / c);
@@ -74,7 +85,7 @@ void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsIt
 	f.setPixelSize(ga.height() - 1);
 	f.setBold(true);
 	_p->setFont(f);
-	for (int i = 0; i < syms.count(); i++)
+	for (int i = 0; i < m_syms.count(); i++)
 		{
 			float vf = round(ga.width() * i / c);
 			float vt = round(ga.width() * (i + 1) / c);
@@ -82,10 +93,10 @@ void SelectionPropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsIt
 			_p->setPen(QColor(0, 0, 0, 96));
 			if (i == v)
 			{
-				_p->drawText(vr.translated(0, 1.f), Qt::AlignCenter, syms[i]);
+				_p->drawText(vr.translated(0, 1.f), Qt::AlignCenter, m_syms[i]);
 				_p->setPen(Qt::white);
 			}
-			_p->drawText(vr.translated(0, 0.f), Qt::AlignCenter, syms[i]);
+			_p->drawText(vr.translated(0, 0.f), Qt::AlignCenter, m_syms[i]);
 		}
 
 }
