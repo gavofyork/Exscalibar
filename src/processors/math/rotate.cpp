@@ -87,7 +87,7 @@ bool Rotate::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 	}
 
 	_outTypes = _inTypes;
-	return _inTypes[0].asA<TransmissionType>().arity() == 1;
+	return _inTypes[0].arity() == 1;
 }
 
 void Rotate::processChunks(BufferDatas const& _in, BufferDatas& _out, uint _c) const

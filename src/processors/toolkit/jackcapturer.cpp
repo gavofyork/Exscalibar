@@ -103,7 +103,6 @@ private:
 	{
 		if (jack_port_is_mine(m_client, _p) != TRUE && jack_port_flags(_p) & JackPortIsOutput)
 		{
-			qDebug() << "Found acceptable output.";
 			for (int i = 0; i < m_ports.count(); i++)
 				if (!jack_port_connected(m_ports[i].port))
 				{
@@ -181,7 +180,7 @@ int JackCapturer::process()
 	{
 		BufferData b = output(i).makeScratchSamples(m_lastSize);
 		if (b.isNull())
-			return DidWork;
+			continue;
 		for (int s = 0; s < m_lastSize; s++)
 			b[s] = m_ports[i].lastChunk[s];
 		output(i) << b;

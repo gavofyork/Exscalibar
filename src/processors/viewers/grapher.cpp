@@ -128,15 +128,14 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 		}
 		else if (Typed<Spectrum> in = _inTypes[i])
 		{
-			m_config.append(ChannelInfo(i, MultiValue::Config(in->max(), in->min(), 0), in->frequency()));
-			m_arity[i] = in->arity();
+			m_labeled = (m_labeledOR == -1) ? m_config.size() : m_labeledOR;
+			m_arity[i] = max(1u, in->arity());
+			m_config.append(ChannelInfo(i, MultiValue::Config(QColor(0, 0, 0, 0x40), Qt::transparent, in->bandFrequency(0), in->bandFrequency(in->bins() - 1), 0), in->frequency()));
 		}
 		else if (Typed<Contiguous> in = _inTypes[i])
 		{
-			m_labeled = (m_labeledOR == -1) ? m_config.size() : m_labeledOR;
-			m_arity[i] = max(1u, in->arity());
-			for (uint ii = 0; ii < in->arity(); ii++)
-				m_config.append(ChannelInfo(i, MultiValue::Config(in->max(), in->min(), ii), in->frequency()));
+			m_config.append(ChannelInfo(i, MultiValue::Config(in->max(), in->min(), 0), in->frequency()));
+			m_arity[i] = in->arity();
 		}
 		else if (Typed<Mark> in = _inTypes[i])
 		{
@@ -188,20 +187,15 @@ int Grapher::process()
 			cycles++;
 			QVector<float> x(m_arity[i]);
 			d.sample(s).copyTo(x);
-
 			if (input(i).type().isA<Mark>())
-			{
 				m_mPoints[i].insert(Mark::timestamp(d.sample(s)), x);
-			}
 			else
-			{
 				m_cPoints[i].append(x);
-				uint ms = input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1;
-				while ((uint)m_cPoints[i].size() > ms)
-					m_cPoints[i].removeFirst();
-			}
 		}
+		if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
+			m_cPoints = m_cPoints.mid(n);
 		l_points.unlock();
+		d.nullify();
 	}
 	return cycles;
 }
@@ -296,8 +290,6 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				float mn = m_config[m_labeled].min;
 				float dl = m_config[m_labeled].delta;
 				q.drawLine(QLineF(0, Y(yp, mn, dl), ds.width(), Y(yp, mn, dl)));
-//				p.setPen(QColor(255, 255, 255, 64));
-//				p.drawLine(QLineF(0, Y(yp, mn, dl), ds.width(), Y(yp, mn, dl)));
 				QString t = QString::number(yp, 'g', 4);
 				QRectF pos(0, Y(yp, mn, dl) - (f.pixelSize() + 2) / 2 + 1, ds.width(), f.pixelSize() + 2);
 				p.setPen(QColor(255, 255, 255, 192));
@@ -313,6 +305,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 
 		double newLatePoint = m_latePoint;
 		for (int cii = 0; cii < m_config.size(); cii++)
+
 		{
 			ChannelInfo& ci = m_config[cii];
 			if (ci.frequency == 0.f)
@@ -376,11 +369,13 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		int cfi = 0;
 		foreach (ChannelInfo ci, m_config)
 		{
-			p.save();
-
 			MultiValue::Config cf = ci.config;
 			float mn = ci.min;
 			float dl = ci.delta;
+			if (!&const_cast<Grapher*>(this)->input(ci.input))
+				continue;
+
+			p.save();
 			if (ci.frequency == 0.f)
 			{
 				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
@@ -391,6 +386,31 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 					else
 						p.fillRect(QRectF(x - 2.f, 0, 4.f, ds.height()), QBrush(cf.fore));
 				}
+			}
+			else if (Typed<Spectrum> in = const_cast<Grapher*>(this)->input(ci.input).type())
+			{
+				QList<QVector<float> > const& d = cp[ci.input];
+				p.translate(ds.width() - 2.f, 0.f);
+				p.scale(ds.width() / m_viewWidth, 1.f);
+				p.translate(ci.latePoint - m_latePoint, 0.f);
+				p.scale(1.f / ci.frequency, 1.f);
+				p.translate(-(d.size() - 1), 0.f);
+				p.setRenderHint(QPainter::Antialiasing, false);
+				for (int i = 1; i < d.size(); i++)
+					for (int b = 0; b < (int)in->bins(); b++)
+					{
+						float l = (d[i][b] - in->min()) / (in->max() - in->min()) * m_gain;
+						QColor col;
+						if (l < 0.f)
+							col = Qt::black;
+						else if (l > 1.f)
+							col = Qt::white;
+						else
+							col = QColor::fromHsv(240 - int(l * 240.f), 255, 255);
+						float bf = Y(in->bandFrequency(b-.5f), mn, dl);
+						p.fillRect(QRectF(i - 1, bf, 1, Y(in->bandFrequency(b+.5f), mn, dl) - bf), col);
+					}
+				p.setRenderHint(QPainter::Antialiasing, m_antialiasing);
 			}
 			else if (cp[ci.input].size())
 			{

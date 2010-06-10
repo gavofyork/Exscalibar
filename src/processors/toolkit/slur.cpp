@@ -66,7 +66,7 @@ void Slur::processOwnChunks(BufferDatas const& _in, BufferDatas& _out, uint _ch)
 bool Slur::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes = inTypes;
-	m_current.resize(inTypes[0].asA<TransmissionType>().arity());
+	m_current.resize(inTypes[0].arity());
 	for (int i = 0; i < m_current.size(); i++)
 		m_current[i] = 0.f;
 	return true;

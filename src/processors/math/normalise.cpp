@@ -64,7 +64,7 @@ void Normalise::initFromProperties(const Properties &p)
 
 bool Normalise::verifyAndSpecifyTypes(const Types &in, Types &out)
 {
-	m_arity = in[0].asA<TransmissionType>().arity();
+	m_arity = in[0].arity();
 	out[0] = in[0];
 	return true;
 }

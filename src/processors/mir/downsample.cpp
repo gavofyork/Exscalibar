@@ -80,7 +80,7 @@ bool DownSample::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Contiguous>())
 		return false;
-	theArity = inTypes[0].asA<TransmissionType>().arity();
+	theArity = inTypes[0].arity();
 	outTypes = inTypes[0];
 
 	if (thePeriod != 0.0) theCount = uint(thePeriod * inTypes[0].asA<Contiguous>().frequency());

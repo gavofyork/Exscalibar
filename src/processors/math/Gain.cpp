@@ -16,43 +16,47 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <cmath>
-using namespace std;
-
-#include "qfactoryexporter.h"
-
-#include "transmissiontype.h"
-#include "bufferdata.h"
-#include "subprocessor.h"
-#include "buffer.h"
+#include <Plugin>
 using namespace Geddei;
 
-class Exp : public SubProcessor
+class Gain: public SubProcessor
 {
-	uint m_arity;
+public:
+	Gain() : SubProcessor("Gain") {}
 
+private:
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void updateFromProperties(Properties const& _p);
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
+	virtual QString simpleText() const { return "X"; }
 
-public:
-	Exp() : SubProcessor("Exp") {}
+	float m_gain;
+	uint m_arity;
 };
 
-void Exp::processChunk(const BufferDatas &ins, BufferDatas &outs) const
+PropertiesInfo Gain::specifyProperties() const
 {
-	for (uint i = 0; i < m_arity; i++)
-		outs[0][i] = exp(ins[0][i]);
+	return PropertiesInfo("Gain", 1.f, "The gain.", true, "x", AV(0.00001f, 100000.f, AllowedValue::Log10));
 }
 
-bool Exp::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+void Gain::updateFromProperties(Properties const& _p)
 {
-	outTypes[0] = inTypes[0];
-	m_arity = inTypes[0].arity();
+	m_gain = _p["Gain"].toFloat();
+}
+
+void Gain::processChunk(const BufferDatas &ins, BufferDatas &outs) const
+{
+	for (uint i = 0; i < m_arity; i++)
+		outs[0][i] = ins[0][i] * m_gain;
+}
+
+bool Gain::verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes)
+{
+	o_outTypes = _inTypes;
+	m_arity = _inTypes[0].arity();
 	return true;
 }
 
-EXPORT_CLASS(Exp, 0,2,0, SubProcessor);
+EXPORT_CLASS(Gain, 0,2,0, SubProcessor);
+

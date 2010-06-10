@@ -167,7 +167,7 @@ void Pulser::processorStopped()
 
 bool Pulser::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
-	if (inTypes[0].asA<TransmissionType>().arity() != 1)
+	if (inTypes[0].arity() != 1)
 		return false;
 	if (m_dynamicPrior)
 	{

@@ -85,7 +85,7 @@ void Convolver::processOwnChunks(BufferDatas const& _in, BufferDatas& _out, uint
 bool Convolver::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes = inTypes;
-	m_arity = inTypes[0].asA<TransmissionType>().arity();
+	m_arity = inTypes[0].arity();
 	return true;
 }
 

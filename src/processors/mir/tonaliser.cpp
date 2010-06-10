@@ -130,9 +130,9 @@ void Deaverage::updateFromProperties(Properties const&)
 
 bool Deaverage::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 {
-	if (_inTypes[0].asA<TransmissionType>().arity() == 1)
+	if (_inTypes[0].arity() == 1)
 		return false;
-	m_arity = _inTypes[0].asA<TransmissionType>().arity();
+	m_arity = _inTypes[0].arity();
 	_outTypes = _inTypes;
 	return true;
 }

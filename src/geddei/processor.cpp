@@ -1202,7 +1202,7 @@ int CoProcessor::cyclesReady()
 	uint cycles = UINT_MAX;
 	for (uint i = 0; i < numOutputs(); i++)
 	{
-		uint bFree = theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().size();
+		uint bFree = min<uint>(UINT_MAX / 2, theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().size());
 		if (bFree < mSpace[i])
 			return 0;
 		else if (mSpace[i] > 0)
@@ -1214,7 +1214,7 @@ int CoProcessor::cyclesReady()
 		QVector<uint> is(numInputs());
 		for (uint i = 0; i < numInputs(); i++)
 			if (theInputs[i]->require(rData[i], mData[i]))
-				is[i] = theInputs[i]->samplesReady() / max(1u, mData[i]);
+				is[i] = min<uint>(UINT_MAX / 2, theInputs[i]->samplesReady() / max(1u, mData[i]));
 			else
 				is[i] = Undefined;
 		cycles = min(cycles, cyclesAvailable(is));

@@ -19,7 +19,8 @@ SOURCES += exp.cpp \
 		   sum.cpp \
 		   log.cpp \
 		   rotate.cpp \
-		   math.cpp
+		   math.cpp \
+    Gain.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES

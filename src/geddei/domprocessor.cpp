@@ -168,7 +168,10 @@ bool DomProcessor::serviceSubs()
 		theCurrentIns.nullify();
 		theCurrentOuts.nullify();
 		for (uint i = 0; i < numInputs(); i++)
-			input(i).readSamples(theWantChunks * theSamplesStep);
+		{
+			BufferData d = input(i).readSamples(theWantChunks * theSamplesStep);
+			d.nullify();
+		}
 	}
 	return true;
 }
@@ -182,12 +185,14 @@ int DomProcessor::canProcess()
 
 int DomProcessor::process()
 {
+	qDebug() << "Got enough input!" << endl;
 	uint samples = Undefined;
 	for (uint i = 0; i < numInputs(); i++)
 		samples = min(samples, input(i).samplesReady());
 
 	if (samples < theWantSamples)
 	{
+		qDebug() << "*** Stream discontinuity!";
 		// stream discontinuity.
 		uint chunks = (samples - theSamplesIn) / theSamplesStep + 1;
 		for (uint i = 0; i < theCurrentIns.count(); i++)

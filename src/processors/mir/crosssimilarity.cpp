@@ -53,7 +53,7 @@ bool CrossSimilarity::verifyAndSpecifyTypes(const Types &inTypes, Types &outType
 {
 	if (!inTypes[0].isA<SquareMatrix>())
 		return false;
-	theArity = inTypes[0].asA<TransmissionType>().arity();
+	theArity = inTypes[0].arity();
 	theCount = multiplicity();
 	outTypes[0] = SquareMatrix(theCount, inTypes[0].asA<SquareMatrix>().frequency());
 	return true;

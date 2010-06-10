@@ -170,7 +170,7 @@ void Histogram::initFromProperties(const Properties &p)
 bool Histogram::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	if (!inTypes[0].isA<Spectrum>()) return false;
-	theColumns = inTypes[0].asA<TransmissionType>().arity();
+	theColumns = inTypes[0].arity();
 	outTypes[0] = Matrix(theColumns, theRows, inTypes[0].asA<Contiguous>().frequency() / theStep, 0, 0);
 	theCount = uint(thePeriod * inTypes[0].asA<Contiguous>().frequency());
 	theStep = uint(theOverlap * inTypes[0].asA<Contiguous>().frequency());

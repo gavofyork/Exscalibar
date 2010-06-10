@@ -51,7 +51,7 @@ void Log::processChunk(const BufferDatas &ins, BufferDatas &outs) const
 bool Log::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	outTypes[0] = inTypes[0];
-	m_arity = inTypes[0].asA<TransmissionType>().arity();
+	m_arity = inTypes[0].arity();
 	return true;
 }
 

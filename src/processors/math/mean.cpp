@@ -55,7 +55,7 @@ bool Mean::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	if (!inTypes.count())
 		return false;
 	outTypes[0] = inTypes[0];
-	m_arity = inTypes[0].asA<TransmissionType>().arity();
+	m_arity = inTypes[0].arity();
 	return true;
 }
 

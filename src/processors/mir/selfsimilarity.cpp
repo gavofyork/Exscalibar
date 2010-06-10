@@ -84,7 +84,7 @@ class Distance: public SubProcessor
 	virtual void updateFromProperties(Properties const& _p);
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	{
-		m_arity = inTypes[0].asA<TransmissionType>().arity();
+		m_arity = inTypes[0].arity();
 		outTypes[0] = Value(inTypes[0].asA<Contiguous>().frequency());
 		return true;
 	}

@@ -309,7 +309,7 @@ public:
 	 *
 	 * @param data The data to be transferred down this connection.
 	 */
-	void push(BufferData const& data) { type().asA<TransmissionType>().polishData(const_cast<BufferData&>(data), theSource, theSourceIndex); pushBE(data); }
+	void push(BufferData const& data) { type()->polishData(const_cast<BufferData&>(data), theSource, theSourceIndex); pushBE(data); }
 
 	/**
 	 * Get the maximum amount of scratch samples we can make that won't cause
