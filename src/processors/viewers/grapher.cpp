@@ -192,8 +192,9 @@ int Grapher::process()
 			else
 				m_cPoints[i].append(x);
 		}
-		if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
-			m_cPoints = m_cPoints.mid(n);
+		if (!input(i).type().isA<Mark>())
+			if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
+				m_cPoints = m_cPoints.mid(n);
 		l_points.unlock();
 		d.nullify();
 	}
@@ -295,7 +296,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				p.setPen(QColor(255, 255, 255, 192));
 				for (float x = -1; x < 2; x++)
 					for (float y = -1; y < 2; y++)
-						if (x != y && x != 1 - y)
+						if (x != y && x != -y)
 							p.drawText(pos.translated(x, y), t);
 				p.setPen(Qt::black);
 				p.drawText(pos, t);
@@ -356,7 +357,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				p.setPen(QColor(255, 255, 255, 192));
 				for (float x = -1; x < 2; x++)
 					for (float y = -1; y < 2; y++)
-						if (x != y && x != 1 - y)
+						if (x != y && x != y)
 							p.drawText(pos.translated(x, y), Qt::AlignHCenter|Qt::AlignTop, t);
 				p.setPen(Qt::black);
 				p.drawText(pos, Qt::AlignHCenter|Qt::AlignTop, t);
@@ -402,9 +403,9 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 						float l = (d[i][b] - in->min()) / (in->max() - in->min()) * m_gain;
 						QColor col;
 						if (l < 0.f)
-							col = Qt::black;
+							continue;
 						else if (l > 1.f)
-							col = Qt::white;
+							col = Qt::darkRed;
 						else
 							col = QColor::fromHsv(240 - int(l * 240.f), 255, 255);
 						float bf = Y(in->bandFrequency(b-.5f), mn, dl);
@@ -477,12 +478,12 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		}
 	}
 	deepRect(&_p, QRectF(QPointF(0.0, 0.0), _s), true, Qt::white, false, 2, false, true);
-	_p.translate(2.5, 2.5);
+	_p.translate(2, 2);
 	_p.setRenderHint(QPainter::SmoothPixmapTransform, false);
 	_p.setRenderHint(QPainter::Antialiasing, false);
+	_p.drawPixmap(0, 0, m_display);
 	_p.drawPixmap(0, 0, m_units);
 	_p.drawPixmap(0, 0, m_time);
-	_p.drawPixmap(0, 0, m_display);
 	_p.drawPixmap(0, 0, m_labels);
 /*	if (m_labeled < (uint)m_config.size() && m_config[m_labeled].config.index < lp.size())
 	{
@@ -491,7 +492,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 		_p.setPen((m_config[m_labeled].back == Qt::transparent) ? QColor(255, 255, 255, 192) : m_config[m_labeled].back);
 		for (int x = -1; x < 2; x++)
 			for (int y = -1; y < 2; y++)
-				if (x != y && x != 1 - y)
+				if (x != y && x != y)
 					_p.drawText(QRectF(QPointF(x - 1, y), _s), Qt::AlignHCenter|Qt::AlignTop, t);
 		_p.setPen((m_config[m_labeled].fore == Qt::transparent) ? Qt::black : m_config[m_labeled].fore);
 		_p.drawText(QRectF(QPointF(0, 0), _s), Qt::AlignHCenter|Qt::AlignTop, t);

@@ -20,14 +20,14 @@
 
 #include <QtGui>
 
-class ProcessorItem;
+class ProcessorBasedItem;
 
 class OutputItem: public QGraphicsItem
 {
 public:
 	OutputItem(int _i, BaseItem* _p, QSizeF const& _size);
 
-	ProcessorItem* processorItem() const;
+	ProcessorBasedItem* processorItem() const;
 	BaseItem* baseItem() const;
 	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }

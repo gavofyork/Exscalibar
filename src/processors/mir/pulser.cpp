@@ -257,6 +257,7 @@ int StaticValue::process()
 {
 	BufferData out = output(0).makeScratchSample();
 	out[0] = m_value;
+	output(0) << out;
 	return DidWork;
 }
 

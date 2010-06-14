@@ -162,6 +162,7 @@ public:
 	 * Used by Marker to put a timestamp on each sample.
 	 */
 	virtual void polishData(BufferData&, Source*, uint) const {}
+	virtual void initData(BufferData&, Source*, uint) const {}
 
 	/**
 	 * Sends this TransmissionType object to the given QSocketSession object.

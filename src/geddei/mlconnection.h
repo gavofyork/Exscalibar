@@ -108,6 +108,7 @@ public:
 	void noMorePlungers();
 
 	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
+	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
 
 	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();

@@ -20,7 +20,7 @@
 #include "ProcessorItem.h"
 #include "MultipleOutputItem.h"
 
-MultipleOutputItem::MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size):
+MultipleOutputItem::MultipleOutputItem(ProcessorBasedItem* _p, QSizeF const& _size):
 	OutputItem		(0, _p, _size),
 	m_multiplicity	(Undefined)
 {
@@ -54,7 +54,7 @@ bool MultipleOutputItem::isConnected() const
 
 MultiSource* MultipleOutputItem::source() const
 {
-	return processorItem() ? static_cast<MultiSource*>(processorItem()->processor()) : static_cast<MultiSource*>(multiProcessorItem()->multiProcessor());
+	return processorItem() ? static_cast<MultiSource*>(processorItem()->executive()) : static_cast<MultiSource*>(multiProcessorItem()->multiProcessor());
 }
 
 MultiProcessorItem* MultipleOutputItem::multiProcessorItem() const

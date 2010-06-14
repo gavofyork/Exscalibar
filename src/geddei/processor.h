@@ -35,6 +35,7 @@
 #include "xlconnection.h"
 #include "rlconnection.h"
 #include "properties.h"
+#include "autoproperties.h"
 #include "source.h"
 #include "sink.h"
 #include "multisource.h"
@@ -51,6 +52,7 @@
 #include <geddei/xlconnection.h>
 #include <geddei/rlconnection.h>
 #include <geddei/properties.h>
+#include <geddei/autoproperties.h>
 #include <geddei/source.h>
 #include <geddei/sink.h>
 #include <geddei/multisource.h>
@@ -153,7 +155,7 @@ class DLLEXPORT BailException
  * values for those properties. It may specify a visual size and method for
  * drawing in a GUI.
  */
-class DLLEXPORT Processor: virtual public Source, virtual public Sink, public MultiSource, public MultiSink, public Groupable
+class DLLEXPORT Processor: public AutoProperties, virtual public Source, virtual public Sink, public MultiSource, public MultiSink, public Groupable
 {
 private:
 	/**
@@ -247,6 +249,8 @@ public:
 private:
 	//@{
 	/** Connection subsystem. */
+	uint m_inputSpace;
+	uint m_outputSpace;
 	QVector<xLConnection *> theInputs;
 	QVector<LxConnection *> theOutputs;
 	friend class RLConnection;
@@ -397,7 +401,7 @@ protected:
 	 * the Processor has been declared as a multi of Output (not ConstOutput though).
 	 * @sa setupVisual()
 	 */
-	void setupIO(uint inputs, uint outputs);
+	void setupIO(uint _inputs, uint _outputs, uint _inputSpace = 1, uint _outputSpace = 1);
 
 	/**
 	 * Call this from initFromProperties to initialise the visual properties of
@@ -517,8 +521,10 @@ protected:
 	 *
 	 * @param properties The given properties.
 	 */
-	virtual void initFromProperties(const Properties &properties) = 0;
-	virtual void updateFromProperties(const Properties &) {}
+	virtual void initFromProperties(Properties const& _p);
+	virtual void updateFromProperties(Properties const&);
+	virtual void initFromProperties() {}
+	virtual void updateFromProperties() {}
 
 	/**
 	 * Reimplement to restrict signal types this class can handle, and define signaltypes
@@ -643,6 +649,7 @@ public:
 	virtual void update(Properties const& _p) { updateFromProperties(_p); }
 
 	virtual double secondsPassed() const;
+	virtual double secondsPassed(float _s, uint _i = 0) const;
 
 	/**
 	 * Checks if the previously called init() has failed.

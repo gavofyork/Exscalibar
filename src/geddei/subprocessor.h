@@ -26,6 +26,7 @@
 #include "qfastwaitcondition.h"
 #include "globals.h"
 #include "properties.h"
+#include "autoproperties.h"
 #include "bufferdatas.h"
 #include "types.h"
 #else
@@ -33,6 +34,7 @@
 #include <geddei/globals.h>
 #include <geddei/properties.h>
 #include <geddei/bufferdatas.h>
+#include <geddei/autoproperties.h>
 #include <geddei/types.h>
 #endif
 
@@ -102,68 +104,70 @@ class RSCoupling;
  *
  * @sa DomProcessor @sa MultiProcessor
  */
-class DLLEXPORT SubProcessor
+class DLLEXPORT SubProcessor: public AutoProperties
 {
 	friend class Combination;
-
-	//@{
-	/** Basic properties. */
-	QString theType;
-	uint theNumInputs, theNumOutputs, theIn, theOut, theStep;
-	MultiplicityType theMulti;
-	Types theOutTypes;
-	//@}
-
-	//@{
-	/** Graphics stuff. */
-	uint theWidth;
-	uint theHeight;
-	//@}
-
-	//@{
-	/** DomProcessor relationship. */
-	DomProcessor *thePrimaryOf;
-	friend class DomProcessor;
-
-	/** @internal
-	 * Records the DomProcessor that we are the primary of. Used only by
-	 * DomProcessor itself.
-	 *
-	 * @param primaryOf The DomProcessor we are to be the primary of.
-	 */
-	void setPrimaryOf(DomProcessor *primaryOf) { thePrimaryOf = primaryOf; }
-	//@}
-
-	//* Association and deletion management.
-	xSCoupling *theCoupling;
 	friend class xSCoupling;
 	friend class DSCoupling;
 	friend class RSCoupling;
-
-	/** @internal
-	 * Use to find associated coupling. Used by ProcessorForwarder for deletion
-	 * management.
-	 *
-	 * @return A pointer to the associated Coupling.
-	 */
-	xSCoupling *coupling() { return theCoupling; }
+	friend class DomProcessor;
 	friend class ProcessorForwarder;
 
-	/** @internal
-	 * A quick'n'dirty proxy method, that basically just calls the virtual function
-	 * verifyAndSpecifyTypes(...). This should be used as an abstract interface. It,
-	 * in fact does an extra thing, namely records the outTypes for later use.
-	 * DO NOT call verifyAndSpecifyTypes(...) directly: Use proxyVSTypes(...) instead.
+public:
+	/**
+	 * Basic destructor.
 	 */
-	bool proxyVSTypes(const Types &inTypes, Types &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
+	virtual ~SubProcessor() { }
 
-	/** @internal
-	 * (Re)defines the number of inputs/outputs after any multiplicity concerns are
-	 * accounted for.
+	virtual QString type() const { return theType; }
+
+	// Note the following are not for real use - only for getting visuals in GUI.
+
+	void init(Properties const& _p) { initFromProperties(_p); }
+
+	PropertiesInfo properties() const { return specifyProperties(); }
+
+	void draw(QPainter& _p) const { paintProcessor(_p); }
+
+	QColor outlineColour() const { return specifyOutlineColour(); }
+
+	/**
+	 * Gets the width of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's width.
 	 */
-	void defineIO(uint numInputs, uint numOutputs);
+	uint width() const { return theWidth; }
+
+	/**
+	 * Gets the height of the processor's image. Used by the Nite for drawing.
+	 *
+	 * @return The image's height.
+	 */
+	uint height() const { return theHeight; }
+
+	/**
+	 * Gets the number of inputs this processor has.
+	 *
+	 * @return The number of inputs.
+	 */
+	uint numInputs() const { return theNumInputs; }
+
+	/**
+	 * Gets the number of outputs this processor has.
+	 *
+	 * @return The number of outputs.
+	 */
+	uint numOutputs() const { return theNumOutputs; }
 
 protected:
+	/**
+	 * SubProcessor constructor - use this when subclassing.
+	 *
+	 * @param type This must be set to the name of the subclass.
+	 * @param multi The type of multiplicity this SubProcessor supports.
+	 */
+	SubProcessor(const QString &type, const MultiplicityType &multi = NotMulti);
+
 	/**
 	 * Reimplement to specify how to process a chunk of data.
 	 *
@@ -251,8 +255,10 @@ protected:
 	 * @param properties The given Properties for the SubProcessor to be initialised
 	 * with.
 	 */
-	virtual void initFromProperties(Properties const& _p) { updateFromProperties(_p); }
-	virtual void updateFromProperties(Properties const&) {}
+	virtual void initFromProperties(Properties const& _p);
+	virtual void updateFromProperties(Properties const& _p);
+	virtual void initFromProperties() {}
+	virtual void updateFromProperties() {}
 
 	/**
 	 * Determine the multiplicity of the connection. Only valid after setupIO() has
@@ -322,59 +328,60 @@ protected:
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 96, 160); }
 	virtual QString simpleText() const { return "S"; }
 
-	/**
-	 * SubProcessor constructor - use this when subclassing.
+private:
+	/** @internal
+	 * Use to find associated coupling. Used by ProcessorForwarder for deletion
+	 * management.
 	 *
-	 * @param type This must be set to the name of the subclass.
-	 * @param multi The type of multiplicity this SubProcessor supports.
+	 * @return A pointer to the associated Coupling.
 	 */
-	SubProcessor(const QString &type, const MultiplicityType &multi = NotMulti);
+	xSCoupling *coupling() { return theCoupling; }
 
-public:
-	/**
-	 * Basic destructor.
+	/** @internal
+	 * A quick'n'dirty proxy method, that basically just calls the virtual function
+	 * verifyAndSpecifyTypes(...). This should be used as an abstract interface. It,
+	 * in fact does an extra thing, namely records the outTypes for later use.
+	 * DO NOT call verifyAndSpecifyTypes(...) directly: Use proxyVSTypes(...) instead.
 	 */
-	virtual ~SubProcessor() { }
+	bool proxyVSTypes(const Types &inTypes, Types &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
 
-	virtual QString type() const { return theType; }
+	/** @internal
+	 * (Re)defines the number of inputs/outputs after any multiplicity concerns are
+	 * accounted for.
+	 */
+	void defineIO(uint numInputs, uint numOutputs);
 
-	// Note the following are not for real use - only for getting visuals in GUI.
-
-	void init(Properties const& _p) { initFromProperties(_p); }
-
-	PropertiesInfo properties() const { return specifyProperties(); }
-
-	void draw(QPainter& _p) const { paintProcessor(_p); }
-
-	QColor outlineColour() const { return specifyOutlineColour(); }
-
-	/**
-	 * Gets the width of the processor's image. Used by the Nite for drawing.
+	//@{
+	/** @internal
+	 * Records the DomProcessor that we are the primary of. Used only by
+	 * DomProcessor itself.
 	 *
-	 * @return The image's width.
+	 * @param primaryOf The DomProcessor we are to be the primary of.
 	 */
-	uint width() const { return theWidth; }
+	void setPrimaryOf(DomProcessor *primaryOf) { thePrimaryOf = primaryOf; }
 
-	/**
-	 * Gets the height of the processor's image. Used by the Nite for drawing.
-	 *
-	 * @return The image's height.
-	 */
-	uint height() const { return theHeight; }
+	/** DomProcessor relationship. */
+	DomProcessor *thePrimaryOf;
+	//@}
 
-	/**
-	 * Gets the number of inputs this processor has.
-	 *
-	 * @return The number of inputs.
-	 */
-	uint numInputs() const { return theNumInputs; }
+	//@{
+	/** Basic properties. */
+	QString theType;
+	uint theNumInputs, theNumOutputs, theIn, theOut, theStep;
+	MultiplicityType theMulti;
+	Types theOutTypes;
+	//@}
 
-	/**
-	 * Gets the number of outputs this processor has.
-	 *
-	 * @return The number of outputs.
-	 */
-	uint numOutputs() const { return theNumOutputs; }
+	//@{
+	/** Graphics stuff. */
+	uint theWidth;
+	uint theHeight;
+	//@}
+
+	//* Association and deletion management.
+	xSCoupling *theCoupling;
+
+	QStringList m_dynamics;
 };
 
 class StatefulSubProcessor: public SubProcessor

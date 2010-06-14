@@ -44,7 +44,7 @@ QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
 	theWidth(16), theHeight(6), theMinWidth(16), theMinHeight(6), m_isResizable(false), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
-	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
+	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), m_inputSpace(1), m_outputSpace(1), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
 
@@ -74,6 +74,13 @@ double Processor::secondsPassed() const
 		if (theInputs[i])
 			m = max(m, theInputs[i]->secondsPassed());
 	return m;
+}
+
+double Processor::secondsPassed(float _s, uint _i) const
+{
+	if ((int)_i < theInputs.size() && theInputs[_i])
+		return theInputs[_i]->secondsPassed(_s);
+	return 0.0;
 }
 
 void Processor::startPlungers()
@@ -144,13 +151,13 @@ void Processor::disconnectAll()
 void Processor::specifyInputSpace(QVector<uint> &samples)
 {
 	for (uint i = 0; i < (uint)theInputs.size(); i++)
-		samples[i] = 1;
+		samples[i] = m_inputSpace;
 }
 
 void Processor::specifyOutputSpace(QVector<uint> &samples)
 {
 	for (uint i = 0; i < (uint)theOutputs.size(); i++)
-		samples[i] = 1;
+		samples[i] = m_outputSpace;
 }
 
 void Processor::dropInput(uint index)
@@ -670,9 +677,9 @@ bool Processor::confirmTypes()
 	}
 
 	// NOTE: DomProcessor::verifyAndSpecifyTypes depends on this code.
-	if ((theMulti&Out) && theTypesCache.count())
+	if (theTypesCache.count())
 	{
-		if (!theTypesCache.populated(0))
+		if (theTypesCache[0].isNull())
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) No output type specified.", qPrintable(name()));
 			theTypesConfirmed = false;
 			QFastMutexLocker lock(&theErrorSystem);
@@ -682,6 +689,8 @@ bool Processor::confirmTypes()
 			return false;
 		}
 		theTypesCache.fillEmpty(theTypesCache[0]);
+		for (uint i = 0; i < theTypesCache.count(); i++)
+			assert (!theTypesCache[i].isNull());
 		// TODO: Enforce the same basic class rule.
 	}
 
@@ -940,7 +949,7 @@ void Processor::reset()
 	if (MESSAGES) qDebug("< Processor::reset()");
 }
 
-void Processor::setupIO(uint inputs, uint outputs)
+void Processor::setupIO(uint inputs, uint outputs, uint _inputSpace, uint _outputSpace)
 {
 	assert(!isRunning());
 
@@ -952,6 +961,8 @@ void Processor::setupIO(uint inputs, uint outputs)
 
 	uint rinputs = inputs;
 	uint routputs = outputs;
+	m_inputSpace = _inputSpace;
+	m_outputSpace = _outputSpace;
 
 	if ((theMulti&In) && !(theMulti&Const))
 	{	if (rinputs != Undefined)
@@ -1059,6 +1070,19 @@ void Processor::resetMulti()
 			theOutputs.resize(0);
 		}
 	}
+}
+
+void Processor::updateFromProperties(Properties const& _p)
+{
+	loadProperties(_p, true);
+	updateFromProperties();
+}
+
+void Processor::initFromProperties(Properties const& _p)
+{
+	updateDynamics(specifyProperties());
+	loadProperties(_p, false);
+	initFromProperties();
 }
 
 HeavyProcessor::HeavyProcessor(QString const& _type, MultiplicityType _m, uint _flags):

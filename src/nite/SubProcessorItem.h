@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #pragma once
 
 #include <QtXml>
@@ -36,6 +37,7 @@ public:
 	SubProcessorItem(SubsContainer* _dpi, QString const& _type, int _index = 0, Properties const& _pr = Properties());
 
 	QSizeF size() const;
+	bool isHidden() const { return subProcessor()->width() == 0 && subProcessor()->height() == 0; }
 
 	uint index() const { return m_index; }
 	SubsContainer* subsContainer() const;
@@ -66,5 +68,5 @@ private:
 
 	QString				m_type;
 	uint				m_index;
-	float				m_widgetsHeight;
+	QSizeF				m_controlsSize;
 };

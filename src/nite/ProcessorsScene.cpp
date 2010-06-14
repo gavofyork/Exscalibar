@@ -32,7 +32,7 @@ using namespace Geddei;
 #include "MultiDomProcessorItem.h"
 #include "MultiProcessorItem.h"
 #include "DomProcessorItem.h"
-#include "ProcessorItem.h"
+#include "ProcessorBasedItem.h"
 #include "ProcessorsView.h"
 
 void deepRect(QPainter* _p, QRectF _r, bool _down, QColor const& _fill, bool _rIsInside, float _thickness, bool _radialFill)
@@ -99,6 +99,12 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 	}
 	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
 	{
+		DomProcessorItem* i = new DomProcessorItem(_event->mimeData()->text().mid(10));
+		i->setPos(_event->scenePos());
+		addItem(i);
+	}
+/*	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
+	{
 		bool doInit = false;
 		SubsContainer* dpi;
 		foreach (dpi, filter<DomProcessorItem>(items()))
@@ -119,7 +125,7 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 			dpi->baseItem()->setPos(_event->scenePos());
 			addItem(dpi->baseItem());
 		}
-	}
+	}*/
 	else
 		return;
 	changed();
@@ -167,7 +173,7 @@ void ProcessorsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 void ProcessorsScene::keyPressEvent(QKeyEvent* _e)
 {
 	if (_e->key() == Qt::Key_Shift)
-		foreach (ProcessorItem* i, filterRelaxed<ProcessorItem>(items()))
+		foreach (ProcessorBasedItem* i, filterRelaxed<ProcessorBasedItem>(items()))
 			i->setTryMulti(true);
 	update();
 }
@@ -175,7 +181,7 @@ void ProcessorsScene::keyPressEvent(QKeyEvent* _e)
 void ProcessorsScene::keyReleaseEvent(QKeyEvent* _e)
 {
 	if (_e->key() == Qt::Key_Shift)
-		foreach (ProcessorItem* i, filterRelaxed<ProcessorItem>(items()))
+		foreach (ProcessorBasedItem* i, filterRelaxed<ProcessorBasedItem>(items()))
 			i->setTryMulti(false);
 	update();
 }
@@ -216,3 +222,4 @@ void ProcessorsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 		mci->rejigEndPoints();
 	update();
 }
+

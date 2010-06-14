@@ -24,31 +24,43 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "SubsContainer.h"
-#include "ProcessorItem.h"
+#include "ProcessorBasedItem.h"
 
-class SubProcessorItem;
-
-class DomProcessorItem: public ProcessorItem, public SubsContainer
+class DomProcessorItem: public ProcessorBasedItem
 {
 public:
-	DomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
+	DomProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
+
+	Properties			baseProperties() const { return Properties("Latency/Throughput", 0.0); }
 
 	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+
+	virtual Processor*	executive() const { return m_combined; }
+	QList<DomProcessorItem*> allBefore();
+	QList<DomProcessorItem*> allAfter();
+	inline QList<DomProcessorItem*> all() { return QList<DomProcessorItem*>(allBefore()) << this << allAfter(); }
 
 	enum { ItemType = UserType + 14 };
 	virtual int			type() const { return ItemType; }
 
 protected:
-	virtual void		geometryChanged();
-	virtual QSizeF		centreMin() const;
-	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
-	virtual Processor*	reconstructProcessor();
-	virtual void		paintCentre(QPainter* _p);
+	virtual Processor*	prototypal() const { return m_prototypal; }
+	virtual SubProcessor* subPrototypal() const { return m_prototypal->primary(); }
+	virtual DomProcessor* domPrototypal() const { return m_prototypal; }
 
-	virtual QList<SubProcessorItem*> subProcessorItems() const;
-	virtual BaseItem*	baseItem() { return this; }
-	virtual DomProcessor*	domProcessor() const;
-	virtual void		propertiesChanged() { ProcessorItem::propertiesChanged(); }
+	virtual Properties	subsProperties();
+	QString				composedSubs();
+	virtual void		paintCentre(QPainter* _p);
+	virtual void		prepYourself(ProcessorGroup&);
+	virtual void		unprepYourself();
+
+	virtual void		propertiesChanged(QString const& _newName = QString::null);
+
+private:
+	DomProcessor*		m_combined;
+	DomProcessor*		m_prototypal;
+
+	QString				m_type;
+	QSizeF				m_controlsSize;
 };

@@ -57,6 +57,7 @@ public:
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
+	virtual void		unprepYourself();
 	virtual void		typesConfirmed();
 
 	virtual void		tick();
@@ -75,11 +76,11 @@ public:
 	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return outlineRect().adjusted(-ms, -ms, ms, ms); }
 	virtual QRectF		adjustBounds(QRectF const& _wouldBe) const { return _wouldBe; }
 
-	void				forwardEvent(QGraphicsSceneEvent* _e);
-
 	QBrush				fillBrush() const;
 	QPen				outerPen() const;
 	QPen				innerPen() const;
+
+	void				notePositionChange() { positionChanged(); }
 
 protected:
 	virtual Properties	completeProperties() const { return m_properties; }
@@ -114,9 +115,6 @@ private:
 	void				checkWidgets();
 
 	QRectF				resizeRect() const;
-
-//	QGraphicsRectItem*	m_statusBar;
-//	PauseItem*			m_pauseItem;
 
 	QSizeF				m_controlsSize;
 

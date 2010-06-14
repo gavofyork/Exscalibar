@@ -26,17 +26,16 @@ using namespace Geddei;
 
 #include "InputItem.h"
 
-class ProcessorItem;
+class ProcessorBasedItem;
 class MultiProcessorItem;
 
 class MultipleInputItem: public InputItem
 {
 public:
-	MultipleInputItem(ProcessorItem* _p, QSizeF const& _size);
+	MultipleInputItem(ProcessorBasedItem* _p, QSizeF const& _size);
 	MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
 	void setMultiplicity(uint _m);
-	MultiSink* sink() const;
 
 	// This or processorItem() will return non-zero.
 	MultiProcessorItem* multiProcessorItem() const;

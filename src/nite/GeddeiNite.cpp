@@ -378,6 +378,8 @@ void GeddeiNite::disconnectAll()
 	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		i->disconnectYourself();
 	theConnected = false;
+	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
+		i->unprepYourself();
 }
 
 void GeddeiNite::on_toolsDeployPlayer_activated()
@@ -385,7 +387,7 @@ void GeddeiNite::on_toolsDeployPlayer_activated()
 	QString filename = QFileDialog::getOpenFileName(this, "Open audio file", "/tmp", "Uncompressed audio (*.wav);;Ogg Vorbis (*.ogg);;FLAC audio (*.flac);;MP3 audio (*.mp3);;All files (*)");
 	if (!filename.isEmpty())
 	{
-		ProcessorItem* pi = new ProcessorItem("Player", Properties("Filename", filename));
+		ProcessorBasedItem* pi = new ProcessorItem("Player", Properties("Filename", filename));
 		theScene.addItem(pi);
 		setModified(true);
 	}

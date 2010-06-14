@@ -43,7 +43,7 @@ class BufferReader : public ScreenOwner
 	friend class Buffer;
 	Buffer *theBuffer;
 	BufferInfo *lastRead;
-	uint readPos, lastReadSize, theUsed, theToBeSkipped, theAlreadyPlungedHere;
+	uint readPos, m_lastReadSize, theUsed, theToBeSkipped, theAlreadyPlungedHere;
 
 	/**
 	 * The guts of skipElements. Do not use directly.
@@ -56,6 +56,8 @@ class BufferReader : public ScreenOwner
 	void clearUNSAFE();
 
 public:
+	uint lastReadSize() const { return m_lastReadSize; }
+
 	void openTrapdoor(const Processor *processor);
 	void closeTrapdoor(const Processor *processor);
 

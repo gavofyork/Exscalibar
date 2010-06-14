@@ -185,7 +185,6 @@ int DomProcessor::canProcess()
 
 int DomProcessor::process()
 {
-	qDebug() << "Got enough input!" << endl;
 	uint samples = Undefined;
 	for (uint i = 0; i < numInputs(); i++)
 		samples = min(samples, input(i).samplesReady());

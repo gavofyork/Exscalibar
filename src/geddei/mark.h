@@ -51,6 +51,7 @@ public:
 	virtual QString info() const;
 
 	virtual uint reserved() const { return 2u; }
+	virtual void initData(BufferData&, Source*, uint) const;
 	virtual void polishData(BufferData&, Source*, uint) const;
 	static void setTimestamp(BufferData& _data, double _ts);
 	static double timestamp(BufferData const& _data);

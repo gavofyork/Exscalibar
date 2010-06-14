@@ -219,6 +219,7 @@ protected:
 
 public:
 	virtual double secondsPassed() const = 0;
+	virtual double secondsPassed(float) const { return secondsPassed(); }
 
 	/**
 	 * Retrieves the type of signal this connection transfers.

@@ -31,7 +31,7 @@ public:
 	{}
 
 	virtual void			mousePressEvent(QGraphicsSceneMouseEvent* _e);
-	virtual void			mouseMoveEvent(QGraphicsSceneMouseEvent* _e) { mousePressEvent(_e); }
+	virtual void			mouseMoveEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void			paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);
 	virtual float			minWidth() const;
 

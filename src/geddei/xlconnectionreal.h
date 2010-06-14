@@ -74,6 +74,7 @@ private:
 	virtual bool plungeSync(uint samples) const;
 	virtual bool require(uint samples, uint preferSamples = Undefined);
 	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
+	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
 
 protected:
 	friend class BobPort;

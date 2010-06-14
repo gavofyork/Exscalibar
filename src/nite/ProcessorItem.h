@@ -22,7 +22,7 @@
 #include <QtGui>
 #include <Geddei>
 
-#include "BaseItem.h"
+#include "ProcessorBasedItem.h"
 #include "InputItem.h"
 #include "OutputItem.h"
 
@@ -32,63 +32,31 @@ extern const QSizeF portSize;
 extern const QSizeF multiPortSize;
 extern const double portLateralMargin;
 
-class ProcessorItem: public BaseItem
+class ProcessorItem: public ProcessorBasedItem
 {
 	friend class InputItem;
 	friend class OutputItem;
 
 public:
 	ProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
-	~ProcessorItem() { delete m_processor; }
+	~ProcessorItem() { delete m_nominal; }
 
 	enum { ItemType = UserType + 1 };
 	virtual int			type() const { return ItemType; }
 
-	virtual bool		isRunning() const { return processor() && processor()->isRunning(); }
-	virtual float		cyclePoint() const { return (processor()->guardsCrossed() % 36) * 360.0 / 36; }
-	virtual void		togglePause();
-
-	void				setTryMulti(bool _m) { m_tryToShowMulti = _m; updateMultiDisplay(); }
-	void				updateMultiDisplay();
-
-	virtual void		prepYourself(ProcessorGroup&);
-	virtual bool		connectYourself();
-	virtual void		disconnectYourself();
-	virtual void		typesConfirmed();
-	virtual void		tick();
-	virtual QString		name() const { return processor()->name(); }
-	virtual QString		typeName() const { return processor()->type(); }
-
-	Processor*			processor() const { return m_processor; }
+	virtual Processor*	prototypal() const { return m_nominal; }
+	virtual Processor*	executive() const { return m_nominal; }
 
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "processor"); }
 	QDomElement			saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const;
 
-protected:
-	virtual QSizeF		centreMin() const;
-	virtual QSizeF		centrePref() const { return QSizeF(processor()->width(), processor()->height()); }
-	virtual QColor		outlineColour() const { return processor()->outlineColour(); }
-	virtual void		paintCentre(QPainter* _p) { BaseItem::paintCentre(_p); processor()->draw(*_p, clientRect().size()); }
-	virtual uint		redrawPeriod() const { return processor() ? processor()->redrawPeriod() : 0; }
-	virtual bool		isResizable() const { return processor() && processor()->isResizable(); }
+	void				propertiesChanged(QString const& _newName = QString::null);
 
-	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
-
-	virtual Processor*	reconstructProcessor();
-	virtual void		geometryChanged();
-	virtual void		positionChanged();
-	virtual void		propertiesChanged(QString const& _newName = QString::null);
-
-	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(m_processor); }
-
-	Processor*			m_processor;
+	virtual void		unprepYourself();
 
 private:
-	void				updateMultiplicities();
-
-	bool				m_propertiesDirty;
+	Processor*			m_nominal;
 	QString				m_type;
-	bool				m_tryToShowMulti;
-	uint				m_multiplicity;
+	bool				m_propertiesDirty;
 };

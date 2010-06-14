@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GeddeiNite.h"
 #include "WithProperties.h"
 
 void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
@@ -26,4 +27,10 @@ void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
 	foreach (QString k, _i.keys())
 		if (_i.datum(k).allowed.size())
 			m_dynamicKeys << k;
+}
+
+void WithProperties::setProperty(QString const& _key, QVariant const& _value)
+{
+	m_properties[_key] = _value;
+	dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
 }

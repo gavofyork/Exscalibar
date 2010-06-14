@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "ProcessorsScene.h"
 #include "SubsContainer.h"
 #include "WithProperties.h"
@@ -32,18 +31,19 @@ SubProcessorItem::SubProcessorItem(SubsContainer* _dpi, QString const& _type, in
 	WithProperties	(_dpi->baseItem(), _pr),
 	m_type			(_type),
 	m_index			(_index),
-	m_widgetsHeight	(0.f)
+	m_controlsSize	(0, 0)
 {
 	_dpi->reorder();
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable);
+	m_controlsSize = QSizeF(0, 0);
 	QRectF widget(widgetMargin, subProcessor()->height() + widgetMargin, size().width() - widgetMargin * 2, 0);
 	foreach (QString k, m_dynamicKeys)
 	{
 		PropertyItem* item = new PropertyItem(this, widget, k);
 		widget.translate(0, item->boundingRect().height());
+		m_controlsSize.setWidth(max<float>(m_controlsSize.width(), item->minWidth()));
 	}
-	m_widgetsHeight = widget.top() - (subProcessor()->height() + widgetMargin);
-	assert(m_widgetsHeight < 10000);
+	m_controlsSize.setHeight(widget.top() - (subProcessor()->height() + widgetMargin));
 }
 
 SubProcessor* SubProcessorItem::subProcessor() const
@@ -73,7 +73,7 @@ SubProcessor* SubProcessorItem::subProcessor() const
 
 QSizeF SubProcessorItem::size() const
 {
-	return QSizeF(max<float>(m_dynamicKeys.count() ? 40.f : 0.f, subProcessor()->width()), subProcessor()->height() + m_widgetsHeight);
+	return QSizeF(max<float>(m_controlsSize.width(), subProcessor()->width()), subProcessor()->height() + m_controlsSize.height());
 }
 
 void SubProcessorItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*)
@@ -161,3 +161,4 @@ void SubProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) cons
 	}
 	_root.appendChild(proc);
 }
+

@@ -64,7 +64,8 @@ HEADERS += buffer.h \
     type.h \
     types.h \
     coretypes.h \
-    plugin.h
+    plugin.h \
+    autoproperties.h
 SOURCES += buffer.cpp \
 	bufferinfo.cpp \
 	bufferdata.cpp \
@@ -116,7 +117,8 @@ SOURCES += buffer.cpp \
     contiguous.cpp \
     typeregistrar.cpp \
     typeds.cpp \
-    typed.cpp
+    typed.cpp \
+    autoproperties.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

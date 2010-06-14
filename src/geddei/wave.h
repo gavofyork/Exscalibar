@@ -20,7 +20,6 @@
 
 #include <exscalibar.h>
 #ifdef __GEDDEI_BUILD
-
 #include "contiguous.h"
 #else
 #include <geddei/contiguous.h>
@@ -51,11 +50,40 @@ public:
 	 * frequency of 44100, i.e. each sample represents a reading in time of
 	 * 1/44100th of a second later than the last.
 	 */
-	Wave(float frequency = 0) : Contiguous(1, frequency, 1.f, -1.f) {}
+	inline Wave(float _frequency = 0.f, float _max = 1.f, float _min = -1.f) : Contiguous(1, _frequency, _max, _min) {}
 
 	virtual QString info() const { return QString("<div><b>Wave</b></div>") + Contiguous::info(); }
 
 	TT_NO_MEMBERS;
+};
+
+class DLLEXPORT WaveChunk: public Contiguous
+{
+	TRANSMISSION_TYPE(WaveChunk, Contiguous);
+
+public:
+	/**
+	 * The constructor.
+	 *
+	 * @param frequency The sampling frequency of the Wave. That is, the
+	 * inverse of the delay between each sample. e.g. CD audio has a sample
+	 * frequency of 44100, i.e. each sample represents a reading in time of
+	 * 1/44100th of a second later than the last.
+	 */
+	inline WaveChunk(uint _length = 0, float _frequency = 1.f, float _rate = 1.f, float _max = 1.f, float _min = -1.f) : Contiguous(_length, _frequency, _max, _min), m_rate(_rate) {}
+
+	virtual QString info() const { return QString("<div><b>WaveChunk</b></div><div>Rate: %1 Hz</div>").arg(m_rate) + Contiguous::info(); }
+
+	inline uint length() const { return arity(); }
+	inline void setLength(uint _l) { setArity(_l); }
+
+	inline float rate() const { return m_rate; }
+	inline void setRate(float _r) { m_rate = _r; }
+
+private:
+	float m_rate;
+
+	TT_1_MEMBER(m_rate);
 };
 
 }

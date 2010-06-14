@@ -25,24 +25,22 @@ public:
 	Gain() : SubProcessor("Gain") {}
 
 private:
+	virtual QString simpleText() const { return ""; }
+
 	virtual PropertiesInfo specifyProperties() const;
-	virtual void updateFromProperties(Properties const& _p);
-	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
+	virtual void initFromProperties() { setupVisual(0, 0); }
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
-	virtual QString simpleText() const { return "X"; }
+	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
 
 	float m_gain;
+	DECLARE_1_PROPERTY(Gain, m_gain);
+
 	uint m_arity;
 };
 
 PropertiesInfo Gain::specifyProperties() const
 {
 	return PropertiesInfo("Gain", 1.f, "The gain.", true, "x", AV(0.00001f, 100000.f, AllowedValue::Log10));
-}
-
-void Gain::updateFromProperties(Properties const& _p)
-{
-	m_gain = _p["Gain"].toFloat();
 }
 
 void Gain::processChunk(const BufferDatas &ins, BufferDatas &outs) const

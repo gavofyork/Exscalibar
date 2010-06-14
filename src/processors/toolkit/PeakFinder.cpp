@@ -55,8 +55,13 @@ int PeakFinder::process()
 		else if ((in(0, 0) < in(1, 0) && in(1, 0) > in(2, 0)) || m_goingUp == true)
 		{
 			BufferData out = output(0).makeScratchSample();
-			out[0] = in[1];
-			out[1] = in[1] + max(in[0], in[2]);
+			float const& a = in(0, 0);
+			float const& b = in(1, 0);
+			float const& c = in(2, 0);
+			float p = (a - c) / 2 / (a - 2 * b + c);
+			out[0] = b - (a - c) * p / 4.f;
+			out[1] = in[1];
+			Mark::setTimestamp(out, input(0).secondsPassed(p + 1.f));
 			output(0) << out;
 			m_goingUp = false;
 		}
@@ -80,7 +85,7 @@ bool PeakFinder::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 void PeakFinder::initFromProperties(Properties const& _p)
 {
 	updateFromProperties(_p);
-	setupIO(1, 1);
+	setupIO(1, 1, 3, 1);
 }
 
 void PeakFinder::updateFromProperties(Properties const&)

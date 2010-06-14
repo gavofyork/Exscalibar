@@ -17,7 +17,7 @@
  */
 
 #include "ProcessorsView.h"
-#include "ProcessorItem.h"
+#include "ProcessorBasedItem.h"
 #include "OutputItem.h"
 
 OutputItem::OutputItem(int _i, BaseItem* _p, QSizeF const& _size):
@@ -124,7 +124,7 @@ void OutputItem::mousePressEvent(QGraphicsSceneMouseEvent*)
 	qobject_cast<ProcessorsScene*>(scene())->beginConnect(this);
 }
 
-ProcessorItem* OutputItem::processorItem() const
+ProcessorBasedItem* OutputItem::processorItem() const
 {
-	return dynamic_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<ProcessorBasedItem*>(parentItem());
 }

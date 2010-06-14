@@ -16,12 +16,33 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wave.h"
+#pragma once
+
+#include <QStringList>
+
+#include <exscalibar.h>
+#ifdef __GEDDEI_BUILD
+#include "memberinfo.h"
+#else
+#include <qtextra/memberinfo.h>
+#endif
 
 namespace Geddei
 {
 
-TRANSMISSION_TYPE_CPP(Wave);
-TRANSMISSION_TYPE_CPP(WaveChunk);
+class Properties;
+class PropertiesInfo;
+
+class AutoProperties
+{
+	TT_BASE_CLASS(AutoProperties);
+	TT_NO_MEMBERS;
+
+protected:
+	void loadProperties(Properties const& _p, bool _dynamicsOnly = false);
+	void updateDynamics(PropertiesInfo const& _pi);
+
+	QStringList m_dynamics;
+};
 
 }

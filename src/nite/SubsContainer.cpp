@@ -27,35 +27,40 @@ SubsContainer::SubsContainer()
 QSizeF SubsContainer::centreMin() const
 {
 	QSizeF s(-margin(), 0);
+	bool needPadding = false;
 	foreach (SubProcessorItem* i, subProcessorItems())
+	{
 		s = QSizeF(s.width() + i->size().width() + margin(), max(s.height(), i->size().height()));
-	return s + QSizeF(padding() * 2, padding() * 2);
+		if (!i->isHidden())
+			needPadding = true;
+	}
+	return needPadding ? s + QSizeF(padding() * 2, padding() * 2) : s;
 }
 
 void SubsContainer::paintFrames(QPainter* _p) const
 {
 	_p->save();
 	foreach (SubProcessorItem* spi, ordered())
-		deepRect(_p, QRectF(spi->pos(), spi->size()), true, spi->subProcessor()->outlineColour());
-
+		if (!spi->isHidden())
+			deepRect(_p, QRectF(spi->pos(), spi->size()), true, spi->subProcessor()->outlineColour());
 	_p->restore();
 }
 
-QString SubsContainer::composedSubs() const
+QString SubsContainer::composedSubs(QList<SubProcessorItem*> const& _ordered)
 {
 	QString ret;
-	foreach (SubProcessorItem* i, ordered())
+	foreach (SubProcessorItem* i, _ordered)
 		ret += "&" + i->spType();
 	return ret.mid(1);
 }
 
-Properties SubsContainer::completeProperties() const
+Properties SubsContainer::completeProperties(QList<SubProcessorItem*> const& _ordered, Properties const& _base)
 {
 	Properties ret;
-	QList<SubProcessorItem*> spis = ordered();
+	QList<SubProcessorItem*> spis = _ordered;
 	for (int i = (uint)spis.count() - 1; i >= 0; i--)
 		ret = ret.stashed() + spis[i]->properties();
-	ret = ret.stashed() + baseItem()->properties();
+	ret = ret.stashed() + _base;
 	return ret;
 }
 
@@ -102,7 +107,13 @@ QList<SubProcessorItem*> SubsContainer::ordered() const
 
 void SubsContainer::geometryChanged()
 {
-	QPointF cp(padding(), padding());
+	QPointF cp(0, 0);
+	foreach (SubProcessorItem* spi, ordered())
+		if (!spi->isHidden())
+		{
+			cp = QPointF(padding(), padding());
+			break;
+		}
 	foreach (SubProcessorItem* spi, ordered())
 	{
 		spi->setPos(cp);

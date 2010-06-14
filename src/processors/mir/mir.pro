@@ -35,7 +35,10 @@ SOURCES += bandwise.cpp \
     Peakify.cpp \
     PeakRoller.cpp \
     SpectralHarmonics.cpp \
-    tonaliser.cpp
+    tonaliser.cpp \
+    ToneSplit.cpp \
+    Window.cpp \
+    DeciBel.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
@@ -48,4 +51,3 @@ CONFIG += plugin
 VERSION = $$OURVERSION
 
 HEADERS +=
-

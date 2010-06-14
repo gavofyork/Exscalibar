@@ -42,7 +42,8 @@ HEADERS += GeddeiNite.h \
     WithProperties.h \
     PropertyItem.h \
     RangePropertyItem.h \
-	SelectionPropertyItem.h
+	SelectionPropertyItem.h \
+    ProcessorBasedItem.h
 SOURCES += GeddeiNite.cpp \
     main.cpp \
     ProcessorView.cpp \
@@ -69,7 +70,8 @@ SOURCES += GeddeiNite.cpp \
 	WithProperties.cpp \
     PropertyItem.cpp \
     RangePropertyItem.cpp \
-	SelectionPropertyItem.cpp
+	SelectionPropertyItem.cpp \
+    ProcessorBasedItem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp

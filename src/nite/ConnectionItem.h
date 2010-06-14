@@ -25,12 +25,15 @@
 
 class InputItem;
 class OutputItem;
-class ProcessorItem;
+class ProcessorBasedItem;
 
 class ConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
+	enum Nature { Connection, Coupling };
+
 	ConnectionItem(InputItem* _to, OutputItem* _from);
+	~ConnectionItem();
 
 	enum { ItemType = UserType + 4 };
 	virtual int type() const { return ItemType; }
@@ -44,19 +47,27 @@ public:
 
 	QPointF wouldAdjust() const;
 
-	ProcessorItem* toProcessor() const;
-	ProcessorItem* fromProcessor() const;
+	ProcessorBasedItem* toProcessor() const;
+	ProcessorBasedItem* fromProcessor() const;
+	BaseItem* toBase() const;
+	BaseItem* fromBase() const;
 
 	static void fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	void saveYourself(QDomElement& _root, QDomDocument& _doc) const;
 
 	void rejigEndPoints();
 
+	void refreshNature();
+	Nature nature() const { return m_nature; }
+
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
+	bool m_rejigging;
 	bool m_isValid;
 	OutputItem* m_from;
 	InputItem* m_to;
+
+	Nature m_nature;
 };

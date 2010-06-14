@@ -46,7 +46,9 @@ LxConnection::~LxConnection()
 
 BufferData LxConnection::makeScratchSamples(uint samples, bool autoPush)
 {
-	return makeScratchElements(theType->elementsFromSamples(samples), autoPush);
+	BufferData d = makeScratchElements(theType->elementsFromSamples(samples), autoPush);
+	type()->polishData(d, theSource, theSourceIndex);
+	return d;
 }
 
 /*BufferData LxConnection::makeScratchSeconds(float seconds, bool autoPush)

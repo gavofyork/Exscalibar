@@ -31,6 +31,13 @@ class NodeServerSession;
 
 namespace rGeddei { class RemoteSession; }
 
+#define DECLARE_1_PROPERTY(C, P1) TT_BASE_CLASS(C); TT_1_MEMBER(P1)
+#define DECLARE_2_PROPERTIES(C, P1, P2) TT_BASE_CLASS(C); TT_2_MEMBERS(P1, P2)
+#define DECLARE_3_PROPERTIES(C, P1, P2, P3) TT_BASE_CLASS(C); TT_3_MEMBERS(P1, P2, P3)
+#define DECLARE_4_PROPERTIES(C, P1, P2, P3, P4) TT_BASE_CLASS(C); TT_4_MEMBERS(P1, P2, P3, P4)
+#define DECLARE_5_PROPERTIES(C, P1, P2, P3, P4, P5) TT_BASE_CLASS(C); TT_5_MEMBERS(P1, P2, P3, P4, P5)
+#define DECLARE_6_PROPERTIES(C, P1, P2, P3, P4, P5, P6) TT_BASE_CLASS(C); TT_6_MEMBERS(P1, P2, P3, P4, P5, P6)
+
 namespace Geddei
 {
 
@@ -171,6 +178,8 @@ public:
 	 */
 	QVariant operator[](const QString &key) const { if (!theData.contains(key)) qWarning("*** WARNING: Reading undefined property (%s)", qPrintable(key)); return theData[key]; }
 
+	bool contains(QString const& _k) const { return theData.contains(_k); }
+
 	/**
 	 * Subscript operator giving full access to the mapping. This can be used
 	 * for writing to the mapping.
@@ -224,6 +233,8 @@ public:
 	 * Basic constructor. Creates an empty Properties object.
 	 */
 	Properties() {}
+	Properties(Properties const& _p): theData(_p.theData) {}
+	Properties& operator=(Properties const& _p) { theData = _p.theData; return *this; }
 
 	/** @internal
 	 * Constructor to create a Properties object from a PropertiesInfo
@@ -256,6 +267,8 @@ static const QList<AllowedValue> AVfrequency = AV(20.f, 20000.f, AllowedValue::L
 static const QList<AllowedValue> AVunity = AV(0.f, 1.f, AllowedValue::Linear);
 static const QList<AllowedValue> AVlogUnity = AV(0.f, 1.f, AllowedValue::Log2);
 static const QList<AllowedValue> AVbool = AV("Off", "O", false) AVand("On", "|", true);
+static const QList<AllowedValue> AVgain = AV(0.00001f, 100000.f, AllowedValue::Log10);
+static const QList<AllowedValue> AVsamples = AV(2, 16384, AllowedValue::Log2);
 
 /** @internal
  * Class to hold any extra data for each Property of the the PropertiesInfo

@@ -89,7 +89,7 @@ public:
 	 *
 	 * @param src The source pointer reference to be copied.
 	 */
-	Typed(TT const& src = TT()) : m_ptr(src.copy()) {}
+	Typed(TT const& src = TT()) : m_ptr(static_cast<TT*>(src.copy())) {}
 	Typed(Typed<TT> const& _p) : m_ptr(static_cast<TT*>(_p.m_ptr->copy())) {}
 	template<class T> Typed(Typed<T> const& _p) : m_ptr(_p.isA<TT>() ? static_cast<TT*>(_p.m_ptr->copy()) : new TT(TransmissionType::NullTransmissionType)) {}
 	~Typed() { delete m_ptr; }
@@ -176,7 +176,7 @@ public:
 	 */
 	Typed<TT> &operator=(Typed<TT> const& _p) { if (_p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } else nullify(); return *this; }
 
-	template<class T> Typed<TT> &operator=(Typed<T> const& _p) { if (_p.isA<TT>() && _p.m_ptr != m_ptr) { delete m_ptr; m_ptr = _p.m_ptr->copy(); assert(_p == *this); } else nullify(); return *this; }
+	template<class T> Typed<TT> &operator=(Typed<T> const& _p) { if (_p.isA<TT>() && _p.m_ptr != m_ptr) { delete m_ptr; m_ptr = static_cast<TT*>(_p.m_ptr->copy()); assert(_p == *this); } else nullify(); return *this; }
 	/**
 	 * Check to see if we are the same as some other TransmissionType. This not only
 	 * checks that we are the same type but also checks that our parameters are

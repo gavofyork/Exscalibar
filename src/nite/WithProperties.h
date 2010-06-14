@@ -35,7 +35,7 @@ public:
 	inline PropertiesDatum			propertiesInfo(QString const& _key) const { return propertiesInfo().datum(_key); }
 	virtual Properties const&		properties() const { return m_properties; }
 	virtual PropertiesInfo const&	propertiesInfo() const { return m_propertiesInfo; }
-	virtual void					setProperty(QString const& _key, QVariant const& _value) { m_properties[_key] = _value; }
+	virtual void					setProperty(QString const& _key, QVariant const& _value);
 	virtual void					setPropertiesInfo(PropertiesInfo const& _i);
 
 protected:

@@ -49,9 +49,15 @@ Mark::Mark(uint _arity, QVector<float> const& _maxs, QVector<float> const& _mins
 	}
 }
 
+void Mark::initData(BufferData& _d, Source*, uint) const
+{
+	setTimestamp(_d, numeric_limits<double>::infinity());
+}
+
 void Mark::polishData(BufferData& _d, Source* _s, uint) const
 {
-	setTimestamp(_d, _s->secondsPassed());
+	if (isinf(timestamp(_d)))
+		setTimestamp(_d, _s->secondsPassed());
 }
 
 void Mark::setTimestamp(BufferData& _d, double _ts)

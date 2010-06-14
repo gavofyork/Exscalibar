@@ -74,8 +74,8 @@ void CutOff::initFromProperties(const Properties &properties)
 
 PropertiesInfo CutOff::specifyProperties() const
 {
-	return PropertiesInfo("Frequency From", 0., "The lower bound of bands allowed to pass.")
-						 ("Frequency To", 4000., "The uppoer bound of bands allowed to pass.");
+	return PropertiesInfo("Frequency From", 20., "The lower bound of bands allowed to pass.", false, QChar(0x21A6), AVfrequency)
+						 ("Frequency To", 4000., "The upper bound of bands allowed to pass.", false, QChar(0x21A4), AVfrequency);
 }
 
 EXPORT_CLASS(CutOff, 0,1,0, SubProcessor);

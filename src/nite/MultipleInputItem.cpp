@@ -20,11 +20,11 @@
 
 #include "MultipleConnectionItem.h"
 #include "ConnectionItem.h"
-#include "ProcessorItem.h"
+#include "ProcessorBasedItem.h"
 #include "MultiProcessorItem.h"
 #include "MultipleInputItem.h"
 
-MultipleInputItem::MultipleInputItem(ProcessorItem* _p, QSizeF const& _size):
+MultipleInputItem::MultipleInputItem(ProcessorBasedItem* _p, QSizeF const& _size):
 	InputItem		(0, _p, _size),
 	m_multiplicity	(Undefined)
 {
@@ -34,11 +34,6 @@ MultipleInputItem::MultipleInputItem(int _i, MultiProcessorItem* _p, QSizeF cons
 	InputItem		(_i, _p, _size),
 	m_multiplicity	(Undefined)
 {
-}
-
-MultiSink* MultipleInputItem::sink() const
-{
-	return processorItem() ? static_cast<MultiSink*>(processorItem()->processor()) : static_cast<MultiSink*>(multiProcessorItem()->multiProcessor());
 }
 
 void MultipleInputItem::setMultiplicity(uint _m)
@@ -68,8 +63,8 @@ MultiProcessorItem* MultipleInputItem::multiProcessorItem() const
 
 void MultipleInputItem::typesConfirmed()
 {
-	if (processorItem() && processorItem()->processor()->numInputs())
-		m_typeInfo = processorItem()->processor()->input(0).type().info();
+	if (processorItem() && processorItem()->executive()->numInputs())
+		m_typeInfo = processorItem()->executive()->input(0).type().info();
 	else if (multiProcessorItem() && (int)multiProcessorItem()->processor()->numInputs() > (int)m_index)
 		m_typeInfo = multiProcessorItem()->processor()->input(m_index).type().info();
 	m_typeInfo = QString("<div><b>Multiple Connection</b></div><div>Arity: %1</div>").arg(m_multiplicity) + m_typeInfo;

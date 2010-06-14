@@ -70,6 +70,7 @@ public:
 	virtual const Processor *processor() const;
 
 	virtual double secondsPassed() const = 0;
+	virtual double secondsPassed(float _sample, uint _input = 0) const { (void)_sample; (void)_input; return secondsPassed(); }
 
 	/**
 	 * Virtual destructor.

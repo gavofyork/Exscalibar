@@ -50,6 +50,11 @@ void RangePropertyItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 	withProperties()->setProperty(propertyItem()->key(), f);
 }
 
+void RangePropertyItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
+{
+	mousePressEvent(_e);
+}
+
 float RangePropertyItem::minWidth() const
 {
 	return 50.f;

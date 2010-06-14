@@ -21,14 +21,14 @@
 #include <QtGui>
 #include <QtXml>
 
-class ProcessorItem;
+class ProcessorBasedItem;
 
 class InputItem: public QGraphicsItem
 {
 public:
 	InputItem(int _i, BaseItem* _p, QSizeF const& _size);
 
-	ProcessorItem* processorItem() const;
+	ProcessorBasedItem* processorItem() const;
 	BaseItem* baseItem() const;
 
 	bool isConnected() const;

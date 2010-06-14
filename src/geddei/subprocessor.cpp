@@ -113,6 +113,19 @@ void SubProcessor::defineIO(uint numInputs, uint numOutputs)
 	theNumOutputs = numOutputs;
 }
 
+void SubProcessor::updateFromProperties(Properties const& _p)
+{
+	loadProperties(_p, true);
+	updateFromProperties();
+}
+
+void SubProcessor::initFromProperties(Properties const& _p)
+{
+	updateDynamics(specifyProperties());
+	loadProperties(_p, false);
+	initFromProperties();
+}
+
 }
 
 #undef MESSAGES

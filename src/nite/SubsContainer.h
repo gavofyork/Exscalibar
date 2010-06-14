@@ -43,15 +43,18 @@ public:
 	void				reorder();
 	virtual void		propertiesChanged() = 0;
 
+	static QString		composedSubs(QList<SubProcessorItem*> const& _ordered);
+	static Properties	completeProperties(QList<SubProcessorItem*> const& _ordered, Properties const& _base);
+
 protected:
 	void				geometryChanged();
 	QSizeF				centreMin() const;
-	Properties			completeProperties() const;
+	Properties			completeProperties() const { return completeProperties(ordered(), baseItem()->properties()); }
 	virtual float		margin() const { return 5.f; }
 	virtual float		padding() const { return 2.f; }
 	void				paintFrames(QPainter*) const;
 
-	QString				composedSubs() const;
+	QString				composedSubs() const { return composedSubs(ordered()); }
 	QList<SubProcessorItem*> ordered() const;
 
 	void				importDom(QDomElement& _item, QGraphicsScene* _scene);

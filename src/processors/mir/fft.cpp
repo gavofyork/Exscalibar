@@ -36,67 +36,76 @@ using namespace Geddei;
 
 #define PI 3.1415926535898
 
-#ifdef HAVE_FFTW3F
+#if defined(HAVE_FFTW3F) || 1
 
 #include <fftw3.h>
 
 class FFT: public SubProcessor
 {
-	int theSize, theStep;
-
-	fftwf_plan thePlan;
-	float *theIn, *theOut;
-	float *theWindow;
-
-	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
-	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
-	virtual QString simpleText() const { return QChar(0x237c); }
-
 public:
-	FFT() : SubProcessor("FFT") {}
+	FFT() : SubProcessor("FFT"), m_plan(0), m_in(0), m_out(0) {}
 	~FFT();
+
+private:
+	virtual QString simpleText() const { return QChar(0x237c); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(270, 96, 160); }
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties();
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
+	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
+
+	bool m_optimise;
+	DECLARE_1_PROPERTY(FFT, m_optimise);
+
+	uint m_arity;
+	fftwf_plan m_plan;
+	float* m_in;
+	float* m_out;
 };
 
-void FFT::initFromProperties(const Properties &p)
+PropertiesInfo FFT::specifyProperties() const
 {
-	theStep = p["Step"].toInt();
-	theSize = p["Size"].toInt();
-	setupSamplesIO(theSize, theStep, 1);
-	theIn = (float *)fftwf_malloc(sizeof(float) * theSize);
-	theOut = (float *)fftwf_malloc(sizeof(float) * theSize);
-	thePlan = fftwf_plan_r2r_1d(theSize, theIn, theOut, FFTW_R2HC, p["Optimise"].toBool() ? FFTW_MEASURE : FFTW_ESTIMATE);
-	theWindow = new float[theSize];
-	for (int i = 0; i < theSize; ++i)
-	{
-		theWindow[i] = .5f * (1.f - cos(2.f * PI * float(i) / float(theSize - 1)));
-	}
+	return PropertiesInfo("Optimise", true, "True if time is taken to optimise the calculation.", false, "O", AVbool);
+}
+
+void FFT::initFromProperties()
+{
+	setupSamplesIO(1, 1, 1);
+}
+
+bool FFT::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+{
+	Typed<WaveChunk> in = inTypes[0];
+	if (!in) return false;
+	m_arity = in->length();
+	outTypes[0] = FreqSteppedSpectrum(m_arity / 2 + 1, in->frequency(), in->rate() / float(m_arity));
+	if (m_in) fftwf_free(m_in);
+	if (m_out) fftwf_free(m_out);
+	if (m_plan) fftwf_destroy_plan(m_plan);
+	m_in = (float *)fftwf_malloc(sizeof(float) * m_arity);
+	m_out = (float *)fftwf_malloc(sizeof(float) * m_arity);
+	m_plan = fftwf_plan_r2r_1d(m_arity, m_in, m_out, FFTW_R2HC, m_optimise ? FFTW_MEASURE : FFTW_ESTIMATE);
+	return true;
 }
 
 FFT::~FFT()
 {
-	delete [] theWindow;
-	fftwf_destroy_plan(thePlan);
-	fftwf_free(theIn);
-	fftwf_free(theOut);
+	if (m_in) fftwf_free(m_in);
+	if (m_out) fftwf_free(m_out);
+	if (m_plan) fftwf_destroy_plan(m_plan);
 }
 
-void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
+void FFT::processChunk(BufferDatas const& _in, BufferDatas& _out) const
 {
-	for (int i = 0; i < theSize; i++)
-	{	theIn[i] = in[0][i] * theWindow[i];
-	}
-
-	fftwf_execute(thePlan);
-
-	out[0][0] = theOut[0] / float(theSize / 2);
-	for (int i = 1; i < theSize / 2; i++)
+	_in[0].copyTo(m_in, m_arity);
+	fftwf_execute(m_plan);
+	_out[0][0] = m_out[0] / float(m_arity / 2);
+	for (uint i = 1; i < m_arity / 2; i++)
 	{
-		float xsq = theOut[i] * theOut[i] + theOut[theSize - i] * theOut[theSize - i];
-		out[0][i] = isFinite(xsq) && xsq > 0 ? sqrt(xsq) / float(theSize / 2) : 0;
+		float xsq = m_out[i] * m_out[i] + m_out[m_arity - i] * m_out[m_arity - i];
+		_out[0][i] = isFinite(xsq) && xsq > 0 ? sqrt(xsq) / float(m_arity / 2) : 0;
 	}
-	out[0][theSize / 2] = theOut[theSize / 2] / float(theSize / 2);
+	_out[0][m_arity / 2] = m_out[m_arity / 2] / float(m_arity / 2);
 }
 
 #else
@@ -106,7 +115,7 @@ using namespace std;
 
 class FFT : public SubProcessor
 {
-	uint theLogSize, theStep, theSize, theSizeMask;
+	uint theLogSize, m_hop, m_size, theSizeMask;
 	float *costable, *sintable;
 	uint *bitReverse;
 	float *real, *imag;
@@ -151,11 +160,11 @@ FFT::~FFT()
 
 void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 {
-	for (uint i = 0; i < theSize; i++)
+	for (uint i = 0; i < m_size; i++)
 	{	real[i] = in[0][bitReverse[i] & theSizeMask];
 		imag[i] = 0;
 	}
-	uint exchanges = 1, factfact = theSize / 2;
+	uint exchanges = 1, factfact = m_size / 2;
 	float fact_real, fact_imag, tmp_real, tmp_imag;
 
 	for (uint i = theLogSize; i != 0; i--)
@@ -165,7 +174,7 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 			fact_real = costable[j * factfact];
 			fact_imag = sintable[j * factfact];
 
-			for (uint k = j; k < theSize; k += exchanges << 1)
+			for (uint k = j; k < m_size; k += exchanges << 1)
 			{
 				int k1 = k + exchanges;
 				tmp_real = fact_real * real[k1] - fact_imag * imag[k1];
@@ -180,10 +189,10 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 		factfact >>= 1;
 	}
 
-	float theMagnitude = (theSize / 2);
+	float theMagnitude = (m_size / 2);
 	theMagnitude *= theMagnitude;
 
-	for (uint i = 0; i < theSize / 2; i++)
+	for (uint i = 0; i < m_size / 2; i++)
 		out[0][i] = ((real[i] * real[i]) + (imag[i] * imag[i])) / theMagnitude;
 	out[0][0] /= 4;
 }
@@ -191,40 +200,31 @@ void FFT::processChunk(const BufferDatas &in, BufferDatas &out) const
 void FFT::initFromProperties(const Properties &properties)
 {
 	theLogSize = int(floor(log(double(properties["Size"].toInt())) / log(2.0)));
-	theStep = properties["Step"].toInt();
-	theSize = 1 << theLogSize;
-	if (theSize != (uint)properties["Size"].toInt())
+	m_hop = properties["Step"].toInt();
+	m_size = 1 << theLogSize;
+	if (m_size != (uint)properties["Size"].toInt())
 		qDebug("*** WARNING: Using simple FFT as FFTW not found. Can only use FFT sizes that are\n"
 			   "             powers of 2. Size truncated from %d (=2^%f) to %d (=2^%d). Fix this\n"
-			   "             by installing libfftw and recompiling the FFT subprocessor.", properties["Size"].toInt(), log(double(properties["Size"].toInt())) / log(2.0), theSize, theLogSize);
-	theSizeMask = theSize - 1;
-	setupIO(1, 1, theSize, theStep, 1);
+			   "             by installing libfftw and recompiling the FFT subprocessor.", properties["Size"].toInt(), log(double(properties["Size"].toInt())) / log(2.0), m_size, theLogSize);
+	theSizeMask = m_size - 1;
+	setupIO(1, 1, m_size, m_hop, 1);
 
 	// set up lookups
 	delete [] sintable;
 	delete [] costable;
 	delete [] bitReverse;
-	sintable = new float[theSize / 2];
-	costable = new float[theSize / 2];
-	for (uint i = 0; i < theSize / 2; i++)
-	{	costable[i] = cos(2 * PI * i / theSize);
-		sintable[i] = sin(2 * PI * i / theSize);
+	sintable = new float[m_size / 2];
+	costable = new float[m_size / 2];
+	for (uint i = 0; i < m_size / 2; i++)
+	{	costable[i] = cos(2 * PI * i / m_size);
+		sintable[i] = sin(2 * PI * i / m_size);
 	}
-	bitReverse = new uint[theSize];
-	for (uint i = 0; i < theSize; i++)
+	bitReverse = new uint[m_size];
+	for (uint i = 0; i < m_size; i++)
 		bitReverse[i] = reverseBits(i, theLogSize);
 
-	real = new float[theSize];
-	imag = new float[theSize];
-}
-
-#endif
-
-bool FFT::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
-{
-	if (!inTypes[0].isA<Wave>()) return false;
-	outTypes[0] = FreqSteppedSpectrum(theSize / 2 + 1, inTypes[0].asA<Contiguous>().frequency() / float(theStep), inTypes[0].asA<Contiguous>().frequency() / float(theSize));
-	return true;
+	real = new float[m_size];
+	imag = new float[m_size];
 }
 
 PropertiesInfo FFT::specifyProperties() const
@@ -233,5 +233,14 @@ PropertiesInfo FFT::specifyProperties() const
 						 ("Step", 1024, "The number of samples between consequent sampling blocks.")
 						 ("Optimise", true, "True if time is taken to optimise the calculation.");
 }
+
+bool FFT::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
+{
+	if (!inTypes[0].isA<Wave>()) return false;
+	outTypes[0] = FreqSteppedSpectrum(m_size / 2 + 1, inTypes[0].asA<Contiguous>().frequency() / float(m_hop), inTypes[0].asA<Contiguous>().frequency() / float(m_size));
+	return true;
+}
+
+#endif
 
 EXPORT_CLASS(FFT, 0,9,0, SubProcessor);

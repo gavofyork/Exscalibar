@@ -19,7 +19,7 @@
 #include <Geddei>
 
 #include "ConnectionItem.h"
-#include "ProcessorItem.h"
+#include "ProcessorBasedItem.h"
 #include "InputItem.h"
 
 InputItem::InputItem(int _i, BaseItem* _p, QSizeF const& _size): QGraphicsItem(_p), m_index(_i), m_baseSize(_size)
@@ -27,9 +27,9 @@ InputItem::InputItem(int _i, BaseItem* _p, QSizeF const& _size): QGraphicsItem(_
 	m_size = m_baseSize;
 }
 
-ProcessorItem* InputItem::processorItem() const
+ProcessorBasedItem* InputItem::processorItem() const
 {
-	return dynamic_cast<ProcessorItem*>(parentItem());
+	return dynamic_cast<ProcessorBasedItem*>(parentItem());
 }
 
 BaseItem* InputItem::baseItem() const
@@ -61,7 +61,7 @@ void InputItem::typesConfirmed()
 {
 	prepareGeometryChange();
 	m_size = m_baseSize;
-	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->m_processor->input(m_index).type().info();
+	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->executive()->input(m_index).type().info();
 	update();
 	foreach (ConnectionItem* ci, filter<ConnectionItem>(scene()->items()))
 		if (ci->to() == this)

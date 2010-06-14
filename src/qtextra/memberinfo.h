@@ -47,13 +47,15 @@ protected: \
 protected: \
 	typedef PT __FIRST_MEMBER; \
 public: \
-	inline static const MemberDefinition* memberInfo() { static MemberDefinition s_mi[memberCount]; static bool ft = true; if (ft) __FIRST_MEMBER::fillMemberInfo(s_mi+memberCount); ft = false; return s_mi; } \
+	virtual const MemberDefinition* memberInfo() { return __THIS_CLASS::staticMemberInfo(); } \
+	virtual int memberCount() { return __THIS_CLASS::staticMemberCount; } \
+	inline static const MemberDefinition* staticMemberInfo() { static MemberDefinition s_mi[staticMemberCount]; static bool ft = true; if (ft) __FIRST_MEMBER::fillMemberInfo(s_mi+staticMemberCount); ft = false; return s_mi; } \
 	inline bool operator==(__THIS_CLASS const& _cmp) const { return &_cmp && __FIRST_MEMBER::compare(this, &_cmp);; } \
 	inline bool operator!=(__THIS_CLASS const& _cmp) const { return !operator==(_cmp); } \
-	static const int memberCount = __FIRST_MEMBER::memberCount
+	static const int staticMemberCount = __FIRST_MEMBER::memberCount
 
-#define TT_BASE_CLASS(NAME) protected: typedef NAME __THIS_CLASS; typedef NAME __BASE_CLASS; typedef FirstMemberDeclaration<__THIS_CLASS> __INITIAL_MEMBER;
-#define TT_INHERITED_CLASS(NAME, SUPER) protected: typedef NAME __THIS_CLASS; typedef SUPER __SUPER_CLASS; typedef SUPER::__BASE_CLASS __BASE_CLASS; typedef SUPER::__FIRST_MEMBER __INITIAL_MEMBER;
+#define TT_BASE_CLASS(NAME) protected: typedef NAME __THIS_CLASS; static const char* staticName() { return #NAME; } typedef NAME __BASE_CLASS; typedef FirstMemberDeclaration<__THIS_CLASS> __INITIAL_MEMBER;
+#define TT_INHERITED_CLASS(NAME, SUPER) protected: typedef NAME __THIS_CLASS; static const char* staticName() { return #NAME; } typedef SUPER __SUPER_CLASS; static const char* staticSuperName() { return #SUPER; } typedef SUPER::__BASE_CLASS __BASE_CLASS; typedef SUPER::__FIRST_MEMBER __INITIAL_MEMBER;
 
 #define TT_FIRST_MEMBER(M) __DO_MEMBER(__INITIAL_MEMBER, M)
 #define TT_NEXT_MEMBER(P, M) __DO_MEMBER(__MEMBER_INFO_ ## P, M)

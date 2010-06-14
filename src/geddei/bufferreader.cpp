@@ -33,7 +33,7 @@ BufferReader::BufferReader(Buffer *buffer)
 {
 	theBuffer = buffer;
 
-	lastReadSize = 0;
+	m_lastReadSize = 0;
 	QFastMutexLocker lock(&theBuffer->theDataFlux);
 	readPos = theBuffer->readPos;
 	theUsed = theBuffer->theUsed;
@@ -123,12 +123,12 @@ void BufferReader::skipElementsUNSAFE(uint elements)
 	// has finished, so we can actually advance past the elements "immediately".
 	// TODO: currently this freaks if it just sees a plunger. would be better to freak only if plunger is actually within affecting distance
 	// note this is a worst case scenario. if the last read was actually a peek, rather than a read (or was a read that will be
-	// turned into a peek) then we just have to check that elements < lastReadSize. Unfortunately semantics are that we can't be sure
+	// turned into a peek) then we just have to check that elements < m_lastReadSize. Unfortunately semantics are that we can't be sure
 	// what's going to happen yet. this could be fixed by preventing arbitrary changes of mind between reads and peeks, by privatising
 	// (or otherwise preventing non-end of life calls of) forgetRead and haveRead.
 	// i.e. plunger distance > elements + last_read_size (+ theToBeSkipped?).
 //	if (theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere) != -1)
-	if (uint(theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere)) < elements + lastReadSize)
+	if (uint(theBuffer->nextPlungerUNSAFE(readPos, theAlreadyPlungedHere)) < elements + m_lastReadSize)
 	{	if (qMESSAGES) qDebug("= skipElementsUNSAFE: Plunger detected in stream. Waiting for last read (%p) to end...", lastRead);
 		while (lastRead->isActive() && !theBuffer->trapdoorUNSAFE())
 			theBuffer->theDataOut.wait(&theBuffer->theDataFlux);
@@ -205,7 +205,7 @@ const BufferData BufferReader::readElements(uint elements, bool autoFree)
 
 	BufferData ret = BufferData(lastRead, readPos);
 
-	lastReadSize = elements;
+	m_lastReadSize = elements;
 	if (MESSAGES) qDebug("< [%p] readElements (r: %p)", this, lastRead);
 	return ret;
 }
@@ -231,7 +231,7 @@ void BufferReader::haveRead(const BufferData &data)
 		theAlreadyPlungedHere = 0;
 	}
 	if (lastRead->thePlunger) theAlreadyPlungedHere++;
-	lastReadSize = 0;
+	m_lastReadSize = 0;
 	uint skipNow = theToBeSkipped;
 	theToBeSkipped = 0;
 	if (skipNow) skipElementsUNSAFE(skipNow);
@@ -249,7 +249,7 @@ void BufferReader::forgetRead(const BufferData &data)
 	if (MESSAGES) qDebug("= [%p] forgetRead (size: %d)", this, lastRead->theAccessibleSize);
 	lastRead->theEndType = BufferInfo::Ignore;
 	lastRead->theValid = false;
-	lastReadSize = 0;
+	m_lastReadSize = 0;
 	uint skipNow = theToBeSkipped;
 	theToBeSkipped = 0;
 	if (MESSAGES) qDebug("= [%p] forgetRead (skipNow: %d, theUsed: %d)", this, skipNow, theUsed);

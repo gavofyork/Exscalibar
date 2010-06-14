@@ -25,13 +25,13 @@ using namespace Geddei;
 
 #include "OutputItem.h"
 
-class ProcessorItem;
+class ProcessorBasedItem;
 class MultiProcessorItem;
 
 class MultipleOutputItem: public OutputItem
 {
 public:
-	MultipleOutputItem(ProcessorItem* _p, QSizeF const& _size);
+	MultipleOutputItem(ProcessorBasedItem* _p, QSizeF const& _size);
 	MultipleOutputItem(int _i, MultiProcessorItem* _p, QSizeF const& _size);
 
 	void setMultiplicity(uint _m);

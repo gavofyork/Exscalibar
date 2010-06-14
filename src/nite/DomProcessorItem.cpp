@@ -16,67 +16,125 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ConnectionItem.h"
 #include "SubProcessorItem.h"
 #include "DomProcessorItem.h"
 
-DomProcessorItem::DomProcessorItem(Properties const& _pr, QSizeF const& _size):
-	ProcessorItem(QString::null, _pr, _size)
+DomProcessorItem::DomProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
+	ProcessorBasedItem	(_pr, _size),
+	m_combined			(0),
+	m_prototypal		(0),
+	m_type				(_type)
 {
+	if (!m_type.isEmpty())
+		propertiesChanged();
 }
 
-DomProcessor* DomProcessorItem::domProcessor() const
+Properties DomProcessorItem::subsProperties()
 {
-	return dynamic_cast<DomProcessor*>(processor());
+	Properties ret;
+	QList<DomProcessorItem*> dpis = all();
+	for (int i = (uint)dpis.count() - 1; i >= 0; i--)
+		ret = ret.stashed() + dpis[i]->properties();
+	return ret;
 }
 
-QSizeF DomProcessorItem::centreMin() const
+QString DomProcessorItem::composedSubs()
 {
-	QSizeF s = SubsContainer::centreMin();
-	return QSizeF(max(ProcessorItem::centreMin().width(), s.width()), max(ProcessorItem::centreMin().height(), s.height()));
+	QString ret;
+	foreach (DomProcessorItem const* i, all())
+		ret += "&" + i->m_type;
+	return ret.mid(1);
 }
 
-QList<SubProcessorItem*> DomProcessorItem::subProcessorItems() const
+void DomProcessorItem::propertiesChanged(QString const& _newName)
 {
-	return filter<SubProcessorItem>(childItems());
-}
+	if (executive())
+		executive()->update(subsProperties().stashed() + baseProperties());
 
-void DomProcessorItem::geometryChanged()
-{
-	SubsContainer::geometryChanged();
-	ProcessorItem::geometryChanged();
+	if (DomProcessor* n = new DomProcessor(m_type))
+	{
+		n->init(_newName.isEmpty() ? m_prototypal ? m_prototypal->name() : QString::number((long unsigned)this) : _newName, properties().stashed() + baseProperties());
+		if (!m_prototypal)
+		{
+			PropertiesInfo p(n->properties());
+			p.destash();
+			setDefaultProperties(p);
+		}
+		delete m_prototypal;
+		m_prototypal = n;
+	}
+	ProcessorBasedItem::propertiesChanged(_newName);
 }
 
 void DomProcessorItem::paintCentre(QPainter* _p)
 {
-	paintFrames(_p);
+	QRectF ca = QRectF(QPointF(0, 0), clientRect().size());
+	_p->save();
+	_p->translate(round((clientRect().size().width() - subPrototypal()->width()) / 2), 0);
+	_p->setClipRect(ca);
+	subPrototypal()->draw(*_p);
+	_p->setClipping(false);
+	_p->restore();
 }
 
-Processor* DomProcessorItem::reconstructProcessor()
+QList<DomProcessorItem*> DomProcessorItem::allBefore()
 {
-	QString cs = composedSubs();
-	if (cs.isEmpty())
-		return 0;
-	Processor* p = new DomProcessor(cs);
-	PropertiesInfo pi = p->properties();
+	if (filter<InputItem>(childItems()).count() == 1)
+	{
+		InputItem* ii = filter<InputItem>(childItems())[0];
+		foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
+			if (i->to() == ii && i->nature() == ConnectionItem::Coupling)
+				return QList<DomProcessorItem*>(dynamic_cast<DomProcessorItem*>(i->fromBase())->allBefore()) << dynamic_cast<DomProcessorItem*>(i->fromBase());
+	}
+	return QList<DomProcessorItem*>();
+}
 
-	baseItem()->setDefaultProperties(pi.destash());
-	foreach (SubProcessorItem* i, ordered())
-		i->setDefaultProperties(pi.destash());
+QList<DomProcessorItem*> DomProcessorItem::allAfter()
+{
+	if (filter<OutputItem>(childItems()).count() == 1)
+	{
+		OutputItem* ii = filter<OutputItem>(childItems())[0];
+		foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
+			if (i->from() == ii && i->nature() == ConnectionItem::Coupling)
+				return QList<DomProcessorItem*>() << dynamic_cast<DomProcessorItem*>(i->toBase()) << dynamic_cast<DomProcessorItem*>(i->toBase())->allAfter();
+	}
+	return QList<DomProcessorItem*>();
+}
 
-	return p;
+void DomProcessorItem::prepYourself(ProcessorGroup& _g)
+{
+	if (allAfter().size() != 0)
+		return;
+
+	m_combined = new DomProcessor(composedSubs());
+	m_combined->init(name(), subsProperties().stashed() + baseProperties());
+
+	foreach (DomProcessorItem* d, allBefore())
+		d->m_combined = m_combined;
+
+	ProcessorBasedItem::prepYourself(_g);
+}
+
+void DomProcessorItem::unprepYourself()
+{
+	if (allAfter().size() != 0)
+		delete m_combined;
+	m_combined = 0;
+	ProcessorBasedItem::unprepYourself();
 }
 
 void DomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
-	DomProcessorItem* dpi = new DomProcessorItem;
-	dpi->ProcessorItem::importDom(_element, _scene);
-	dpi->SubsContainer::importDom(_element, _scene);
-	dpi->setName(_element.attribute("name"));
+	DomProcessorItem* pi = new DomProcessorItem(_element.attribute("type"));
+	pi->importDom(_element, _scene);
 }
 
 QDomElement DomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
-	QDomElement us = ProcessorItem::saveYourself(_root, _doc, "domprocessor");
-	SubsContainer::exportDom(us, _doc);
-	return us;
+	QDomElement proc = _doc.createElement("domprocessor");
+	proc.setAttribute("type", m_type);
+	exportDom(proc, _doc);
+	_root.appendChild(proc);
+	return proc;
 }

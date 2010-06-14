@@ -39,9 +39,11 @@
 #include "wave.h"
 #include "matrix.h"
 #include "spectrum.h"
+#include "mark.h"
 #else
 #include <geddei/value.h>
 #include <geddei/wave.h>
 #include <geddei/matrix.h>
 #include <geddei/spectrum.h>
+#include <geddei/mark.h>
 #endif

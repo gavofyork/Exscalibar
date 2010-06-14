@@ -42,6 +42,7 @@ PropertyItem::PropertyItem(QGraphicsItem* _p, QRectF const& _r, QString const& _
 			it = new RangePropertyItem(this, _r, i);
 	}
 	resize(_r);
+	setZValue(10);
 }
 
 float PropertyItem::minWidth() const
@@ -75,11 +76,11 @@ void PropertyItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*
 	f.setBold(true);
 	_p->setFont(f);
 	QRectF r = m_rect;
-	r.setWidth(floor(s_widgetHeight));
+	r.setWidth(floor(s_widgetHeight) - 1);
 	_p->setPen(QColor(0, 0, 0, 96));
-	_p->drawText(r.translated(0, 1.f), Qt::AlignRight, withProperties()->propertiesInfo().symbolOf(m_key));
-	_p->setPen(Qt::white);
 	_p->drawText(r.translated(0, 0.f), Qt::AlignRight, withProperties()->propertiesInfo().symbolOf(m_key));
+	_p->setPen(Qt::white);
+	_p->drawText(r.translated(0, -1.f), Qt::AlignRight, withProperties()->propertiesInfo().symbolOf(m_key));
 }
 
 void BasePropertyItem::resize(QRectF const& _r)

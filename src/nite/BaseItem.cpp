@@ -20,6 +20,7 @@
 #include "PauseItem.h"
 #include "BaseItem.h"
 #include "PropertyItem.h"
+#include "ConnectionItem.h"
 
 #include "Magnetic.h"
 #include "InputItem.h"
@@ -28,6 +29,8 @@
 static const double cornerSize = 2.0;
 static const double statusHeight = 8.0;
 static const double statusMargin = 2.0;
+const float widgetMarginP = 0.f;
+
 
 BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
 	WithProperties	(0, _pr),
@@ -36,31 +39,12 @@ BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
 	m_resizing		(false)
 {
 	assert(m_size.height() < 100000);
-/*
-	m_statusBar = new QGraphicsRectItem(this);
-	m_statusBar->setPen(Qt::NoPen);
-	m_statusBar->setBrush(QColor(255, 255, 255, 16));
-
-	m_pauseItem = new PauseItem(m_statusBar, this, statusHeight);
-	m_pauseItem->setPos(0, 0);
-*/
 	setAcceptHoverEvents(true);
 	setFlags(ItemClipsToShape | ItemIsFocusable | ItemIsSelectable | ItemIsMovable);
 }
 
 BaseItem::~BaseItem()
 {
-}
-
-void BaseItem::forwardEvent(QGraphicsSceneEvent* _e)
-{
-	switch (_e->type())
-	{
-		case QEvent::GraphicsSceneMouseMove: mouseMoveEvent(static_cast<QGraphicsSceneMouseEvent*>(_e)); break;
-		case QEvent::GraphicsSceneMousePress: mousePressEvent(static_cast<QGraphicsSceneMouseEvent*>(_e)); break;
-		case QEvent::GraphicsSceneMouseRelease: mouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent*>(_e)); break;
-		default:;
-	}
 }
 
 void BaseItem::setProperty(QString const& _key, QVariant const& _value)
@@ -107,6 +91,10 @@ void BaseItem::timerEvent(QTimerEvent*)
 
 void BaseItem::propertiesChanged(QString const&)
 {
+	if (scene())
+		foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
+			if (ci->fromBase() == this || ci->toBase() == this)
+				ci->refreshNature();
 	geometryChanged();
 }
 
@@ -185,6 +173,10 @@ void BaseItem::disconnectYourself()
 		this->killTimer(m_timerId);
 }
 
+void BaseItem::unprepYourself()
+{
+}
+
 void BaseItem::focusInEvent(QFocusEvent* _e)
 {
 	foreach (QGraphicsItem* i, scene()->selectedItems())
@@ -195,7 +187,6 @@ void BaseItem::focusInEvent(QFocusEvent* _e)
 	update();
 	QGraphicsItem::focusInEvent(_e);
 }
-
 void BaseItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
 	m_resizing = resizeRect().contains(_e->pos());
@@ -221,6 +212,7 @@ void BaseItem::hoverMoveEvent(QGraphicsSceneHoverEvent* _e)
 		setCursor(Qt::SizeFDiagCursor);
 	else
 		setCursor(Qt::ArrowCursor);
+	QGraphicsItem::hoverMoveEvent(_e);
 }
 
 QList<QPointF> BaseItem::magnetism(BaseItem const* _b, bool _moving) const
