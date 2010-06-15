@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -282,6 +282,7 @@ void DomProcessor::initFromProperties(const Properties &properties)
 		w->initFromProperties(wp);
 	theProperties = wp;
 	setupIO(thePrimary->theNumInputs, thePrimary->theNumOutputs);
+	setupVisual(thePrimary->width(), thePrimary->height(), 0, thePrimary->width(), thePrimary->height(), false);
 	if (theIOSetup)
 		onIOSetup();
 }

@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -57,11 +57,21 @@ void PropertyItem::resize(QRectF const& _r)
 {
 	QRectF widget = _r.translated(s_widgetHeight, 2.f);
 	widget.setHeight(s_widgetHeight - 4.f);
+
+	float totalMinWidth = 0.f;
+	float fixed = 0.f;
+	foreach (BasePropertyItem* i, filterRelaxed<BasePropertyItem>(childItems()))
+		if (i->isExpandable())
+			totalMinWidth += i->minWidth() + 2.f;
+		else
+			fixed += i->minWidth() + 2.f;
+	float scale = totalMinWidth > 0.f ? (_r.width() - s_widgetHeight - fixed) / totalMinWidth : 0.f;
 	foreach (BasePropertyItem* i, filterRelaxed<BasePropertyItem>(childItems()))
 	{
-		widget.setWidth(i->minWidth());
+		float w = i->isExpandable() ? floor(i->minWidth() * scale) : i->minWidth();
+		widget.setWidth(w);
 		i->resize(widget);
-		widget.translate(i->minWidth() + 2.f, 0);
+		widget.translate(w + 2.f, 0);
 	}
 	prepareGeometryChange();
 	m_rect = QRectF(_r.left(), _r.top(), widget.left() - _r.left() - 2.f, s_widgetHeight);

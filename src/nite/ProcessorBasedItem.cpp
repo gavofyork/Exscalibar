@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -112,6 +112,11 @@ void ProcessorBasedItem::updateMultiplicities()
 		i->setMultiplicity(prototypal()->numOutputs() > 0 ? prototypal()->numOutputs() : Undefined);
 }
 
+float ProcessorBasedItem::interiorPorts() const
+{
+	return max(prototypal()->numInputs(), prototypal()->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin - 1.f;
+}
+
 void ProcessorBasedItem::geometryChanged()
 {
 	QVector<InputItem*> iis(prototypal()->numInputs() == Undefined ? 0 : prototypal()->numInputs(), 0);
@@ -143,7 +148,7 @@ void ProcessorBasedItem::geometryChanged()
 			(moi = new MultipleOutputItem(this, multiPortSize))->hide();
 		else
 			moi = filter<MultipleOutputItem>(childItems())[0];
-		moi->setPos(centreRect().width() + portLateralMargin, portLongalMargin * 3 / 2);
+		moi->setPos(interiorRect().width() + portLateralMargin, portLongalMargin * 3 / 2);
 	}
 
 	foreach (OutputItem* oi, filter<OutputItem>(childItems()))
@@ -155,16 +160,16 @@ void ProcessorBasedItem::geometryChanged()
 		if (!ois[i])
 			ois[i] = new OutputItem(i, this, portSize);
 	foreach (OutputItem* i, ois)
-		i->setPos(centreRect().width() + portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + i->size().height()) * i->index());
+		i->setPos(interiorRect().width() + portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + i->size().height()) * i->index());
 
 	updateMultiDisplay();
 	BaseItem::geometryChanged();
 }
 
-QSizeF ProcessorBasedItem::centreMin() const
+/*QSizeF ProcessorBasedItem::centreMin() const
 {
-	return QSizeF(prototypal()->minWidth(), max((double)prototypal()->minHeight(), max(prototypal()->numInputs(), prototypal()->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin - 1.f));
-}
+	return QSizeF(prototypal()->minWidth(), max((double)prototypal()->minHeight(), ));
+}*/
 
 void ProcessorBasedItem::positionChanged()
 {

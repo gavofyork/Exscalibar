@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -285,7 +285,7 @@ void MultiProcessorItem::paintOutline(QPainter* _p)
 	for (int i = 1; i < min(5, int((m == Undefined) ? 5 : m)); i++)
 	{
 		_p->setPen(QPen(QColor::fromHsv(0, 0, (i - 1) * 255 / 4), 0));
-		_p->drawLine(outlineRect().topLeft() + QPointF(i, -i * 2), outlineRect().topRight() + QPointF(-i, -i * 2));
+		_p->drawLine(exteriorRect().topLeft() + QPointF(i, -i * 2), exteriorRect().topRight() + QPointF(-i, -i * 2));
 	}
 }
 
@@ -294,8 +294,8 @@ void MultiProcessorItem::paintCentre(QPainter* _p)
 	if (m_showAll && multiProcessor() && multiProcessor()->knowMultiplicity())
 	{
 		int rows = (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize);
-		int tw = centreRect().width();
-		int th = centreRect().height();
+		int tw = interiorRect().width();
+		int th = interiorRect().height();
 		int mw = marginWidth;
 		for (uint i = 0; i < multiProcessor()->multiplicity(); i++)
 		{
@@ -352,12 +352,12 @@ void MultiProcessorItem::geometryChanged()
 		if (!mois[i])
 			mois[i] = new MultipleOutputItem(i, this, multiPortSize);
 	foreach (MultipleOutputItem* moi, mois)
-		moi->setPos(centreRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
+		moi->setPos(interiorRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
 
 	updateMultiplicities();
 
 	if (m_controls)
-		m_controls->setPos(outlineRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height() - 2));
+		m_controls->setPos(exteriorRect().topRight() - QPointF(m_controls->rect().width(), m_controls->rect().height() - 2));
 
 	BaseItem::geometryChanged();
 }

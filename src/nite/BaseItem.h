@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -68,12 +68,15 @@ public:
 
 	virtual float		marginSize() const;
 
+	float				portHeight() const { return 12.f; }
 	QSizeF				controlsSize() const;
-	QRectF				centreRect() const { return QRectF(QPointF(0, 0), m_size); }
+	QRectF				controlsRect() const { return QRectF(QPointF(0, m_size.height() - controlsSize().height()), QSizeF(max<float>(m_controlsSize.width(), isResizable() ? m_size.width() - portHeight() : m_size.width()), controlsSize().height())); }
+	QRectF				interiorRect() const { return QRectF(QPointF(0, 0), m_size); }
 	QRectF				clientRect() const { return QRectF(QPointF(0, 0), m_size - QSizeF(0, m_controlsSize.height())); }
-	virtual QRectF		outlineRect() const;
+	virtual QRectF		exteriorRect() const;
 	virtual QRectF		boundingRect() const;
-	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return outlineRect().adjusted(-ms, -ms, ms, ms); }
+	inline QRectF		basicBoundingRect() const { float ms = marginSize(); return exteriorRect().adjusted(-ms, -ms, ms, ms); }
+
 	virtual QRectF		adjustBounds(QRectF const& _wouldBe) const { return _wouldBe; }
 
 	QBrush				fillBrush() const;
@@ -90,9 +93,16 @@ protected:
 
 	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
-	QSizeF				interiorMin() const;
-	virtual QSizeF		centreMin() const { return QSizeF(0.f, 0.f); }
-	virtual QSizeF		centrePref() const { return QSizeF(32.f, 32.f); }
+	virtual float		interiorPorts() const { return 0.f; }
+
+	QSizeF				interiorMin() const { return interiorWith(clientMin()); }
+	QSizeF				interiorPref() const { return interiorWith(clientPref()); }
+
+	QSizeF				controlsSize(float _minWidth) const;
+	virtual QSizeF		interiorWith(QSizeF _client) const;
+	virtual QSizeF		clientMin() const { return QSizeF(0.f, 0.f); }
+	virtual QSizeF		clientPref() const { return QSizeF(32.f, 32.f); }
+
 	virtual void		paintOutline(QPainter* _p);
 	virtual QColor		highlightColour() const { return QColor::fromHsv(220, 220, 200); }
 	virtual QColor		outlineColour() const { return QColor::fromHsv(0, 220, 200); }
@@ -117,6 +127,8 @@ private:
 	QRectF				resizeRect() const;
 
 	QSizeF				m_controlsSize;
+	QSizeF				m_controlsStack;
+	QSizeF				m_controlsBar;
 
 	QSizeF				m_size;
 	int					m_timerId;

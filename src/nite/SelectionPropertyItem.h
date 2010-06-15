@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -29,6 +29,7 @@ public:
 	virtual int			type() const { return ItemType; }
 
 	virtual float		minWidth() const;
+	virtual bool		isExpandable() const { return false; }
 	virtual void		mousePressEvent(QGraphicsSceneMouseEvent* _e);
 	virtual void		paintItem(QPainter* _p, const QStyleOptionGraphicsItem* _o, QWidget* _w);
 

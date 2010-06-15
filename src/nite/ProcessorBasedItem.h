@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -61,8 +61,9 @@ public:
 protected:
 	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
-	virtual QSizeF		centreMin() const;
-	virtual QSizeF		centrePref() const { return QSizeF(prototypal()->width(), prototypal()->height()); }
+	virtual float		interiorPorts() const;
+	virtual QSizeF		clientMin() const { return QSizeF(prototypal()->minWidth(), prototypal()->minHeight()); }
+	virtual QSizeF		clientPref() const { return QSizeF(prototypal()->width(), prototypal()->height()); }
 	virtual QColor		outlineColour() const { return prototypal()->outlineColour(); }
 	virtual void		paintCentre(QPainter* _p) { BaseItem::paintCentre(_p); (executive() ? executive() : prototypal())->draw(*_p, clientRect().size()); }
 	virtual uint		redrawPeriod() const { return prototypal() ? prototypal()->redrawPeriod() : 0; }

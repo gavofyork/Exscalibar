@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -27,10 +27,6 @@
 #include "OutputItem.h"
 
 static const double cornerSize = 2.0;
-static const double statusHeight = 8.0;
-static const double statusMargin = 2.0;
-const float widgetMarginP = 0.f;
-
 
 BaseItem::BaseItem(Properties const& _pr, QSizeF const& _size):
 	WithProperties	(0, _pr),
@@ -51,6 +47,7 @@ void BaseItem::setProperty(QString const& _key, QVariant const& _value)
 {
 	m_properties[_key] = _value;
 	propertiesChanged();
+	dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
 }
 
 void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
@@ -60,22 +57,57 @@ void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
 	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
 		delete i;
 
-	m_controlsSize = QSizeF(-5.f, 0.f);
+	m_controlsStack = QSizeF(0.f, 0.f);
+	m_controlsBar = QSizeF(0.f, 0.f);
 	foreach (QString k, m_dynamicKeys)
 	{
 		PropertyItem* item = new PropertyItem(this, QRectF(0, 0, m_size.width(), 0), k);
-		m_controlsSize = QSizeF(m_controlsSize.width() + item->minWidth() + 5.f, max<float>(m_controlsSize.height(), item->boundingRect().height()));
+		m_controlsStack = QSizeF(max<float>(m_controlsSize.width(), item->minWidth()), m_controlsSize.height() + item->boundingRect().height());
+		m_controlsBar = QSizeF(m_controlsSize.width() + item->minWidth(), max<float>(item->boundingRect().height(), item->boundingRect().height()));
 	}
 	checkWidgets();
 }
 
 void BaseItem::checkWidgets()
 {
-	QRectF widget(widgetMarginP, m_size.height() - m_controlsSize.height() + widgetMarginP, 0/*m_size.width() - widgetMarginP * 2*/, m_controlsSize.height());
-	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
+//	QRectF widget(widgetMarginP, m_size.height() - m_controlsSize.height() + widgetMarginP, 0/*m_size.width() - widgetMarginP * 2*/, m_controlsSize.height());
+//	foreach (PropertyItem* i, filterRelaxed<PropertyItem>(childItems()))
+//	{
+//		i->resize(widget);
+//		widget.translate(i->boundingRect().width() + 5.f, 0);
+//	}
+	float oX = controlsRect().left();
+	float oY = controlsRect().top();
+	float maxWidth = controlsRect().width();
+	m_controlsSize = QSizeF(0.f, 0.f);
+	float cSPos = 0.f;
+	float cSLine = 0.f;
+	QList<PropertyItem*> line;
+	QList<PropertyItem*> items = filterRelaxed<PropertyItem>(childItems());
+	for (int ii = 0; ii < items.count(); ii++)
 	{
-		i->resize(widget);
-		widget.translate(i->boundingRect().width() + 5.f, 0);
+		PropertyItem* item = items[ii];
+		line << item;
+		item->setPos(cSPos + oX, m_controlsSize.height() + oY);
+		cSLine = max<float>(cSLine, item->boundingRect().height());
+		cSPos += item->minWidth();
+		m_controlsSize.setWidth(item->minWidth());
+
+		if (ii == items.count() - 1 || items[ii + 1]->minWidth() + cSPos > maxWidth)
+		{
+			float w = max<float>(item->minWidth(), maxWidth) / cSPos;
+			float x = 0.f;
+			for (int i = 0; i < line.count(); i++)
+			{
+				line[i]->setPos(floor(x) + oX, line[i]->pos().y());
+				line[i]->resize(QRectF(0, 0, floor(line[i]->minWidth() * w), cSLine));
+				x += floor(line[i]->minWidth() * w);
+			}
+			m_controlsSize.setHeight(m_controlsSize.height() + cSLine);
+			cSPos = 0;
+			cSLine = 0;
+			line.clear();
+		}
 	}
 }
 
@@ -86,15 +118,18 @@ void BaseItem::tick()
 
 void BaseItem::timerEvent(QTimerEvent*)
 {
-	update();//centreRect().adjusted(2, 2, -2, -2));
+	update(clientRect().adjusted(2, 2, -2, -2));
 }
 
 void BaseItem::propertiesChanged(QString const&)
 {
 	if (scene())
+	{
+		dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
 		foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
 			if (ci->fromBase() == this || ci->toBase() == this)
 				ci->refreshNature();
+	}
 	geometryChanged();
 }
 
@@ -103,22 +138,39 @@ QSizeF BaseItem::controlsSize() const
 	return m_controlsSize;
 }
 
-QSizeF BaseItem::interiorMin() const
+QSizeF BaseItem::controlsSize(float _minWidth) const
 {
-	return QSizeF(max(controlsSize().width(), centreMin().width()), centreMin().height() + controlsSize().height());
+	QSizeF ret(0.f, 0.f);
+	float cSPos = 0.f;
+	float cSLine = 0.f;
+	foreach (PropertyItem* item, filter<PropertyItem>(childItems()))
+	{
+		if (item->minWidth() + cSPos > max<float>(item->minWidth(), _minWidth))
+		{
+			ret.setHeight(ret.height() + cSLine);
+			cSPos = 0;
+			cSLine = 0;
+		}
+		cSLine = max<float>(cSLine, item->boundingRect().height());
+		ret.setWidth(max<float>(ret.width(), cSPos += item->minWidth()));
+	}
+	ret.setHeight(ret.height() + cSLine);
+	return ret;
+}
+
+QSizeF BaseItem::interiorWith(QSizeF _client) const
+{
+	QSizeF controls = controlsSize(_client.width() - (isResizable() ? portHeight() : 0));
+	return QSizeF(max<float>(controls.width() + (isResizable() ? portHeight() : 0), _client.width()), max<float>(interiorPorts(), _client.height() + max<float>(isResizable() ? portHeight() : 0, controls.height())));
 }
 
 void BaseItem::geometryChanged()
 {
 	prepareGeometryChange();
-	if (!m_size.isValid())
-		m_size = centrePref();
-	m_size = QSizeF(max(interiorMin().width(), m_size.width()), max(interiorMin().height(), m_size.height()));
-//	m_statusBar->setPos(centreRect().bottomLeft() + QPointF(cornerSize * 2.f, statusMargin));
-//	m_statusBar->setRect(QRectF(0, 0, m_size.width() - cornerSize * 5.f, statusHeight));
-
+	if (!m_size.isValid() || m_size.isEmpty())
+		m_size = interiorMin();
+	m_controlsSize = controlsSize(m_size.width() - (isResizable() ? portHeight() : 0));
 	checkWidgets();
-
 	positionChanged();
 }
 
@@ -132,22 +184,16 @@ QRectF BaseItem::boundingRect() const
 	return adjustBounds(basicBoundingRect());
 }
 
-QRectF BaseItem::outlineRect() const
+QRectF BaseItem::exteriorRect() const
 {
 	// Add one to width & height as we translate up 7 left by half a pixel when drawing.
-	assert(statusHeight < 100000);
-	assert(statusMargin < 100000);
-	assert(m_size.height() < 100000);
-	if (isResizable())
-		return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, statusHeight + 2 * statusMargin + 1);
-	else
-		return centreRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, cornerSize + 1);
+	return interiorRect().adjusted(-cornerSize, -cornerSize, cornerSize + 1, cornerSize + 1);
 }
 
 QRectF BaseItem::resizeRect() const
 {
 	if (isResizable())
-		return QRectF(outlineRect().bottomRight(), QSizeF(-(statusHeight + cornerSize), -(statusHeight + cornerSize)));
+		return QRectF(exteriorRect().bottomRight(), QSizeF(-(portHeight() + cornerSize), -(portHeight() + cornerSize)));
 	else
 		return QRectF(0, 0, 0, 0);
 }
@@ -187,12 +233,13 @@ void BaseItem::focusInEvent(QFocusEvent* _e)
 	update();
 	QGraphicsItem::focusInEvent(_e);
 }
+
 void BaseItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
 	m_resizing = resizeRect().contains(_e->pos());
 	if (m_resizing)
 		m_origPosition = QPointF(m_size.width(), m_size.height()) - _e->pos();
-	else if (!outlineRect().contains(_e->pos()))
+	else if (!exteriorRect().contains(_e->pos()))
 	{
 		_e->setAccepted(false);
 		return;
@@ -219,13 +266,13 @@ QList<QPointF> BaseItem::magnetism(BaseItem const* _b, bool _moving) const
 {
 	QList<QPointF> ret;
 	if (_b == this && !_moving)
-		ret << QPointF(centrePref().width() - centreRect().width(), centrePref().height() - centreRect().height());
+		ret << QPointF(clientPref().width() - clientRect().width(), clientPref().height() - clientRect().height());
 
 	if (_b == this)
 		return ret;
 
-	QRectF us = outlineRect().translated(pos());
-	QRectF them = _b->outlineRect().translated(_b->pos());
+	QRectF us = exteriorRect().translated(pos());
+	QRectF them = _b->exteriorRect().translated(_b->pos());
 
 	if (_moving)
 	{
@@ -296,24 +343,25 @@ void BaseItem::paintCentre(QPainter*)
 
 QBrush BaseItem::fillBrush() const
 {
-	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+	QLinearGradient cg(exteriorRect().topLeft(), exteriorRect().bottomLeft());
 	cg.setColorAt(0, outlineColour().lighter(125));
 	cg.setColorAt(1, outlineColour().darker(150));
 	return QBrush(cg);
 }
 QPen BaseItem::innerPen() const
 {
-	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+	QLinearGradient cg(exteriorRect().topLeft(), exteriorRect().bottomLeft());
 	cg.setColorAt(0, outlineColour().lighter(175));
 	cg.setColorAt(1, outlineColour().darker(150));
 	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 QPen BaseItem::outerPen() const
-{
-	QLinearGradient cg(outlineRect().topLeft(), outlineRect().bottomLeft());
+{/*
+	QLinearGradient cg(exteriorRect().topLeft(), exteriorRect().bottomLeft());
 	cg.setColorAt(0, outlineColour().darker(250));
 	cg.setColorAt(1, outlineColour().darker(350));
-	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
+	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);*/
+	return QPen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 
 void BaseItem::paintOutline(QPainter* _p)
@@ -362,13 +410,13 @@ void BaseItem::paintOutline(QPainter* _p)
 	}
 	_p->restore();
 
-	_p->fillRect(outlineRect().adjusted(1, 1, -1, -1), fillBrush());
+	_p->fillRect(exteriorRect().adjusted(1, 1, -1, -1), fillBrush());
 	_p->setPen(outerPen());
-	_p->drawRoundedRect(outlineRect(), 3, 3);
+	_p->drawRoundedRect(exteriorRect(), 3, 3);
 	_p->setPen(innerPen());
-	_p->drawRoundedRect(outlineRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
+	_p->drawRoundedRect(exteriorRect().adjusted(1, 1, -1, -1), 1.5, 1.5);
 
-	QRectF o = outlineRect().adjusted(1, 1, -1, -1);
+	QRectF o = exteriorRect().adjusted(1, 1, -1, -1);
 /*	_p->setPen(QPen(QColor(0, 0, 0, 32), 1));
 	for (int i = 0; i < 4; i++)
 	{
@@ -382,8 +430,8 @@ void BaseItem::paintOutline(QPainter* _p)
 		_p->setPen(QPen(outlineColour().darker(), 1));
 		for (int i = 0; i < 4; i++)
 		{
-			double mp = (statusHeight + cornerSize) * (4.0 - i) / 4.0;
-			_p->drawLine(o.right() - statusMargin, o.bottom() - mp, o.right() - mp, o.bottom() - statusMargin);
+			double mp = (portHeight()) * (4.0 - i) / 4.0;
+			_p->drawLine(o.right() - cornerSize, o.bottom() - mp, o.right() - mp, o.bottom() - cornerSize);
 		}
 	}
 
@@ -393,7 +441,7 @@ void BaseItem::paintOutline(QPainter* _p)
 		for (int i = 1; i < 4; i++)
 		{
 			_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
-			_p->drawRect(outlineRect());
+			_p->drawRect(exteriorRect());
 		}
 	}
 }

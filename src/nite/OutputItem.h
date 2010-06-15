@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -42,8 +42,9 @@ public:
 	enum { ItemType = UserType + 3 };
 	virtual int type() const { return ItemType; }
 
-protected:
 	virtual QRectF boundingRect() const;
+
+protected:
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void interPaint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) {}
 

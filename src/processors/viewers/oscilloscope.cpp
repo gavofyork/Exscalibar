@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -41,7 +41,9 @@ private:
 	float m_gain;
 	int m_size;
 	int m_refreshPeriod;
-	DECLARE_3_PROPERTIES(Oscilloscope, m_gain, m_size, m_refreshPeriod);
+	bool m_antialiasing;
+	int m_detail;
+	DECLARE_5_PROPERTIES(Oscilloscope, m_gain, m_size, m_refreshPeriod, m_antialiasing, m_detail);
 
 	QVector<float> m_last;
 	bool m_chunked;
@@ -56,17 +58,17 @@ int Oscilloscope::process()
 
 bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
-	_p.setRenderHint(QPainter::Antialiasing, false);
-	_p.translate(0, _s.height() / 2);
-	_p.scale(1, _s.height() / 2 * -m_gain);
-	_p.setPen(QPen(QColor(0, 0, 0, 64), 0));
-	_p.drawLine(0, 0, _s.width(), 0);
-	_p.drawLine(0, .5f, _s.width(), .5f);
-	_p.drawLine(0, -.5f, _s.width(), -.5f);
+	_p.setRenderHint(QPainter::Antialiasing, m_antialiasing);
+	_p.translate(0, floor(_s.height() / 2.f) + 0.5f);
+	_p.scale(1, floor(_s.height() / 2.f) * -m_gain);
+	_p.setPen(QPen(QColor(0, 0, 0, 32), 0));
+	_p.drawLine(QLineF(0, -0.001f, float(_s.width()), -0.001f));
+	_p.drawLine(QLineF(0.f, .5f, float(_s.width()), .5f));
+	_p.drawLine(QLineF(0.f, -.5f, float(_s.width()), -.5f));
 	_p.setPen(QPen(Qt::black, 0));
 	if (isRunning())
-		for (int i = 2; i < _s.width(); i+=2)
-			_p.drawLine(QLineF(i - 2, m_last[(i - 2) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
+		for (int i = m_detail; i < _s.width(); i+=m_detail)
+			_p.drawLine(QLineF(i - m_detail, m_last[(i - m_detail) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
 	return true;
 }
 
@@ -102,7 +104,9 @@ void Oscilloscope::updateFromProperties()
 }
 PropertiesInfo Oscilloscope::specifyProperties() const
 {
-	return PropertiesInfo	("Size", 1024, "The size of the window's width (in samples).", false, "#", AVsamples)
+	return PropertiesInfo	("Antialiasing", true, "Antialiasing.", true, "a", AVbool)
+							("Detail", true, "Detail.", 2, "d", AV("High", "H", 1) AVand("Medium", "M", 2) AVand("Low", "L", 3))
+							("Size", 1024, "The size of the window's width (in samples).", false, "#", AVsamples)
 							("RefreshPeriod", 30, "The refresh period (in ms).", true, "r", AV(1, 1000, AllowedValue::Log10))
 							("Gain", 1.f, "Gain for input signal (x).", true, "x", AVgain);
 }

@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -32,5 +32,4 @@ void WithProperties::setPropertiesInfo(PropertiesInfo const& _i)
 void WithProperties::setProperty(QString const& _key, QVariant const& _value)
 {
 	m_properties[_key] = _value;
-	dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
 }

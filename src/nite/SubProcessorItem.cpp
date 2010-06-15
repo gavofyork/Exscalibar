@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -121,21 +121,18 @@ void SubProcessorItem::focusInEvent(QFocusEvent* _e)
 
 void SubProcessorItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
 {
-	subsContainer()->baseItem()->forwardEvent(_e);
 	subsContainer()->baseItem()->setSelected(false);
 	QGraphicsItem::mouseReleaseEvent(_e);
 }
 
 void SubProcessorItem::mousePressEvent(QGraphicsSceneMouseEvent* _e)
 {
-	subsContainer()->baseItem()->forwardEvent(_e);
 	subsContainer()->baseItem()->setSelected(false);
 	QGraphicsItem::mousePressEvent(_e);
 }
 
 void SubProcessorItem::mouseMoveEvent(QGraphicsSceneMouseEvent* _e)
 {
-	subsContainer()->baseItem()->forwardEvent(_e);
 }
 
 void SubProcessorItem::fromDom(QDomElement const& _element, SubsContainer* _dpi)

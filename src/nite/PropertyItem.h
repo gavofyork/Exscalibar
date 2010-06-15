@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -62,6 +62,7 @@ public:
 	virtual void			paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 	virtual void			paintItem(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) {}
 	virtual float			minWidth() const { return 30.f; }
+	virtual bool			isExpandable() const { return true; }
 
 	virtual bool			sceneEvent(QEvent* _e);
 

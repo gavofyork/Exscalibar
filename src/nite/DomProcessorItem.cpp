@@ -1,4 +1,4 @@
-/* Copyright 2003, 2004, 2005, 2007, 2009 Gavin Wood <gav@kde.org>
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
  *
  * This file is part of Exscalibar.
  *
@@ -17,7 +17,6 @@
  */
 
 #include "ConnectionItem.h"
-#include "SubProcessorItem.h"
 #include "DomProcessorItem.h"
 
 DomProcessorItem::DomProcessorItem(QString const& _type, Properties const& _pr, QSizeF const& _size):
