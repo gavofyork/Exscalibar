@@ -84,7 +84,7 @@ void RangePropertyItem::paintItem(QPainter* _p, const QStyleOptionGraphicsItem*,
 		g.setColorAt(.49f, QColor::fromHsvF(0, 0, .825f));
 		g.setColorAt(.51f, QColor::fromHsvF(0, 0, .675f));
 		g.setColorAt(1, QColor::fromHsvF(0, 0, .5f));
-		QRectF merc = ga.adjusted(0, 0, round((v - 1.f) * ga.width()), 0);
+		QRectF merc = ga.adjusted(0, 0, ((v - 1.f) * ga.width()), 0);
 		_p->fillRect(merc, g);
 		_p->setPen(QPen(QColor(0, 0, 0, 32), bd / 2));
 		_p->drawRect(merc.adjusted(bd / 4, bd / 4, -bd / 4, -bd / 4));

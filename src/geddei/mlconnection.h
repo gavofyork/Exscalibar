@@ -56,7 +56,8 @@ class DLLEXPORT MLConnection: public xLConnection
 	virtual void waitForElements(uint elements) const;
 	virtual const BufferData readElements(uint elements);
 	virtual const BufferData peekElements(uint elements);
-	virtual void enforceMinimum(uint elements);
+	virtual void enforceMinimumRead(uint elements);
+	virtual void enforceMinimumWrite(uint elements);
 	virtual BufferReader *newReader();
 	virtual void killReader();
 	virtual void resurectReader();

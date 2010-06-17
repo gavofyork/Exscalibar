@@ -109,9 +109,14 @@ BufferReader *MLConnection::newReader()
 	return new BufferReader(&(theConnection->theBuffer));
 }
 
-void MLConnection::enforceMinimum(uint elements)
+void MLConnection::enforceMinimumRead(uint elements)
 {
-	theConnection->enforceMinimum(elements);
+	theConnection->enforceMinimumRead(elements);
+}
+
+void MLConnection::enforceMinimumWrite(uint elements)
+{
+	theConnection->enforceMinimumWrite(elements);
 }
 
 uint MLConnection::elementsReady() const

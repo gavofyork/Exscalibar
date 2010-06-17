@@ -22,9 +22,12 @@
 
 #include <limits>
 #include <cmath>
+#include <cassert>
 
-#include <qthread.h>
-#include <qstringlist.h>
+#include <QtAlgorithms>
+#include <QThread>
+#include <QVector>
+#include <QStringList>
 
 #include <exscalibar.h>
 
@@ -122,6 +125,29 @@ namespace Geddei
 			(*o_from) = ceil(uMin / inc) * inc;
 		}
 		return inc;
+	}
+
+	template<class T>
+	inline T interpolateIndex(QVector<T> const& _l, float _i)
+	{
+		if (_i <= 0) return _l.first();
+		if (_i >= _l.count() - 1) return _l.last();
+		return lerp<T>(_l[(int)floor(_i)], _l[(int)floor(_i) + 1], _i - floor(_i));
+	}
+
+	template<class T>
+	inline T interpolateValue(QVector<T> const& _l, float _v)
+	{
+		if (_v <= _l.first())
+			return 0;
+		if (_v >= _l.last())
+			return _l.count() - 1;
+		typename QVector<T>::ConstIterator i = qLowerBound(_l.begin(), _l.end(), _v);
+		if (*i == _v)
+			return i - _l.begin();
+		assert(*i > _v);
+		assert(i != _l.begin());
+		return (i - _l.begin()) + (_v - *i) / (*i - *(i-1));
 	}
 
 	DLLEXPORT const char *getVersion();

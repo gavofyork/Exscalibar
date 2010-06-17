@@ -18,21 +18,26 @@
 
 #pragma once
 
-class BaseItem;
+#include <QtGui>
 
-class PauseItem: public QGraphicsEllipseItem
+#include "MultiProcessorItem.h"
+
+class ControlsItem: public QGraphicsRectItem
 {
 public:
-	PauseItem(QGraphicsItem* _parent, BaseItem* _p, float _s);
+	ControlsItem(MultiProcessorItem* _p, float _size = 10);
 
-	void tick();
+	MultiProcessorItem* mpi() const { return dynamic_cast<MultiProcessorItem*>(parentItem()); }
+	void init();
 
 protected:
-	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const* _o, QWidget* _w);
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent*);
+	uint whichRect(QPointF _pos) const;
+	QRectF rectOf(uint _i) const;
+	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const*, QWidget*);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e);
 
-	enum { ItemType = UserType + 6 };
-	virtual int type() const { return ItemType; }
-
-	BaseItem* m_baseItem;
+	uint m_clickedRect;
+	float m_size;
 };
+

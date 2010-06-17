@@ -47,9 +47,9 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual void startPlungers() {}
 	virtual void plungerSent() {}
 	virtual void noMorePlungers() {}
-	virtual uint maximumScratchElements(const uint) { return Undefined; }
+	virtual uint maximumScratchElements(uint) { return Undefined; }
 	virtual uint maximumScratchElementsEver() { return Undefined; }
-	virtual BufferData makeScratchElements(const uint, bool = false) { return BufferData::fake(); }
+	virtual BufferData makeScratchElements(uint, bool = false) { return BufferData::fake(); }
 	virtual void setType(Type const& _type) { theType = _type; }
 	virtual void resetType() { theType.nullify(); }
 	virtual bool waitUntilReady() { return 1; }
@@ -57,7 +57,9 @@ class DLLEXPORT LxConnectionNull: public LxConnection
 	virtual void sourceStopping() {}
 	virtual void sourceStopped() {}
 	virtual void reset() {}
-	virtual void enforceMinimum(const uint) {}
+	virtual void enforceMinimum(uint) {}
+	virtual void enforceMinimumRead(uint) {}
+	virtual void enforceMinimumWrite(uint) {}
 	virtual uint bufferElementsFree() { return (uint)-1; }
 
 public:

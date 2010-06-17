@@ -40,59 +40,6 @@ ostream &operator<<(ostream &out, Buffer &me)
 	return out << " ]";
 }
 
-void Buffer::debug()
-{
-	QFastMutexLocker lock(&theDataFlux);
-	QString out = "[";
-
-	for (uint i = 0; i < theSize; i++)
-	{
-		char c = 'A';
-		foreach (BufferReader* j, theReaders)
-		{
-			if (i == j->readPos) out += c; else out += " ";
-			c++;
-		}
-		QList<uint>::Iterator p; for (p = thePlungers.begin(); p != thePlungers.end(); p++)
-			if (*p == i) break;
-		out += (readPos == i) ? "R" : " ";
-		if (p == thePlungers.end()) out += " "; else out += "#";
-		out += (writePos == i) ? "W" : " ";
-
-		out += ":" + QString::number(theData[i & theMask]) + ":";
-	}
-	out += "]";
-	qDebug("%s", qPrintable(out));
-}
-
-void Buffer::updateUNSAFE()
-{
-	// figure out how much theUsed will be moved on.
-	if (MESSAGES) qDebug("Updating position");
-	uint newUsed = 0;
-	foreach (BufferReader* i, theReaders)
-		if (newUsed < i->theUsed)
-			newUsed = i->theUsed;
-
-	uint moveBy = theUsed - newUsed;
-	if (MESSAGES) qDebug("Moving by %d", moveBy);
-
-	// clear old plunger (if any) - could be multiple due to potential for skipping
-	if (MESSAGES) qDebug("Next plunger is %d away", (nextPlungerUNSAFE() - readPos) & theMask);
-	while (1)
-		if (thePlungers.begin() != thePlungers.end())
-			if (((*thePlungers.begin() - readPos) & theMask) < moveBy)
-				thePlungers.removeFirst();
-			else
-				break;
-		else
-			break;
-
-	readPos = (readPos + moveBy) & theMask;
-	theUsed -= moveBy;
-	theDataOut.wakeAll();
-}
-
 Buffer::Buffer(uint size, Type const& _type) : theDataFlux(QFastMutex::Recursive)
 {
 	theDataFlux.lock();
@@ -165,6 +112,59 @@ void Buffer::resize(uint size)
 	}
 
 	theDataFlux.unlock();
+}
+
+void Buffer::debug()
+{
+	QFastMutexLocker lock(&theDataFlux);
+	QString out = "[";
+
+	for (uint i = 0; i < theSize; i++)
+	{
+		char c = 'A';
+		foreach (BufferReader* j, theReaders)
+		{
+			if (i == j->readPos) out += c; else out += " ";
+			c++;
+		}
+		QList<uint>::Iterator p; for (p = thePlungers.begin(); p != thePlungers.end(); p++)
+			if (*p == i) break;
+		out += (readPos == i) ? "R" : " ";
+		if (p == thePlungers.end()) out += " "; else out += "#";
+		out += (writePos == i) ? "W" : " ";
+
+		out += ":" + QString::number(theData[i & theMask]) + ":";
+	}
+	out += "]";
+	qDebug("%s", qPrintable(out));
+}
+
+void Buffer::updateUNSAFE()
+{
+	// figure out how much theUsed will be moved on.
+	if (MESSAGES) qDebug("Updating position");
+	uint newUsed = 0;
+	foreach (BufferReader* i, theReaders)
+		if (newUsed < i->theUsed)
+			newUsed = i->theUsed;
+
+	uint moveBy = theUsed - newUsed;
+	if (MESSAGES) qDebug("Moving by %d", moveBy);
+
+	// clear old plunger (if any) - could be multiple due to potential for skipping
+	if (MESSAGES) qDebug("Next plunger is %d away", (nextPlungerUNSAFE() - readPos) & theMask);
+	while (1)
+		if (thePlungers.begin() != thePlungers.end())
+			if (((*thePlungers.begin() - readPos) & theMask) < moveBy)
+				thePlungers.removeFirst();
+			else
+				break;
+		else
+			break;
+
+	readPos = (readPos + moveBy) & theMask;
+	theUsed -= moveBy;
+	theDataOut.wakeAll();
 }
 
 void Buffer::appendPlunger()

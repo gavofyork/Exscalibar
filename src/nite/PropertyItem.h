@@ -33,6 +33,7 @@ public:
 	inline QString const& key() const { return m_key; }
 	inline void resize(QRectF const& _n);
 	float minWidth() const;
+	bool isExpandable() const;
 
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 

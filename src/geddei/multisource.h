@@ -73,6 +73,8 @@ public:
 	Connection::Tristate share(uint _sourceIndex);
 	Connection::Tristate split(uint _sourceIndex);
 
+	void clearDeferreds();
+
 	/**
 	 * Test to see if a connect() would defer.
 	 *

@@ -72,6 +72,12 @@ ProcessorsScene::ProcessorsScene(QObject* _p): QGraphicsScene(_p), m_currentConn
 {
 }
 
+ProcessorsScene::~ProcessorsScene()
+{
+	foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(items()))
+		delete ci;
+}
+
 void ProcessorsScene::dragEnterEvent(QGraphicsSceneDragDropEvent* _event)
 {
 	if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("Processor:"))
@@ -99,33 +105,19 @@ void ProcessorsScene::dropEvent(QGraphicsSceneDragDropEvent* _event)
 	}
 	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
 	{
-		DomProcessorItem* i = new DomProcessorItem(_event->mimeData()->text().mid(10));
-		i->setPos(_event->scenePos());
-		addItem(i);
-	}
-/*	else if (_event->mimeData()->hasFormat("text/plain") && _event->mimeData()->text().startsWith("SubProcessor:"))
-	{
-		bool doInit = false;
-		SubsContainer* dpi;
-		foreach (dpi, filter<DomProcessorItem>(items()))
-			if (dpi->baseItem()->boundingRect().contains(dpi->baseItem()->mapFromScene(_event->scenePos())))
-				goto OK;
-		foreach (dpi, filter<MultiDomProcessorItem>(items()))
-			if (dpi->baseItem()->boundingRect().contains(dpi->baseItem()->mapFromScene(_event->scenePos())))
-				goto OK;
-		doInit = true;
 		if (_event->modifiers() & Qt::ShiftModifier)
-			dpi = new MultiDomProcessorItem;
-		else
-			dpi = new DomProcessorItem;
-		OK:
-		new SubProcessorItem(dpi, _event->mimeData()->text().mid(13), dpi->subProcessorItems().count());
-		if (doInit)
 		{
-			dpi->baseItem()->setPos(_event->scenePos());
-			addItem(dpi->baseItem());
+			MultiDomProcessorItem* i = new MultiDomProcessorItem(_event->mimeData()->text().mid(13));
+			i->setPos(_event->scenePos());
+			addItem(i);
 		}
-	}*/
+		else
+		{
+			DomProcessorItem* i = new DomProcessorItem(_event->mimeData()->text().mid(13));
+			i->setPos(_event->scenePos());
+			addItem(i);
+		}
+	}
 	else
 		return;
 	changed();

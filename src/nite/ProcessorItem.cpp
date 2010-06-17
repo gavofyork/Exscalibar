@@ -41,17 +41,18 @@ void ProcessorItem::propertiesChanged(QString const& _newName)
 	{
 		m_nominal->update(completeProperties());
 		m_propertiesDirty = true;
-		return;
 	}
-
-	m_propertiesDirty = false;
-	if (Processor* n = ProcessorFactory::create(m_type))
+	else
 	{
-		n->init(_newName.isEmpty() ? m_nominal ? m_nominal->name() : QString::number((long unsigned)this) : _newName, completeProperties());
-		if (!m_nominal)
-			setDefaultProperties(n->properties());
-		delete m_nominal;
-		m_nominal = n;
+		m_propertiesDirty = false;
+		if (Processor* n = ProcessorFactory::create(m_type))
+		{
+			n->init(_newName.isEmpty() ? m_nominal ? m_nominal->name() : QString::number((long unsigned)this) : _newName, completeProperties());
+			if (!m_nominal)
+				setDefaultProperties(n->properties());
+			delete m_nominal;
+			m_nominal = n;
+		}
 	}
 	BaseItem::propertiesChanged(_newName);
 }

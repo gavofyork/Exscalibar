@@ -620,7 +620,7 @@ bool Processor::confirmTypes()
 				theOutputs[i] = new LxConnectionNull(this, i);
 			if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
 			theOutputs[i]->setType(theTypesCache[i]);
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache[i]->size() * 2);
+			theOutputs[i]->enforceMinimumWrite(theSizesCache[i] * theTypesCache[i]->size());
 		}
 		return true;
 	}
@@ -701,10 +701,7 @@ bool Processor::confirmTypes()
 		if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Enforcing inputs minima:", qPrintable(name()));
 		for (QVector<xLConnection *>::Iterator i = theInputs.begin(); i != theInputs.end(); i++, ii++)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d : %d samples", qPrintable(name()), ii, sizes[ii]);
-			// We multiply it by 2 to get the maximum of 2xoutputMin and 2xinputMin.
-			// This is a cheap hack on what we really want which is outputMin+inputMin
-			// For that, we will need a new API call in order to seperate the two enforceMinimum()s.
-			(*i)->enforceMinimum(sizes[ii] * (*i)->type().size() * 2);
+			(*i)->enforceMinimumRead(sizes[ii] * (*i)->type().size());
 		}
 	}
 
@@ -722,7 +719,7 @@ bool Processor::confirmTypes()
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
 			theOutputs[i]->setType(theTypesCache[i]);
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
-			theOutputs[i]->enforceMinimum(theSizesCache[i] * theTypesCache[i]->size() * 2);
+			theOutputs[i]->enforceMinimumWrite(theSizesCache[i] * theTypesCache[i]->size());
 		}
 	}
 
@@ -785,34 +782,120 @@ bool Processor::readyRegisterIn(uint sinkIndex) const
 	return true;
 }
 
-const Connection *Processor::connect(uint sourceIndex, Sink *sink, uint sinkIndex, uint bufferSize)
+class DLLEXPORT xLsConnectionReal: public xLConnection
+{
+protected:
+	xLsConnectionReal(Sink* _newSink, uint _newSinkIndex): xLConnection(_newSink, _newSinkIndex) {}
+	~xLsConnectionReal() {}
+
+	Type const& type() const { if (theType.isNull()) const_cast<xLsConnectionReal*>(this)->pullType(); return theType; }
+
+	void commit()
+	{
+		if ((int)m_toTransfer < m_readBuffer.size())
+			memmove(m_readBuffer.data(), m_readBuffer.data() + m_readBuffer.size() - m_toTransfer, (m_readBuffer.size() - m_toTransfer) * sizeof(float));
+		memcpy(m_readBuffer.data() + m_readBuffer.size() - min<int>(m_readBuffer.size(), m_toTransfer), m_writeBuffer.data() + m_toTransfer - min<int>(m_readBuffer.size(), m_toTransfer), min<int>(m_readBuffer.size(), m_toTransfer) * sizeof(float));
+		m_toTransfer = 0;
+	}
+
+	virtual bool pullType() = 0;
+	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; qDebug() << "Reseting connection."; m_readBuffer.fill(0); m_writeBuffer.fill(0); m_toTransfer = 0; }
+
+	QVector<float> m_writeBuffer;
+	QVector<float> m_readBuffer;
+	uint m_toTransfer;
+
+	mutable uint64_t m_samplesRead;
+	mutable uint64_t m_latestPeeked;
+
+private:
+	virtual void sinkStopping() {}
+	virtual void sinkStopped() {}
+	virtual uint elementsReady() const { return m_readBuffer.size(); }
+	virtual void waitForElements(uint) const {}
+	virtual BufferData const readElements(uint _elements) { assert((int)_elements <= m_readBuffer.size()); return BufferData(m_readBuffer.constData() + (uint)m_readBuffer.size() - _elements, (uint)m_readBuffer.size(), type().size()); }
+	virtual BufferData const peekElements(uint _elements) { return readElements(_elements); }
+	virtual void enforceMinimumRead(uint _elements) { m_readBuffer.resize(_elements); m_readBuffer.fill(0); }
+	virtual void enforceMinimumWrite(uint _elements) { m_writeBuffer.resize(_elements); m_writeBuffer.fill(0); }
+	virtual BufferReader* newReader() { return 0; }
+	virtual void killReader() {}
+	virtual void resurectReader() {}
+	virtual uint capacity() const { return (m_readBuffer.size() + m_writeBuffer.size()) / theType->size(); }
+	virtual float filled() const { return 1.0; }
+	virtual bool plungeSync(uint) const { return true; }
+	virtual bool require(uint, uint = Undefined) { return true; }
+	virtual double secondsPassed() const { return 0.0; }
+	virtual double secondsPassed(float) const { return 0.0; }
+};
+
+class DLLEXPORT LLsConnection: public LxConnectionReal, public xLsConnectionReal
+{
+	//* Reimplementations from LxConnection
+	virtual bool waitUntilReady() { return theSink->waitUntilReady(); }
+	virtual Tristate isReadyYet() { return theSink->isGoingYet(); }
+	virtual const Type& type() const { return xLsConnectionReal::type(); }
+	virtual void setType(Type const& _type) { theType = _type; }
+	virtual void resetType() { theType = TransmissionType(); xLsConnectionReal::reset(); }
+	virtual void reset() { xLsConnectionReal::reset(); }
+	virtual void sourceStopping() {}
+	virtual void sourceStopped() {}
+	virtual BufferData makeScratchElements(uint _elements, bool autoPush) { return BufferData(_elements, type().size(), m_writeBuffer.data(), this, autoPush ? BufferInfo::Activate : BufferInfo::Ignore); }
+	virtual void pushPlunger() { plungerSent(); }
+	virtual void startPlungers() { theSink->startPlungers(); }
+	virtual void plungerSent() { theSink->plungerSent(theSinkIndex); }
+	virtual void noMorePlungers() { theSink->noMorePlungers(); }
+	virtual uint maximumScratchElements(uint) { return m_writeBuffer.size(); }
+	virtual uint maximumScratchElementsEver() { return m_writeBuffer.size(); }
+
+	//* Reimplementation from xLConnection.
+	virtual bool pullType() { theSource->confirmTypes(); return !theType.isNull(); }
+
+	//* Reimplementation from LxConnectionReal.
+	virtual void bufferWaitForFree() {}
+	virtual uint bufferElementsFree() { return m_writeBuffer.size(); }
+	virtual void transport(BufferData const& _data) { m_toTransfer = _data.elements(); commit(); theSource->checkExit(); }
+
+	friend class Processor;
+	LLsConnection(Source* _newSource, uint _newSourceIndex, Sink* _newSink, uint _newSinkIndex):
+		LxConnectionReal(_newSource, _newSourceIndex),
+		xLsConnectionReal(_newSink, _newSinkIndex)
+	{}
+};
+
+
+const Connection *Processor::connect(uint _sourceIndex, Sink *_sink, uint _sinkIndex, uint _bufferSize)
 {
 	if (isRunning())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(name()), sourceIndex);
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Cannot change connection states while running.", qPrintable(name()), _sourceIndex);
 		return 0;
 	}
-	if (sourceIndex >= (uint)theOutputs.size())
-	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(name()), sourceIndex);
+	if (_sourceIndex >= (uint)theOutputs.size())
+	{	qWarning("*** ERROR: Processor::connect: %s[%d]: Invalid source index to connect from.", qPrintable(name()), _sourceIndex);
 		return 0;
 	}
 
-	if (!sink->readyRegisterIn(sinkIndex)) return 0;
+	if (!_sink->readyRegisterIn(_sinkIndex)) return 0;
 
-	if (theOutputs[sourceIndex] == 0)
-		return new LLConnection(this, sourceIndex, sink, sinkIndex, bufferSize);
-	else if (dynamic_cast<LMConnection *>(theOutputs[sourceIndex]))
+	if (theOutputs[_sourceIndex] == 0)
 	{
-		LMConnection *c = dynamic_cast<LMConnection *>(theOutputs[sourceIndex]);
-		return new MLConnection(sink, sinkIndex, c);
+		if (specifyInputMode(_sourceIndex))
+			return new LLsConnection(this, _sourceIndex, _sink, _sinkIndex);
+		else
+			return new LLConnection(this, _sourceIndex, _sink, _sinkIndex, _bufferSize);
 	}
-	else if (dynamic_cast<Splitter *>(theOutputs[sourceIndex]))
+	else if (dynamic_cast<LMConnection *>(theOutputs[_sourceIndex]))
 	{
-		Splitter *s = dynamic_cast<Splitter *>(theOutputs[sourceIndex]);
-		return new LLConnection(s, 0, sink, sinkIndex, bufferSize);
+		LMConnection *c = dynamic_cast<LMConnection *>(theOutputs[_sourceIndex]);
+		return new MLConnection(_sink, _sinkIndex, c);
+	}
+	else if (dynamic_cast<Splitter *>(theOutputs[_sourceIndex]))
+	{
+		Splitter *s = dynamic_cast<Splitter *>(theOutputs[_sourceIndex]);
+		return new LLConnection(s, 0, _sink, _sinkIndex, _bufferSize);
 	}
 	else
 	{	qWarning("*** ERROR: Processor::connect: Output %s[%d] already connected and is neither split\n"
-			   "           nor share()d.", qPrintable(name()), sourceIndex);
+			   "           nor share()d.", qPrintable(name()), _sourceIndex);
 		return 0;
 	}
 }

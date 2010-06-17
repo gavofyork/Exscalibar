@@ -21,6 +21,7 @@
 #include <QtGui>
 #include <QtXml>
 
+#include "ConnectionItem.h"
 #include "Magnetic.h"
 
 class InputItem;
@@ -33,7 +34,10 @@ class MultiProcessorItem;
 class MultipleConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
+	typedef ConnectionItem::Nature Nature;
+
 	MultipleConnectionItem(MultipleInputItem* _to, MultipleOutputItem* _from);
+	~MultipleConnectionItem();
 
 	enum { ItemType = UserType + 9 };
 	virtual int type() const { return ItemType; }
@@ -50,11 +54,21 @@ public:
 
 	QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
+	static void refreshNature(BaseItem* _b);
+	static void refreshNature(MultipleInputItem* _i, MultipleOutputItem* _o, QGraphicsScene* _s);
+	void refreshNature();
+	Nature nature() const { return m_nature; }
+
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);
 
 	bool m_isValid;
+
 	MultipleOutputItem* m_from;
 	MultipleInputItem* m_to;
+
+	QPointF m_centre;
+
+	Nature m_nature;
 };

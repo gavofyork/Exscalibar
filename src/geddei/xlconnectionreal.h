@@ -31,9 +31,6 @@
 #include <geddei/contiguous.h>
 #endif
 using namespace Geddei;
-using namespace Geddei;
-
-class BobPort;
 
 namespace Geddei
 {
@@ -52,43 +49,13 @@ class xLConnectionReal: public xLConnection
 {
 	// Reimplementations from Connection
 	friend class Processor;
+	// Reimplementations from xLConnection
+	friend class RLConnection;
+
 public:
 	virtual const Type& type() const;
 
-	// Reimplementations from xLConnection
-	friend class RLConnection;
-private:
-	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; theBuffer.clear(); }
-	virtual void sinkStopping();
-	virtual void sinkStopped();
-	virtual uint elementsReady() const;
-	virtual void waitForElements(uint elements) const;
-	virtual const BufferData readElements(uint elements);
-	virtual const BufferData peekElements(uint elements);
-	virtual void enforceMinimum(uint elements);
-	virtual BufferReader *newReader() { return new BufferReader(&theBuffer); }
-	virtual void killReader();
-	virtual void resurectReader();
-	virtual uint capacity() const { return theBuffer.size() / theType->size(); }
-	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
-	virtual bool plungeSync(uint samples) const;
-	virtual bool require(uint samples, uint preferSamples = Undefined);
-	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
-	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
-
 protected:
-	friend class BobPort;
-	Buffer theBuffer;
-	BufferReader *theReader;
-	mutable uint64_t m_samplesRead;
-	mutable uint64_t m_latestPeeked;
-
-
-	/**
-	 * Extracts the type from the source end of the connection.
-	 */
-	virtual bool pullType() = 0;
-
 	/**
 	 * Simple constructor.
 	 *
@@ -104,6 +71,40 @@ protected:
 	 * Simple destructor.
 	 */
 	~xLConnectionReal();
+
+	/**
+	 * Extracts the type from the source end of the connection.
+	 */
+	virtual bool pullType() = 0;
+
+	friend class BobPort;
+	Buffer theBuffer;
+	BufferReader* theReader;
+	mutable uint64_t m_samplesRead;
+	mutable uint64_t m_latestPeeked;
+	int m_minRead;
+	int m_minWrite;
+
+private:
+	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; theBuffer.clear(); qDebug() << "Reseting connection."; m_minRead = m_minWrite = 0; }
+	virtual void sinkStopping();
+	virtual void sinkStopped();
+	virtual uint elementsReady() const;
+	virtual void waitForElements(uint elements) const;
+	virtual const BufferData readElements(uint elements);
+	virtual const BufferData peekElements(uint elements);
+	virtual void enforceMinimum(uint _elements);
+	virtual void enforceMinimumRead(uint _elements);
+	virtual void enforceMinimumWrite(uint _elements);
+	virtual BufferReader *newReader() { return new BufferReader(&theBuffer); }
+	virtual void killReader();
+	virtual void resurectReader();
+	virtual uint capacity() const { return theBuffer.size() / theType->size(); }
+	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
+	virtual bool plungeSync(uint samples) const;
+	virtual bool require(uint samples, uint preferSamples = Undefined);
+	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
+	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
 };
 
 }

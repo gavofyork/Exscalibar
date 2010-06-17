@@ -117,7 +117,7 @@ void DomProcessorItem::prepYourself(ProcessorGroup& _g)
 
 void DomProcessorItem::unprepYourself()
 {
-	if (allAfter().size() != 0)
+	if (allAfter().size() == 0)
 		delete m_combined;
 	m_combined = 0;
 	ProcessorBasedItem::unprepYourself();

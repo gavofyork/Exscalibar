@@ -67,6 +67,8 @@ public:
 	//* Reimplementation from MultiSink
 	virtual uint numMultiInputs() const = 0;
 
+	void clearDeferrals() { theDeferrals.clear(); }
+
 	/**
 	 * Override to provide the routine for providing a sink port.
 	 */

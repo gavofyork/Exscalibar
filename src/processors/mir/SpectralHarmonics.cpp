@@ -69,13 +69,14 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 
 	int sc = m_signal.bins();
 
+	har.copyFrom(in);
 	pass.copyFrom(in);
 
-	for (uint i = 0; i < m_signal.bins(); i++)
-		har[i] = 0.f;
+	for (int i = 0; i < sc; i++)
+		har(0, i) = 0.f;
 
 	float total = 0.f;
-	for (uint i = 0; i < m_signal.bins(); i++)
+	for (int i = 0; i < sc; i++)
 		total += in[i];
 
 	for (int n = 0; n < m_maxPass; n++)

@@ -54,58 +54,12 @@ class Buffer: public ScratchOwner
 {
 	friend class BufferReader;
 
-	mutable QFastWaitCondition theDataIn, theDataOut;
-	mutable QFastMutex theDataFlux;
-
-	float *theData;
-	uint theLogSize, theSize, theMask, theUsed;
-	uint readPos, writePos;
-	BufferInfo *lastScratch;
-	Type theType;
-	QVector<const Processor *> theTrapdoors;
-	QList<uint> thePlungers;
-	QList<BufferReader*> theReaders;
-
-	friend ostream &operator<<(ostream &out, Buffer &me);
-
-	/** theDataFlux ***MUST*** be locked before calling any methods who end in UNSAFE. */
-
-	/**
-	 * Updates the position of the global readPos from the registered readers.
-	 * This should be called after any operation on a reader's position.
-	 * Will discard any plungers that are *before* the new readPos.
-	 */
-	void updateUNSAFE();
-
-	bool trapdoorUNSAFE() const;
-	uint waitForUNSAFE(uint elements) const;
-	uint waitForUNSAFE(uint elements, const BufferReader *reader) const;
-	uint waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *reader) const;
-	void waitForFreeUNSAFE(uint elements) const;
-
-	/**
-	 * Discards the next plunger, if there is one.
-	 * Thread-safe.
-	 */
-	void discardNextPlungerUNSAFE();
-
-	/**
-	 * Simply finds the next plunger from readPos and returns its position in
-	 * the buffer.
-	 *
-	 * @return -1 if there isn't one.
-	 */
-	int nextPlungerUNSAFE() const;
-
-	/**
-	 * Finds the next plunger from @a pos and returns its position relative to
-	 * @a pos. Upto @arg ignore plungers are ignored at position @a pos.
-	 *
-	 * @return -1 if there isn't such a plunger.
-	 */
-	int nextPlungerUNSAFE(uint pos, uint ignore) const;
-
 public:
+	Buffer(uint size, Type const& _type = Type());
+	virtual ~Buffer();
+
+	static void __test1();
+
 	// USE THIS FROM processor on stop() - dont forget to reinitialise
 	void openTrapdoor(const Processor *processor);
 	void closeTrapdoor(const Processor *processor);
@@ -214,8 +168,57 @@ public:
 
 	void debug();
 
-	Buffer(uint size, Type const& _type = Type());
-	virtual ~Buffer();
+private:
+	friend ostream &operator<<(ostream &out, Buffer &me);
+
+	/** theDataFlux ***MUST*** be locked before calling any methods who end in UNSAFE. */
+
+	/**
+	 * Updates the position of the global readPos from the registered readers.
+	 * This should be called after any operation on a reader's position.
+	 * Will discard any plungers that are *before* the new readPos.
+	 */
+	void updateUNSAFE();
+
+	bool trapdoorUNSAFE() const;
+	uint waitForUNSAFE(uint elements) const;
+	uint waitForUNSAFE(uint elements, const BufferReader *reader) const;
+	uint waitForIgnorePlungersUNSAFE(uint elements, const BufferReader *reader) const;
+	void waitForFreeUNSAFE(uint elements) const;
+
+	/**
+	 * Discards the next plunger, if there is one.
+	 * Thread-safe.
+	 */
+	void discardNextPlungerUNSAFE();
+
+	/**
+	 * Simply finds the next plunger from readPos and returns its position in
+	 * the buffer.
+	 *
+	 * @return -1 if there isn't one.
+	 */
+	int nextPlungerUNSAFE() const;
+
+	/**
+	 * Finds the next plunger from @a pos and returns its position relative to
+	 * @a pos. Upto @arg ignore plungers are ignored at position @a pos.
+	 *
+	 * @return -1 if there isn't such a plunger.
+	 */
+	int nextPlungerUNSAFE(uint pos, uint ignore) const;
+
+	mutable QFastWaitCondition theDataIn, theDataOut;
+	mutable QFastMutex theDataFlux;
+
+	float *theData;
+	uint theLogSize, theSize, theMask, theUsed;
+	uint readPos, writePos;
+	BufferInfo *lastScratch;
+	Type theType;
+	QVector<const Processor *> theTrapdoors;
+	QList<uint> thePlungers;
+	QList<BufferReader*> theReaders;
 };
 
 }

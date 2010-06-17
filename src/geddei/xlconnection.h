@@ -60,164 +60,12 @@ class xLConnection: virtual public Connection
 	friend class HeavyProcessor;
 	friend class CoProcessor;
 
-protected:
-	Sink *theSink;  ///< Sink object that anchors thit end of the connection.
-	uint theSinkIndex;  ///< Index into the Sink object, if any.
-
-	/** @internal
-	 * Resets the connection object.
-	 *
-	 * Should be called between processing sessions (when all processors are
-	 * stopped). Only needs to be called if the Connection object is persistant
-	 * between sessions.
-	 */
-	virtual void reset() = 0;
-
-	/** @internal
-	 * Notifies the object that the sink processor will be stopped.
-	 *
-	 * Allows blocking calls to exit, if they belong to the sink processor.
-	 *
-	 * This constitutes the initial part of a shutdown.
-	 *
-	 * @sa sinkStopped()
-	 */
-	virtual void sinkStopping() = 0;
-
-	/** @internal
-	 * Notifies the object that the sink processor has been stopped.
-	 *
-	 * Restores normal blocking calls behaviour from sinkStopping().
-	 *
-	 * This constitutes the final part of a shutdown.
-	 *
-	 * @sa sinkStopping()
-	 */
-	virtual void sinkStopped() = 0;
-
-	/** @internal
-	 * Blocks until either:
-	 *
-	 * a) It discards up to @a samples from the input stream and it then reads
-	 * a plunger. In this case, it returns false.
-	 *
-	 * b) It discards nothing, but guarantees that at least @a samples can be
-	 * read from the input stream immediately and without interruption. In this
-	 * case, it returns true.
-	 *
-	 * On exit it guarantees either a specific number of samples can be read
-	 * (like waitUntilReady()), or that it has gotten rid of at least one
-	 * plunger. If neither plunger nor enough data are forthcoming in the input
-	 * stream, it will block indefinately.
-	 */
-	virtual bool plungeSync(uint samples) const = 0;
-
-	/** @internal
-	 * Will return true if @a elements can be read from the input stream without
-	 * blocking. Any plungers that would block this from being true are skipped.
-	 * If a plunger is skipped then the sink is notified. Will return false if
-	 * @a elements could be read, but also if sometime in the future @a prefer
-	 * could be made available.
-	 *
-	 * NON-BLOCKING.
-	 */
-	virtual bool require(uint samples, uint preferSamples = Undefined) = 0;
-
-	/** @internal
-	 * Returns the number of elements currently available to be read without
-	 * blocking.
-	 *
-	 * @return The number of elements currently ready.
-	 * This is guaranteed to be correct at some point between the start of the
-	 * call and the return of the call, but no where in particular. This is
-	 * essentially a technical issue. As such the value returned may be an
-	 * underestimate.
-	 */
-	virtual uint elementsReady() const = 0;
-
-	/** @internal
-	 * Waits until a read @a elements elements can be guaranteed without
-	 * blocking.
-	 *
-	 * @param elements Numnber of elements to wait for.
-	 */
-	virtual void waitForElements(uint elements) const = 0;
-
-	/** @internal
-	 * Reads a number of samples or seconds (or elements, but this is
-	 * discouraged).
-	 *
-	 * If @a elements is nonzero, this may block if there isn't enough data to
-	 * be read.
-	 *
-	 * The Buffer is only guaranteed to be purged of the elements after all
-	 * BufferData objects referencing the data at the one returned are
-	 * destroyed.
-	 *
-	 * @param elements Number of elements to be read. If zero, then as much as
-	 * possible data is read, without blocking. In the event that no data is
-	 * available, the BufferData will be of size 0.
-	 * @return BufferData of size @a elements which contains the next
-	 * @a elements elements from the source.
-	 *
-	 * @sa peekElements()
-	 */
-	virtual const BufferData readElements(uint elements) = 0;
-
-	/** @internal plunge
-	 * Reads a number of samples or seconds (or elements, but this is
-	 * discouraged).
-	 *
-	 * If @a elements is nonzero, this may block if there isn't enough data to
-	 * be read.
-	 *
-	 * Elements are not removed from buffer, so any subsequent calls will
-	 * return same data.
-	 *
-	 * @param elements Number of elements to be read. If zero, then as much as
-	 * possible data is read, without blocking. In the event that no data is
-	 * available, the BufferData will be of size 0.
-	 * @return BufferData of size @a elements which contains the next
-	 * @a elements elements from the source.
-	 *
-	 * @sa readElements
-	 */
-	virtual const BufferData peekElements(uint elements) = 0;
-
-	/** @internal
-	 * Deletes the reader. Any reads must now be done by creating your own
-	 * BufferReader with newReader().
-	 *
-	 * @note Do not call the standard reading methods. They are now unsafe.
-	 *
-	 * @sa resurectReader() @sa newReader()
-	 */
-	virtual void killReader() = 0;
-
-	/** @internal
-	 * Reinstates the reader. This undoes the killReader() operation, and
-	 * therefore should only be called after a killReader().
-	 *
-	 * The standard reading methods will work properly again after this call.
-	 *
-	 * @sa killReader() @sa newReader()
-	 */
-	virtual void resurectReader() = 0;
-
-	/** @internal
-	 * Creates and returns a new reader for the source buffer.
-	 *
-	 * @return Pointer to a new BufferReader object, that is associated with
-	 * the source Buffer object.
-	 */
-	virtual BufferReader *newReader() = 0;
-
-	/** @internal
-	 * Simple constructor.
-	 */
-	xLConnection(Sink *newSink, uint newSinkIndex);
-
 public:
+	/**
+	 * Simple destructor.
+	 */
+	virtual ~xLConnection();
+
 	virtual double secondsPassed() const = 0;
 	virtual double secondsPassed(float) const { return secondsPassed(); }
 
@@ -400,11 +248,162 @@ public:
 	 */
 	virtual float filled() const { return 0.; }
 
-	/**
-	 * Simple destructor.
+protected:
+	/** @internal
+	 * Simple constructor.
 	 */
-	virtual ~xLConnection();
+	xLConnection(Sink *newSink, uint newSinkIndex);
 
+	/** @internal
+	 * Resets the connection object.
+	 *
+	 * Should be called between processing sessions (when all processors are
+	 * stopped). Only needs to be called if the Connection object is persistant
+	 * between sessions.
+	 */
+	virtual void reset() = 0;
+
+	/** @internal
+	 * Notifies the object that the sink processor will be stopped.
+	 *
+	 * Allows blocking calls to exit, if they belong to the sink processor.
+	 *
+	 * This constitutes the initial part of a shutdown.
+	 *
+	 * @sa sinkStopped()
+	 */
+	virtual void sinkStopping() = 0;
+
+	/** @internal
+	 * Notifies the object that the sink processor has been stopped.
+	 *
+	 * Restores normal blocking calls behaviour from sinkStopping().
+	 *
+	 * This constitutes the final part of a shutdown.
+	 *
+	 * @sa sinkStopping()
+	 */
+	virtual void sinkStopped() = 0;
+
+	/** @internal
+	 * Blocks until either:
+	 *
+	 * a) It discards up to @a samples from the input stream and it then reads
+	 * a plunger. In this case, it returns false.
+	 *
+	 * b) It discards nothing, but guarantees that at least @a samples can be
+	 * read from the input stream immediately and without interruption. In this
+	 * case, it returns true.
+	 *
+	 * On exit it guarantees either a specific number of samples can be read
+	 * (like waitUntilReady()), or that it has gotten rid of at least one
+	 * plunger. If neither plunger nor enough data are forthcoming in the input
+	 * stream, it will block indefinately.
+	 */
+	virtual bool plungeSync(uint samples) const = 0;
+
+	/** @internal
+	 * Will return true if @a elements can be read from the input stream without
+	 * blocking. Any plungers that would block this from being true are skipped.
+	 * If a plunger is skipped then the sink is notified. Will return false if
+	 * @a elements could be read, but also if sometime in the future @a prefer
+	 * could be made available.
+	 *
+	 * NON-BLOCKING.
+	 */
+	virtual bool require(uint samples, uint preferSamples = Undefined) = 0;
+
+	/** @internal
+	 * Returns the number of elements currently available to be read without
+	 * blocking.
+	 *
+	 * @return The number of elements currently ready.
+	 * This is guaranteed to be correct at some point between the start of the
+	 * call and the return of the call, but no where in particular. This is
+	 * essentially a technical issue. As such the value returned may be an
+	 * underestimate.
+	 */
+	virtual uint elementsReady() const = 0;
+
+	/** @internal
+	 * Waits until a read @a elements elements can be guaranteed without
+	 * blocking.
+	 *
+	 * @param elements Numnber of elements to wait for.
+	 */
+	virtual void waitForElements(uint elements) const = 0;
+
+	/** @internal
+	 * Reads a number of samples or seconds (or elements, but this is
+	 * discouraged).
+	 *
+	 * If @a elements is nonzero, this may block if there isn't enough data to
+	 * be read.
+	 *
+	 * The Buffer is only guaranteed to be purged of the elements after all
+	 * BufferData objects referencing the data at the one returned are
+	 * destroyed.
+	 *
+	 * @param elements Number of elements to be read. If zero, then as much as
+	 * possible data is read, without blocking. In the event that no data is
+	 * available, the BufferData will be of size 0.
+	 * @return BufferData of size @a elements which contains the next
+	 * @a elements elements from the source.
+	 *
+	 * @sa peekElements()
+	 */
+	virtual const BufferData readElements(uint elements) = 0;
+
+	/** @internal plunge
+	 * Reads a number of samples or seconds (or elements, but this is
+	 * discouraged).
+	 *
+	 * If @a elements is nonzero, this may block if there isn't enough data to
+	 * be read.
+	 *
+	 * Elements are not removed from buffer, so any subsequent calls will
+	 * return same data.
+	 *
+	 * @param elements Number of elements to be read. If zero, then as much as
+	 * possible data is read, without blocking. In the event that no data is
+	 * available, the BufferData will be of size 0.
+	 * @return BufferData of size @a elements which contains the next
+	 * @a elements elements from the source.
+	 *
+	 * @sa readElements
+	 */
+	virtual const BufferData peekElements(uint elements) = 0;
+
+	/** @internal
+	 * Deletes the reader. Any reads must now be done by creating your own
+	 * BufferReader with newReader().
+	 *
+	 * @note Do not call the standard reading methods. They are now unsafe.
+	 *
+	 * @sa resurectReader() @sa newReader()
+	 */
+	virtual void killReader() = 0;
+
+	/** @internal
+	 * Reinstates the reader. This undoes the killReader() operation, and
+	 * therefore should only be called after a killReader().
+	 *
+	 * The standard reading methods will work properly again after this call.
+	 *
+	 * @sa killReader() @sa newReader()
+	 */
+	virtual void resurectReader() = 0;
+
+	/** @internal
+	 * Creates and returns a new reader for the source buffer.
+	 *
+	 * @return Pointer to a new BufferReader object, that is associated with
+	 * the source Buffer object.
+	 */
+	virtual BufferReader *newReader() = 0;
+
+	Sink *theSink;  ///< Sink object that anchors this end of the connection.
+	uint theSinkIndex;  ///< Index into the Sink object, if any.
 };
 
 }

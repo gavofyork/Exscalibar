@@ -39,10 +39,10 @@ Splitter::~Splitter()
 		delete theConnections.takeLast();
 }
 
-void Splitter::enforceMinimum(uint elements)
+void Splitter::enforceMinimumWrite(uint _elements)
 {
 	foreach (LxConnection* i, theConnections)
-		i->enforceMinimum(elements);
+		i->enforceMinimumWrite(_elements);
 }
 
 void Splitter::forgetScratch(const BufferData &data)

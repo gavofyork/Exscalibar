@@ -17,7 +17,6 @@
  */
 
 #include "GeddeiNite.h"
-#include "PauseItem.h"
 #include "BaseItem.h"
 #include "PropertyItem.h"
 #include "ConnectionItem.h"
@@ -47,7 +46,7 @@ void BaseItem::setProperty(QString const& _key, QVariant const& _value)
 {
 	m_properties[_key] = _value;
 	propertiesChanged();
-	dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
+	//dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
 }
 
 void BaseItem::setDefaultProperties(PropertiesInfo const& _def)
@@ -80,40 +79,42 @@ void BaseItem::checkWidgets()
 	float oY = controlsRect().top();
 	float maxWidth = controlsRect().width();
 	m_controlsSize = QSizeF(0.f, 0.f);
-	float cSPos = 0.f;
-	float cSLine = 0.f;
+	float csPos = 0.f;
+	float csLine = 0.f;
+	float csFixed = 0.f;
 	QList<PropertyItem*> line;
 	QList<PropertyItem*> items = filterRelaxed<PropertyItem>(childItems());
 	for (int ii = 0; ii < items.count(); ii++)
 	{
 		PropertyItem* item = items[ii];
 		line << item;
-		item->setPos(cSPos + oX, m_controlsSize.height() + oY);
-		cSLine = max<float>(cSLine, item->boundingRect().height());
-		cSPos += item->minWidth();
+		item->setPos(csPos + oX, m_controlsSize.height() + oY);
+		csLine = max<float>(csLine, item->boundingRect().height());
+		csPos += item->minWidth();
+		csFixed += item->isExpandable() ? 0 : item->minWidth();
 		m_controlsSize.setWidth(item->minWidth());
 
-		if (ii == items.count() - 1 || items[ii + 1]->minWidth() + cSPos > maxWidth)
+		if (ii == items.count() - 1 || items[ii + 1]->minWidth() + csPos > maxWidth)
 		{
-			float w = max<float>(item->minWidth(), maxWidth) / cSPos;
-			float x = 0.f;
-			for (int i = 0; i < line.count(); i++)
+			if (csFixed < csPos)
 			{
-				line[i]->setPos(floor(x) + oX, line[i]->pos().y());
-				line[i]->resize(QRectF(0, 0, floor(line[i]->minWidth() * w), cSLine));
-				x += floor(line[i]->minWidth() * w);
+				float w = (max<float>(item->minWidth(), maxWidth) - csFixed) / (csPos - csFixed);
+				float x = 0.f;
+				for (int i = 0; i < line.count(); i++)
+				{
+					line[i]->setPos(floor(x) + oX, line[i]->pos().y());
+					float nw = floor(line[i]->minWidth() * (line[i]->isExpandable() ? w : 1));
+					line[i]->resize(QRectF(0, 0, nw, csLine));
+					x += nw;
+				}
 			}
-			m_controlsSize.setHeight(m_controlsSize.height() + cSLine);
-			cSPos = 0;
-			cSLine = 0;
+			m_controlsSize.setHeight(m_controlsSize.height() + csLine);
+			csPos = 0;
+			csLine = 0;
+			csFixed = 0;
 			line.clear();
 		}
 	}
-}
-
-void BaseItem::tick()
-{
-//	m_pauseItem->tick();
 }
 
 void BaseItem::timerEvent(QTimerEvent*)
@@ -126,6 +127,7 @@ void BaseItem::propertiesChanged(QString const&)
 	if (scene())
 	{
 		dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
+		MultipleConnectionItem::refreshNature(this);
 		foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
 			if (ci->fromBase() == this || ci->toBase() == this)
 				ci->refreshNature();
@@ -167,7 +169,7 @@ QSizeF BaseItem::interiorWith(QSizeF _client) const
 void BaseItem::geometryChanged()
 {
 	prepareGeometryChange();
-	if (!m_size.isValid() || m_size.isEmpty())
+	if (!m_size.isValid() || m_size.isEmpty() || !isResizable())
 		m_size = interiorMin();
 	m_controlsSize = controlsSize(m_size.width() - (isResizable() ? portHeight() : 0));
 	checkWidgets();
@@ -356,11 +358,7 @@ QPen BaseItem::innerPen() const
 	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 QPen BaseItem::outerPen() const
-{/*
-	QLinearGradient cg(exteriorRect().topLeft(), exteriorRect().bottomLeft());
-	cg.setColorAt(0, outlineColour().darker(250));
-	cg.setColorAt(1, outlineColour().darker(350));
-	return QPen(cg, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);*/
+{
 	return QPen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 }
 

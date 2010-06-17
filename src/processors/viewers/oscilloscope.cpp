@@ -56,18 +56,33 @@ int Oscilloscope::process()
 	return DidWork;
 }
 
+static float rmsOf(QVector<float> const& _d)
+{
+	if (!_d.count())
+		return 0.f;
+	float ret = 0.f;
+	for (int i = 0; i < _d.count(); i++)
+		ret += sqr(_d[i]);
+	return sqrt(ret / _d.count());
+}
+
 bool Oscilloscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 {
+	float rms = rmsOf(m_last);
 	_p.setRenderHint(QPainter::Antialiasing, m_antialiasing);
 	_p.translate(0, floor(_s.height() / 2.f) + 0.5f);
 	_p.scale(1, floor(_s.height() / 2.f) * -m_gain);
-	_p.setPen(QPen(QColor(0, 0, 0, 32), 0));
-	_p.drawLine(QLineF(0, -0.001f, float(_s.width()), -0.001f));
+	_p.setPen(QPen(QColor(0, 0, 0, 48), 0));
+	_p.drawLine(QLineF(0, -0.0001f, float(_s.width()), -0.0001f));
+	_p.setPen(QPen(QColor(0, 0, 0, 24), 0));
 	_p.drawLine(QLineF(0.f, .5f, float(_s.width()), .5f));
 	_p.drawLine(QLineF(0.f, -.5f, float(_s.width()), -.5f));
+	_p.setPen(QPen(QColor(255, 0, 0, 32), 0));
+	_p.drawLine(QLineF(0.f, rms - 0.0001f, float(_s.width()), rms - 0.0001f));
+	_p.drawLine(QLineF(0.f, -rms - 0.0001f, float(_s.width()), -rms - 0.0001f));
 	_p.setPen(QPen(Qt::black, 0));
 	if (isRunning())
-		for (int i = m_detail; i < _s.width(); i+=m_detail)
+		for (int i = m_detail; i < (int)_s.width(); i+=clamp(m_detail, 1, 3))
 			_p.drawLine(QLineF(i - m_detail, m_last[(i - m_detail) * m_last.size() / (int)_s.width()], i, m_last[i * m_last.size() / (int)_s.width()]));
 	return true;
 }
@@ -105,7 +120,7 @@ void Oscilloscope::updateFromProperties()
 PropertiesInfo Oscilloscope::specifyProperties() const
 {
 	return PropertiesInfo	("Antialiasing", true, "Antialiasing.", true, "a", AVbool)
-							("Detail", true, "Detail.", 2, "d", AV("High", "H", 1) AVand("Medium", "M", 2) AVand("Low", "L", 3))
+							("Detail", 2, "Detail.", true, "d", AV("High", "H", 1) AVand("Medium", "M", 2) AVand("Low", "L", 3))
 							("Size", 1024, "The size of the window's width (in samples).", false, "#", AVsamples)
 							("RefreshPeriod", 30, "The refresh period (in ms).", true, "r", AV(1, 1000, AllowedValue::Log10))
 							("Gain", 1.f, "Gain for input signal (x).", true, "x", AVgain);

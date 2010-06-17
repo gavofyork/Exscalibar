@@ -88,6 +88,8 @@ void MultiProcessor::reset()
 {
 	foreach (Processor* i, theProcessors)
 		i->reset();
+	clearDeferreds();
+	clearDeferrals();
 }
 
 void MultiProcessor::disconnectAll()

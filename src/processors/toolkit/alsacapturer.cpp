@@ -137,6 +137,7 @@ bool ALSACapturer::processorStarted()
 	{
 		uint f;
 		snd_pcm_hw_params_get_rate_resample(thePcmHandle, hwparams, &f);
+		qDebug() << "*** ACTUAL FREQUENCY" << f;
 		m_inData.resize(thePeriodSize * theChannels);
 		assert(!snd_pcm_nonblock(thePcmHandle, 1));
 		snd_pcm_prepare(thePcmHandle);
@@ -158,7 +159,12 @@ int ALSACapturer::canProcess()
 		int av = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
 		if (av > 0)
 		{
+			qDebug() << "REWINDING" << av;
+			if (snd_pcm_rewindable(thePcmHandle) < av)
+				qDebug() << "*** ALSA CAPTURER: CAN'T REWIND FRAMES!";
 			int x = snd_pcm_rewind(thePcmHandle, av);
+			if (x < av)
+				qDebug() << "*** ALSA CAPTURER: CAN'T REWIND FRAMES!";
 			if (x != av)
 				av = x;
 		}
@@ -179,6 +185,9 @@ int ALSACapturer::process()
 {
 	m_error *= m_error;
 	int count = snd_pcm_readi(thePcmHandle, m_inData.data(), thePeriodSize);
+	static int totalCount = 0;
+	totalCount += count;
+	qDebug() <<  totalCount / theFrequency;
 	if (count > 0)
 	{
 		BufferData d[theChannels];

@@ -52,13 +52,13 @@ private:
 PropertiesInfo Window::specifyProperties() const
 {
 	return PropertiesInfo("Size", 2048, "The size of the block (in samples) from which to conduct a short time Fourier transform.", false, "#", AV(32, 16384, AllowedValue::Log2))
-						 ("Hop", 1024, "The number of samples between consequent sampling blocks.", false, "h", AV(1, 8192, AllowedValue::Log2))
-						 ("Padding", 0, "The amount of padding in samples.", false, "p", AV("0", "0", 0) AVand(32, 262144, AllowedValue::Log2))
+						 ("Hop", 341, "The number of samples between consequent sampling blocks.", false, "h", AV(1, 8192, AllowedValue::Log2))
+						 ("Padding", 2048, "The amount of padding in samples.", false, "p", AV("0", "0", 0) AVand(32, 262144, AllowedValue::Log2))
 						 ("ZeroPhase", true, "Make window zero phase.", true, "z", AVbool)
 #define W(N, n) AVand(#N, #n, N)
-						 ("Type", Rectangular, "Window type.", true, "t", AV("Rectangular", "r", Rectangular) W(Hamming, h) W(Hann, n) W(Tukey, t) W(Kaiser, k) W(Blackman, b) W(Gaussian, g))
+						 ("Type", Blackman, "Window type.", true, "t", AV("Rectangular", "r", Rectangular) W(Hamming, h) W(Hann, n) W(Tukey, t) W(Kaiser, k) W(Blackman, b) W(Gaussian, g))
 #undef W
-						 ("Parameter", 0.5f, "The window type parameter.", true, "?", AV(0.f, 1.f) AVand("2", "2", 2) AVand("3", "3", 3) AVand("4", "4", 4));
+						 ("Parameter", 0.16f, "The window type parameter.", true, "?", AV(0.f, 1.f) AVand("2", "2", 2) AVand("3", "3", 3) AVand("4", "4", 4));
 }
 double io(double x)
 {

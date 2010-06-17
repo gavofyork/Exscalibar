@@ -28,11 +28,16 @@ using namespace std;
 namespace Geddei
 {
 
-void MultiSource::disconnect()
+void MultiSource::clearDeferreds()
 {
 	while (theDeferreds.size())
 		if (MultiSink* s = theDeferreds.takeLast().s)
 			s->removeDeferral(this);
+}
+
+void MultiSource::disconnect()
+{
+	clearDeferreds();
 	if (knowMultiplicity())
 		for (uint i = 0; i < multiplicity(); i++)
 			for (uint j = 0; j < numMultiOutputs(); j++)

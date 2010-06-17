@@ -53,6 +53,14 @@ float PropertyItem::minWidth() const
 	return ret;
 }
 
+bool PropertyItem::isExpandable() const
+{
+	foreach (BasePropertyItem* i, filterRelaxed<BasePropertyItem>(childItems()))
+		if (i->isExpandable())
+			return true;
+	return false;
+}
+
 void PropertyItem::resize(QRectF const& _r)
 {
 	QRectF widget = _r.translated(s_widgetHeight, 2.f);

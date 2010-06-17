@@ -33,7 +33,7 @@ public:
 	enum Nature { Connection, Coupling };
 
 	ConnectionItem(InputItem* _to, OutputItem* _from);
-	~ConnectionItem();
+	virtual ~ConnectionItem();
 
 	enum { ItemType = UserType + 4 };
 	virtual int type() const { return ItemType; }

@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "MultiDomProcessorItem.h"
 #include "MultipleInputItem.h"
 #include "MultipleOutputItem.h"
 #include "MultipleConnectionItem.h"
@@ -32,6 +33,53 @@ MultipleConnectionItem::MultipleConnectionItem(MultipleInputItem* _to, MultipleO
 	setFlags(ItemIsFocusable | ItemIsSelectable);
 	setCursor(Qt::ArrowCursor);
 	setZValue(-1);
+	refreshNature(to(), from(), _to->scene());
+}
+
+MultipleConnectionItem::~MultipleConnectionItem()
+{
+	MultipleInputItem* t = to();
+	MultipleOutputItem* f = from();
+	m_from = 0;
+	m_to = 0;
+	refreshNature(t, f, scene());
+}
+
+void MultipleConnectionItem::refreshNature(BaseItem* _b)
+{
+	if (_b->scene())
+		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_b->scene()->items()))
+			if (ci->from()->baseItem() == _b || ci->to()->baseItem() == _b)
+				ci->refreshNature();
+}
+
+void MultipleConnectionItem::refreshNature(MultipleInputItem* _i, MultipleOutputItem* _o, QGraphicsScene* _s)
+{
+	if (_s)
+		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_s->items()))
+			if (ci->from() == _o || ci->to() == _i)
+				ci->refreshNature();
+}
+
+void MultipleConnectionItem::refreshNature()
+{
+	update();
+	m_nature = ConnectionItem::Connection;
+
+	MultiDomProcessorItem* fp = dynamic_cast<MultiDomProcessorItem*>(from()->baseItem());
+	MultiDomProcessorItem* tp = dynamic_cast<MultiDomProcessorItem*>(to()->baseItem());
+
+	if (!fp || !tp ||
+		filter<MultipleOutputItem>(fp->childItems()).count() != 1 ||
+		filter<MultipleInputItem>(tp->childItems()).count() != 1)
+		return;
+
+	foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+		if ((i->from() == from() && i != this) || (i->to() == to() && i != this))
+			return;
+
+	// Single connection between two DomProcessors each with one input/output.
+	m_nature = ConnectionItem::Coupling;
 }
 
 void MultipleConnectionItem::rejigEndPoints()
@@ -43,6 +91,8 @@ void MultipleConnectionItem::rejigEndPoints()
 	QPointF c1((to.x() * 3 + from.x()) / 4.0, from.y());
 	QPointF c2((to.x() + from.x() * 3) / 4.0, to.y());
 	p.cubicTo(c1, c2, to);
+	m_centre = QPointF((from.x() + to.x()) / 2, (from.y() + to.y()) / 2);
+	p.addEllipse(m_centre, 5, 5);
 	setPath(p);
 }
 
@@ -66,8 +116,15 @@ void MultipleConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*
 		_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), 5));
 		_p->drawPath(path());
 	}
-	_p->setPen(QPen(Qt::black, 2));
+	_p->setPen(QPen((m_nature == ConnectionItem::Coupling) ? Qt::blue : Qt::black, 2));
 	_p->drawPath(path());
+	_p->setPen(Qt::NoPen);
+	_p->setBrush(Qt::white);
+	_p->drawEllipse(m_centre, 5, 5);
+	_p->setPen(Qt::black);
+	static QFont f("Helvetica", 7, QFont::Bold);
+	_p->setFont(f);
+	_p->drawText(QRectF(m_centre, QSizeF(0, 0)).adjusted(-5, -5, 5, 5), Qt::AlignCenter, "?");
 }
 
 QList<QPointF> MultipleConnectionItem::magnetism(BaseItem const* _b, bool _moving) const

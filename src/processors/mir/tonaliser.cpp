@@ -82,7 +82,8 @@ bool Tonaliser::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
 		}
 		m_bands[b] = ob;
 	}
-	_outTypes[0] = Spectrum(m_bc.count(), _inTypes[0].asA<Spectrum>().frequency(), _inTypes[0].asA<Spectrum>().max(), _inTypes[0].asA<Spectrum>().min());
+	float step = 1.f;
+	_outTypes[0] = LogFreqSteppedSpectrum(m_bc.count(), _inTypes[0].asA<Spectrum>().frequency(), step, _inTypes[0].asA<Spectrum>().max(), _inTypes[0].asA<Spectrum>().min());
 	return true;
 }
 

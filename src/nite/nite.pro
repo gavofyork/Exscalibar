@@ -22,7 +22,6 @@ HEADERS += GeddeiNite.h \
     ProcessorsView.h \
     ProcessorsScene.h \
     ProcessorItem.h \
-    SubProcessorItem.h \
     DomProcessorItem.h \
     InputItem.h \
     ConnectionItem.h \
@@ -31,10 +30,8 @@ HEADERS += GeddeiNite.h \
     MultipleConnectionItem.h \
     MultiProcessorItem.h \
     BaseItem.h \
-    PauseItem.h \
     MultipleInputItem.h \
     MultipleOutputItem.h \
-    SubsContainer.h \
     MultiDomProcessorItem.h \
 	IncompleteMultipleConnectionItem.h \
     Scheduled.h \
@@ -43,7 +40,8 @@ HEADERS += GeddeiNite.h \
     PropertyItem.h \
     RangePropertyItem.h \
 	SelectionPropertyItem.h \
-    ProcessorBasedItem.h
+    ProcessorBasedItem.h \
+    ControlsItem.h
 SOURCES += GeddeiNite.cpp \
     main.cpp \
     ProcessorView.cpp \
@@ -51,7 +49,6 @@ SOURCES += GeddeiNite.cpp \
     ProcessorsScene.cpp \
     ProcessorItem.cpp \
     DomProcessorItem.cpp \
-    SubProcessorItem.cpp \
     InputItem.cpp \
     ConnectionItem.cpp \
     OutputItem.cpp \
@@ -59,10 +56,8 @@ SOURCES += GeddeiNite.cpp \
     MultipleConnectionItem.cpp \
     MultiProcessorItem.cpp \
     BaseItem.cpp \
-    PauseItem.cpp \
     MultipleInputItem.cpp \
     MultipleOutputItem.cpp \
-    SubsContainer.cpp \
     MultiDomProcessorItem.cpp \
     IncompleteMultipleConnectionItem.cpp \
 	Scheduled.cpp \
@@ -71,7 +66,8 @@ SOURCES += GeddeiNite.cpp \
     PropertyItem.cpp \
     RangePropertyItem.cpp \
 	SelectionPropertyItem.cpp \
-    ProcessorBasedItem.cpp
+    ProcessorBasedItem.cpp \
+    ControlsItem.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") { 
     DEPLOYMENT += $$SOURCES
     SOURCES = .composed.cpp

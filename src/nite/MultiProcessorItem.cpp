@@ -19,172 +19,41 @@
 #include <Geddei>
 using namespace Geddei;
 
+#include "ProcessorsScene.h"
 #include "MultipleInputItem.h"
 #include "MultipleOutputItem.h"
 #include "MultipleConnectionItem.h"
 #include "MultiProcessorItem.h"
+#include "ControlsItem.h"
 #include "ProcessorItem.h"
-
-class ControlsItem: public QGraphicsRectItem
-{
-public:
-	ControlsItem(MultiProcessorItem* _p, float _size = 10);
-
-	MultiProcessorItem* mpi() const { return dynamic_cast<MultiProcessorItem*>(parentItem()); }
-	void init();
-
-protected:
-	uint whichRect(QPointF _pos) const
-	{
-		if (rect().contains(_pos))
-			return _pos.x() * 3 / rect().width();
-		return Undefined;
-	}
-	QRectF rectOf(uint _i) const
-	{
-		if (_i != Undefined)
-			return QRectF(rect().left() + rect().width() / 3 * _i, rect().top(), rect().width() / 3, rect().height());
-		return QRectF();
-	}
-	virtual void paint(QPainter* _p, QStyleOptionGraphicsItem const*, QWidget*)
-	{
-		_p->save();
-		float yo = pos().y();
-		_p->translate(0, -yo);
-		_p->setBrush(Qt::NoBrush);
-		_p->setPen(mpi()->outerPen());
-		_p->setClipRect(rect().adjusted(-1, -1, 0.5, -2).translated(0, yo));
-		_p->drawRoundedRect(rect().adjusted(0, 0, 0, 3).translated(0, yo), 3, 3);
-		_p->setClipping(false);
-		_p->drawLine(rect().translated(0, yo).bottomRight(), rect().translated(0, yo).bottomRight() + QPointF(0, -3));
-		_p->fillRect(rect().adjusted(1, 1, -1, 0).translated(0, yo), mpi()->fillBrush());
-		if (m_clickedRect != Undefined)
-			_p->fillRect(rectOf(m_clickedRect).adjusted(0, 0, 0, 1).translated(0, yo), QColor(255, 255, 255, 127));
-		_p->setPen(mpi()->innerPen());
-		_p->setClipRect(rect().adjusted(-1, -1, 0, -.5).translated(0, yo));
-		_p->drawRoundedRect(rect().adjusted(1, 1, -1, 3).translated(0, yo), 1.5f, 1.5f);
-		_p->setClipping(false);
-		_p->drawLine(rect().translated(-1, yo).bottomRight(), rect().translated(-1, yo - 3).bottomRight());
-		_p->restore();
-
-		QPen pen = mpi()->outerPen();
-		pen.setStyle(Qt::DotLine);
-		_p->setPen(pen);
-		for (uint i = 1; i < 3; i++)
-			_p->drawLine(rectOf(i).topLeft(), rectOf(i).bottomLeft() + QPointF(0, -2));
-		if (mpi()->showingAll())
-		{
-			_p->setBrush(Qt::NoBrush);
-			for (int i = 0; i < 2; i++)
-			{
-				_p->setPen(QPen(i ? Qt::white : QColor(0, 0, 0, 96), 1));
-				_p->drawRect(rectOf(1).adjusted(3, 3, -3, -3).translated(0, 1 - i));
-				_p->drawRect(rectOf(0).adjusted(2, 3, -2, -3).translated(0, 1 - i));
-				_p->drawRect(rectOf(2).adjusted(3, 2, -3, -2).translated(0, 1 - i));
-			}
-		}
-		else
-		{
-			_p->setPen(QPen(QColor(Qt::black), 0));
-			_p->setBrush(QColor(Qt::white));
-			QFont f;
-			f.setPixelSize(m_size - 2.f);
-			_p->setFont(f);
-			QString t = QString::number(mpi()->face());
-			_p->setPen(QPen(QColor(0, 0, 0, 96), 0));
-			_p->drawText(rectOf(1).translated(0, 1), t, QTextOption(Qt::AlignCenter));
-			_p->setPen(QPen(QColor(Qt::white), 0));
-			_p->drawText(rectOf(1), t, QTextOption(Qt::AlignCenter));
-
-			_p->setBrush(Qt::NoBrush);
-			for (int i = 0; i < 2; i++)
-			{
-				_p->setPen(QPen(i ? Qt::white : QColor(0, 0, 0, 96), 1));
-				QRectF r = rectOf(0).adjusted(3, 3, -3, -3).translated(0, 1 - i);
-				_p->drawLine(r.topRight(), QPointF(r.left(), r.center().y()));
-				_p->drawLine(r.bottomRight(), QPointF(r.left(), r.center().y()));
-				r = rectOf(2).adjusted(3, 3, -3, -3).translated(0, 1 - i);
-				_p->drawLine(r.topLeft(), QPointF(r.right(), r.center().y()));
-				_p->drawLine(r.bottomLeft(), QPointF(r.right(), r.center().y()));
-			}
-		}
-		//_p->drawLines(QVector<QPointF>() << rect().bottomLeft() << rect().topLeft() << rect().topLeft() << rect().topRight() << rect().topRight() << rect().bottomRight());
-		if (parentItem()->isSelected())
-			for (int i = 1; i < 4; i++)
-			{
-				_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), i));
-				_p->drawPolyline(QVector<QPointF>() << rect().translated(0, -2).bottomLeft() << rect().topLeft() << rect().topRight() << rect().bottomRight());
-			}
-	}
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent* _e)
-	{
-		m_clickedRect = whichRect(_e->pos());
-		update();
-	}
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* _e)
-	{
-		if (whichRect(_e->pos()) == m_clickedRect)
-		{
-			if (mpi()->showingAll())
-				switch (m_clickedRect)
-				{
-				case 0: mpi()->decRowSize(); break;
-				case 1: mpi()->toggleShowAll(); break;
-				case 2: mpi()->incRowSize(); break;
-				}
-			else
-				switch (m_clickedRect)
-				{
-				case 0: mpi()->prevFace(); break;
-				case 1: mpi()->toggleShowAll(); break;
-				case 2: mpi()->nextFace(); break;
-				}
-		}
-		m_clickedRect = Undefined;
-		update();
-	}
-	uint m_clickedRect;
-	float m_size;
-};
-
-ControlsItem::ControlsItem(MultiProcessorItem* _p, float _size):
-	QGraphicsRectItem	(_p),
-	m_clickedRect		(Undefined),
-	m_size				(_size)
-{
-	setRect(0, 0, _size * 3, _size);
-	setCursor(Qt::ArrowCursor);
-}
-
-void ControlsItem::init()
-{
-	setPen(Qt::NoPen);
-	setBrush(mpi()->outlineColour());
-}
 
 MultiProcessorItem::MultiProcessorItem(QString const& _type, Properties const& _pr, QString const& _name, QSizeF const& _size):
 	BaseItem			(_pr, _size),
 	m_processor			(0),
-	m_type				(_type),
+	m_controls			(new ControlsItem(this)),
 	m_multiProcessor	(0),
+	m_type				(_type),
+	m_multiplicity		(Undefined),
 	m_showAll			(false),
 	m_rowSize			(1),
-	m_face				(0)
+	m_face				(0),
+	m_propertiesDirty	(false)
 {
-	m_controls = new ControlsItem(this);
 	propertiesChanged(_name);
 }
 
 MultiProcessorItem::MultiProcessorItem(Properties const& _pr, QSizeF const& _size):
 	BaseItem			(_pr, _size),
 	m_processor			(0),
-	m_type				(QString::null),
+	m_controls			(0),
 	m_multiProcessor	(0),
+	m_type				(QString::null),
+	m_multiplicity		(Undefined),
 	m_showAll			(false),
 	m_rowSize			(1),
-	m_face				(0)
+	m_face				(0),
+	m_propertiesDirty	(false)
 {
-	m_controls = new ControlsItem(this);
 }
 
 MultiProcessorItem::~MultiProcessorItem()
@@ -199,7 +68,9 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 	if (name.isEmpty())
 		name = this->name();
 	if (name.isEmpty())
-		name = QString::number((long uint)(this));
+		name = QString::number((long unsigned)(this));
+
+	bool upbi = !m_propertiesDirty;
 
 	// TODO: Need isRunning and update on MultiProcessor.
 	if (m_multiProcessor && m_multiProcessor->isRunning())
@@ -207,31 +78,37 @@ void MultiProcessorItem::propertiesChanged(QString const& _newName)
 		m_multiProcessor->update(completeProperties());
 		m_processor->update(completeProperties());
 		assert(_newName.isEmpty() || _newName == this->name());
-		return;
-	}
-
-	delete m_multiProcessor;
-	delete m_processor;
-	MultiProcessorCreator* creator = newCreator();
-	if (creator)
-	{
-		m_processor = creator->newProcessor();
-		postCreate();
-
-		m_processor->init(QString::null, completeProperties());
-
-		m_multiProcessor = new MultiProcessor(creator);
-		m_multiProcessor->init(name, completeProperties());
-
-		if (m_controls)
-			m_controls->init();
-		BaseItem::propertiesChanged(_newName);
+		m_propertiesDirty = true;
 	}
 	else
 	{
-		m_multiProcessor = 0;
-		m_processor = 0;
+		delete m_multiProcessor;
+		delete m_processor;
+		MultiProcessorCreator* creator = new FactoryCreator(m_type);
+		if (creator)
+		{
+			m_processor = creator->newProcessor();
+			PropertiesInfo pi = m_processor->properties();
+			pi = pi("Processors Multiplicity", 0, "The number of processors that make this object. (>0 to set, 0 for automatic)");
+			setDefaultProperties(pi);
+
+			m_processor->init(name, completeProperties());
+
+			m_multiProcessor = new MultiProcessor(creator);
+			m_multiProcessor->init(name, completeProperties());
+
+			if (m_controls)
+				m_controls->init();
+		}
+		else
+		{
+			m_multiProcessor = 0;
+			m_processor = 0;
+		}
+		m_propertiesDirty = false;
 	}
+	if (upbi)
+		BaseItem::propertiesChanged(_newName);
 }
 
 void MultiProcessorItem::updateMultiplicities()
@@ -247,7 +124,7 @@ void MultiProcessorItem::updateMultiplicities()
 	}
 }
 
-static float const marginWidth = 3.f;
+static float const marginWidth = 1.f;
 
 QSizeF MultiProcessorItem::centreMin() const
 {
@@ -289,13 +166,22 @@ void MultiProcessorItem::paintOutline(QPainter* _p)
 	}
 }
 
+void MultiProcessorItem::timerEvent(QTimerEvent*)
+{
+	if (m_showAll)
+		// TODO: should update each indiviually.
+		update(clientRect().adjusted(2, 2, -2, -2));
+	else
+		update(clientRect().adjusted(2, 2, -2, -2));
+}
+
 void MultiProcessorItem::paintCentre(QPainter* _p)
 {
 	if (m_showAll && multiProcessor() && multiProcessor()->knowMultiplicity())
 	{
 		int rows = (multiProcessor()->multiplicity() + max(1u, m_rowSize) - 1) / max(1u, m_rowSize);
-		int tw = interiorRect().width();
-		int th = interiorRect().height();
+		int tw = clientRect().width();
+		int th = clientRect().height();
 		int mw = marginWidth;
 		for (uint i = 0; i < multiProcessor()->multiplicity(); i++)
 		{
@@ -304,25 +190,26 @@ void MultiProcessorItem::paintCentre(QPainter* _p)
 			int y = i / max(1u, m_rowSize) * (th + mw) / rows;
 			int w = (i % max(1u, m_rowSize) + 1) * (tw + mw) / max(1u, m_rowSize) - x - mw;
 			int h = (i / max(1u, m_rowSize) + 1) * (th + mw) / rows - y - mw;
+			x += 2.f;
+			y += 2.f;
+			w -= 4.f;
+			h -= 4.f;
 			_p->translate(x, y);
+			deepRect(_p, QRectF(0, 0, w, h), true, prototypal()->outlineColour(), true, 2.f, false);
 			_p->setClipRect(QRectF(0, 0, w, h));
-			_p->fillRect(QRectF(0, 0, w, h), QColor(255, 255, 255));
+			//_p->fillRect(QRectF(0, 0, w, h), QColor(255, 255, 255));
 			multiProcessor()->processor(i)->draw(*_p, QSizeF(w, h));
 			_p->restore();
 		}
 	}
 	else
 	{
-		BaseItem::paintCentre(_p);
-		processor()->draw(*_p, clientRect().size());
+		_p->save();
+		deepRect(_p, clientRect(), true, prototypal()->outlineColour(), false, 2.f, false);
+		_p->translate(2, 2);
+		processor()->draw(*_p, clientRect().size() - QSizeF(4, 4));
+		_p->restore();
 	}
-}
-
-void MultiProcessorItem::postCreate()
-{
-	PropertiesInfo pi = m_processor->properties();
-	pi = pi("Processors Multiplicity", 0, "The number of processors that make this object. (>0 to set, 0 for automatic)");
-	setDefaultProperties(pi);
 }
 
 void MultiProcessorItem::geometryChanged()
@@ -330,7 +217,7 @@ void MultiProcessorItem::geometryChanged()
 	if (!multiProcessor())
 		return;
 
-	QVector<MultipleInputItem*> miis(multiProcessor()->numMultiInputs(), 0);
+	QVector<MultipleInputItem*> miis(numMultiInputs(), 0);
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		if ((int)mii->index() < miis.count())
 			miis[mii->index()] = mii;
@@ -340,9 +227,9 @@ void MultiProcessorItem::geometryChanged()
 		if (!miis[i])
 			miis[i] = new MultipleInputItem(i, this, multiPortSize);
 	foreach (MultipleInputItem* mii, miis)
-		mii->setPos(1.f - portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + mii->size().height()) * mii->index());
+		mii->setPos(1.f - portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + mii->size().height()) * mii->index());
 
-	QVector<MultipleOutputItem*> mois(multiProcessor()->numMultiOutputs(), 0);
+	QVector<MultipleOutputItem*> mois(numMultiOutputs(), 0);
 	foreach (MultipleOutputItem* moi, filter<MultipleOutputItem>(childItems()))
 		if ((int)moi->index() < mois.count())
 			mois[moi->index()] = moi;
@@ -352,7 +239,7 @@ void MultiProcessorItem::geometryChanged()
 		if (!mois[i])
 			mois[i] = new MultipleOutputItem(i, this, multiPortSize);
 	foreach (MultipleOutputItem* moi, mois)
-		moi->setPos(interiorRect().width() + portLateralMargin, portLateralMargin * 3 / 2 + (portLateralMargin + moi->size().height()) * moi->index());
+		moi->setPos(interiorRect().width() + portLateralMargin, portLongalMargin * 3 / 2 + (portLongalMargin + moi->size().height()) * moi->index());
 
 	updateMultiplicities();
 
@@ -375,6 +262,7 @@ void MultiProcessorItem::positionChanged()
 
 void MultiProcessorItem::prepYourself(ProcessorGroup& _g)
 {
+	m_multiplicity = Undefined;
 	multiProcessor()->setGroup(_g);
 	multiProcessor()->disconnectAll();
 	multiProcessor()->resetMulti();
@@ -411,20 +299,28 @@ bool MultiProcessorItem::connectYourself()
 	return BaseItem::connectYourself();
 }
 
-void MultiProcessorItem::disconnectYourself()
-{
-	BaseItem::disconnectYourself();
-	geometryChanged();
-	m_multiProcessor->disconnectAll();
-	m_multiProcessor->setNoGroup();
-}
-
 void MultiProcessorItem::typesConfirmed()
 {
 	BaseItem::typesConfirmed();
+	m_multiplicity = multiProcessor()->multiplicity();
 	updateMultiplicities();
 	foreach (MultipleInputItem* mii, filter<MultipleInputItem>(childItems()))
 		mii->typesConfirmed();
+	update();
+}
+
+void MultiProcessorItem::disconnectYourself()
+{
+	geometryChanged();
+	m_multiProcessor->disconnectAll();
+	m_multiProcessor->setNoGroup();
+	BaseItem::disconnectYourself();
+}
+
+void MultiProcessorItem::unprepYourself()
+{
+	if (m_propertiesDirty)
+		propertiesChanged();
 }
 
 void MultiProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
@@ -439,7 +335,7 @@ void MultiProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 QDomElement MultiProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const
 {
 	QDomElement proc = _doc.createElement(_n);
-	proc.setAttribute("type", m_processor->type());
+	proc.setAttribute("type", typeName());
 	proc.setAttribute("showAll", m_showAll);
 	proc.setAttribute("rowSize", m_rowSize);
 	proc.setAttribute("face", m_face);

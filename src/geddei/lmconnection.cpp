@@ -30,7 +30,7 @@ namespace Geddei
 {
 
 LMConnection::LMConnection(Source *source, uint sourceIndex, uint bufferSize)
-	: LxConnectionReal(source, sourceIndex), theBuffer(bufferSize)
+	: LxConnectionReal(source, sourceIndex), theBuffer(bufferSize), m_minRead(0), m_minWrite(0)
 {
 }
 
@@ -38,6 +38,16 @@ LMConnection::~LMConnection()
 {
 	while (theConnections.size())
 		delete theConnections.takeLast();
+}
+
+void LMConnection::enforceMinimumRead(uint _elements)
+{
+	enforceMinimum((m_minRead = _elements) + m_minWrite);
+}
+
+void LMConnection::enforceMinimumWrite(uint _elements)
+{
+	enforceMinimum((m_minWrite = _elements) + m_minRead);
 }
 
 void LMConnection::enforceMinimum(uint elements)
@@ -65,6 +75,7 @@ Connection::Tristate LMConnection::isReadyYet()
 void LMConnection::reset()
 {
 	theBuffer.clear();
+	m_minRead = m_minWrite = 0;
 }
 
 Type const& LMConnection::type() const

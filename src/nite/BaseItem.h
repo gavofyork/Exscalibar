@@ -27,8 +27,6 @@
 #include "OutputItem.h"
 #include "WithProperties.h"
 
-class PauseItem;
-
 class BaseItem: public QObject, public WithProperties, public Magnetic
 {
 	Q_OBJECT
@@ -44,12 +42,13 @@ public:
 	void				setPos(QPointF _p) { QGraphicsItem::setPos(floor(_p.x()) + .5f, floor(_p.y()) + .5f); }
 
 	virtual QTask*		primaryTask() const { return 0; }
+	virtual Processor*	prototypal() const = 0;
 
 	virtual void		setProperty(QString const& _key, QVariant const& _value);
 	void				setDefaultProperties(PropertiesInfo const& _def);	// Doesn't call propertiesChanged.
 
 	virtual QString		typeName() const { return QString::null; }
-	virtual QString		name() const { return QString::null; }
+	virtual QString		name() const { return prototypal() ? prototypal()->name() : QString::null; }
 	void				setName(QString const& _name) { propertiesChanged(_name); }
 
 	virtual QDomElement	saveYourself(QDomElement&, QDomDocument&) const = 0;
@@ -60,7 +59,7 @@ public:
 	virtual void		unprepYourself();
 	virtual void		typesConfirmed();
 
-	virtual void		tick();
+	virtual void		tick() {}
 
 	virtual bool		isRunning() const { return false; }
 	virtual float		cyclePoint() const { return 0; }
@@ -100,15 +99,16 @@ protected:
 
 	QSizeF				controlsSize(float _minWidth) const;
 	virtual QSizeF		interiorWith(QSizeF _client) const;
-	virtual QSizeF		clientMin() const { return QSizeF(0.f, 0.f); }
-	virtual QSizeF		clientPref() const { return QSizeF(32.f, 32.f); }
+
+	virtual QSizeF		clientMin() const { return QSizeF(prototypal()->minWidth(), prototypal()->minHeight()); }
+	virtual QSizeF		clientPref() const { return QSizeF(prototypal()->width(), prototypal()->height()); }
+	virtual QColor		outlineColour() const { return prototypal()->outlineColour(); }
+	virtual uint		redrawPeriod() const { return prototypal() ? prototypal()->redrawPeriod() : 0; }
+	virtual bool		isResizable() const { return prototypal() && prototypal()->isResizable(); }
 
 	virtual void		paintOutline(QPainter* _p);
 	virtual QColor		highlightColour() const { return QColor::fromHsv(220, 220, 200); }
-	virtual QColor		outlineColour() const { return QColor::fromHsv(0, 220, 200); }
 	virtual void		paintCentre(QPainter* _p);
-	virtual uint		redrawPeriod() const { return 0; }
-	virtual bool		isResizable() const { return false; }
 
 	void				importDom(QDomElement& _item, QGraphicsScene* _scene);
 	void				exportDom(QDomElement& _item, QDomDocument& _doc) const;

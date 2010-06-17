@@ -54,7 +54,7 @@ public:
 	const RowVector &	means() const { return m_means; }
 
 	void				pca(const NEWMAT::Matrix &_values);
-	ReturnMatrix		project(const NEWMAT::Matrix &_values, const uint _count, bool const _normalise = true, bool const _clamp = true) const;
+	ReturnMatrix		project(const NEWMAT::Matrix &_values, uint _count, bool const _normalise = true, bool const _clamp = true) const;
 	ReturnMatrix		extrapolate(const NEWMAT::Matrix &_projected) const;
 
 	void				readVec(QString const& _fn);

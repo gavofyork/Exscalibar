@@ -156,6 +156,62 @@ protected:
 	TT_1_MEMBER(theStep);
 };
 
+class DLLEXPORT LogFreqSteppedSpectrum: public Spectrum
+{
+	TRANSMISSION_TYPE(LogFreqSteppedSpectrum, Spectrum);
+
+public:
+	/**
+	 * Create a new TransmissionType to represent a spectrum.
+	 *
+	 * @param size The number of bands in each spectrum.
+	 * @param frequency The number of times the source will emit a spectrum
+	 * per second of signal time (in Hz).
+	 * @param step The increase in audio frequency (in Hz) per band. It is
+	 * currently assumed that the signal is a monotonically stepped spectrum.
+	 */
+	LogFreqSteppedSpectrum(uint bins = 1, float frequency = 1, float step = 1, float _max = 1.f, float _min = 0.f) : Spectrum(bins, frequency, _max, _min), theStep(step) {}
+
+	/**
+	 * Determines the frequency represented by a specific band.
+	 *
+	 * @param band The band index.
+	 * @return The midpoint frequency of band @a band.
+	 */
+	virtual float bandFrequency(float _band) const { return _band * theStep; }
+
+	/**
+	 * Determines the frequency represented by a specific band.
+	 *
+	 * @param band The band index.
+	 * @return The midpoint frequency of band @a band.
+	 */
+	virtual uint frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
+
+	/**
+	 * Gets the Nyquist frequency (the highest frequency that can be
+	 * represented by this spectrum.
+	 *
+	 * @return The Nyquist frequency.
+	 */
+	virtual float nyquist() const { return float(bins()) * theStep; }
+
+	/**
+	 * Gets the difference in audio frequency between each band in the
+	 * spectra.
+	 *
+	 * @return The frequency stepping between bands.
+	 */
+	float step() const { return theStep; }
+
+	virtual QString info() const { return QString("<div><b>LogFreqSteppedSpectrum</b></div><div>Step: %1 Hz</div>").arg(theStep) + Spectrum::info(); }
+
+protected:
+	float theStep; ///< Step between spectral bands of represented Spectrum in Hz.
+
+	TT_1_MEMBER(theStep);
+};
+
 class DLLEXPORT PeriodSteppedSpectrum: public Spectrum
 {
 	TRANSMISSION_TYPE(PeriodSteppedSpectrum, Spectrum);
@@ -212,5 +268,59 @@ protected:
 	TT_1_MEMBER(theStep);
 };
 
+class DLLEXPORT ArbitrarySpectrum: public Spectrum
+{
+	TRANSMISSION_TYPE(ArbitrarySpectrum, Spectrum);
+
+public:
+	/**
+	 * Create a new TransmissionType to represent an arbitrary spectrum.
+	 *
+	 * @param _binFrequencies The centre frequencies for each bin.
+	 * @param _frequency The number of times the source will emit a spectrum
+	 * per second of signal time (in Hz).
+	 */
+	inline ArbitrarySpectrum(QVector<float> const& _binFrequencies = QVector<float>() << 1.f, float _frequency = 1, float _max = 1.f, float _min = 0.f): Spectrum(_binFrequencies.count(), _frequency, _max, _min), m_frequencies(_binFrequencies) {}
+
+	/**
+	 * Determines the frequency represented by a specific band.
+	 *
+	 * @param band The band index.
+	 * @return The midpoint frequency of band @a band.
+	 */
+	virtual float bandFrequency(float _b) const { return interpolateIndex<float>(m_frequencies, _b); }
+
+	/**
+	 * Determines the frequency represented by a specific band.
+	 *
+	 * @param band The band index.
+	 * @return The midpoint frequency of band @a band.
+	 */
+	virtual uint frequencyBand(float _f) const { return interpolateValue<float>(m_frequencies, _f); }
+
+	/**
+	 * Gets the number of bands in the spectra of the signal to which this
+	 * type refers.
+	 *
+	 * @return The number of band bins.
+	 */
+	virtual uint bins() const { return arity(); }
+	virtual void setBins(uint _n) { setArity(_n); }
+
+	/**
+	 * Gets the Nyquist frequency (the highest frequency that can be
+	 * represented by this spectrum.
+	 *
+	 * @return The Nyquist frequency.
+	 */
+	virtual float nyquist() const { return 0.f; }
+
+	virtual QString info() const { return QString("<div><b>Arbitrary Spectrum</b></div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(size() - 2)).arg(bandFrequency(size() - 1)) + Spectrum::info(); }
+
+private:
+	QVector<float> m_frequencies;
+
+	TT_1_MEMBER(m_frequencies);
+};
 
 }

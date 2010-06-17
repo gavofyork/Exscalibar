@@ -34,14 +34,6 @@ ProcessorBasedItem::ProcessorBasedItem(Properties const& _pr, QSizeF const& _siz
 {
 }
 
-void ProcessorBasedItem::tick()
-{
-	BaseItem::tick();
-	foreach (QGraphicsItem* i, childItems())
-		if (InputItem* ii = item_cast<InputItem>(i))
-			ii->update();
-}
-
 void ProcessorBasedItem::updateMultiDisplay()
 {
 	updateMultiplicities();
@@ -114,7 +106,7 @@ void ProcessorBasedItem::updateMultiplicities()
 
 float ProcessorBasedItem::interiorPorts() const
 {
-	return max(prototypal()->numInputs(), prototypal()->numOutputs()) * (portLateralMargin + portSize.height()) - portLateralMargin - 1.f;
+	return max(prototypal()->numInputs(), prototypal()->numOutputs()) * (portLateralMargin + portSize.height() + 2.f) - portLateralMargin - 1.f - 2.f;
 }
 
 void ProcessorBasedItem::geometryChanged()
@@ -127,7 +119,7 @@ void ProcessorBasedItem::geometryChanged()
 			(mii = new MultipleInputItem(this, multiPortSize))->hide();
 		else
 			mii = filter<MultipleInputItem>(childItems())[0];
-		mii->setPos(1.f - portLateralMargin, portLongalMargin * 3 / 2);/* + (portLateralMargin + i->size().height()) * i->index());*/
+		mii->setPos(1.f - portLateralMargin, portLongalMargin * 3 / 2 + (portLateralMargin + mii->size().height()) * mii->index());
 	}
 	foreach (InputItem* ii, filter<InputItem>(childItems()))
 		if ((int)ii->index() < iis.count())

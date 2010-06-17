@@ -68,7 +68,7 @@ public:
 								("Channels", 2, "The number of channels to capture.", false, "#", AV("Channels", "#", 1, 6));
 	}
 //	virtual QColor specifyOutlineColour() const { return QColor(255 * m_error, 127 * (1.f - m_error), 0); }
-	virtual QString simpleText() const { return QChar(0x2386); }
+	virtual QString simpleText() const { return "J"; }
 
 private:
 	bool jackOpen()
@@ -90,6 +90,8 @@ private:
 
 	inline int processJack(jack_nframes_t nframes)
 	{
+		if (m_lastSize)
+			qDebug() << "*** JACKCAPTURER: DISCARDING: " << nframes;
 		for (int i = 0; i < m_ports.count(); i++)
 			memcpy(m_ports[i].lastChunk.data(), (jack_default_audio_sample_t *)jack_port_get_buffer(m_ports[i].port, nframes), nframes * sizeof(jack_default_audio_sample_t));
 		m_lastSize = nframes;
@@ -167,7 +169,7 @@ int JackCapturer::canProcess()
 			tryToConnect(jack_port_by_name(m_client, *p));
 		m_retryConnect = false;
 	}
-	return (m_lastSize > 0) ? CanWork : -(int)round((m_bufferSize / m_frequency * 1000.f) / 2.f);
+	return (m_lastSize > 0) ? CanWork : -1;//-(int)round((m_bufferSize / m_frequency * 1000.f) / 2.f);
 }
 
 int JackCapturer::process()
@@ -175,7 +177,7 @@ int JackCapturer::process()
 	if (!m_client)
 		return WillNeverWork;
 	if (!m_lastSize)
-		return -(int)round((m_bufferSize / m_frequency * 1000.f) / 2.f);
+		return -1;//(int)round((m_bufferSize / m_frequency * 1000.f) / 2.f);
 	for (int i = 0; i < m_ports.count(); i++)
 	{
 		BufferData b = output(i).makeScratchSamples(m_lastSize);

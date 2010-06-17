@@ -26,5 +26,7 @@ namespace Geddei
 TRANSMISSION_TYPE_CPP(Spectrum);
 TRANSMISSION_TYPE_CPP(FreqSteppedSpectrum);
 TRANSMISSION_TYPE_CPP(PeriodSteppedSpectrum);
+TRANSMISSION_TYPE_CPP(ArbitrarySpectrum);
+TRANSMISSION_TYPE_CPP(LogFreqSteppedSpectrum);
 
 }

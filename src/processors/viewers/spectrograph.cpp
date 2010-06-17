@@ -120,7 +120,7 @@ bool Spectrograph::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 	m_bins = in->bins();
 	m_display = QPixmap(m_viewWidthSamples, in->bins());
 	m_display.fill(Qt::white);
-	setupVisual(m_display.width(), m_display.height(), 30);
+//	setupVisual(m_display.width(), m_display.height(), 30);
 	m_min = in->min();
 	m_delta = in->max() - in->min();
 	return true;
@@ -131,6 +131,7 @@ void Spectrograph::initFromProperties(Properties const& _p)
 	setupIO(1, 0);
 	m_viewWidth = _p["View Width"].toDouble();
 	updateFromProperties(_p);
+	setupVisual(100, 50, 30, 50, 25, true);
 }
 
 void Spectrograph::updateFromProperties(Properties const& _p)

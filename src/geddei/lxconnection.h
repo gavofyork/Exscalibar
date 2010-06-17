@@ -59,167 +59,12 @@ class LxConnection: virtual public Connection, public ScratchOwner
 	friend class DomProcessor;
 	friend class Splitter;
 
-	float *theScratch;
-	uint theScratchSize;
-	BufferID lastScratch;
-
-	/**
-	 * Reimplementation from ScratchOwner.
-	 *
-	 * Almost same as push(); used for polymorphism needed for auto cleanup.
-	 *
-	 * @param data The relevant data for the auxilliary operation.
-	 */
-	virtual void pushScratch(const BufferData &data);
-
-	/**
-	 * Reimplementation from ScratchOwner.
-	 *
-	 * Will forget all about last scratch; used for polymorphism needed for
-	 * auto cleanup.
-	 *
-	 * @param data The relevant data for the auxilliary operation.
-	 */
-	virtual void forgetScratch(const BufferData &data);
-
-	/**
-	 * @name Methods for use by Processor.
-	 */
-	//@{
-
-	/**
-	 * Inserts a plunger into the connection's data stream. You should not
-	 * generally use this method directly unless you know what you are doing.
-	 * Instead use Processor::plunge(), which will insert a plunger into all
-	 * output connections.
-	 *
-	 * Notifies any receiving Sink objects that anther plunger will be ready to
-	 * be received in the future.
-	 *
-	 * @note To avoid any confusion regarding order, do not call this when
-	 * there are any active (unpushed) scratch BufferData objects around.
-	 *
-	 * @sa Processor::plunge()
-	 */
-	virtual void pushPlunger() = 0;
-
-	/**
-	 * Blocks until the Sink is ready to receive data (i.e. all types are
-	 * initialised ok).
-	 *
-	 * @return false if something went wrong.
-	 */
-	virtual bool waitUntilReady() = 0;
-	virtual Tristate isReadyYet() = 0;
-
-	/**
-	 * Conducts the setting of the type if an object wants to do it without
-	 * being asked first.
-	 *
-	 * Syncs it with sink connection if the two are different objects.
-	 *
-	 * @param type The TransmissionType object this connection's type should be set
-	 * to.
-	 */
-	virtual void setType(Type const& _type) = 0;
-
-	/**
-	 * Resets the type so that a further setType call will be needed.
-	 * Syncs it with sink connection if the two are different objects.
-	 */
-	virtual void resetType() = 0;
-
-	/**
-	 * Call to allow trapdoor-like returning from blocking methods.
-	 * Used for controlled exiting (the thereIsInputForProcessing() after such methods will enforce exiting from main loop by throwing an exception).
-	 */
-	virtual void sourceStopping() = 0;
-
-	/**
-	 * Called to signify trapdoor-like returning is no-longer needed for this thread.
-	 */
-	virtual void sourceStopped() = 0;
-
-	/**
-	 * Resets anything that needs to be done between processor being stopped and started.
-	 */
-	virtual void reset() = 0;
-
-	/**
-	 * This will let the opposite end of the connection know that from now on
-	 * we may receive a new set of plunger notifications.
-	 */
-	virtual void startPlungers() = 0;
-
-	/**
-	 * This will let the opposite end of the connection know that the source is
-	 * done, so they know that no more data will follow.
-	 */
-	virtual void noMorePlungers() = 0;
-
-	/**
-	 * This will let the opposite end of the connection know that the source
-	 * is about to push a plunger.
-	 */
-	virtual void plungerSent() = 0;
-
-	//@}
-
-protected:
-	Source *theSource;
-	uint theSourceIndex;
-
-	/**
-	 * Simple constructor.
-	 */
-	LxConnection(Source *source, uint sourceIndex);
-
-	virtual void pushBE(const BufferData &data) = 0;
-
-	/**
-	 * Get the maximum amount of scratch elements we can make that won't cause
-	 * a deadlock if we try to create a scratch of that size. If no elements
-	 * are free, will block until elements are free, rather than return zero.
-	 *
-	 * @param minimum The minimum number of elements it should return. This
-	 * must be less than or equal to maximumScratchElementsEver().
-	 * @return Undefined (= (uint)-1) in the case of unlimited.
-	 */
-	virtual uint maximumScratchElements(uint minimum = 1) = 0;
-
-	/**
-	 * Returns the maximum amount of scratch elements we could ever make that
-	 * won't (definately) cause a deadlock.
-	 *
-	 * Typically this value should be divided by two to be sure that the
-	 * scratch size asked for will definately be possible.
-	 *
-	 * @return Undefined (= (uint)-1) in the case of unlimited.
-	 */
-	virtual uint maximumScratchElementsEver() = 0;
-
-	/** @deprecated
-	 * TODO: Kill this method
-	 * Create a new scratch pad with which data may be sent efficiently.
-	 *
-	 * Use push() to send the data, or set autoPush to true for it to happen
-	 * automatically.
-	 *
-	 * This method may block if no resource is available.
-	 *
-	 * For internal note:
-	 * This implementation makes an (inefficient) unassociated scratch object.
-	 * Reimplement to provide a mroe efficient solution.
-	 *
-	 * @param elements The size of the data chunk required in elements.
-	 * @param autoPush If true, then on destruction of the returned BufferData
-	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semanticscope.
-	 * @return The BufferData object into which data can be written.
-	 */
-	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
-
 public:
+	/**
+	 * Simple destructor.
+	 */
+	~LxConnection();
+
 	/**
 	 * Retrieves the type of signal this connection transfers.
 	 *
@@ -365,10 +210,166 @@ public:
 	 */
 	BufferData operator+(uint samples) { return makeScratchSamples(samples); }
 
+protected:
 	/**
-	 * Simple destructor.
+	 * Simple constructor.
 	 */
-	~LxConnection();
+	LxConnection(Source *source, uint sourceIndex);
+
+	virtual void pushBE(const BufferData &data) = 0;
+
+	/**
+	 * Get the maximum amount of scratch elements we can make that won't cause
+	 * a deadlock if we try to create a scratch of that size. If no elements
+	 * are free, will block until elements are free, rather than return zero.
+	 *
+	 * @param minimum The minimum number of elements it should return. This
+	 * must be less than or equal to maximumScratchElementsEver().
+	 * @return Undefined (= (uint)-1) in the case of unlimited.
+	 */
+	virtual uint maximumScratchElements(uint minimum = 1) = 0;
+
+	/**
+	 * Returns the maximum amount of scratch elements we could ever make that
+	 * won't (definately) cause a deadlock.
+	 *
+	 * Typically this value should be divided by two to be sure that the
+	 * scratch size asked for will definately be possible.
+	 *
+	 * @return Undefined (= (uint)-1) in the case of unlimited.
+	 */
+	virtual uint maximumScratchElementsEver() = 0;
+
+	/** @deprecated
+	 * TODO: Kill this method
+	 * Create a new scratch pad with which data may be sent efficiently.
+	 *
+	 * Use push() to send the data, or set autoPush to true for it to happen
+	 * automatically.
+	 *
+	 * This method may block if no resource is available.
+	 *
+	 * For internal note:
+	 * This implementation makes an (inefficient) unassociated scratch object.
+	 * Reimplement to provide a mroe efficient solution.
+	 *
+	 * @param elements The size of the data chunk required in elements.
+	 * @param autoPush If true, then on destruction of the returned BufferData
+	 * object, it will get pushed automatically. This would happen, for
+	 * instance, when it goes out of semanticscope.
+	 * @return The BufferData object into which data can be written.
+	 */
+	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
+
+	Source *theSource;
+	uint theSourceIndex;
+
+private:
+	/**
+	 * Reimplementation from ScratchOwner.
+	 *
+	 * Almost same as push(); used for polymorphism needed for auto cleanup.
+	 *
+	 * @param data The relevant data for the auxilliary operation.
+	 */
+	virtual void pushScratch(const BufferData &data);
+
+	/**
+	 * Reimplementation from ScratchOwner.
+	 *
+	 * Will forget all about last scratch; used for polymorphism needed for
+	 * auto cleanup.
+	 *
+	 * @param data The relevant data for the auxilliary operation.
+	 */
+	virtual void forgetScratch(const BufferData &data);
+
+	/**
+	 * @name Methods for use by Processor.
+	 */
+	//@{
+
+	/**
+	 * Inserts a plunger into the connection's data stream. You should not
+	 * generally use this method directly unless you know what you are doing.
+	 * Instead use Processor::plunge(), which will insert a plunger into all
+	 * output connections.
+	 *
+	 * Notifies any receiving Sink objects that anther plunger will be ready to
+	 * be received in the future.
+	 *
+	 * @note To avoid any confusion regarding order, do not call this when
+	 * there are any active (unpushed) scratch BufferData objects around.
+	 *
+	 * @sa Processor::plunge()
+	 */
+	virtual void pushPlunger() = 0;
+
+	/**
+	 * Blocks until the Sink is ready to receive data (i.e. all types are
+	 * initialised ok).
+	 *
+	 * @return false if something went wrong.
+	 */
+	virtual bool waitUntilReady() = 0;
+	virtual Tristate isReadyYet() = 0;
+
+	/**
+	 * Conducts the setting of the type if an object wants to do it without
+	 * being asked first.
+	 *
+	 * Syncs it with sink connection if the two are different objects.
+	 *
+	 * @param type The TransmissionType object this connection's type should be set
+	 * to.
+	 */
+	virtual void setType(Type const& _type) = 0;
+
+	/**
+	 * Resets the type so that a further setType call will be needed.
+	 * Syncs it with sink connection if the two are different objects.
+	 */
+	virtual void resetType() = 0;
+
+	/**
+	 * Call to allow trapdoor-like returning from blocking methods.
+	 * Used for controlled exiting (the thereIsInputForProcessing() after such methods will enforce exiting from main loop by throwing an exception).
+	 */
+	virtual void sourceStopping() = 0;
+
+	/**
+	 * Called to signify trapdoor-like returning is no-longer needed for this thread.
+	 */
+	virtual void sourceStopped() = 0;
+
+	/**
+	 * Resets anything that needs to be done between processor being stopped and started.
+	 */
+	virtual void reset() = 0;
+
+	/**
+	 * This will let the opposite end of the connection know that from now on
+	 * we may receive a new set of plunger notifications.
+	 */
+	virtual void startPlungers() = 0;
+
+	/**
+	 * This will let the opposite end of the connection know that the source is
+	 * done, so they know that no more data will follow.
+	 */
+	virtual void noMorePlungers() = 0;
+
+	/**
+	 * This will let the opposite end of the connection know that the source
+	 * is about to push a plunger.
+	 */
+	virtual void plungerSent() = 0;
+
+	//@}
+
+	float *theScratch;
+	uint theScratchSize;
+	BufferID lastScratch;
 };
 
 }

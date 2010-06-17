@@ -65,6 +65,8 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 	virtual uint maximumScratchElements(uint minimum = 1);
 	virtual uint maximumScratchElementsEver();
 	virtual void enforceMinimum(uint elements);
+	virtual void enforceMinimumRead(uint elements);
+	virtual void enforceMinimumWrite(uint elements);
 
 	//* Reimplementations from LxConnectionReal
 	virtual void bufferWaitForFree();
@@ -111,6 +113,8 @@ class DLLEXPORT LMConnection: public LxConnectionReal
 protected:
 	QList<MLConnection*> theConnections;
 	Buffer theBuffer;
+	uint m_minRead;
+	uint m_minWrite;
 };
 
 }

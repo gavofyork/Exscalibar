@@ -16,70 +16,126 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SubProcessorItem.h"
+#include "ConnectionItem.h"
+#include "MultipleConnectionItem.h"
 #include "MultiDomProcessorItem.h"
 
-MultiDomProcessorItem::MultiDomProcessorItem(Properties const& _pr, QSizeF const& _size):
+MultiDomProcessorItem::MultiDomProcessorItem(QString const& _type, Properties const& _pr, QString const& _name, QSizeF const& _size):
 	MultiProcessorItem(_pr, _size)
 {
-	delete m_controls;
-	m_controls = 0;
-	propertiesChanged();
+	m_type = _type;
+	propertiesChanged(_name);
 }
 
-void MultiDomProcessorItem::postCreate()
+Properties MultiDomProcessorItem::subsProperties()
 {
-	PropertiesInfo pi = m_processor->properties();
-	baseItem()->setDefaultProperties(pi.destash());
-	foreach (SubProcessorItem* i, ordered())
-		i->setDefaultProperties(pi.destash());
+	Properties ret;
+	QList<MultiDomProcessorItem*> dpis = all();
+	for (int i = (uint)dpis.count() - 1; i >= 0; i--)
+		ret = ret.stashed() + dpis[i]->properties();
+	return ret;
+}
+
+QString MultiDomProcessorItem::composedSubs()
+{
+	QString ret;
+	foreach (MultiDomProcessorItem const* i, all())
+		ret += "&" + i->m_type;
+	return ret.mid(1);
+}
+
+void MultiDomProcessorItem::propertiesChanged(QString const& _newName)
+{
+	if (executive())
+		executive()->update(subsProperties().stashed() + baseProperties());
+
+	if (DomProcessor* n = new DomProcessor(m_type))
+	{
+		n->init(_newName.isEmpty() ? prototypal() ? prototypal()->name() : QString::number((long unsigned)this) : _newName, properties().stashed() + baseProperties());
+		if (!prototypal())
+		{
+			PropertiesInfo p(n->properties());
+			p.destash();
+			// TODO: Handle basePropertiesInfo();
+			setDefaultProperties(p);
+		}
+		delete m_processor;
+		m_processor = n;
+	}
+	BaseItem::propertiesChanged(_newName);
 }
 
 void MultiDomProcessorItem::paintCentre(QPainter* _p)
 {
-	paintFrames(_p);
+	QRectF ca = QRectF(QPointF(0, 0), clientRect().size());
+	_p->save();
+	_p->translate(round((clientRect().size().width() - subPrototypal()->width()) / 2), 0);
+	_p->setClipRect(ca);
+	subPrototypal()->draw(*_p);
+	_p->setClipping(false);
+	_p->restore();
 }
 
-DomProcessor* MultiDomProcessorItem::domProcessor() const
+void MultiDomProcessorItem::prepYourself(ProcessorGroup& _g)
 {
-	return dynamic_cast<DomProcessor*>(processor());
+	if (!allAfter().isEmpty())
+		return;
+
+	m_multiProcessor = new MultiProcessor(new SubFactoryCreator(composedSubs()));
+	m_multiProcessor->init(name(), properties().stashed() + baseProperties());
+	foreach (MultiDomProcessorItem* i, allBefore())
+		i->m_multiProcessor = m_multiProcessor;
+
+	assert(m_multiProcessor);
+
+	MultiProcessorItem::prepYourself(_g);
 }
 
-QSizeF MultiDomProcessorItem::centreMin() const
+void MultiDomProcessorItem::disconnectYourself()
 {
-	QSizeF s = SubsContainer::centreMin();
-	return QSizeF(max(MultiProcessorItem::centreMin().width(), s.width()), max(MultiProcessorItem::centreMin().height(), s.height()));
+	if (m_multiProcessor)
+		MultiProcessorItem::disconnectYourself();
 }
 
-QList<SubProcessorItem*> MultiDomProcessorItem::subProcessorItems() const
+void MultiDomProcessorItem::unprepYourself()
 {
-	return filter<SubProcessorItem>(childItems());
+	MultiProcessorItem::unprepYourself();
+	if (allAfter().isEmpty())
+		delete m_multiProcessor;
+	m_multiProcessor = 0;
 }
 
-void MultiDomProcessorItem::geometryChanged()
+QList<MultiDomProcessorItem*> MultiDomProcessorItem::allBefore()
 {
-	SubsContainer::geometryChanged();
-	MultiProcessorItem::geometryChanged();
+	if (filter<InputItem>(childItems()).count() == 1)
+	{
+		InputItem* ii = filter<InputItem>(childItems())[0];
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+			if (i->to() == ii && i->nature() == ConnectionItem::Coupling)
+				return QList<MultiDomProcessorItem*>(dynamic_cast<MultiDomProcessorItem*>(i->from()->baseItem())->allBefore()) << dynamic_cast<MultiDomProcessorItem*>(i->from()->baseItem());
+	}
+	return QList<MultiDomProcessorItem*>();
 }
 
-MultiProcessorCreator* MultiDomProcessorItem::newCreator()
+QList<MultiDomProcessorItem*> MultiDomProcessorItem::allAfter()
 {
-	QString cs = composedSubs();
-	if (cs.isEmpty())
-		return 0;
-	return new SubFactoryCreator(cs);
+	if (filter<OutputItem>(childItems()).count() == 1)
+	{
+		OutputItem* ii = filter<OutputItem>(childItems())[0];
+		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(scene()->items()))
+			if (i->from() == ii && i->nature() == ConnectionItem::Coupling)
+				return QList<MultiDomProcessorItem*>() << dynamic_cast<MultiDomProcessorItem*>(i->to()->baseItem()) << dynamic_cast<MultiDomProcessorItem*>(i->to()->baseItem())->allAfter();
+	}
+	return QList<MultiDomProcessorItem*>();
 }
 
 void MultiDomProcessorItem::fromDom(QDomElement& _element, QGraphicsScene* _scene)
 {
-	MultiDomProcessorItem* dpi = new MultiDomProcessorItem;
-	dpi->SubsContainer::importDom(_element, _scene);
-	dpi->MultiProcessorItem::importDom(_element, _scene);
+	MultiDomProcessorItem* dpi = new MultiDomProcessorItem(_element.attribute("type"));
+	dpi->importDom(_element, _scene);
 }
 
 QDomElement MultiDomProcessorItem::saveYourself(QDomElement& _root, QDomDocument& _doc) const
 {
-	QDomElement us = MultiProcessorItem::saveYourself(_root, _doc, "multidomprocessor");
-	SubsContainer::exportDom(us, _doc);
-	return us;
+	return MultiProcessorItem::saveYourself(_root, _doc, "multidomprocessor");
 }

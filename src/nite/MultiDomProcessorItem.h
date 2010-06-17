@@ -24,35 +24,44 @@
 #include <Geddei>
 using namespace Geddei;
 
-#include "SubsContainer.h"
 #include "MultiProcessorItem.h"
 
-class SubProcessorItem;
-
-class MultiDomProcessorItem: public MultiProcessorItem, public SubsContainer
+class MultiDomProcessorItem: public MultiProcessorItem
 {
 public:
-	MultiDomProcessorItem(Properties const& _pr = Properties("Latency/Throughput", 0.0), QSizeF const& _size = QSizeF());
+	MultiDomProcessorItem(QString const& _type, Properties const& _pr = Properties("Latency/Throughput", 0.0), QString const& _name = QString::null, QSizeF const& _size = QSizeF());
 
-	virtual DomProcessor*	domProcessor() const;
-
-	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
-	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+	Properties			baseProperties() const { return Properties("Latency/Throughput", 0.0); }
+	PropertiesInfo		basePropertiesInfo() const { return PropertiesInfo("Processors Multiplicity", 0, "The number of processors that make this object. (>0 to set, 0 for automatic)"); }
 
 	enum { ItemType = UserType + 15 };
 	virtual int			type() const { return ItemType; }
 
+	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;
+	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
+
+	virtual QString		typeName() const { return m_type; }
+
+	QList<MultiDomProcessorItem*> allBefore();
+	QList<MultiDomProcessorItem*> allAfter();
+	inline QList<MultiDomProcessorItem*> all() { return QList<MultiDomProcessorItem*>(allBefore()) << this << allAfter(); }
+
+	DomProcessor*		domPrototypal() const { return dynamic_cast<DomProcessor*>(m_processor); }
+	SubProcessor*		subPrototypal() const { return domPrototypal()->primary(); }
+
+	Properties			subsProperties();
+	QString				composedSubs();
+
 protected:
-	virtual void		geometryChanged();
-	virtual QSizeF		centreMin() const;
-	virtual Properties	completeProperties() const { return SubsContainer::completeProperties(); }
-	virtual void		propertiesChanged() { MultiProcessorItem::propertiesChanged(); }
+	virtual void		propertiesChanged(QString const& _name);
+
+	virtual void		prepYourself(ProcessorGroup&);
+	virtual void		disconnectYourself();
+	virtual void		unprepYourself();
+
+	virtual QColor		outlineColour() const { return BaseItem::outlineColour(); }
+	virtual uint		redrawPeriod() const { return 0; }
+	virtual bool		isResizable() const { return false; }
 
 	virtual void		paintCentre(QPainter* _p);
-
-	virtual QList<SubProcessorItem*> subProcessorItems() const;
-	virtual BaseItem*	baseItem() { return this; }
-
-	virtual MultiProcessorCreator* newCreator();
-	virtual void		postCreate();
 };

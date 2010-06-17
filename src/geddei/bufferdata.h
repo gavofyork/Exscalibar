@@ -215,6 +215,7 @@ class DLLEXPORT BufferData
 	friend class RLConnection;
 	friend class LxConnection;
 	friend class LLConnection;
+	friend class LLsConnection;
 	friend class LRConnection;
 	friend class DRCoupling;
 	friend class RSCoupling;

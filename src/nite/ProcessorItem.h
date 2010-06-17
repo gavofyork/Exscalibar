@@ -26,11 +26,10 @@
 #include "InputItem.h"
 #include "OutputItem.h"
 
-class PauseItem;
-
 extern const QSizeF portSize;
 extern const QSizeF multiPortSize;
 extern const double portLateralMargin;
+extern const double portLongalMargin;
 
 class ProcessorItem: public ProcessorBasedItem
 {

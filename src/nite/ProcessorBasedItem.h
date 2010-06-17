@@ -26,8 +26,6 @@
 #include "InputItem.h"
 #include "OutputItem.h"
 
-class PauseItem;
-
 extern const QSizeF portSize;
 extern const QSizeF multiPortSize;
 extern const double portLateralMargin;
@@ -44,36 +42,30 @@ public:
 	enum { ItemType = UserType + 25 };
 	virtual int			type() const { return ItemType; }
 
-	virtual Processor*	prototypal() const = 0;
-	virtual QString		name() const { return prototypal()->name(); }
 	virtual QString		typeName() const { return prototypal()->type(); }
 	void				setTryMulti(bool _m) { m_tryToShowMulti = _m; updateMultiDisplay(); }
-	void				updateMultiDisplay();
 
 	virtual Processor*	executive() const = 0;
 	virtual void		typesConfirmed();
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
-	virtual void		tick();
 	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(executive()); }
 
 protected:
 	virtual QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
 
 	virtual float		interiorPorts() const;
-	virtual QSizeF		clientMin() const { return QSizeF(prototypal()->minWidth(), prototypal()->minHeight()); }
-	virtual QSizeF		clientPref() const { return QSizeF(prototypal()->width(), prototypal()->height()); }
-	virtual QColor		outlineColour() const { return prototypal()->outlineColour(); }
 	virtual void		paintCentre(QPainter* _p) { BaseItem::paintCentre(_p); (executive() ? executive() : prototypal())->draw(*_p, clientRect().size()); }
-	virtual uint		redrawPeriod() const { return prototypal() ? prototypal()->redrawPeriod() : 0; }
-	virtual bool		isResizable() const { return prototypal() && prototypal()->isResizable(); }
 
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
+
 	void				updateMultiplicities();
 
 private:
+	void				updateMultiDisplay();
+
 	bool				m_tryToShowMulti;
 	uint				m_multiplicity;
 };

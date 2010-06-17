@@ -70,7 +70,7 @@ class DLLEXPORT Splitter: public LxConnection, public Source
 	virtual void noMorePlungers();
 	virtual uint maximumScratchElements(uint minimum = 1);
 	virtual uint maximumScratchElementsEver();
-	virtual void enforceMinimum(uint elements);
+	virtual void enforceMinimumWrite(uint _elements);
 	virtual uint bufferElementsFree();
 	virtual double secondsPassed() const { return theSource->secondsPassed(); }
 	virtual double secondsPassed(float _s, uint _i = 0) const { return theSource->secondsPassed(_s, _i); }

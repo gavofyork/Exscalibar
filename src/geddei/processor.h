@@ -570,6 +570,7 @@ protected:
 	inline static uint allInputs(QVector<uint> const& _inputs) { uint ret = UINT_MAX; foreach (uint i, _inputs) if (i == Undefined) return 0; else ret = min(ret, i); return ret; }
 	inline static uint anyInput(QVector<uint> const& _inputs) { uint ret = 0; foreach (uint i, _inputs) if (i != Undefined) ret = max(ret, i); return ret; }
 	virtual uint cyclesAvailable(QVector<uint> const& _inputs) const { return allInputs(_inputs); }
+	virtual bool specifyInputMode(uint) { return false; }
 
 	/**
 	 * Reimplement to force the outputs' buffer size to be at least samples big, explicitly

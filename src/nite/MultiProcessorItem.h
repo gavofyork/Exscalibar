@@ -38,7 +38,11 @@ public:
 	virtual int			type() const { return ItemType; }
 
 	virtual QString		typeName() const { return m_processor->type(); }
-	virtual QString		name() const { return multiProcessor() ? multiProcessor()->name() : QString::null; }
+
+	virtual QTask*		primaryTask() const { return (executive() && executive()->knowMultiplicity() && executive()->multiplicity()) ? dynamic_cast<CoProcessor*>(executive()->processor(0)) : 0; }
+
+	MultiProcessor*		executive() const { return m_multiProcessor; }
+	virtual Processor*	prototypal() const { return m_processor; }
 
 	MultiProcessor*		multiProcessor() const { return m_multiProcessor; }
 	Processor*			processor() const;
@@ -53,14 +57,15 @@ public:
 
 	virtual void		prepYourself(ProcessorGroup&);
 	virtual bool		connectYourself();
-	virtual void		disconnectYourself();
 	virtual void		typesConfirmed();
+	virtual void		disconnectYourself();
+	virtual void		unprepYourself();
 
 	static void			fromDom(QDomElement& _element, QGraphicsScene* _scene);
 	virtual QDomElement saveYourself(QDomElement& _root, QDomDocument& _doc) const { return saveYourself(_root, _doc, "multiprocessor"); }
 	QDomElement			saveYourself(QDomElement& _root, QDomDocument& _doc, QString const& _n) const;
 
-	virtual QColor		outlineColour() const { return processor() ? processor()->outlineColour() : Qt::black; }
+	virtual QColor		outlineColour() const { return QColor(0x40, 0x40, 0x40); }
 
 	virtual QRectF		adjustBounds(QRectF const& _wouldBe) const;
 
@@ -71,29 +76,30 @@ protected:
 	virtual void		geometryChanged();
 	virtual void		positionChanged();
 
-	uint				multiplicity() const { if (multiProcessor() && multiProcessor()->knowMultiplicity()) return multiProcessor()->multiplicity(); return Undefined; }
+	uint				multiplicity() const { return m_multiplicity; }
+	uint				numMultiInputs() const { return prototypal()->numInputs(); }
+	uint				numMultiOutputs() const { return prototypal()->numOutputs(); }
 
 	virtual QSizeF		centreMin() const;
 	virtual QSizeF		centrePref() const;
 	virtual void		paintCentre(QPainter* _p);
 	virtual void		paintOutline(QPainter* _p);
-	virtual uint		redrawPeriod() const { return processor()->redrawPeriod(); }
+	virtual uint		redrawPeriod() const { return prototypal() ? prototypal()->redrawPeriod() : 0; }
+	virtual bool		isResizable() const { return prototypal() && prototypal()->isResizable(); }
 
 	void				updateMultiplicities();
 
-	virtual MultiProcessorCreator* newCreator() { return new FactoryCreator(m_type); }
-	virtual void		postCreate();
+	virtual void		timerEvent(QTimerEvent*);
 
 	Processor*			m_processor;
 	ControlsItem*		m_controls;
-
-	virtual QTask*		primaryTask() const { return (multiplicity() != Undefined && multiplicity()) ? dynamic_cast<CoProcessor*>(m_multiProcessor->processor(0)) : 0; }
+	MultiProcessor*		m_multiProcessor;
+	QString				m_type;
 
 private:
-	QString				m_type;
-	MultiProcessor*		m_multiProcessor;
-
+	uint				m_multiplicity;
 	bool				m_showAll;
 	uint				m_rowSize;
 	uint				m_face;
+	bool				m_propertiesDirty;
 };

@@ -73,7 +73,7 @@ static inline float magnitudeGreater(const float *x, const float *y, uint bandWi
 class Distance: public SubProcessor
 {
 	uint m_arity;
-	float(*m_distance)(const float *, const float *, const uint);
+	float(*m_distance)(const float *, const float *, uint);
 
 	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const
 	{
@@ -118,7 +118,7 @@ class SelfSimilarity : public SubProcessor
 	uint theSize;
 	uint theBandWidth;
 	mutable QVector<float> theMatrix;
-	float(*theDistance)(const float *, const float *, const uint);
+	float(*theDistance)(const float *, const float *, uint);
 
 	virtual void processOwnChunks(const BufferDatas &in, BufferDatas &out, uint chunks);
 	virtual void initFromProperties(const Properties &properties);

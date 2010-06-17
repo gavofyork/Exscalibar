@@ -54,6 +54,7 @@ class ProcessorsScene: public QGraphicsScene
 
 public:
 	ProcessorsScene(QObject* _p);
+	virtual ~ProcessorsScene();
 
 	void						beginConnect(OutputItem* _from);
 	void						beginMultipleConnect(MultipleOutputItem* _from);

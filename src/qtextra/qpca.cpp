@@ -100,7 +100,7 @@ void QFeatures::pca(const Matrix &_values)
 	}
 }
 
-ReturnMatrix QFeatures::project(const Matrix &_values, const uint _count, bool const _normalise, bool const _clamp) const
+ReturnMatrix QFeatures::project(const Matrix &_values, uint _count, bool const _normalise, bool const _clamp) const
 {
 	Matrix features;
 	features.ReSize(_values.Ncols(), _count);

@@ -31,7 +31,7 @@ namespace Geddei
 {
 
 xLConnectionReal::xLConnectionReal(Sink *newSink, uint newSinkIndex, uint bufferSize)
-	: xLConnection(newSink, newSinkIndex), theBuffer(bufferSize)
+	: xLConnection(newSink, newSinkIndex), theBuffer(bufferSize), m_minRead(0), m_minWrite(0)
 {
 	theReader = new BufferReader(&theBuffer);
 	m_samplesRead = 0;
@@ -53,6 +53,25 @@ void xLConnectionReal::resurectReader()
 {
 	if (!theReader)
 		theReader = new BufferReader(&theBuffer);
+}
+
+void xLConnectionReal::enforceMinimumRead(uint _elements)
+{
+	enforceMinimum((m_minRead = _elements) + m_minWrite);
+}
+
+void xLConnectionReal::enforceMinimumWrite(uint _elements)
+{
+	enforceMinimum((m_minWrite = _elements) + m_minRead);
+}
+
+void xLConnectionReal::enforceMinimum(uint elements)
+{
+	if (theBuffer.size() < elements)
+	{
+		qDebug() << "Enforcing minimum of" << elements << "on" << (void*)this << "(" << m_minRead << "+" << m_minWrite << ")";
+		theBuffer.resize(elements);
+	}
 }
 
 uint xLConnectionReal::elementsReady() const
@@ -149,13 +168,7 @@ bool xLConnectionReal::plungeSync(uint samples) const
 	return true;
 }
 
-void xLConnectionReal::enforceMinimum(uint elements)
-{
-	if (theBuffer.size() < elements)
-		theBuffer.resize(elements);
-}
-
-const BufferData xLConnectionReal::readElements(uint elements)
+const BufferData xLConnectionReal::readElements(uint _elements)
 {
 #ifdef EDEBUG
 	if (!theReader)
@@ -166,11 +179,11 @@ const BufferData xLConnectionReal::readElements(uint elements)
 #endif
 
 	while (1)
-	{	BufferData ret = theReader->readElements(elements, true);
+	{	BufferData ret = theReader->readElements(_elements, true);
 		theSink->checkExit();
 		if (!ret.plunger())
 		{
-			m_samplesRead += elements / theType->size();
+			m_samplesRead += _elements / theType->size();
 			m_latestPeeked = min(m_latestPeeked, m_samplesRead);
 			return ret;
 		}

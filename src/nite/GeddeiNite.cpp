@@ -29,7 +29,6 @@ using namespace std;
 #include "MultipleOutputItem.h"
 #include "ProcessorItem.h"
 #include "DomProcessorItem.h"
-#include "SubProcessorItem.h"
 #include "MultiProcessorItem.h"
 #include "MultiDomProcessorItem.h"
 #include "ProcessorView.h"
@@ -153,8 +152,13 @@ void GeddeiNite::setModified(bool _modified)
 	theModified = _modified;
 	if (_modified && !theRunning)
 	{
-		modeRun->setEnabled(connectAll());
-		disconnectAll();
+		if (connectAll())
+		{
+			modeRun->setEnabled(true);
+			disconnectAll();
+		}
+		else
+			modeRun->setEnabled(false);
 	}
 	setWindowTitle((theFilename.isEmpty() ? "Untitled" : theFilename) + (_modified ? " [ Modified ]" : "") + " - Geddei Nite");
 }
@@ -195,21 +199,6 @@ void GeddeiNite::slotUpdateProperties()
 		theName->setEnabled(!theRunning);
 		theType->setText(bi->typeName());
 		Properties const& p(bi->properties());
-		theProperties->setRowCount(p.size());
-		for (uint i = 0; i < p.size(); i++)
-		{
-			theProperties->setVerticalHeaderItem(i, new QTableWidgetItem(p.keys()[i]));
-			theProperties->setItem(i, 0, new QTableWidgetItem(p[p.keys()[i]].toString()));
-		}
-		theProperties->resizeColumnsToContents();
-		theProperties->setEnabled(true);
-	}
-	else if (SubProcessorItem* spi = dynamic_cast<SubProcessorItem*>(i))
-	{
-		theName->setText("");
-		theName->setEnabled(false);
-		theType->setText(spi->subProcessor()->type());
-		Properties const& p(spi->properties());
 		theProperties->setRowCount(p.size());
 		for (uint i = 0; i < p.size(); i++)
 		{
@@ -292,18 +281,9 @@ void GeddeiNite::on_editRemove_activated()
 			if (i->fromProcessor() == bi || i->toProcessor() == bi)
 				delete i;
 		foreach (MultipleConnectionItem* i, filter<MultipleConnectionItem>(theScene.items()))
-			if (i->from()->processorItem() == theScene.selectedItems()[0] || i->from()->multiProcessorItem() == theScene.selectedItems()[0] ||
-				i->to()->processorItem() == theScene.selectedItems()[0] || i->to()->multiProcessorItem() == theScene.selectedItems()[0])
+			if (i->from()->baseItem() == bi || i->to()->baseItem() == bi)
 				delete i;
 		delete bi;
-		setModified(true);
-		theScene.update();
-	}
-	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]))
-	{
-		SubsContainer* sc = dynamic_cast<SubsContainer*>(theScene.selectedItems()[0]->parentItem());
-		delete theScene.selectedItems()[0];
-		sc->reorder();
 		setModified(true);
 		theScene.update();
 	}
@@ -329,11 +309,6 @@ void GeddeiNite::slotPropertyChanged(QTableWidgetItem* _i)
 	{
 		BaseItem* bi = dynamic_cast<BaseItem*>(theScene.selectedItems()[0]);
 		bi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
-	}
-	else if (dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]) && theProperties->verticalHeaderItem(_i->row()))
-	{
-		SubProcessorItem* spi = dynamic_cast<SubProcessorItem*>(theScene.selectedItems()[0]);
-		spi->setProperty(theProperties->verticalHeaderItem(_i->row())->text(), _i->text());
 	}
 	if (!theRunning)
 		setModified(true);
