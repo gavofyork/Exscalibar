@@ -47,7 +47,7 @@ LxConnection::~LxConnection()
 BufferData LxConnection::makeScratchSamples(uint samples, bool autoPush)
 {
 	BufferData d = makeScratchElements(theType->elementsFromSamples(samples), autoPush);
-	type()->polishData(d, theSource, theSourceIndex);
+	type()->initData(d, theSource, theSourceIndex);
 	return d;
 }
 
@@ -63,7 +63,7 @@ BufferData LxConnection::makeScratchElements(uint elements, bool autoPush)
 		theScratch = new float[elements];
 		theScratchSize = elements;
 	}
-	const BufferData &ret = BufferData(elements, theType->size(), theScratch, dynamic_cast<ScratchOwner *>(this), autoPush ? BufferInfo::Activate : BufferInfo::Forget);
+	BufferData ret = BufferData(elements, theType->size(), theScratch, dynamic_cast<ScratchOwner *>(this), autoPush ? BufferInfo::Activate : BufferInfo::Forget);
 	lastScratch = ret.identity();
 	return ret;
 }

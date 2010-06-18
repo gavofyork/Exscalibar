@@ -55,6 +55,8 @@ public:
 	virtual void polishData(BufferData&, Source*, uint) const;
 	static void setTimestamp(BufferData& _data, double _ts);
 	static double timestamp(BufferData const& _data);
+	static bool isEndOfTime(BufferData const& _data);
+	static void setEndOfTime(BufferData& _data);
 
 	float min(uint _i) const { return (_i < arity()) ? m_mins[_i] : 0.f; }
 	float max(uint _i) const { return (_i < arity()) ? m_maxs[_i] : 1.f; }
@@ -64,6 +66,24 @@ public:
 	QVector<float> m_maxs;
 
 	TT_2_MEMBERS(m_mins, m_maxs);
+};
+
+class DLLEXPORT SpectralPeak: public Mark
+{
+	TRANSMISSION_TYPE(SpectralPeak, Mark);
+
+public:
+	enum { Frequency = 0, Value, Spread, HalfSpread };
+
+	SpectralPeak(float _maxF = 24000.f, float _minF = 0.f, float _maxV = 1.f, float _minV = 0.f): Mark(4, QVector<float>() << _maxF << _maxV, QVector<float>() << _minF << _minV) {}
+	virtual ~SpectralPeak() {}
+
+	float minFrequency() const { return m_mins[Frequency]; }
+	float maxFrequency() const { return m_maxs[Frequency]; }
+
+	virtual QString info() const { return QString("<div><b>SpectralPeak</b></div>") + Mark::info(); }
+
+	TT_NO_MEMBERS;
 };
 
 }

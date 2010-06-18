@@ -24,6 +24,7 @@ namespace Geddei
 {
 
 TRANSMISSION_TYPE_CPP(Mark);
+TRANSMISSION_TYPE_CPP(SpectralPeak);
 
 Mark::Mark(uint _arity, QVector<float> const& _maxs, QVector<float> const& _mins):
 	TransmissionType(_arity + 2), m_mins(_arity), m_maxs(_arity)
@@ -56,16 +57,28 @@ void Mark::initData(BufferData& _d, Source*, uint) const
 
 void Mark::polishData(BufferData& _d, Source* _s, uint) const
 {
-	if (isinf(timestamp(_d)))
+	if (isInf(timestamp(_d)) == 1)
 		setTimestamp(_d, _s->secondsPassed());
 }
 
 void Mark::setTimestamp(BufferData& _d, double _ts)
 {
+	if (_d.isNull())
+		return;
 	union { double d; float f[2]; } ts;
 	ts.d = _ts;
 	for (uint s = _d.sampleSize() - 2; s < _d.elements(); s += _d.sampleSize())
 		(_d[s] = ts.f[0]), (_d[s + 1] = ts.f[1]);
+}
+
+bool Mark::isEndOfTime(BufferData const& _d)
+{
+	return isInf(timestamp(_d)) == -1;
+}
+
+void Mark::setEndOfTime(BufferData& _d)
+{
+	setTimestamp(_d, -numeric_limits<double>::infinity());
 }
 
 double Mark::timestamp(BufferData const& _data)

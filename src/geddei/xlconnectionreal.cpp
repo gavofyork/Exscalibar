@@ -184,7 +184,7 @@ const BufferData xLConnectionReal::readElements(uint _elements)
 		if (!ret.plunger())
 		{
 			m_samplesRead += _elements / theType->size();
-			m_latestPeeked = min(m_latestPeeked, m_samplesRead);
+			m_latestPeeked = max(m_latestPeeked, m_samplesRead);
 			return ret;
 		}
 		m_samplesRead = 0;

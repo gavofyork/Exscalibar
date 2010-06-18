@@ -107,7 +107,7 @@ bool Bandwise::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 		float mb = barkBand(in.nyquist());
 		for (int i = 0; i < m_bins.size(); i++)
 		{
-			int band = in.frequencyBand(barkFrequency(float(i + 1) * mb / float(m_bins.size())));
+			int band = (int)round(in.frequencyBand(barkFrequency(float(i + 1) * mb / float(m_bins.size()))));
 			m_bins[i] = band - lastBand;
 			lastBand = band;
 		}

@@ -1,21 +1,71 @@
+/* Copyright 2003, 2004, 2005, 2007, 2009, 2010 Gavin Wood <gav@kde.org>
+ *
+ * This file is part of Exscalibar.
+ *
+ * Exscalibar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Exscalibar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <Plugin>
+using namespace Geddei;
+
 class _NAME_ : public CoProcessor
 {
 public:
 	_NAME_();
 
 private:
+	virtual QString simpleText() const { return QChar(0x21FB); }
+	virtual QColor outlineColour() const { return QColor::fromHsv(0, 255, 255); }
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties();
+	virtual void updateFromProperties();
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
+	virtual void specifyInputSpace(QVector<uint>& _s) { _s.fill(1); }
+	virtual void requireInputSpace(QVector<uint>& _s) { _s.fill(1); }
+	virtual void specifyOutputSpace(QVector<uint>& _s) { _s.fill(1); }
 	virtual bool processorStarted();
 	virtual int process();
 	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes);
-	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties(Properties const& _p);
-	virtual void updateFromProperties(Properties const& _p);
-	virtual QString simpleText() const { return QChar(0x21FB); }
+
+	bool m_example;
+	DECLARE_1_PROPERTY(_NAME, m_example);
 };
 
 _NAME_::_NAME_(): CoProcessor("_NAME_")
 {
+}
+
+PropertiesInfo _NAME_::specifyProperties() const
+{
+	return PropertiesInfo
+		("Example", false, "Example description.", false, "Ë");
+}
+
+void _NAME_::initFromProperties()
+{
+	setupIO(1, 1);
+	setupVisual(10, 10, 1, 10, 10, true);
+}
+
+void _NAME_::updateFromProperties()
+{
+}
+
+bool _NAME_::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes)
+{
+	_outTypes[0] = _inTypes[0];
+	return _outTypes[0].isA<Spectrum>();
 }
 
 bool _NAME_::processorStarted()
@@ -34,28 +84,6 @@ int _NAME_::process()
 
 void _NAME_::processorStopped()
 {
-}
-
-bool _NAME_::verifyAndSpecifyTypes(SignalTypeRefs const& _inTypes, SignalTypeRefs& _outTypes)
-{
-	_outTypes[0] = _inTypes[0];
-	return _outTypes[0].isA<Spectrum>();
-}
-
-void _NAME_::initFromProperties(Properties const& _p)
-{
-	updateFromProperties(_p);
-	setupIO(1, 1);
-}
-
-void _NAME_::updateFromProperties(Properties const&)
-{
-}
-
-PropertiesInfo _NAME_::specifyProperties() const
-{
-	return PropertiesInfo
-			("Example", false, "Example description.", false, "Ë");
 }
 
 EXPORT_CLASS(_NAME_, 0,1,0, Processor);

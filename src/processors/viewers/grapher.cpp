@@ -131,12 +131,18 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 		{
 			m_labeled = (m_labeledOR == -1) ? m_config.size() : m_labeledOR;
 			m_arity[i] = max(1u, in->arity());
-			m_config.append(ChannelInfo(i, MultiValue::Config(QColor(0, 0, 0, 0x40), Qt::transparent, in->bandFrequency(0), in->bandFrequency(in->bins() - 1), 0), in->frequency()));
+			m_config.append(ChannelInfo(i, MultiValue::Config(QColor(0, 0, 0, 0x40), Qt::transparent, in->minFrequency(), in->maxFrequency(), 0), in->frequency()));
 		}
 		else if (Typed<Contiguous> in = _inTypes[i])
 		{
 			m_config.append(ChannelInfo(i, MultiValue::Config(in->max(), in->min(), 0), in->frequency()));
 			m_arity[i] = in->arity();
+		}
+		else if (Typed<SpectralPeak> in = _inTypes[i])
+		{
+			m_labeled = (m_labeledOR == -1) ? m_config.size() : m_labeledOR;
+			m_arity[i] = in.arity();
+			m_config.append(ChannelInfo(i, MultiValue::Config(QColor(0, 0, 0, 0x40), Qt::transparent, in->minFrequency(), in->maxFrequency(), 0), 0));
 		}
 		else if (Typed<Mark> in = _inTypes[i])
 		{
@@ -157,7 +163,7 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 			m_spectra[i].second = QImage(_inTypes[i].arity(), 32, QImage::Format_Indexed8);
 			for (int c = 0; c < 256; c++)
 				m_spectra[i].second.setColor(c, QColor::fromHsv((255 - c) * 240 / 255, 255, 255).rgba());
-			m_spectra[i].second.setColor(0, Qt::transparent);
+//			m_spectra[i].second.setColor(0, Qt::transparent);
 			m_spectra[i].second.setColor(255, qRgba(128, 0, 0, 255));
 			m_spectra[i].first = 0;
 		}
@@ -197,7 +203,7 @@ int Grapher::process()
 		if (Typed<Spectrum> in = input(i).type())
 		{
 			float mn = in->min();
-			float sc = m_gain * 255.f / (in->max() - in->min());
+			float sc = 255.f / (in->max() - in->min());
 			if ((int)d.samples() + m_spectra[i].first > m_spectra[i].second.height())
 				m_spectra[i].second = m_spectra[i].second.copy(0, 0, d.sampleSize(), d.samples() + m_spectra[i].first);
 			for (uint s = 0; s < d.samples(); s++)
@@ -349,7 +355,8 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				ci.latePoint = mp[ci.input].size() ? mp[ci.input].keys().last() : 0.0;
 			else
 				ci.latePoint = double(ci.throughput += max<int>(0, max<int>(sp[ci.input].first, cp[ci.input].size() - 1))) / (double)ci.frequency;
-			newLatePoint = max(newLatePoint, ci.latePoint);
+			if (ci.latePoint < newLatePoint + 1.0e5)
+				newLatePoint = max(newLatePoint, ci.latePoint);
 		}
 
 		double pixelOff = ceil((newLatePoint - m_latePoint) / m_viewWidth * ds.width());
@@ -429,19 +436,29 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
 				{
+					qDebug() << i.key() << m_latePoint << ci.latePoint;
 					float x = (i.key() - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
-					if (i.value().size())
-						p.fillRect(QRectF(x - 2.f, ds.height(), 4.f, Y(i.value()[0], mn, dl) - ds.height()), QBrush(cf.fore));
+					if (Typed<SpectralPeak> in = const_cast<Grapher*>(this)->input(ci.input).type())
+					{
+						float s = (i.value()[SpectralPeak::Value] - 15.f) / 4.f;
+						if (s > 0)
+							p.fillRect(QRectF(x - s, Y(i.value()[SpectralPeak::Frequency], mn, dl) - s, s * 2, s * 2), QBrush(cf.fore));
+					}
 					else
-						p.fillRect(QRectF(x - 2.f, 0, 4.f, ds.height()), QBrush(cf.fore));
+					{
+						if (i.value().size())
+							p.fillRect(QRectF(x - 2.f, ds.height(), 4.f, Y(i.value()[0], mn, dl) - ds.height()), QBrush(cf.fore));
+						else
+							p.fillRect(QRectF(x - 2.f, 0, 4.f, ds.height()), QBrush(cf.fore));
+					}
 				}
 			}
 			else if (Typed<Spectrum> in = const_cast<Grapher*>(this)->input(ci.input).type())
 			{
 				p.setRenderHint(QPainter::Antialiasing, false);
 				p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-				int x = (float(0 - (sp[ci.input].first - 1)) / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f;
-				int w = (1.f / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f - x;
+				int x = round((float(-sp[ci.input].first) / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f);
+				int w = ceil(sp[ci.input].first / ci.frequency * ds.width() / m_viewWidth);
 				int y = Y(in->bandFrequency(0), mn, dl);
 				int h = Y(in->bandFrequency(in->bins()), mn, dl) - y;
 				QRect r(x, y, w, h);
@@ -467,7 +484,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 							break;
 						if (f > cf.max)
 							continue;
-						int b = in->frequencyBand(f);
+						int b = (int)round(in->frequencyBand(f));
 //						qDebug() << x << y << i << b;
 						float l = (d[i][b] - in->min()) / (in->max() - in->min()) * m_gain;
 //						qDebug() << l;

@@ -85,7 +85,7 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 		int mm = 0;
 		float men = 0.f;
 
-		for (int i = max<int>(2, m_signal.frequencyBand(m_lowerBand)) * m_mag; i < sc; i++)
+		for (int i = max<int>(2, round(m_signal.frequencyBand(m_lowerBand))) * m_mag; i < sc; i++)
 		{
 			// freq: ( [0, sc) + 1 ) / harmonics
 			// from: ( 0 .. (sc - (freq * harmonics)) ] + 1
@@ -142,7 +142,7 @@ void SpectralHarmonics::processChunk(const BufferDatas &ins, BufferDatas &outs) 
 //		float med = phens[i / kkkfkfkf / 2];
 //		har[i] = mphen;//max(0.f, mphen / med);// / (total / m_signal.bins());//lphen;*/
 //	}
-/*	for (int i = max<int>(2, m_signal.frequencyBand(m_lowerBand)); i < (m_signal.bins() - 1) / 2; i++)
+/*	for (int i = max<int>(2, round(m_signal.frequencyBand(m_lowerBand))); i < (m_signal.bins() - 1) / 2; i++)
 	{
 		float en = pass[i];
 		float mb = i;

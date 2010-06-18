@@ -69,7 +69,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float) const { return 0; }
+	virtual float frequencyBand(float) const { return 0; }
 
 	/**
 	 * Gets the number of bands in the spectra of the signal to which this
@@ -87,6 +87,9 @@ public:
 	 * @return The Nyquist frequency.
 	 */
 	virtual float nyquist() const { return 0.f; }
+
+	virtual float minFrequency() const { return ::min<float>(bandFrequency(0), bandFrequency(bins() - 1)); }
+	virtual float maxFrequency() const { return ::max<float>(bandFrequency(0), bandFrequency(bins() - 1)); }
 
 	virtual QString info() const { return QString("<div><b>Spectrum</b></div><div>Bin range: %1,%2-%3,%4 Hz</div>").arg(bandFrequency(0)).arg(bandFrequency(1)).arg(bandFrequency(size() - 2)).arg(bandFrequency(size() - 1)) + Contiguous::info(); }
 };
@@ -130,7 +133,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
+	virtual float frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -186,7 +189,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
+	virtual float frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -242,7 +245,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _freq) const { return clamp((uint)(bins() - 1), 0u, (uint)(theStep / ::max(0.0001f, _freq))); }
+	virtual float frequencyBand(float _freq) const { return clamp((uint)(bins() - 1), 0u, (uint)(theStep / ::max(0.0001f, _freq))); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be
@@ -291,12 +294,12 @@ public:
 	virtual float bandFrequency(float _b) const { return interpolateIndex<float>(m_frequencies, _b); }
 
 	/**
-	 * Determines the frequency represented by a specific band.
+	 * Determines the band that represents a specific frequency.
 	 *
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual uint frequencyBand(float _f) const { return interpolateValue<float>(m_frequencies, _f); }
+	virtual float frequencyBand(float _f) const { return interpolateValue<float>(m_frequencies, _f); }
 
 	/**
 	 * Gets the number of bands in the spectra of the signal to which this
