@@ -180,10 +180,11 @@ int JackCapturer::process()
 		return -1;//(int)round((m_bufferSize / m_frequency * 1000.f) / 2.f);
 	for (int i = 0; i < m_ports.count(); i++)
 	{
-		BufferData b = output(i).makeScratchSamples(m_lastSize);
+		int ls = min<int>(m_lastSize, m_bufferSize);
+		BufferData b = output(i).makeScratchSamples(ls);
 		if (b.isNull())
 			continue;
-		for (int s = 0; s < m_lastSize; s++)
+		for (int s = 0; s < ls; s++)
 			b[s] = m_ports[i].lastChunk[s];
 		output(i) << b;
 	}

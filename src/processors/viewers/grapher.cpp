@@ -82,6 +82,7 @@ private:
 	typedef QMultiMap<double, QVector<float> > MarkData;
 	mutable QVector<MarkData> m_mPoints;
 	mutable QVector<QList<QVector<float> > > m_cPoints;
+	mutable QVector<QPair<int, QImage> > m_spectra;
 	mutable QFastMutex l_points;
 	mutable bool m_rejig;
 };
@@ -149,6 +150,17 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 
 	m_mPoints.resize(_inTypes.size());
 	m_cPoints.resize(_inTypes.size());
+	m_spectra.resize(_inTypes.size());
+	for (uint i = 0; i < _inTypes.size(); i++)
+		if (_inTypes[i].isA<Spectrum>())
+		{
+			m_spectra[i].second = QImage(_inTypes[i].arity(), 32, QImage::Format_Indexed8);
+			for (int c = 0; c < 256; c++)
+				m_spectra[i].second.setColor(c, QColor::fromHsv((255 - c) * 240 / 255, 255, 255).rgba());
+			m_spectra[i].second.setColor(0, Qt::transparent);
+			m_spectra[i].second.setColor(255, qRgba(128, 0, 0, 255));
+			m_spectra[i].first = 0;
+		}
 
 	for (int i = 0; i < m_config.size(); i++)
 	{
@@ -182,19 +194,36 @@ int Grapher::process()
 	{
 		BufferData d = input(i).readSamples(0, true);
 		l_points.lock();
-		for (uint s = 0; s < d.samples(); s++)
+		if (Typed<Spectrum> in = input(i).type())
 		{
-			cycles++;
-			QVector<float> x(m_arity[i]);
-			d.sample(s).copyTo(x);
-			if (input(i).type().isA<Mark>())
-				m_mPoints[i].insert(Mark::timestamp(d.sample(s)), x);
-			else
-				m_cPoints[i].append(x);
+			float mn = in->min();
+			float sc = m_gain * 255.f / (in->max() - in->min());
+			if ((int)d.samples() + m_spectra[i].first > m_spectra[i].second.height())
+				m_spectra[i].second = m_spectra[i].second.copy(0, 0, d.sampleSize(), d.samples() + m_spectra[i].first);
+			for (uint s = 0; s < d.samples(); s++)
+			{
+				uchar* sl = m_spectra[i].second.scanLine(m_spectra[i].first + s);
+				for (uint e = 0; e < d.sampleSize(); e++)
+					sl[e] = clamp<int>(round((d(s, e) - mn) * sc), 0, 255);
+			}
+			m_spectra[i].first += d.samples();
 		}
-		if (!input(i).type().isA<Mark>())
-			if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
-				m_cPoints = m_cPoints.mid(n);
+		else
+		{
+			for (uint s = 0; s < d.samples(); s++)
+			{
+				cycles++;
+				QVector<float> x(m_arity[i]);
+				d.sample(s).copyTo(x);
+				if (input(i).type().isA<Mark>())
+					m_mPoints[i].insert(Mark::timestamp(d.sample(s)), x);
+				else
+					m_cPoints[i].append(x);
+			}
+			if (!input(i).type().isA<Mark>())
+				if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
+					m_cPoints = m_cPoints.mid(n);
+		}
 		l_points.unlock();
 		d.nullify();
 	}
@@ -253,17 +282,21 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 
 	QSizeF ds = _s - QSizeF(4, 4);
 
-	#define Y(_V, _M, _D) ((1.f - ((_V) - _M) / _D) * _s.height())
+#define Y(_V, _M, _D) ((1.f - ((_V) - (_M)) / (_D)) * _s.height())
+#define Yinv(_Y, _M, _D) ((1.f - float(_Y) / _s.height()) * (_D) + (_M))
 
 	if (m_cPoints.size() && m_mPoints.size())
 	{
 		QVector<QList<QVector<float> > > cp;
 		QVector<MarkData> mp;
+		QVector<QPair<int, QImage> > sp;
 		l_points.lock();
 		cp = m_cPoints;
 		mp = m_mPoints;
+		sp = m_spectra;
 		for (int i = 0; i < cp.size(); i++)
 		{
+			m_spectra[i].first = 0;
 			m_cPoints[i].clear();
 			if (cp[i].size())
 				m_cPoints[i].append(cp[i].last());
@@ -312,7 +345,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			if (ci.frequency == 0.f)
 				ci.latePoint = mp[ci.input].size() ? mp[ci.input].keys().last() : 0.0;
 			else
-				ci.latePoint = double(ci.throughput += max<int>(0, cp[ci.input].size() - 1)) / (double)ci.frequency;
+				ci.latePoint = double(ci.throughput += max<int>(0, max<int>(sp[ci.input].first, cp[ci.input].size() - 1))) / (double)ci.frequency;
 			newLatePoint = max(newLatePoint, ci.latePoint);
 		}
 
@@ -364,10 +397,9 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			}
 		}
 
+		int cfi = 0;
 		QPainter p(&m_display);
 		p.setRenderHint(QPainter::Antialiasing, m_antialiasing);
-		p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-		int cfi = 0;
 		foreach (ChannelInfo ci, m_config)
 		{
 			MultiValue::Config cf = ci.config;
@@ -379,6 +411,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			p.save();
 			if (ci.frequency == 0.f)
 			{
+				p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
 				{
 					float x = (i.key() - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
@@ -390,15 +423,48 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			}
 			else if (Typed<Spectrum> in = const_cast<Grapher*>(this)->input(ci.input).type())
 			{
-				QList<QVector<float> > const& d = cp[ci.input];
-				p.translate(ds.width() - 2.f, 0.f);
-				p.scale(ds.width() / m_viewWidth, 1.f);
-				p.translate(ci.latePoint - m_latePoint, 0.f);
-				p.scale(1.f / ci.frequency, 1.f);
-				p.translate(-(d.size() - 1), 0.f);
 				p.setRenderHint(QPainter::Antialiasing, false);
+				p.setRenderHint(QPainter::SmoothPixmapTransform, false);
+				int x = (float(0 - (sp[ci.input].first - 1)) / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f;
+				int w = (1.f / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f - x;
+				int y = Y(in->bandFrequency(0), mn, dl);
+				int h = Y(in->bandFrequency(in->bins()), mn, dl) - y;
+				QRect r(x, y, w, h);
+				r = r.normalized();
+				p.translate(r.x(), r.y());
+				r.moveTo(0, 0);
+				p.rotate(-90);
+				p.drawImage(QRect(0, 0, -r.height(), r.width()).normalized(), sp[ci.input].second, QRect(0, 0, in->bins(), sp[ci.input].first), Qt::ThresholdDither);
+				/*QList<QVector<float> > const& d = cp[ci.input];
+				int lx = -1;
+//				qDebug() << d.size() << m_display.width() << m_display.height();
 				for (int i = 1; i < d.size(); i++)
-					for (int b = 0; b < (int)in->bins(); b++)
+				{
+					int x = (float(i - (d.size() - 1)) / ci.frequency + (ci.latePoint - m_latePoint)) * ds.width() / m_viewWidth + ds.width() - 2.f;
+					if (x == lx || x < 0 || x > m_display.width())
+						continue;
+//					qDebug() << d[i].size();
+					for (int y = 0; y < m_display.height(); y++)
+					{
+						lx = x;
+						float f = Yinv(y, mn, dl);
+						if (f < cf.min)
+							break;
+						if (f > cf.max)
+							continue;
+						int b = in->frequencyBand(f);
+//						qDebug() << x << y << i << b;
+						float l = (d[i][b] - in->min()) / (in->max() - in->min()) * m_gain;
+//						qDebug() << l;
+						if (l <= 0.f)
+							continue;
+						else if (l > 1.f)
+							p.setPen(Qt::darkRed);
+						else
+							p.setPen(QColor::fromHsv(240 - int(l * 240.f), 255, 255));
+						p.drawPoint(QPointF(x, y));
+					}*/
+/*					for (int b = 0; b < (int)in->bins(); b++)
 					{
 						float l = (d[i][b] - in->min()) / (in->max() - in->min()) * m_gain;
 						QColor col;
@@ -410,11 +476,12 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 							col = QColor::fromHsv(240 - int(l * 240.f), 255, 255);
 						float bf = Y(in->bandFrequency(b-.5f), mn, dl);
 						p.fillRect(QRectF(i - 1, bf, 1, Y(in->bandFrequency(b+.5f), mn, dl) - bf), col);
-					}
-				p.setRenderHint(QPainter::Antialiasing, m_antialiasing);
+					}*/
+//				}
 			}
 			else if (cp[ci.input].size())
 			{
+				p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 				QList<QVector<float> > const& d = cp[ci.input];
 
 				float lv = d[0][cf.index] * cf.conversion;
