@@ -310,6 +310,9 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			m_display = QPixmap(ds.width(), ds.height());
 			m_display.fill(Qt::transparent);
 
+			m_time = QPixmap(f.pixelSize() * 5, ds.height());
+			m_time.fill(Qt::transparent);
+
 			m_labels = QPixmap(f.pixelSize() * 5, ds.height());
 			m_labels.fill(Qt::transparent);
 			QPainter p(&m_labels);
@@ -361,39 +364,51 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				p.setCompositionMode(QPainter::CompositionMode_Source);
 				p.fillRect(ds.width() - pixelOff, 0, pixelOff, ds.height(), Qt::transparent);
 			}
-			m_time = QPixmap(ds.width(), ds.height());
-			m_time.fill(Qt::transparent);
+
+			if (m_time.width() < ds.width() || m_time.height() < ds.height())
+			{
+				m_time = QPixmap(ds.width(), ds.height());
+				m_time.fill(Qt::transparent);
+			}
+			else
+				m_time.scroll(-pixelOff, 0, m_time.rect());
 			QPainter p(&m_time);
+			p.setRenderHint(QPainter::Antialiasing, false);
+			p.setCompositionMode(QPainter::CompositionMode_Source);
+			p.fillRect(ds.width() - pixelOff, 0, pixelOff, ds.height(), Qt::transparent);
+			p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
 			p.setFont(f);
 			double from;
 			double inc = graphParameters<double>(m_latePoint - m_viewWidth, m_latePoint, (double)ds.width() / 30.0, &from, 0, true);
+
 			for (double i = from; i < m_latePoint; i += inc)
 			{
 				float x = (i - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
-				if (x > ds.width() - 20.f || x < 20.f)
-					continue;
-				p.setPen(QColor(0, 0, 0, 0x10));
-				p.drawLine(QPointF(x, 0), QPointF(x, ds.height()));
+				if (x < ds.width() && x >= ds.width() - pixelOff)
+				{
+					p.setPen(QColor(0, 0, 0, 0x10));
+					p.drawLine(QPointF(x, 0), QPointF(x, ds.height()));
+				}
 			}
 			inc = graphParameters<double>(m_latePoint - m_viewWidth, m_latePoint, (double)ds.width() / 30.0, &from);
 			for (double i = from; i < m_latePoint; i += inc)
 			{
 				float x = (i - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
-				p.setPen(QColor(0, 0, 0, 0x20));
-				p.drawLine(QPointF(x, 0), QPointF(x, ds.height()));
-
-				if (x > ds.width() - 20.f || x < 20.f)
-					continue;
-
-				QString t = QString::number(i, 'g', 3);
-				QRectF pos(x - 20.f, 0.f, 40.f, f.pixelSize() + 2);
-				p.setPen(QColor(255, 255, 255, 192));
-				for (float x = -1; x < 2; x++)
-					for (float y = -1; y < 2; y++)
-						if (x != y && x != y)
-							p.drawText(pos.translated(x, y), Qt::AlignHCenter|Qt::AlignTop, t);
-				p.setPen(Qt::black);
-				p.drawText(pos, Qt::AlignHCenter|Qt::AlignTop, t);
+				if (x < ds.width() - 20.f && x >= ds.width() - pixelOff - 20.f)
+				{
+					p.setPen(QColor(0, 0, 0, 0x20));
+					p.drawLine(QPointF(x, 0), QPointF(x, ds.height()));
+					QString t = QString::number(i, 'g', 3);
+					QRectF pos(x - 20.f, 0.f, 40.f, f.pixelSize() + 2);
+					p.setPen(QColor(255, 255, 255, 192));
+					for (float x = -1; x < 2; x++)
+						for (float y = -1; y < 2; y++)
+							if (x != y && x != y)
+								p.drawText(pos.translated(x, y), Qt::AlignHCenter|Qt::AlignTop, t);
+					p.setPen(Qt::black);
+					p.drawText(pos, Qt::AlignHCenter|Qt::AlignTop, t);
+				}
 			}
 		}
 
