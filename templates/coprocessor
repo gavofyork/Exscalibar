@@ -25,8 +25,8 @@ public:
 	_NAME_();
 
 private:
-	virtual QString simpleText() const { return QChar(0x21FB); }
-	virtual QColor outlineColour() const { return QColor::fromHsv(0, 255, 255); }
+	virtual QString simpleText() const { return QChar(0x263C); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(0, 255, 255); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties();
 	virtual void updateFromProperties();
@@ -39,7 +39,7 @@ private:
 	virtual void processorStopped();
 
 	bool m_example;
-	DECLARE_1_PROPERTY(_NAME, m_example);
+	DECLARE_1_PROPERTY(_NAME_, m_example);
 };
 
 _NAME_::_NAME_(): CoProcessor("_NAME_")
@@ -55,7 +55,7 @@ PropertiesInfo _NAME_::specifyProperties() const
 void _NAME_::initFromProperties()
 {
 	setupIO(1, 1);
-	setupVisual(10, 10, 1, 10, 10, true);
+	setupVisual(24, 12, 1, 24, 12, true);
 }
 
 void _NAME_::updateFromProperties()

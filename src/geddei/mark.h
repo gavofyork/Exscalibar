@@ -73,9 +73,9 @@ class DLLEXPORT SpectralPeak: public Mark
 	TRANSMISSION_TYPE(SpectralPeak, Mark);
 
 public:
-	enum { Frequency = 0, Value, Spread, HalfSpread };
+	enum { Value = 0, Frequency, Spread, HalfSpread };
 
-	SpectralPeak(float _maxF = 24000.f, float _minF = 0.f, float _maxV = 1.f, float _minV = 0.f): Mark(4, QVector<float>() << _maxF << _maxV, QVector<float>() << _minF << _minV) {}
+	SpectralPeak(float _maxF = 24000.f, float _minF = 0.f, float _maxV = 1.f, float _minV = 0.f): Mark(4, QVector<float>() << _maxV << _maxF, QVector<float>() << _minV << _minF) {}
 	virtual ~SpectralPeak() {}
 
 	float minFrequency() const { return m_mins[Frequency]; }

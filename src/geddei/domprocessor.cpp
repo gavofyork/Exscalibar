@@ -56,6 +56,11 @@ DomProcessor::~DomProcessor()
 	assert(theWorkers.isEmpty());
 }
 
+QColor DomProcessor::specifyOutlineColour() const
+{
+	return thePrimary ? thePrimary->specifyOutlineColour() : QColor::fromHsv(0, 0, 80);
+}
+
 void DomProcessor::addWorker(SubProcessor *worker)
 {
 	theWorkers.append(new DSCoupling(this, worker));

@@ -16,92 +16,90 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <cmath>
-using namespace std;
 
-#include <qfile.h>
+#include <QFile>
 #include "qfactoryexporter.h"
 
-#include "geddei.h"
+#include <Plugin>
 using namespace Geddei;
 
-#include "coretypes.h"
-using namespace Geddei;
-
-class Dumper: public HeavyProcessor
+class Dumper: public CoProcessor
 {
-	QFile theOut;
-	bool theFloats;
-	bool theText;
-	bool theCommas;
+public:
+	Dumper(): CoProcessor("Dumper", In) {}
 
-	virtual PropertiesInfo specifyProperties() const { return PropertiesInfo("Commas", false, "Separate values by commas")("Output", "/tmp/data", "The filename in to which data should be written.")("Binary", true, "Write data in binary (false for text)")("Floats", false, "Use binary floats instead of bytes."); }
-	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const Types &, Types &);
-	virtual void processor();
+private:
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties();
+	virtual bool verifyAndSpecifyTypes(Types const&, Types&) { return true; }
+	virtual bool processorStarted();
+	virtual int process();
 	virtual void processorStopped();
 
-public:
-	Dumper();
+	bool m_floats;
+	bool m_binary;
+	bool m_commas;
+	QString m_output;
+	DECLARE_4_PROPERTIES(Dumper, m_floats, m_binary, m_commas, m_output);
+
+	QFile m_out;
+	QTextStream m_ts;
 };
 
-Dumper::Dumper(): HeavyProcessor("Dumper", In, Guarded)
+PropertiesInfo Dumper::specifyProperties() const
 {
+	return PropertiesInfo
+			("Commas", false, "Separate values by commas", false, ",", AVbool)
+			("Output", "/tmp/data", "The filename in to which data should be written.", false)
+			("Binary", true, "Write data in binary (false for text)", false, QChar(0x2325), AVbool)
+			("Floats", false, "Use binary floats instead of bytes.", false, QChar(0x211D), AVbool);
 }
 
-void Dumper::initFromProperties(const Properties &p)
+void Dumper::initFromProperties()
 {
-	theOut.setFileName(p["Output"].toString());
-	theText = !p["Binary"].toBool();
-	theCommas = p["Commas"].toBool();
-	theFloats = p["Floats"].toBool();
-
+	m_out.setFileName(m_output);
 	setupIO(Undefined, 0);
 }
 
-bool Dumper::verifyAndSpecifyTypes(const Types &, Types &)
+bool Dumper::processorStarted()
 {
-	return true;
+	m_out.open(QIODevice::Truncate|QIODevice::WriteOnly);
+	if (!m_binary)
+		m_ts.setDevice(&m_out);
+	return m_out.isOpen();
 }
 
-void Dumper::processor()
+int Dumper::process()
 {
-	theOut.open(QIODevice::Truncate|QIODevice::WriteOnly);
-	QTextStream ts;
-	if (theText)
-		ts.setDevice(&theOut);
-	while (thereIsInputForProcessing(1))
-	{
-		for (uint i = 0; i < numInputs(); i++)
-		{	const BufferData d = input(i).readSample();
-			for (uint j = 0; j < d.elements(); j++)
-				if (theText)
-					ts << d[j] << (theCommas ? "," : " ");
-				else if (theFloats)
-				{
-					unsigned char* dc = (unsigned char*)&(d[j]);
-					theOut.putChar(dc[0]);
-					theOut.putChar(dc[1]);
-					theOut.putChar(dc[2]);
-					theOut.putChar(dc[3]);
-				}
-				else
-					theOut.putChar(int(min(max(0.f, d[j]), 1.f) * 255));
-			if (theText)
-				ts << "\t";
-		}
-		if (theText)
-			ts << endl;
+	for (uint i = 0; i < numInputs(); i++)
+	{	const BufferData d = input(i).readSample();
+		for (uint j = 0; j < d.elements(); j++)
+			if (!m_binary)
+				m_ts << d[j] << (m_commas ? "," : " ");
+			else if (m_floats)
+			{
+				unsigned char* dc = (unsigned char*)&(d[j]);
+				m_out.putChar(dc[0]);
+				m_out.putChar(dc[1]);
+				m_out.putChar(dc[2]);
+				m_out.putChar(dc[3]);
+			}
+			else
+				m_out.putChar(int(min(max(0.f, d[j]), 1.f) * 255));
+		if (!m_binary)
+			m_ts << "\t";
 	}
+	if (!m_binary)
+		m_ts << endl;
+	return DidWork;
 }
 
 void Dumper::processorStopped()
 {
-	theOut.close();
+	m_ts.flush();
+	m_ts.setDevice(0);
+	m_out.close();
 }
 
 EXPORT_CLASS(Dumper, 0,1,1, Processor);

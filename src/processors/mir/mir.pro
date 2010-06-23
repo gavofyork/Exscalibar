@@ -39,7 +39,12 @@ SOURCES += bandwise.cpp \
     ToneSplit.cpp \
     Window.cpp \
     DeciBel.cpp \
-    PeakPicker.cpp
+    PeakPicker.cpp \
+    TonePicker.cpp \
+    Terhardt.cpp \
+    DBToPhon.cpp \
+    Histogram.cpp \
+    PeakFollower.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES

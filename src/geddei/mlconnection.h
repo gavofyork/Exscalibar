@@ -70,6 +70,7 @@ protected:
 	BufferReader *theReader;
 	mutable uint64_t m_samplesRead;
 	mutable uint64_t m_latestPeeked;
+	mutable double m_latestTime;
 
 public:
 	/**
@@ -108,8 +109,8 @@ public:
 	 */
 	void noMorePlungers();
 
-	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
-	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
+	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : m_latestTime; }
+	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : m_latestTime; }
 
 	MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection);
 	virtual ~MLConnection();

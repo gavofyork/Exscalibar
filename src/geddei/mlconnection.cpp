@@ -21,6 +21,7 @@
 #include "mlconnection.h"
 #include "buffer.h"
 #include "processor.h"
+#include "mark.h"
 using namespace Geddei;
 
 #define MESSAGES 0
@@ -35,6 +36,7 @@ MLConnection::MLConnection(Sink *sink, uint sinkIndex, LMConnection *connection)
 	theReader = new BufferReader(&(theConnection->theBuffer));
 	m_samplesRead = 0;
 	m_latestPeeked = 0;
+	m_latestTime = 0.0;
 }
 
 MLConnection::~MLConnection()
@@ -163,6 +165,7 @@ bool MLConnection::plungeSync(uint samples) const
 	{
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 		return false;
@@ -170,7 +173,7 @@ bool MLConnection::plungeSync(uint samples) const
 	return true;
 }
 
-const BufferData MLConnection::readElements(uint elements)
+const BufferData MLConnection::readElements(uint _elements)
 {
 #ifdef EDEBUG
 	if (!theReader)
@@ -181,16 +184,22 @@ const BufferData MLConnection::readElements(uint elements)
 #endif
 
 	while (1)
-	{	BufferData ret = theReader->readElements(elements, true);
+	{	BufferData ret = theReader->readElements(_elements, true);
 		theSink->checkExit();
 		if (!ret.plunger())
 		{
-			m_samplesRead += elements / theType->size();
-			m_latestPeeked = max(m_latestPeeked, m_samplesRead);
+			if (type().isA<Mark>())
+				m_latestTime = Mark::timestamp(ret);
+			else
+			{
+				m_samplesRead += _elements / theType->size();
+				m_latestPeeked = max(m_latestPeeked, m_samplesRead);
+			}
 			return ret;
 		}
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		// This is a workaround for a buggy gcc (3.2.2).
 		// If it wasn't here stuff wouldn't get freed up in the buffer.
 		// As it is, there are deallocation problems, since the last instance of ret
@@ -215,11 +224,15 @@ const BufferData MLConnection::peekElements(uint elements)
 		theSink->checkExit();
 		if (!ret.plunger())
 		{
-			m_latestPeeked = m_samplesRead + elements / theType->size();
+			if (type().isA<Mark>())
+				m_latestTime = Mark::timestamp(ret);
+			else
+				m_latestPeeked = m_samplesRead + elements / theType->size();
 			return ret;
 		}
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 	}
@@ -235,12 +248,14 @@ void MLConnection::sinkStopped()
 	theConnection->closeBufferTrapdoor(dynamic_cast<Processor *>(theSink));
 	m_samplesRead = 0;
 	m_latestPeeked = 0;
+	m_latestTime = 0.0;
 }
 
 void MLConnection::reset()
 {
 	m_samplesRead = 0;
 	m_latestPeeked = 0;
+	m_latestTime = 0.0;
 }
 
 void MLConnection::resetType()

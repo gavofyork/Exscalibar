@@ -16,21 +16,11 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#if defined(HAVE_JACK) || 1
+#if defined(HAVE_JACK)
 
 #include <jack/jack.h>
 
-#include "qfactoryexporter.h"
-
-#include "buffer.h"
-#include "processor.h"
-using namespace Geddei;
-
-#include "wave.h"
+#include <Plugin>
 using namespace Geddei;
 
 class JackCapturer: public CoProcessor
@@ -207,149 +197,5 @@ bool JackCapturer::verifyAndSpecifyTypes(const Types &, Types &outTypes)
 
 EXPORT_CLASS(JackCapturer, 2,0,0, Processor);
 
-#if 0
-class JackCapturer: public HeavyProcessor
-{
-	QFastWaitCondition theTransfer;
-	QFastMutex theTransferLock;
-	bool theKeepGoing, theDoneTransfer;
-	jack_nframes_t theWantFrames;
-	BufferData theBuffer;
-
-	jack_port_t *theInputPort;
-	jack_client_t *theClient;
-	uint theFreq;
-	uint theCount;
-
-	int process(jack_nframes_t nframes)
-	{
-		jack_default_audio_sample_t *in = (jack_default_audio_sample_t *)jack_port_get_buffer(theInputPort, nframes);
-
-		if (!isRunning())
-			return 0;
-
-//		QFastMutexLocker lock(&theTransferLock);
-//		theWantFrames = nframes;
-//		while (theBuffer.isNull()) theTransfer.wait(&theTransferLock);
-		theBuffer = output(0).makeScratchSamples(nframes);
-		if (theBuffer.isNull())
-			return 0;
-		for (uint i = 0; i < nframes; i++)
-			theBuffer[i] = in[i];
-		output(0) << theBuffer;
-//		theWantFrames = 0;
-//		theDoneTransfer = true;
-		return 0;
-	}
-
-	void shutdown()
-	{
-		theKeepGoing = false;
-	}
-
-	static int jackProcess(jack_nframes_t nframes, void *arg)
-	{
-		return static_cast<JackCapturer *>(arg)->process(nframes);
-	}
-
-	static void jackShutdown(void *arg)
-	{
-		static_cast<JackCapturer *>(arg)->shutdown();
-	}
-
-	void JackCapturer::processorStarted()
-	{
-	}
-
-	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties(const Properties &p);
-	virtual bool verifyAndSpecifyTypes(const Types &, Types &out);
-	virtual bool processorStarted();
-	virtual void processor();
-	virtual void processorStopped();
-	virtual void specifyOutputSpace(QVector<uint> &samples);
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(240, 0, 160); }
-
-public:
-	JackCapturer(): HeavyProcessor("JackCapturer", NotMulti, Guarded) {}
-};
-
-PropertiesInfo JackCapturer::specifyProperties() const
-{
-	return PropertiesInfo();
-}
-
-void JackCapturer::specifyOutputSpace(QVector<uint> &samples)
-{
-	samples[0] = 8192;
-}
-
-void JackCapturer::initFromProperties(const Properties &)
-{
-	JackStatus js;
-	if ((theClient = jack_client_open(name().toLocal8Bit(), JackNullOption, &js)) == 0)
-		qWarning("*** WARNING: JACK server not running!");
-	else
-	{	setupIO(0, theClient ? 1 : 0);
-		theFreq = jack_get_sample_rate(theClient);
-		jack_client_close(theClient);
-	}
-}
-
-bool JackCapturer::verifyAndSpecifyTypes(const Types &, Types &out)
-{
-	out = Wave(theFreq);
-	return true;
-}
-
-bool JackCapturer::processorStarted()
-{
-	if (!numOutputs()) return false;
-	theBuffer.nullify();
-	theKeepGoing = true;
-	theCount = 0;
-	JackStatus js;
-	if ((theClient = jack_client_open(name().toLocal8Bit(), JackNullOption, &js)) == 0)
-	{
-		qWarning("*** ERROR: JACK server not running!");
-		return false;
-	}
-	jack_set_process_callback(theClient, JackCapturer::jackProcess, this);
-	jack_on_shutdown(theClient, JackCapturer::jackShutdown, this);
-	theInputPort = jack_port_register(theClient, "input", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-	if (jack_activate(theClient))
-	{
-		qWarning("*** ERROR: Cannot activate JACK client!");
-		return false;
-	}
-	return true;
-}
-
-void JackCapturer::processor()
-{
-	while (theKeepGoing)
-	{
-		sleep(1);
-/*		QFastMutexLocker lock(&theTransferLock);
-		while (!theWantFrames) theTransfer.wait(&theTransferLock);
-		theDoneTransfer = false;
-		theBuffer = output(0).makeScratchSamples(theWantFrames);
-		while (!theDoneTransfer) theTransfer.wait(&theTransferLock);
-		output(0) << theBuffer;
-		theBuffer.nullify();
-		if (++theCount == 80)
-		{	plunge();
-			theCount = 0;
-		}*/
-	}
-}
-
-void JackCapturer::processorStopped()
-{
-	jack_client_close(theClient);
-}
-
-EXPORT_CLASS(JackCapturer, 0,1,0, Processor);
-#endif
 #endif
 

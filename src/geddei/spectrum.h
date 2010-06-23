@@ -125,7 +125,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual float bandFrequency(float _band) const { return _band * theStep; }
+	virtual float bandFrequency(float _band) const { return (_band) * theStep; }
 
 	/**
 	 * Determines the frequency represented by a specific band.
@@ -133,7 +133,7 @@ public:
 	 * @param band The band index.
 	 * @return The midpoint frequency of band @a band.
 	 */
-	virtual float frequencyBand(float _freq) const { return ::min((uint)(_freq / theStep), (uint)(bins() - 1)); }
+	virtual float frequencyBand(float _freq) const { return ::min<float>(_freq / theStep, bins() - 1); }
 
 	/**
 	 * Gets the Nyquist frequency (the highest frequency that can be

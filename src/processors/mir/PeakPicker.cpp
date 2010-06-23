@@ -26,9 +26,9 @@ public:
 
 private:
 	virtual QString simpleText() const { return QChar(0x21FB); }
-	virtual QColor outlineColour() const { return QColor::fromHsv(0, 255, 255); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(0, 255, 255); }
 	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties() { setupIO(1, 1); setupVisual(10, 10, 1, 10, 10, true); }
+	virtual void initFromProperties() { setupIO(1, 1); setupVisual(24, 12, 1, 24, 12, false); }
 	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
 	virtual void specifyInputSpace(QVector<uint>& _s) { _s.fill(1); }
 	virtual void requireInputSpace(QVector<uint>& _s) { _s.fill(1); }
@@ -81,9 +81,9 @@ int PeakPicker::process()
 			gu = false;
 		}
 	}
-//	BufferData out = output(0).makeScratchSample();
-//	Mark::setEndOfTime(out);
-//	output(0) << out;
+	BufferData out = output(0).makeScratchSample();
+	Mark::setEndOfTime(out);
+	output(0) << out;
 	return DidWork;
 }
 

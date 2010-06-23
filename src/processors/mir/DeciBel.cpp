@@ -26,6 +26,7 @@ public:
 	DeciBel() : SubProcessor("DeciBel") {}
 
 private:
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(30, 160, 160); }
 	virtual QString simpleText() const { return "dB"; }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes);
@@ -61,7 +62,7 @@ void DeciBel::processChunk(BufferDatas const& _ins, BufferDatas& _outs) const
 
 PropertiesInfo DeciBel::specifyProperties() const
 {
-	return PropertiesInfo("Spl", 90.f, "The SPL value.", true, ":", AV(30.f, 120.f));
+	return PropertiesInfo("Spl", 90.f, "The SPL calibration offset. Specifies the SPL that the input corresponds to at maximum power.", true, ":", AV(30.f, 120.f));
 }
 
 EXPORT_CLASS(DeciBel, 1,0,1, SubProcessor);

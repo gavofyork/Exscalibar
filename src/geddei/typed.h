@@ -102,6 +102,10 @@ public:
 	 */
 	template<class T>
 	bool isA() const { return dynamic_cast<const T *>(m_ptr); }
+	template<class T>
+	Typed<T> const toA() const { return Typed<T>(*this); }
+	template<class T>
+	Typed<T> toA() { return Typed<T>(*this); }
 
 	/**
 	 * Return a reference of class @a T that we represent. If we cannot

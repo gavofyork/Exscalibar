@@ -1,6 +1,4 @@
-Put controls in bottom space for resize handle.
-
-Scroll time, don't redraw.
+DomProc should match up timestamps manually.
 
 Connect by dragging/dropping over processor.
 
@@ -8,9 +6,6 @@ Make sure mouse up events aren't obscured by a shadow of proc above.
 - Ignore events for shadow.
 
 Colouriser.
-
-Smaller widgets.
-Bigger Subs.
 
 SprectralTransform template.
 

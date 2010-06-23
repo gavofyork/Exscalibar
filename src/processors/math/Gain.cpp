@@ -29,12 +29,13 @@ private:
 
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties() { setupVisual(0, 0); }
-	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
-	virtual void processChunk(const BufferDatas &in, BufferDatas &out) const;
+	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes);
+	virtual void processChunk(BufferDatas const& _ins, BufferDatas& _outs) const;
 
 	float m_gain;
 	DECLARE_1_PROPERTY(Gain, m_gain);
 
+	bool m_isMark;
 	uint m_arity;
 };
 
@@ -43,17 +44,25 @@ PropertiesInfo Gain::specifyProperties() const
 	return PropertiesInfo("Gain", 1.f, "The gain.", true, "x", AV(0.00001f, 100000.f, AllowedValue::Log10));
 }
 
-void Gain::processChunk(const BufferDatas &ins, BufferDatas &outs) const
-{
-	for (uint i = 0; i < m_arity; i++)
-		outs[0][i] = ins[0][i] * m_gain;
-}
-
 bool Gain::verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes)
 {
+	m_isMark = _inTypes[0].isA<Mark>();
 	o_outTypes = _inTypes;
 	m_arity = _inTypes[0].arity();
 	return true;
+}
+
+void Gain::processChunk(BufferDatas const& _ins, BufferDatas& _outs) const
+{
+	if (m_isMark)
+	{
+		for (uint i	= 0; i < m_arity; i++)
+			_outs[0][i] = i ? _ins[0][i] : (m_gain * _ins[0][i]);
+//		Mark::setTimestamp(_outs[0], Mark::timestamp(_ins[0]));
+	}
+	else
+		for (uint i	= 0; i < m_arity; i++)
+			_outs[0][i] = _ins[0][i] * m_gain;
 }
 
 EXPORT_CLASS(Gain, 0,2,0, SubProcessor);

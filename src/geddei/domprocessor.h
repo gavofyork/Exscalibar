@@ -123,7 +123,7 @@ class DLLEXPORT DomProcessor: public CoProcessor
 	virtual void specifyInputSpace(QVector<uint> &samples);
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 	virtual void requireInputSpace(QVector<uint> &samples);
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(0, 0, 80); }
+	virtual QColor specifyOutlineColour() const;
 
 	/**
 	 * Adds another SubProcessor object to this Processor's list of "workers".

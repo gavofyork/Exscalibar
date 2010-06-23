@@ -23,6 +23,7 @@ using namespace std;
 #include "processor.h"
 #include "bufferdata.h"
 #include "xlconnectionreal.h"
+#include "mark.h"
 using namespace Geddei;
 
 #define MESSAGES 0
@@ -36,6 +37,7 @@ xLConnectionReal::xLConnectionReal(Sink *newSink, uint newSinkIndex, uint buffer
 	theReader = new BufferReader(&theBuffer);
 	m_samplesRead = 0;
 	m_latestPeeked = 0;
+	m_latestTime = 0.0;
 }
 
 xLConnectionReal::~xLConnectionReal()
@@ -162,6 +164,7 @@ bool xLConnectionReal::plungeSync(uint samples) const
 		theSink->plunged(theSinkIndex);
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		return false;
 	}
 	if (MESSAGES) qDebug("xLC: Plunger not found; read must have succeeded.");
@@ -183,12 +186,18 @@ const BufferData xLConnectionReal::readElements(uint _elements)
 		theSink->checkExit();
 		if (!ret.plunger())
 		{
-			m_samplesRead += _elements / theType->size();
-			m_latestPeeked = max(m_latestPeeked, m_samplesRead);
+			if (type().isA<Mark>())
+				m_latestTime = Mark::timestamp(ret);
+			else
+			{
+				m_samplesRead += _elements / theType->size();
+				m_latestPeeked = max(m_latestPeeked, m_samplesRead);
+			}
 			return ret;
 		}
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		// This is a workaround for a buggy gcc (3.2.2).
 		// If it wasn't here stuff wouldn't get freed up in the buffer.
 		// As it is, there are deallocation problems, since the last instance of ret
@@ -213,11 +222,15 @@ const BufferData xLConnectionReal::peekElements(uint elements)
 		theSink->checkExit();
 		if (!ret.plunger())
 		{
-			m_latestPeeked = m_samplesRead + elements / theType->size();
+			if (type().isA<Mark>())
+				m_latestTime = Mark::timestamp(ret);
+			else
+				m_latestPeeked = m_samplesRead + elements / theType->size();
 			return ret;
 		}
 		m_samplesRead = 0;
 		m_latestPeeked = 0;
+		m_latestTime = 0.0;
 		theReader->haveRead(ret);
 		theSink->plunged(theSinkIndex);
 	}
@@ -235,6 +248,7 @@ void xLConnectionReal::sinkStopped()
 	theBuffer.closeTrapdoor(dynamic_cast<Processor *>(theSink));
 	m_samplesRead = 0;
 	m_latestPeeked = 0;
+	m_latestTime = 0.0;
 }
 
 Type const& xLConnectionReal::type() const

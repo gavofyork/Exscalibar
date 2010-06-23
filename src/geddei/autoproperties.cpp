@@ -39,6 +39,7 @@ void AutoProperties::loadProperties(Properties const& _p, bool _dynamics)
 			HANDLE_TYPE(double, Double);
 			HANDLE_TYPE(int, Int);
 			HANDLE_TYPE(bool, Bool);
+			HANDLE_TYPE(QString, String);
 		}
 	}
 #undef HANDLE_TYPE

@@ -82,11 +82,12 @@ protected:
 	BufferReader* theReader;
 	mutable uint64_t m_samplesRead;
 	mutable uint64_t m_latestPeeked;
+	mutable double m_latestTime;
 	int m_minRead;
 	int m_minWrite;
 
 private:
-	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; theBuffer.clear(); qDebug() << "Reseting connection."; m_minRead = m_minWrite = 0; }
+	virtual void reset() { m_samplesRead = 0; m_latestPeeked = 0; m_latestTime = 0.0; theBuffer.clear(); m_minRead = m_minWrite = 0; }
 	virtual void sinkStopping();
 	virtual void sinkStopped();
 	virtual uint elementsReady() const;
@@ -103,8 +104,8 @@ private:
 	virtual float filled() const { return 1.0 - float(theBuffer.elementsFree()) / float(theBuffer.size()); }
 	virtual bool plungeSync(uint samples) const;
 	virtual bool require(uint samples, uint preferSamples = Undefined);
-	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
-	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : 0.0; }
+	virtual double secondsPassed() const { return type().isA<Contiguous>() ? m_latestPeeked / (double)(type().asA<Contiguous>().frequency()) : m_latestTime; }
+	virtual double secondsPassed(float _s) const { return type().isA<Contiguous>() ? (m_latestPeeked - theReader->lastReadSize() + _s) / (double)(type().asA<Contiguous>().frequency()) : m_latestTime; }
 };
 
 }

@@ -222,7 +222,11 @@ int Grapher::process()
 				QVector<float> x(m_arity[i]);
 				d.sample(s).copyTo(x);
 				if (input(i).type().isA<Mark>())
-					m_mPoints[i].insert(Mark::timestamp(d.sample(s)), x);
+				{
+					double ts = Mark::timestamp(d.sample(s));
+					if (!isInf(ts))
+						m_mPoints[i].insert(ts, x);
+				}
 				else
 					m_cPoints[i].append(x);
 			}
@@ -436,13 +440,17 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
 				{
-					qDebug() << i.key() << m_latePoint << ci.latePoint;
 					float x = (i.key() - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
 					if (Typed<SpectralPeak> in = const_cast<Grapher*>(this)->input(ci.input).type())
 					{
-						float s = (i.value()[SpectralPeak::Value] - 15.f) / 4.f;
-						if (s > 0)
-							p.fillRect(QRectF(x - s, Y(i.value()[SpectralPeak::Frequency], mn, dl) - s, s * 2, s * 2), QBrush(cf.fore));
+						float s = (i.value()[SpectralPeak::Value] - 12.f) / 5.f;
+						if (!isInf(s))
+						{
+//							p.fillRect(QRectF(x - s, Y(i.value()[SpectralPeak::Frequency], mn, dl) - s, s * 2, s * 2), QBrush(qRgba(cf.fore.red(), cf.fore.green(), cf.fore.blue(), 1)));
+							p.setPen(QPen(cf.fore, s));
+							if (s > 0)
+								p.drawPoint(QPointF(x, Y(i.value()[SpectralPeak::Frequency], mn, dl)));
+						}
 					}
 					else
 					{

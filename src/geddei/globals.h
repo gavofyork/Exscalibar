@@ -76,6 +76,11 @@ namespace Geddei
 		return _x * _x;
 	}
 	template<class T>
+	inline T cube(T _x)
+	{
+		return _x * _x * _x;
+	}
+	template<class T>
 	inline T normalPDFN(T _x, T _m, T _o)
 	{
 		return exp(sqr(_x - _m)/(-2.0 * _o * _o));
@@ -134,7 +139,49 @@ namespace Geddei
 		if (_i >= _l.count() - 1) return _l.last();
 		return lerp<T>(_l[(int)floor(_i)], _l[(int)floor(_i) + 1], _i - floor(_i));
 	}
+	template<class T>
+	inline T interpolateIndex(T const* _d, int _len, float _i)
+	{
+		if (_i <= 0) return _d[0];
+		if (_i >= _len - 1) return _d[_len - 1];
+		return lerp<T>(_d[(int)floor(_i)], _d[(int)floor(_i) + 1], _i - floor(_i));
+	}
 
+	template<class T>
+	static inline T cubicInterpolateIndex(T const* _data, int _len, T _index)
+	{
+		int fi = (int)floor(_index);
+		T pi = _index - floor(_index);
+		if (pi == 0)
+			return _data[fi];
+		if (fi >= _len - 1)
+			return _data[_len - 1];
+		if (fi <= 0)
+			return _data[0];
+
+		T m = _data[fi + 1] - _data[fi];
+		T mi = fi ? (_data[fi + 1] - _data[fi - 1]) / 2.f : m;
+		T mia1 = (fi < _len - 2) ? (_data[fi + 2] - _data[fi]) / 2.f : m;
+		T pi2 = sqr(pi);
+		T pi3 = cube(pi);
+
+		return	_data[fi] * (1.f - 3.f * pi2 + 2.f * pi3) + mi * (pi - 2.f * pi2 + pi3) + _data[fi + 1] * (3.f * pi2 - 2.f * pi3) - mia1 * (pi2 - pi3);
+	}
+
+	template<class T>
+	inline T interpolateValue(T const* _d, int _len, float _v)
+	{
+		if (_v <= _d[0])
+			return 0;
+		if (_v >= _d[_len - 1])
+			return _len - 1;
+		T const* i = qLowerBound(_d, _d + _len, _v);
+		if (*i == _v)
+			return i - _d;
+		assert(*i > _v);
+		assert(i != _d);
+		return (i - _d) + (_v - *i) / (*i - *(i - 1));
+	}
 	template<class T>
 	inline T interpolateValue(QVector<T> const& _l, float _v)
 	{
@@ -147,7 +194,7 @@ namespace Geddei
 			return i - _l.begin();
 		assert(*i > _v);
 		assert(i != _l.begin());
-		return (i - _l.begin()) + (_v - *i) / (*i - *(i-1));
+		return (i - _l.begin()) + (_v - *i) / (*i - *(i - 1));
 	}
 
 	DLLEXPORT const char *getVersion();

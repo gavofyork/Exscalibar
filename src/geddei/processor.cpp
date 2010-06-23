@@ -43,7 +43,7 @@ namespace Geddei
 QThreadStorage<Processor **> Processor::theOwningProcessor;
 
 Processor::Processor(const QString &type, MultiplicityType multi): theName(""), theType(type),
-	theWidth(16), theHeight(6), theMinWidth(16), theMinHeight(6), m_isResizable(false), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
+	theWidth(24), theHeight(12), theMinWidth(24), theMinHeight(12), m_isResizable(false), theIOSetup(false), theStopping(false), theIsInitialised(false), theAllDone(false),
 	theTypesConfirmed(false), theError(NotStarted), theErrorData(0), m_inputSpace(1), m_outputSpace(1), theMulti(multi), theHardMultiplicity(Undefined), thePlungersStarted(false), thePlungersEnded(false)
 {
 }
