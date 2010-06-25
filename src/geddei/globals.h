@@ -71,6 +71,11 @@ namespace Geddei
 		return (_b - _a) * _x + _a;
 	}
 	template<class T>
+	inline T lerp(T _da, T _db, T _sa, T _sb)
+	{
+		return (_db - _da) * _sb / (_sa + _sb) + _da;
+	}
+	template<class T>
 	inline T sqr(T _x)
 	{
 		return _x * _x;

@@ -189,7 +189,9 @@ const BufferData MLConnection::readElements(uint _elements)
 		if (!ret.plunger())
 		{
 			if (type().isA<Mark>())
-				m_latestTime = Mark::timestamp(ret);
+				if (!Mark::isEndOfTime(ret))
+					m_latestTime = Mark::timestamp(ret);
+				else{}
 			else
 			{
 				m_samplesRead += _elements / theType->size();
@@ -225,7 +227,9 @@ const BufferData MLConnection::peekElements(uint elements)
 		if (!ret.plunger())
 		{
 			if (type().isA<Mark>())
-				m_latestTime = Mark::timestamp(ret);
+				if (!Mark::isEndOfTime(ret))
+					m_latestTime = Mark::timestamp(ret);
+				else{}
 			else
 				m_latestPeeked = m_samplesRead + elements / theType->size();
 			return ret;

@@ -50,18 +50,22 @@ Mark::Mark(uint _arity, QVector<float> const& _maxs, QVector<float> const& _mins
 	}
 }
 
-void Mark::initData(BufferData& _d, Source*, uint) const
+void Mark::initData(BufferData const& _d, Source*, uint) const
 {
-	setTimestamp(_d, numeric_limits<double>::infinity());
+	setTimestamp(const_cast<BufferData&>(_d), numeric_limits<double>::infinity());
 }
 
-void Mark::polishData(BufferData& _d, Source* _s, uint) const
+void Mark::polishData(BufferData const& _d, Source* _s, uint) const
 {
-	if (isInf(timestamp(_d)) == 1)
-		setTimestamp(_d, _s->secondsPassed());
+	for (uint i = 0; i < _d.samples(); i++)
+		if (_d(i, 0) > 800)
+			qDebug() << "POLISHDATA: CRAZY SAMPLE" << _d(i, 0) << _d(i, 1);
+	for (uint i = 0; i < _d.samples(); i++)
+		if (isInf(timestamp(_d.sample(i))) == 1)
+			setTimestamp(const_cast<BufferData&>(_d).sample(i), _s->secondsPassed());
 }
 
-void Mark::setTimestamp(BufferData& _d, double _ts)
+void Mark::setTimestamp(BufferData _d, double _ts)
 {
 	if (_d.isNull())
 		return;
@@ -76,8 +80,12 @@ bool Mark::isEndOfTime(BufferData const& _d)
 	return isInf(timestamp(_d)) == -1;
 }
 
-void Mark::setEndOfTime(BufferData& _d)
+void Mark::setEndOfTime(BufferData _d)
 {
+	if (_d.isNull())
+		return;
+	for (uint s = 0; s < _d.elements(); s++)
+		_d[s] = 0;
 	setTimestamp(_d, -numeric_limits<double>::infinity());
 }
 

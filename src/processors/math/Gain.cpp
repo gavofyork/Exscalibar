@@ -41,7 +41,7 @@ private:
 
 PropertiesInfo Gain::specifyProperties() const
 {
-	return PropertiesInfo("Gain", 1.f, "The gain.", true, "x", AV(0.00001f, 100000.f, AllowedValue::Log10));
+	return PropertiesInfo("Gain", 1.f, "The gain.", true, "x", AV("-", "-", -1.f) AVand(0.001f, 1000.f, AllowedValue::Log2));
 }
 
 bool Gain::verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes)

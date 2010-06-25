@@ -225,7 +225,11 @@ int Grapher::process()
 				{
 					double ts = Mark::timestamp(d.sample(s));
 					if (!isInf(ts))
+					{
+						if (d(s, SpectralPeak::Value) > 800)
+							qDebug() << "### CRAZY VALUE in input stream";
 						m_mPoints[i].insert(ts, x);
+					}
 				}
 				else
 					m_cPoints[i].append(x);
@@ -446,10 +450,15 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 						float s = (i.value()[SpectralPeak::Value] - 12.f) / 5.f;
 						if (!isInf(s))
 						{
+							if (s > 80.f)
+								qDebug() << "*** CRAZY SAMPLE " << i.key() << i.value()[0] << i.value()[1];
+							else
 //							p.fillRect(QRectF(x - s, Y(i.value()[SpectralPeak::Frequency], mn, dl) - s, s * 2, s * 2), QBrush(qRgba(cf.fore.red(), cf.fore.green(), cf.fore.blue(), 1)));
-							p.setPen(QPen(cf.fore, s));
-							if (s > 0)
-								p.drawPoint(QPointF(x, Y(i.value()[SpectralPeak::Frequency], mn, dl)));
+							{
+								p.setPen(QPen(cf.fore, s + 1));
+								if (s > 0)
+									p.drawPoint(QPointF(x, Y(i.value()[SpectralPeak::Frequency], mn, dl)));
+							}
 						}
 					}
 					else

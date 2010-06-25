@@ -74,7 +74,20 @@ int Dumper::process()
 {
 	for (uint i = 0; i < numInputs(); i++)
 	{	const BufferData d = input(i).readSample();
-		for (uint j = 0; j < d.elements(); j++)
+		Type t = input(i).type();
+		if (t.isA<Mark>())
+		{
+			double ts = Mark::timestamp(d);
+			if (!m_binary)
+				m_ts << ts << (m_commas ? "," : " ");
+			else
+			{
+				unsigned char* dc = (unsigned char*)&(ts);
+				for  (uint i = 0; i < sizeof(double); i++)
+					m_out.putChar(dc[i]);
+			}
+		}
+		for (uint j = 0; j < t.arity(); j++)
 			if (!m_binary)
 				m_ts << d[j] << (m_commas ? "," : " ");
 			else if (m_floats)

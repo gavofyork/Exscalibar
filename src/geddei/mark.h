@@ -51,12 +51,12 @@ public:
 	virtual QString info() const;
 
 	virtual uint reserved() const { return 2u; }
-	virtual void initData(BufferData&, Source*, uint) const;
-	virtual void polishData(BufferData&, Source*, uint) const;
-	static void setTimestamp(BufferData& _data, double _ts);
+	virtual void initData(BufferData const&, Source*, uint) const;
+	virtual void polishData(BufferData const&, Source*, uint) const;
+	static void setTimestamp(BufferData _data, double _ts);
 	static double timestamp(BufferData const& _data);
 	static bool isEndOfTime(BufferData const& _data);
-	static void setEndOfTime(BufferData& _data);
+	static void setEndOfTime(BufferData _data);
 
 	float min(uint _i) const { return (_i < arity()) ? m_mins[_i] : 0.f; }
 	float max(uint _i) const { return (_i < arity()) ? m_maxs[_i] : 1.f; }

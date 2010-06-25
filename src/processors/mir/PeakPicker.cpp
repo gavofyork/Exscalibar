@@ -35,7 +35,7 @@ private:
 	virtual void specifyOutputSpace(QVector<uint>& _s) { _s.fill(m_type->bins() / 2); }
 	virtual int process();
 
-	bool m_peaks;
+	int m_peaks;
 	DECLARE_1_PROPERTY(PeakPicker, m_peaks);
 
 	Typed<Spectrum> m_type;

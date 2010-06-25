@@ -48,7 +48,7 @@ public:
 
 private:
 	virtual QString simpleText() const { return QChar(0x237c); }
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(270, 96, 160); }
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(210, 96, 160); }
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties();
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);

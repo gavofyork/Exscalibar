@@ -268,7 +268,7 @@ struct AllowedValue
 
 static const QList<AllowedValue> AVfrequency =  AV("0", "0", 0) AVand(32.f, 16384.f, AllowedValue::Log2) AVand("Infinity", QChar(0x221E), 96000.f);
 static const QList<AllowedValue> AVunity = AV(0.f, 1.f, AllowedValue::Linear);
-static const QList<AllowedValue> AVlogUnity = AV(0.f, 1.f, AllowedValue::Log2);
+static const QList<AllowedValue> AVlogUnity = AV(0.00001f, 1.f, AllowedValue::Log2);
 static const QList<AllowedValue> AVbool = AV("Off", "O", false) AVand("On", "|", true);
 static const QList<AllowedValue> AVgain = AV(0.00001f, 100000.f, AllowedValue::Log10);
 static const QList<AllowedValue> AVsamples = AV(2, 16384, AllowedValue::Log2);

@@ -44,7 +44,8 @@ SOURCES += bandwise.cpp \
     Terhardt.cpp \
     DBToPhon.cpp \
     Histogram.cpp \
-    PeakFollower.cpp
+    PeakFollower.cpp \
+    PeakFilter.cpp
 
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
