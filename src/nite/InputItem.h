@@ -22,6 +22,7 @@
 #include <QtXml>
 
 class ProcessorBasedItem;
+class ConnectionItem;
 
 class InputItem: public QGraphicsItem
 {
@@ -32,6 +33,7 @@ public:
 	BaseItem* baseItem() const;
 
 	bool isConnected() const;
+	QList<ConnectionItem*> connections() const;
 
 	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }

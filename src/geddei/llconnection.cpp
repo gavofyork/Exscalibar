@@ -41,7 +41,7 @@ bool LLConnection::pullType()
 
 void LLConnection::setType(Type const& _type)
 {
-	theType = _type;
+	LxConnectionReal::setType(_type);
 	theBuffer.setType(theType);
 }
 

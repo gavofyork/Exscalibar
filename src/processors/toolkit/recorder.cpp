@@ -54,9 +54,9 @@ void Recorder::processor()
 				if (thePrintSample)
 					stream << theCurrentSample << theFieldDelimiter;
 				if (thePrintTime)
-					stream << (float(theCurrentSample) / input(0).type().asA<Contiguous>().frequency()) << theFieldDelimiter;
+					stream << (float(theCurrentSample) / input(0).readType().asA<Contiguous>().frequency()) << theFieldDelimiter;
 				for (uint j = 0; j < numInputs(); j++)
-					for (uint i = 0; i < input(i).type().asA<Contiguous>().arity(); i++)
+					for (uint i = 0; i < input(i).readType().asA<Contiguous>().arity(); i++)
 						stream << "0" << theFieldDelimiter;
 			}
 		if (theCurrentSample || theCurrentSection)
@@ -66,7 +66,7 @@ void Recorder::processor()
 		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
 		if (thePrintTime)
-			stream << (float(theCurrentSample) / input(0).type().asA<Contiguous>().frequency()) << theFieldDelimiter;
+			stream << (float(theCurrentSample) / input(0).readType().asA<Contiguous>().frequency()) << theFieldDelimiter;
 		for (uint i = 0; i < numInputs(); i++)
 		{
 			if (MESSAGES) qDebug("= Recorder::processor(): Reading from input %d...", i);
@@ -96,9 +96,9 @@ void Recorder::receivedPlunger()
 		if (thePrintSample)
 			stream << theCurrentSample << theFieldDelimiter;
 		if (thePrintTime)
-			stream << (float(theCurrentSample) / input(0).type().asA<Contiguous>().frequency()) << theFieldDelimiter;
+			stream << (float(theCurrentSample) / input(0).readType().asA<Contiguous>().frequency()) << theFieldDelimiter;
 		for (uint j = 0; j < numInputs(); j++)
-			for (uint i = 0; i < input(i).type().asA<Contiguous>().arity(); i++)
+			for (uint i = 0; i < input(i).readType().asA<Contiguous>().arity(); i++)
 				stream << "0" << theFieldDelimiter;
 	}
 	theCurrentSection++;

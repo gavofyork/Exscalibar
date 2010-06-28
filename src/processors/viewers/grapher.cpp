@@ -39,7 +39,7 @@ private:
 	virtual void initFromProperties(const Properties &properties);
 	virtual void updateFromProperties(const Properties &properties);
 	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
-	virtual void specifyInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.size(); i++) _s[i] = input(i).type().isA<Mark>() ? 1 : max<uint>(1, input(i).type().asA<Contiguous>().frequency() / 30); }
+	virtual void specifyInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.size(); i++) _s[i] = input(i).readType().isA<Mark>() ? 1 : max<uint>(1, input(i).readType().asA<Contiguous>().frequency() / 30); }
 	virtual void requireInputSpace(QVector<uint>& _s) { for (int i = 0; i < _s.size(); i++) _s[i] = 1; }
 	void updateLimits(QSizeF const& _s, float _ppl) const;
 	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
@@ -163,7 +163,7 @@ bool Grapher::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
 			m_spectra[i].second = QImage(_inTypes[i].arity(), 32, QImage::Format_Indexed8);
 			for (int c = 0; c < 256; c++)
 				m_spectra[i].second.setColor(c, QColor::fromHsv((255 - c) * 240 / 255, 255, 255).rgba());
-//			m_spectra[i].second.setColor(0, Qt::transparent);
+			m_spectra[i].second.setColor(0, Qt::transparent);
 			m_spectra[i].second.setColor(255, qRgba(128, 0, 0, 255));
 			m_spectra[i].first = 0;
 		}
@@ -200,7 +200,7 @@ int Grapher::process()
 	{
 		BufferData d = input(i).readSamples(0, true);
 		l_points.lock();
-		if (Typed<Spectrum> in = input(i).type())
+		if (Typed<Spectrum> in = input(i).readType())
 		{
 			float mn = in->min();
 			float sc = 255.f / (in->max() - in->min());
@@ -221,7 +221,7 @@ int Grapher::process()
 				cycles++;
 				QVector<float> x(m_arity[i]);
 				d.sample(s).copyTo(x);
-				if (input(i).type().isA<Mark>())
+				if (input(i).readType().isA<Mark>())
 				{
 					double ts = Mark::timestamp(d.sample(s));
 					if (!isInf(ts))
@@ -234,8 +234,8 @@ int Grapher::process()
 				else
 					m_cPoints[i].append(x);
 			}
-			if (!input(i).type().isA<Mark>())
-				if (int n = max<int>(0, m_cPoints.size() - (input(i).type().asA<Contiguous>().frequency() * m_viewWidth + 1)))
+			if (!input(i).readType().isA<Mark>())
+				if (int n = max<int>(0, m_cPoints.size() - (input(i).readType().asA<Contiguous>().frequency() * m_viewWidth + 1)))
 					m_cPoints = m_cPoints.mid(n);
 		}
 		l_points.unlock();
@@ -445,7 +445,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 				for (QMap<double, QVector<float> >::iterator i = mp[ci.input].lowerBound(m_latePoint - m_viewWidth); i != mp[ci.input].end(); i++)
 				{
 					float x = (i.key() - m_latePoint) * ds.width() / m_viewWidth + ds.width() - 2.f;
-					if (Typed<SpectralPeak> in = const_cast<Grapher*>(this)->input(ci.input).type())
+					if (Typed<SpectralPeak> in = const_cast<Grapher*>(this)->input(ci.input).readType())
 					{
 						float s = (i.value()[SpectralPeak::Value] - 12.f) / 5.f;
 						if (!isInf(s))
@@ -470,7 +470,7 @@ bool Grapher::paintProcessor(QPainter& _p, QSizeF const& _s) const
 					}
 				}
 			}
-			else if (Typed<Spectrum> in = const_cast<Grapher*>(this)->input(ci.input).type())
+			else if (Typed<Spectrum> in = const_cast<Grapher*>(this)->input(ci.input).readType())
 			{
 				p.setRenderHint(QPainter::Antialiasing, false);
 				p.setRenderHint(QPainter::SmoothPixmapTransform, false);

@@ -41,7 +41,8 @@ private:
 	float m_deviation;
 	float m_harmonicDeviation;
 	bool m_breakOnFirst;
-	DECLARE_5_PROPERTIES(PeakFollower, m_maxTracks, m_maxArea, m_deviation, m_breakOnFirst, m_harmonicDeviation);
+	float m_advantage;
+	DECLARE_6_PROPERTIES(PeakFollower, m_maxTracks, m_maxArea, m_deviation, m_breakOnFirst, m_harmonicDeviation, m_advantage);
 
 	struct Track
 	{
@@ -72,6 +73,7 @@ PropertiesInfo PeakFollower::specifyProperties() const
 			("HarmonicDeviation", 0.05f, "Amount of deviation to allow for harmonics coalescing.", true, "h", AVlogUnity)
 			("Deviation", 0.05f, "Amount of deviation to allow for interval coalescing.", true, "d", AVlogUnity)
 			("BreakOnFirst", true, "BreakOnFirst.", true, "B", AVbool)
+			("Advantage", 2.f, "Ad.", true, "v", AV(1.f, 8.f, AllowedValue::Log2))
 			("MaxArea", 100, "", true, "A", AV(10, 200));
 }
 
@@ -85,37 +87,19 @@ bool PeakFollower::verifyAndSpecifyTypes(Types const& _inTypes, Types& _outTypes
 
 void PeakFollower::updateFromProperties()
 {
-	if (m_tracks.count() != m_maxTracks)
-		m_tracks.resize(m_maxTracks);
 }
 
-template<class T>
-bool divides(T _n, T _d, T _e)
+// returns between 1 and 0
+float priorOnFrequency(float _f)
 {
-	T dummy;
-	T x = modf(_n / _d, &dummy);
-	if (x > .5)
-		return 1.0 - x < _e;
-	else
-		return x < _e;
-}
-
-template <typename RandomAccessIterator, typename LessThan>
-inline bool isSorted(RandomAccessIterator _start, RandomAccessIterator _end, LessThan _lessThan)
-{
-	if (_start != _end)
-	{
-		RandomAccessIterator lit = _start;
-		RandomAccessIterator it = lit;
-		for (it++; it != _end; ++it, ++lit)
-			if (!_lessThan(*lit, *it))
-				return false;
-	}
-	return true;
+	return 2 * cos(1 - normalPDFN(abs(log2(_f / 230))*.85)) - 1;
 }
 
 int PeakFollower::process()
 {
+	if (m_tracks.count() != m_maxTracks)
+		m_tracks.resize(m_maxTracks);
+
 	float mean = 0.f;
 	QList<Track> tin;
 
@@ -148,27 +132,24 @@ int PeakFollower::process()
 	}
 	mean /= tin.count();
 
-	// Calculate intervals...
-	QList<Track> rawIntervals;
-//	rawIntervals = tin;
-	int workDone = 0;
+	// Calculate probable fundamentals...
+	QList<Track> probFunds;
 
 	// MonteCarlo GCD...
 	{
 		if (!isSorted(tin.begin(), tin.end(), byConfidence))
 			qSort(tin.begin(), tin.end(), byConfidence);
 
-		float chd = 1.f - sqr(1.f - m_harmonicDeviation);
 		for (int i = 1; i < tin.count(); i++)
 		{
-			for (int k = 0; k < m_maxTracks; k++)
+			for (int k = 0; k < m_tracks.count(); k++)
 			{
 				int j = random() % i;
 				int di = 1;
 				int dj = 1;
 				float fi = tin[i].frequency;
 				float fj = tin[j].frequency;
-				while (di * dj < 100)
+				while (di * dj < m_maxArea)
 				{
 					if (fi > fj)
 						fi = tin[i].frequency / ++di;
@@ -180,20 +161,75 @@ int PeakFollower::process()
 					if (d < m_harmonicDeviation)
 					{
 						float f = lerp(fi, fj, tin[i].confidence, tin[j].confidence);
-						float c = (tin[i].confidence + tin[j].confidence) / sqrt(di * dj);
-						QList<Track>::iterator lb = qLowerBound(rawIntervals.begin(), rawIntervals.end(), Track(f, 0), byFrequency);
-						if (lb != rawIntervals.end() && abs((*lb).frequency - f) < min((*lb).frequency, f) * m_deviation)
+						float c = (tin[i].confidence + tin[j].confidence) / sqrt(di * dj) * (1 - d / max(.0001f, m_harmonicDeviation));
+						QList<Track>::iterator lb = qLowerBound(probFunds.begin(), probFunds.end(), Track(f, 0), byFrequency);
+						if (lb != probFunds.end() && abs((*lb).frequency - f) < min((*lb).frequency, f) * m_deviation)
 						{
 							(*lb).frequency = lerp((*lb).frequency, f, (*lb).confidence, c);
 							(*lb).confidence += c;
 						}
 						else
-							rawIntervals.insert(lb, Track(f, c));
+							probFunds.insert(lb, Track(f, c));
 						if (m_breakOnFirst)
 							break;
 					}
 				}
+			}
+		}
+	}
+
+	// Three confidence factors now:
+	// - Prior on fundamental frequency.
+	// - Incoming probability from peaks.
+	// - Continuity assumption from m_tracks.
+
+	{
+		// Go through tracks, reduce confidence by timespan.
+/*		for (int i = 0; i < m_tracks; i++)
+		{
+			if ()
+		}*/
+		// Go through probfunds, add them to tracks, tapered by frequency prior, coalescing harmonics according to the one with the biggest confidence, giving lower harmonics a (double?) advantage.
+		m_tracks.clear();
+		for (int i = 0; i < probFunds.count(); i++)
+			probFunds[i].confidence *= priorOnFrequency(probFunds[i].frequency);
+		qSort(probFunds.begin(), probFunds.end(), byFrequency);
+		for (int i = probFunds.count() - 1; i >= 0; i--)
+		{
+			QList<Track>::iterator lb = qLowerBound(probFunds.begin(), probFunds.begin() + i, Track(probFunds[i].frequency / 2.f * (1.f-m_harmonicDeviation), 0), byFrequency);
+			QList<Track>::iterator ub = qUpperBound(lb, probFunds.begin() + i, Track(probFunds[i].frequency / 2.f * (1.f+m_harmonicDeviation), 0), byFrequency);
+			for (QList<Track>::iterator it = lb; it != ub; ++it)
+				if ((*it).confidence * m_advantage > probFunds[i].confidence)
+				{
+					probFunds.erase(probFunds.begin() + i);
+					goto OK;
+				}
+			// Survived...
+			foreach (Track t, probFunds)
+				m_tracks.append(probFunds[i]);
+			OK:;
+		}
+	}
+
+	// Write our state to the output.
+	int nout = m_tracks.count();
+	BufferData out = output(0).makeScratchSamples(nout + 1);
+	for (int i = 0; i < nout; i++)
+	{
+		out(i, SpectralPeak::Frequency) = m_tracks[i].frequency;
+		out(i, SpectralPeak::Value) = m_tracks[i].confidence;
+	}
+	Mark::setEndOfTime(out.sample(nout));
+	output(0) << out;
+	return DidWork;
+}
+
+EXPORT_CLASS(PeakFollower, 0,1,0, Processor);
+
+
 /*
+	int workDone = 0;
+		float chd = 1.f - sqr(1.f - m_harmonicDeviation);
 				int u;
 				int l;
 				if (tin[i].frequency < tin[j].frequency)
@@ -219,10 +255,6 @@ int PeakFollower::process()
 						break;
 					}
 				}*/
-			}
-		}
-	}
-
 	/*
 	for (int i = 0; i < tin.count(); i++)
 		for (int j = i + 1; j < tin.count(); j++)
@@ -248,60 +280,39 @@ int PeakFollower::process()
 	//   Pass a <deviation>-wide window over each interval to get interval with greatest window-sum.
 	//   Coalesce intervals within window.
 
-	m_tracks = QVector<Track>::fromList(rawIntervals);
-/*	{
-		QList<Track> intervals;
-		qSort(rawIntervals.begin(), rawIntervals.end(), byFrequency);
-		while (intervals.count() < m_maxTracks && rawIntervals.count())
-		{
-			float bestSum = 0;
-			int bestInterval = -1;
-			QList<Track>::iterator bestLb;
-			QList<Track>::iterator bestUb;
-			for (int i = 0; i < rawIntervals.count(); i++)
+	/*	{
+			QList<Track> intervals;
+			qSort(rawIntervals.begin(), rawIntervals.end(), byFrequency);
+			while (intervals.count() < m_tracks.count() && rawIntervals.count())
 			{
-				QList<Track>::iterator ub = qUpperBound(rawIntervals.begin(), rawIntervals.end(), Track(rawIntervals[i].frequency * (1 + m_deviation), 0), byFrequency);
-				QList<Track>::iterator lb = qLowerBound(rawIntervals.begin(), rawIntervals.end(), Track(rawIntervals[i].frequency * (1 - m_deviation), 0), byFrequency);
-				float sum = 0.f;
-				for (QList<Track>::const_iterator j = lb; j != ub; j++)
-					sum += (*j).confidence;
-				if (bestInterval == -1 || sum > bestSum)
+				float bestSum = 0;
+				int bestInterval = -1;
+				QList<Track>::iterator bestLb;
+				QList<Track>::iterator bestUb;
+				for (int i = 0; i < rawIntervals.count(); i++)
 				{
-					bestInterval = i;
-					bestSum = sum;
-					bestLb = lb;
-					bestUb = ub;
+					QList<Track>::iterator ub = qUpperBound(rawIntervals.begin(), rawIntervals.end(), Track(rawIntervals[i].frequency * (1 + m_deviation), 0), byFrequency);
+					QList<Track>::iterator lb = qLowerBound(rawIntervals.begin(), rawIntervals.end(), Track(rawIntervals[i].frequency * (1 - m_deviation), 0), byFrequency);
+					float sum = 0.f;
+					for (QList<Track>::const_iterator j = lb; j != ub; j++)
+						sum += (*j).confidence;
+					if (bestInterval == -1 || sum > bestSum)
+					{
+						bestInterval = i;
+						bestSum = sum;
+						bestLb = lb;
+						bestUb = ub;
+					}
 				}
+				intervals.append(Track(rawIntervals[bestInterval].frequency, bestSum));
+				rawIntervals.erase(bestLb, bestUb);
 			}
-			intervals.append(Track(rawIntervals[bestInterval].frequency, bestSum));
-			rawIntervals.erase(bestLb, bestUb);
+			for (int i = 0; i < m_tracks.count(); i++)
+			{
+				if (i < intervals.count())
+					m_tracks[i] = intervals[i];
+				else
+					m_tracks[i].confidence = m_tracks[i].frequency = 0;
+			}
 		}
-		for (int i = 0; i < m_tracks.count(); i++)
-		{
-			if (i < intervals.count())
-				m_tracks[i] = intervals[i];
-			else
-				m_tracks[i].confidence = m_tracks[i].frequency = 0;
-		}
-	}
-*/
-	// Write our state to the output.
-	int nout = m_tracks.count();
-/*	foreach (Track const& t, m_tracks)
-		if (t.confidence > m_requirement)
-			nout++;
-		else
-			break;*/
-	BufferData out = output(0).makeScratchSamples(nout + 1);
-	for (int i = 0; i < nout; i++)
-	{
-		out(i, SpectralPeak::Frequency) = m_tracks[i].frequency;
-		out(i, SpectralPeak::Value) = m_tracks[i].confidence;
-	}
-	Mark::setEndOfTime(out.sample(nout));
-	output(0) << out;
-	return DidWork;
-}
-
-EXPORT_CLASS(PeakFollower, 0,1,0, Processor);
-
+	*/

@@ -17,6 +17,7 @@
  */
 
 #include "ConnectionItem.h"
+#include "DomProcessorItem.h"
 #include "ProcessorsView.h"
 #include "ProcessorBasedItem.h"
 #include "MultipleInputItem.h"
@@ -241,32 +242,39 @@ bool ProcessorBasedItem::connectYourself()
 						cis << i;
 				if (cis.size() != 1)
 					return false;
-				ConnectionItem* ci = cis[0];
 
-				if (ci->nature() == ConnectionItem::Connection)
+				ConnectionItem *tci = cis[0];
+				ConnectionItem *fci = tci;
+
+				if (tci->nature() == ConnectionItem::Reaper)
+					fci = tci->auxConnection();
+
+				if (!fci->from()->processorItem()->executive()->isConnected(fci->from()->index()))
+					foreach (ConnectionItem* i, fci->from()->connections())
+						if (i != fci)
+						{
+							fci->from()->processorItem()->executive()->split(fci->from()->index());
+							break;
+						}
+
+				if (tci->nature() == ConnectionItem::Reaper)
 				{
-					assert(ci->fromProcessor()->executive());
-					if (ci->from()->inputItem())
+					DomProcessorItem* dpi = dynamic_cast<DomProcessorItem*>(tci->fromProcessor());
+					if (dpi)
 					{
-						ci->from()->processorItem()->executive()->disconnect(ci->from()->index());
-						ci->from()->processorItem()->executive()->split(ci->from()->index());
-						ci->from()->processorItem()->executive()->connect(ci->from()->index(), ci->from()->inputItem()->processorItem()->executive(), ci->from()->inputItem()->index());
-						ci->from()->setInputItem(0);
+						LxConnection* c = dynamic_cast<LxConnection*>(const_cast<Connection*>(fci->fromProcessor()->executive()->connect(fci->from()->index(), executive(), ii->index())));
+						c->setSub(dynamic_cast<DomProcessor*>(dpi->executive())->primary());
 					}
-					else if (!ci->fromProcessor()->executive()->isConnected(ci->from()->index()))
-						ci->from()->setInputItem(ii);
-					if (ci->fromProcessor()->executive()->connect(ci->from()->index(), executive(), ii->index()))
-						ci->setValid(true);
-					else
-					{
-						ci->setValid(false);
+				}
+				else if (tci->nature() == ConnectionItem::Connection)
+				{
+					assert(fci->fromProcessor()->executive());
+					tci->setValid(fci->fromProcessor()->executive()->connect(fci->from()->index(), executive(), ii->index()));
+					if (!tci->isValid())
 						ret = false;
-					}
 				}
 				else
-				{
-					ci->setValid(true);
-				}
+					tci->setValid(true);
 			}
 	/*
 		qDebug() << executive()->numInputs() << executive()->numOutputs();
@@ -299,9 +307,6 @@ void ProcessorBasedItem::disconnectYourself()
 
 		geometryChanged();
 
-		foreach (QGraphicsItem* i, childItems())
-			if (OutputItem* ii = item_cast<OutputItem>(i))
-				ii->setInputItem();
 		executive()->disconnectAll();
 		executive()->setNoGroup();
 	}

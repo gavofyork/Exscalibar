@@ -36,7 +36,7 @@ class MySource: public HeavyProcessor
 			{	BufferData s = output(0).makeScratchSamples(10);
 				for (int j = 0; j < 10; j++)
 					s[j] = j;
-				output(0) << s;
+				output(0).push(s);
 			}
 		}
 	}

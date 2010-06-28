@@ -37,6 +37,17 @@ BaseItem* InputItem::baseItem() const
 	return dynamic_cast<BaseItem*>(parentItem());
 }
 
+QList<ConnectionItem*> InputItem::connections() const
+{
+	QList<ConnectionItem*> ret;
+	if (!scene())
+		return ret;
+	foreach (ConnectionItem* ci, filter<ConnectionItem>(scene()->items()))
+		if (ci->to() == this)
+			ret.append(ci);
+	return ret;
+}
+
 bool InputItem::isConnected() const
 {
 	if (!scene())
@@ -61,7 +72,8 @@ void InputItem::typesConfirmed()
 {
 	prepareGeometryChange();
 	m_size = m_baseSize;
-	m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->executive()->input(m_index).type().info();
+	if (&(processorItem()->executive()->input(m_index)))
+		m_typeInfo = "<div><b>Single Connection</b></div>" + processorItem()->executive()->input(m_index).readType().info();
 	update();
 	foreach (ConnectionItem* ci, filter<ConnectionItem>(scene()->items()))
 		if (ci->to() == this)

@@ -71,7 +71,7 @@ bool PeakRoller::processorStarted()
 	m_balls.resize(multiplicity());
 	for (uint i = 0; i < multiplicity(); i++)
 	{
-		m_balls[i].position = input(0).type().arity() / 2;
+		m_balls[i].position = input(0).readType().arity() / 2;
 		m_balls[i].inertia = 0;
 	}
 
@@ -86,7 +86,7 @@ static float dist(float _a, float _b, float)
 
 int PeakRoller::process()
 {
-	int s = input(0).type().arity();
+	int s = input(0).readType().arity();
 	float in[s];
 	input(0).readSample().copyTo(in, s);
 	in[s - 1] = 0;
@@ -115,15 +115,15 @@ int PeakRoller::process()
 			}
 		}
 		if (!maxPeak)
-			maxPeak = rand() % input(0).type().arity();
+			maxPeak = rand() % input(0).readType().arity();
 		m_balls[b].position = Geddei::lerp(m_balls[b].position, m_balls[b].position + (maxPeak > m_balls[b].position ? 1 : -1), pow(1 - m_balls[b].inertia, m_weight));
 		//* (in[maxPeak] - max(in[floor(m_position)], in[ceil(m_position)]))
 		m_balls[b].inertia = Geddei::lerp(m_balls[b].inertia, max(in[(int)floor(m_balls[b].position)], in[(int)ceil(m_balls[b].position)]) / max(.001f, in[maxPeak]), m_inertiaFactor);
 		in[maxPeak] = 0;
 		BufferData out = output(b).makeScratchSample(true);
-		out[0] = input(0).type().asA<Spectrum>().bandFrequency(m_balls[b].position);
+		out[0] = input(0).readType().asA<Spectrum>().bandFrequency(m_balls[b].position);
 		out[1] = m_balls[b].inertia;
-		out[2] = (maxPeak > 0) ? input(0).type().asA<Spectrum>().bandFrequency(maxPeak) : Geddei::StreamFalse;
+		out[2] = (maxPeak > 0) ? input(0).readType().asA<Spectrum>().bandFrequency(maxPeak) : Geddei::StreamFalse;
 		o++;
 	}
 	return DidWork;

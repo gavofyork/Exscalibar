@@ -1,5 +1,12 @@
 DomProc should match up timestamps manually.
 
+Internal support for seperators in Mark stream
+- Allow "grab all data until timestamp" call.
+- Perhaps use plungers instead of end-of-time ts?
+
+Gain taking way too much time
+- Need inline xform sub proc support and a special connection type.
+
 Connect by dragging/dropping over processor.
 
 Make sure mouse up events aren't obscured by a shadow of proc above.

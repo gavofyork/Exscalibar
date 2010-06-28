@@ -74,7 +74,7 @@ int Dumper::process()
 {
 	for (uint i = 0; i < numInputs(); i++)
 	{	const BufferData d = input(i).readSample();
-		Type t = input(i).type();
+		Type t = input(i).readType();
 		if (t.isA<Mark>())
 		{
 			double ts = Mark::timestamp(d);

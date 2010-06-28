@@ -58,8 +58,8 @@ class DLLEXPORT LLConnection: public LxConnectionReal, public xLConnectionReal
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual uint maximumScratchElements(uint minimum) { while (bufferElementsFree() < minimum) bufferWaitForFree(); return bufferElementsFree(); }
-	virtual uint maximumScratchElementsEver() { return theBuffer.size(); }
+	virtual uint freeInDestinationBuffer(uint minimum) { while (bufferElementsFree() < minimum) bufferWaitForFree(); return bufferElementsFree(); }
+	virtual uint freeInDestinationBufferEver() { return theBuffer.size(); }
 
 	//* Reimplementation from xLConnection.
 	virtual bool pullType();

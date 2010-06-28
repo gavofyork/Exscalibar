@@ -100,9 +100,9 @@ void LRConnection::enforceMinimum(uint size)
 
 void LRConnection::setType(Type const& _type)
 {
+	LxConnectionReal::setType(_type);
 	theSink.sendByte(SetType);
 	_type->send(theSink);
-	theType = _type;
 }
 
 void LRConnection::resetType()

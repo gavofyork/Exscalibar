@@ -43,6 +43,7 @@ namespace Geddei
 
 class ProcessorForwarder;
 class DomProcessor;
+class LxConnection;
 class xSCoupling;
 class DSCoupling;
 class RSCoupling;
@@ -110,6 +111,7 @@ class DLLEXPORT SubProcessor: public AutoProperties
 	friend class xSCoupling;
 	friend class DSCoupling;
 	friend class RSCoupling;
+	friend class LxConnection;
 	friend class DomProcessor;
 	friend class ProcessorForwarder;
 
@@ -159,6 +161,9 @@ public:
 	 */
 	uint numOutputs() const { return theNumOutputs; }
 
+	void setFlag(int _flag, bool _set = true) { m_flags = (m_flags & ~_flag); if (_set) m_flags |= _flag; }
+	bool isInplace() const { return (m_flags & SubInplace) && theIn == 1 && theOut == 1 && theStep == 1 && m_inTypes.size() == m_outTypes.size() && m_inTypes.size() == 1 && m_inTypes[0].size() == m_outTypes[0].size(); }
+
 protected:
 	/**
 	 * SubProcessor constructor - use this when subclassing.
@@ -166,7 +171,7 @@ protected:
 	 * @param type This must be set to the name of the subclass.
 	 * @param multi The type of multiplicity this SubProcessor supports.
 	 */
-	SubProcessor(const QString &type, const MultiplicityType &multi = NotMulti);
+	SubProcessor(const QString &type, MultiplicityType multi = NotMulti, int _f = 0);
 
 	/**
 	 * Reimplement to specify how to process a chunk of data.
@@ -343,7 +348,7 @@ private:
 	 * in fact does an extra thing, namely records the outTypes for later use.
 	 * DO NOT call verifyAndSpecifyTypes(...) directly: Use proxyVSTypes(...) instead.
 	 */
-	bool proxyVSTypes(const Types &inTypes, Types &outTypes) { return verifyAndSpecifyTypes(inTypes, outTypes); }
+	bool proxyVSTypes(const Types &inTypes, Types &outTypes);
 
 	/** @internal
 	 * (Re)defines the number of inputs/outputs after any multiplicity concerns are
@@ -369,7 +374,8 @@ private:
 	QString theType;
 	uint theNumInputs, theNumOutputs, theIn, theOut, theStep;
 	MultiplicityType theMulti;
-	Types theOutTypes;
+	Types m_inTypes;
+	Types m_outTypes;
 	//@}
 
 	//@{
@@ -381,13 +387,15 @@ private:
 	//* Association and deletion management.
 	xSCoupling *theCoupling;
 
+	int m_flags;
+
 	QStringList m_dynamics;
 };
 
 class StatefulSubProcessor: public SubProcessor
 {
 public:
-	StatefulSubProcessor(const QString &type, const MultiplicityType &multi = NotMulti): SubProcessor(type, multi) {}
+	StatefulSubProcessor(const QString &type, MultiplicityType multi = NotMulti): SubProcessor(type, multi) {}
 };
 
 }

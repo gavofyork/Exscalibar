@@ -105,9 +105,9 @@ Connection::Tristate Splitter::isReadyYet()
 
 void Splitter::setType(Type const& _type)
 {
-	theType = _type;
+	LxConnection::setType(_type);
 	foreach (LxConnection* i, theConnections)
-		i->setType(_type);
+		i->setType(theType);
 }
 
 void Splitter::resetType()
@@ -185,21 +185,21 @@ void Splitter::noMorePlungers()
 		i->noMorePlungers();
 }
 
-uint Splitter::maximumScratchElements(uint minimum)
+uint Splitter::freeInDestinationBuffer(uint minimum)
 {
 	QList<LxConnection*>::iterator i = theConnections.begin();
-	uint ret = (*i)->maximumScratchElements(minimum);
+	uint ret = (*i)->freeInDestinationBuffer(minimum);
 	for (i++; i != theConnections.end(); i++)
-		ret = ::min(ret, (*i)->maximumScratchElements(minimum));
+		ret = ::min(ret, (*i)->freeInDestinationBuffer(minimum));
 	return ret;
 }
 
-uint Splitter::maximumScratchElementsEver()
+uint Splitter::freeInDestinationBufferEver()
 {
 	QList<LxConnection*>::iterator i = theConnections.begin();
-	uint ret = (*i)->maximumScratchElementsEver();
+	uint ret = (*i)->freeInDestinationBufferEver();
 	for (i++; i != theConnections.end(); i++)
-		ret = ::min(ret, (*i)->maximumScratchElementsEver());
+		ret = ::min(ret, (*i)->freeInDestinationBufferEver());
 	return ret;
 }
 

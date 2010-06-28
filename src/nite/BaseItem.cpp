@@ -127,7 +127,6 @@ void BaseItem::propertiesChanged(QString const&)
 	if (scene())
 	{
 		dynamic_cast<GeddeiNite*>(scene()->parent())->propertyHasBeenChanged();
-		MultipleConnectionItem::refreshNature(this);
 		foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
 			if (ci->fromBase() == this || ci->toBase() == this)
 				ci->refreshNature();

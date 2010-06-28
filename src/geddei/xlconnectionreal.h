@@ -52,9 +52,6 @@ class xLConnectionReal: public xLConnection
 	// Reimplementations from xLConnection
 	friend class RLConnection;
 
-public:
-	virtual const Type& type() const;
-
 protected:
 	/**
 	 * Simple constructor.
@@ -71,6 +68,8 @@ protected:
 	 * Simple destructor.
 	 */
 	~xLConnectionReal();
+
+	virtual const Type& type() const;
 
 	/**
 	 * Extracts the type from the source end of the connection.

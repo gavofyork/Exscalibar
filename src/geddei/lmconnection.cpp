@@ -87,10 +87,10 @@ Type const& LMConnection::type() const
 
 void LMConnection::setType(Type const& _type)
 {
-	theType = _type;
+	LxConnectionReal::setType(_type);
 	foreach (MLConnection* i, theConnections)
-		i->setType(_type);
-	theBuffer.setType(_type);
+		i->setType(theType);
+	theBuffer.setType(theType);
 }
 
 void LMConnection::resetType()
@@ -115,12 +115,12 @@ uint LMConnection::bufferElementsFree()
 	return theBuffer.elementsFree();
 }
 
-uint LMConnection::maximumScratchElementsEver()
+uint LMConnection::freeInDestinationBufferEver()
 {
 	return theBuffer.size();
 }
 
-uint LMConnection::maximumScratchElements(uint minimum)
+uint LMConnection::freeInDestinationBuffer(uint minimum)
 {
 	while (bufferElementsFree() < minimum)
 		bufferWaitForFree();

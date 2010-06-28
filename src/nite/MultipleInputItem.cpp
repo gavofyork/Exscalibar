@@ -64,9 +64,9 @@ MultiProcessorItem* MultipleInputItem::multiProcessorItem() const
 void MultipleInputItem::typesConfirmed()
 {
 	if (processorItem() && processorItem()->executive()->numInputs())
-		m_typeInfo = processorItem()->executive()->input(0).type().info();
+		m_typeInfo = processorItem()->executive()->input(0).readType().info();
 	else if (multiProcessorItem() && (int)multiProcessorItem()->multiProcessor()->numMultiInputs() > (int)m_index && multiProcessorItem()->multiProcessor()->knowMultiplicity() && multiProcessorItem()->multiProcessor()->multiplicity() > 0)
-		m_typeInfo = multiProcessorItem()->multiProcessor()->processor(0)->input(m_index).type().info();
+		m_typeInfo = multiProcessorItem()->multiProcessor()->processor(0)->input(m_index).readType().info();
 	m_typeInfo = QString("<div><b>Multiple Connection</b></div><div>Arity: %1</div>").arg(m_multiplicity) + m_typeInfo;
 }
 

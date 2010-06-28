@@ -34,6 +34,7 @@ namespace Geddei
 {
 
 class Source;
+class SubProcessor;
 
 /** @ingroup Geddei
  * @brief Refinement of Connection from a local Source.
@@ -51,7 +52,7 @@ class Source;
  * Other methods are included for completeness to allow currently barely
  * imagined uses.
  */
-class LxConnection: virtual public Connection, public ScratchOwner
+class DLLEXPORT LxConnection: virtual public Connection, public ScratchOwner
 {
 	friend class Processor;
 	friend class HeavyProcessor;
@@ -65,12 +66,7 @@ public:
 	 */
 	~LxConnection();
 
-	/**
-	 * Retrieves the type of signal this connection transfers.
-	 *
-	 * @return A Type of this conection's TransmissionType.
-	 */
-	virtual Type const& type() const { return theType; }
+	Type const& writeType() const { return m_sub ? m_midType : type(); }
 
 	/**
 	 * Returns the amount of free ELEMENTS in the destination buffer (trivial on LL but
@@ -92,7 +88,7 @@ public:
 	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSamples(uint samples, bool autoPush = false);
+	BufferData makeScratchSamples(uint samples, bool autoPush = false);
 
 	/**
 	 * Create a new scratch pad with which data may be sent efficiently. The
@@ -108,40 +104,7 @@ public:
 	 * instance, when it goes out of semanticscope.
 	 * @return The BufferData object into which data can be written.
 	 */
-	virtual BufferData makeScratchSample(bool autoPush = false) { return makeScratchSamples(1, autoPush); }
-
-	/**
-	 * Create a new scratch pad with which data may be sent efficiently.
-	 *
-	 * Use push() to send the data, or set @a autoPush to true for it to happen
-	 * automatically.
-	 *
-	 * This method may block if no resource is available.
-	 *
-	 * @param seconds The size of the data chunk required in seconds.
-	 * @param autoPush If true, then on destruction of the returned BufferData
-	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semanticscope.
-	 * @return The BufferData object into which data can be written.
-	 */
-//	virtual BufferData makeScratchSeconds(float seconds, bool autoPush = false);
-
-	/**
-	 * Create a new scratch pad with which data may be sent efficiently. The
-	 * scratch is exactly one second long.
-	 *
-	 * Use push() to send the data, or set @a autoPush to true for it to happen
-	 * automatically.
-	 *
-	 * This method may block if no resource is available.
-	 *
-	 * @param seconds The size of the data chunk required in seconds.
-	 * @param autoPush If true, then on destruction of the returned BufferData
-	 * object, it will get pushed automatically. This would happen, for
-	 * instance, when it goes out of semanticscope.
-	 * @return The BufferData object into which data can be written.
-	 */
-//	virtual BufferData makeScratchSecond(bool autoPush = false) { return makeScratchSeconds(1., autoPush); }
+	BufferData makeScratchSample(bool autoPush = false) { return makeScratchSamples(1, autoPush); }
 
 	/**
 	 * Transfers @a data down the connection to its sink.
@@ -154,7 +117,9 @@ public:
 	 *
 	 * @param data The data to be transferred down this connection.
 	 */
-	void push(BufferData const& _data) { type()->polishData(_data, theSource, theSourceIndex); pushBE(_data); }
+	void push(BufferData const& _data);
+
+	void setSub(SubProcessor* _s);
 
 	/**
 	 * Get the maximum amount of scratch samples we can make that won't cause
@@ -165,18 +130,18 @@ public:
 	 * must be less than or equal to maximumScratchSamplesEver().
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	uint maximumScratchSamples(uint minimum = 1) { return maximumScratchElements(theType->elementsFromSamples(minimum)) == Undefined ? Undefined : theType->samples(maximumScratchElements(theType->elementsFromSamples(minimum))); }
+	uint maximumScratchSamples(uint minimum = 1);
 
 	/**
 	 * Returns the maximum amount of scratch samples we could ever make that
 	 * won't (definately) cause a deadlock.
 	 *
 	 * Typically this value should be divided by two to be sure that the
-	 * scratch size asked for will definately be possible.
+	 * scratch size asked for will definitely be possible.
 	 *
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	uint maximumScratchSamplesEver() { return maximumScratchElementsEver() == Undefined ? Undefined : theType->samples(maximumScratchElementsEver()); }
+	uint maximumScratchSamplesEver();
 
 	/**
 	 * Some syntactic sugar, if you're into that sort of thing. Equivalent to
@@ -210,11 +175,21 @@ public:
 	 */
 	BufferData operator+(uint samples) { return makeScratchSamples(samples); }
 
+	virtual void setMinimumRead(uint _s);
+	virtual void setMinimumWrite(uint _s);
+
 protected:
 	/**
 	 * Simple constructor.
 	 */
 	LxConnection(Source *source, uint sourceIndex);
+
+	/**
+	 * Retrieves the type of signal this connection transfers.
+	 *
+	 * @return A Type of this conection's TransmissionType.
+	 */
+	virtual Type const& type() const { return theType; }
 
 	virtual void pushBE(const BufferData &data) = 0;
 
@@ -224,10 +199,10 @@ protected:
 	 * are free, will block until elements are free, rather than return zero.
 	 *
 	 * @param minimum The minimum number of elements it should return. This
-	 * must be less than or equal to maximumScratchElementsEver().
+	 * must be less than or equal to freeInDestinationBufferEver().
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	virtual uint maximumScratchElements(uint minimum = 1) = 0;
+	virtual uint freeInDestinationBuffer(uint minimum = 1) = 0;
 
 	/**
 	 * Returns the maximum amount of scratch elements we could ever make that
@@ -238,7 +213,7 @@ protected:
 	 *
 	 * @return Undefined (= (uint)-1) in the case of unlimited.
 	 */
-	virtual uint maximumScratchElementsEver() = 0;
+	virtual uint freeInDestinationBufferEver() = 0;
 
 	/** @deprecated
 	 * TODO: Kill this method
@@ -260,6 +235,17 @@ protected:
 	 * @return The BufferData object into which data can be written.
 	 */
 	virtual BufferData makeScratchElements(uint elements, bool autoPush = false);
+
+	/**
+	 * Conducts the setting of the type if an object wants to do it without
+	 * being asked first.
+	 *
+	 * Syncs it with sink connection if the two are different objects.
+	 *
+	 * @param type The TransmissionType object this connection's type should be set
+	 * to.
+	 */
+	virtual void setType(Type const& _type);
 
 	Source *theSource;
 	uint theSourceIndex;
@@ -315,17 +301,6 @@ private:
 	virtual Tristate isReadyYet() = 0;
 
 	/**
-	 * Conducts the setting of the type if an object wants to do it without
-	 * being asked first.
-	 *
-	 * Syncs it with sink connection if the two are different objects.
-	 *
-	 * @param type The TransmissionType object this connection's type should be set
-	 * to.
-	 */
-	virtual void setType(Type const& _type) = 0;
-
-	/**
 	 * Resets the type so that a further setType call will be needed.
 	 * Syncs it with sink connection if the two are different objects.
 	 */
@@ -370,6 +345,11 @@ private:
 	float *theScratch;
 	uint theScratchSize;
 	BufferID lastScratch;
+
+	SubProcessor* m_sub;
+	Type m_midType;
+	QVector<float> m_midScratch;
+	uint m_leftOver;
 };
 
 }

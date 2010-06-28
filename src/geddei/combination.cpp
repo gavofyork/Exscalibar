@@ -51,12 +51,13 @@ void Combination::processChunks(const BufferDatas &in, BufferDatas &out, uint) c
 	}
 	BufferDatas d(1);
 	d.setData(0, theResident);
+
 	unsigned long long s = rdtsc();
-	theX->processChunks(in, d, xc);
+	theX->processChunks(in, theY->isInplace() ? out : d, xc);
 	m_totalTimeX += rdtscElapsed(s);
 
 	s = rdtsc();
-	theY->processChunks(d, out, yc);
+	theY->processChunks(theY->isInplace() ? out : d, out, yc);
 	m_totalTimeY += rdtscElapsed(s);
 	d.setData(0, 0);
 }
@@ -72,10 +73,10 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 
 	if (theResident)
 	{
-		assert(theResident->samples() > cachedSamples);
+		assert(m_residentSamples > cachedSamples);
 
 		// copy the last cachedSamples samples to the cache.
-		theResident->rightSamples(cachedSamples).copyTo(cache, cachedSamples * theInterScope);
+		theResident->mid(m_residentSamples - cachedSamples, cachedSamples).copyTo(cache, cachedSamples * theInterScope);
 
 		if (theResident->samples() < interSamples)
 		{
@@ -94,17 +95,19 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 	uint xc = (interSamples - cachedSamples) / theX->theOut;
 
 	d.copyData(0, theResident->samples(cachedSamples));
+	assert(in[0].samples() == (xc - 1) * theX->theStep + theX->theIn);
 	BufferDatas aIn = in.rightSamples((xc - 1) * theX->theStep + theX->theIn);
 
 	unsigned long long s = rdtsc();
-	theX->processOwnChunks(aIn, d, xc);
+	theX->processOwnChunks(in, theY->isInplace() ? out : d, xc);
 	m_totalTimeX += rdtscElapsed(s);
 
 	d.copyData(0, *theResident);
 
 	s = rdtsc();
-	theY->processOwnChunks(d, out, yc);
+	theY->processOwnChunks(theY->isInplace() ? out : d.leftSamples(interSamples), out, yc);
 	m_totalTimeY += rdtscElapsed(s);
+	m_residentSamples = theY->theIn + (yc - 1) * theY->theStep;
 }
 
 PropertiesInfo Combination::specifyProperties() const
@@ -131,14 +134,15 @@ bool Combination::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 {
 	resetTime();
 	Types r(1);
-	if (theX->verifyAndSpecifyTypes(inTypes, r) && r.populated(0))
+	if (theX->proxyVSTypes(inTypes, r) && r.populated(0))
 	{
 		theInterScope = r[0]->size();
-		if (!theY->verifyAndSpecifyTypes(r, outTypes))
+		if (!theY->proxyVSTypes(r, outTypes))
 			return false;
 		if (theY->theIn >= theX->theOut && theY->theStep >= theX->theOut && !(theY->theIn % theX->theOut) && !(theY->theStep % theX->theOut) && theX->theNumOutputs == 1 && theY->theNumInputs == 1)
 		{
 			setupSamplesIO(theX->theIn + theX->theStep * (theY->theIn / theX->theOut - 1), theX->theStep * theY->theStep / theX->theOut, theY->theOut);
+			setFlag(SubInplace, (theX->isInplace() || !theY->isInplace()));
 			if (MESSAGES) qDebug("Setting up IO: %d->%d, %d/%d => %d", theNumInputs, theNumOutputs, theIn, theStep, theOut);
 			delete theResident;
 			theResident = 0;

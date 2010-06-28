@@ -33,32 +33,30 @@ MultipleConnectionItem::MultipleConnectionItem(MultipleInputItem* _to, MultipleO
 	setFlags(ItemIsFocusable | ItemIsSelectable);
 	setCursor(Qt::ArrowCursor);
 	setZValue(-1);
-	refreshNature(to(), from(), _to->scene());
 }
 
 MultipleConnectionItem::~MultipleConnectionItem()
 {
-	MultipleInputItem* t = to();
-	MultipleOutputItem* f = from();
+//	MultipleInputItem* t = to();
+//	MultipleOutputItem* f = from();
 	m_from = 0;
 	m_to = 0;
-	refreshNature(t, f, scene());
 }
 
 void MultipleConnectionItem::refreshNature(BaseItem* _b)
 {
-	if (_b->scene())
+	/*if (_b->scene())
 		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_b->scene()->items()))
 			if (ci->from()->baseItem() == _b || ci->to()->baseItem() == _b)
-				ci->refreshNature();
+				ci->refreshNature();*/
 }
 
 void MultipleConnectionItem::refreshNature(MultipleInputItem* _i, MultipleOutputItem* _o, QGraphicsScene* _s)
 {
-	if (_s)
+/*	if (_s)
 		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_s->items()))
 			if (ci->from() == _o || ci->to() == _i)
-				ci->refreshNature();
+				ci->refreshNature();*/
 }
 
 void MultipleConnectionItem::refreshNature()

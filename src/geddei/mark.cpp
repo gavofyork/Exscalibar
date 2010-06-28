@@ -57,9 +57,9 @@ void Mark::initData(BufferData const& _d, Source*, uint) const
 
 void Mark::polishData(BufferData const& _d, Source* _s, uint) const
 {
-	for (uint i = 0; i < _d.samples(); i++)
+/*	for (uint i = 0; i < _d.samples(); i++)
 		if (_d(i, 0) > 800)
-			qDebug() << "POLISHDATA: CRAZY SAMPLE" << _d(i, 0) << _d(i, 1);
+			qDebug() << "POLISHDATA: CRAZY SAMPLE" << _d(i, 0) << _d(i, 1);*/
 	for (uint i = 0; i < _d.samples(); i++)
 		if (isInf(timestamp(_d.sample(i))) == 1)
 			setTimestamp(const_cast<BufferData&>(_d).sample(i), _s->secondsPassed());

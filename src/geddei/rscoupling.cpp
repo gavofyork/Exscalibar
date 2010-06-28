@@ -94,7 +94,6 @@ void RSCoupling::run()
 			Types dummyOutTypes(outTypes.count());
 			if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
 				qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
-			theSubProc->theOutTypes = outTypes;
 			if (MESSAGES) qDebug("RSC: SpecifyTypes: Done.");
 			break;
 		}

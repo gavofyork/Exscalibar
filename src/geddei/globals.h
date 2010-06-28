@@ -35,6 +35,7 @@ namespace Geddei
 {
 	enum { FFTW = 1, GAT = 2, LIBSNDFILE = 4, ALSA = 8, LIBVORBISFILE = 16, LIBMAD = 32 };
 	enum MultiplicityType { NotMulti = 0, In = 1, Out = 2, InOut = 3, Const = 4, InConst = 5, OutConst = 6, InOutConst = 7, Hetero = 8 };
+	enum { SubNonInplace = 0, SubInplace = 1 };
 	static uint Undefined = (uint)-1;
 
 	static const float StreamFalse = -std::numeric_limits<float>::infinity();
@@ -88,12 +89,17 @@ namespace Geddei
 	template<class T>
 	inline T normalPDFN(T _x, T _m, T _o)
 	{
-		return exp(sqr(_x - _m)/(-2.0 * _o * _o));
+		return exp(sqr(_x - _m)/(-2.0 * sqr(_o)));
+	}
+	template<class T>
+	inline T normalPDFN(T _x)
+	{
+		return exp(-0.5*sqr(_x));
 	}
 	template<class T>
 	inline T normalPDF(T _x, T _m, T _o)
 	{
-		return exp(sqr(_x - _m)/(-2.0 * _o * _o)) / sqrt(2.0 * M_PI * _o * _o);
+		return exp(sqr(_x - _m)/(-2.0 * sqr(_o))) / sqrt(2.0 * M_PI * sqr(_o));
 	}
 	template<class T>
 	inline T normalCDF(T _x, T _m, T _o)
@@ -113,6 +119,30 @@ namespace Geddei
 	inline bool isFinite(float _x)
 	{
 		return (*(uint32_t const*)(&_x)) != 0x7fc00000 && (*(uint32_t const*)(&_x)) != 0xff800000 && (*(uint32_t const*)(&_x)) != 0x7f800000;
+	}
+
+	template<class T>
+	bool divides(T _n, T _d, T _e)
+	{
+		T dummy;
+		T x = modf(_n / _d, &dummy);
+		if (x > .5)
+			return 1.0 - x < _e;
+		else
+			return x < _e;
+	}
+	template <typename RandomAccessIterator, typename LessThan>
+	inline bool isSorted(RandomAccessIterator _start, RandomAccessIterator _end, LessThan _lessThan)
+	{
+		if (_start != _end)
+		{
+			RandomAccessIterator lit = _start;
+			RandomAccessIterator it = lit;
+			for (it++; it != _end; ++it, ++lit)
+				if (!_lessThan(*lit, *it))
+					return false;
+		}
+		return true;
 	}
 	template<class T>
 	static T graphParameters(T _min, T _max, T _divisions, T* o_from = 0, T* o_delta = 0, bool _forceMinor = false)

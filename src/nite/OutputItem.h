@@ -21,6 +21,7 @@
 #include <QtGui>
 
 class ProcessorBasedItem;
+class ConnectionItem;
 
 class OutputItem: public QGraphicsItem
 {
@@ -33,9 +34,7 @@ public:
 	inline QSizeF size() const { return m_size; }
 
 	bool isConnected() const;
-
-	inline InputItem* inputItem() const { return m_inputItem; }
-	inline void setInputItem(InputItem* _ii = 0) { m_inputItem = _ii; }
+	QList<ConnectionItem*> connections() const;
 
 	QPointF tip() const;
 
@@ -55,5 +54,4 @@ protected:
 	QSizeF			m_size;
 	uint			m_index;
 	bool			m_hover;
-	InputItem*		m_inputItem;
 };

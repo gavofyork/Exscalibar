@@ -620,7 +620,7 @@ bool Processor::confirmTypes()
 				theOutputs[i] = new LxConnectionNull(this, i);
 			if (MESSAGES) qDebug("Processor::confirmTypes(): (%s) Output %d : %d samples", qPrintable(name()), i, theSizesCache[i]);
 			theOutputs[i]->setType(theTypesCache[i]);
-			theOutputs[i]->enforceMinimumWrite(theSizesCache[i] * theTypesCache[i]->size());
+			theOutputs[i]->setMinimumWrite(theSizesCache[i]);
 		}
 		return true;
 	}
@@ -701,7 +701,7 @@ bool Processor::confirmTypes()
 		if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Enforcing inputs minima:", qPrintable(name()));
 		for (QVector<xLConnection *>::Iterator i = theInputs.begin(); i != theInputs.end(); i++, ii++)
 		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input %d : %d samples", qPrintable(name()), ii, sizes[ii]);
-			(*i)->enforceMinimumRead(sizes[ii] * (*i)->type().size());
+			(*i)->setMinimumRead(sizes[ii]);
 		}
 	}
 
@@ -719,7 +719,7 @@ bool Processor::confirmTypes()
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Setting type...", i);
 			theOutputs[i]->setType(theTypesCache[i]);
 			if (MESSAGES) qDebug("Processor::confirmInputTypes(): Output %d: Enforcing minimum %d", i, theSizesCache[i]);
-			theOutputs[i]->enforceMinimumWrite(theSizesCache[i] * theTypesCache[i]->size());
+			theOutputs[i]->setMinimumWrite(theSizesCache[i]);
 		}
 	}
 
@@ -834,7 +834,7 @@ class DLLEXPORT LLsConnection: public LxConnectionReal, public xLsConnectionReal
 	virtual bool waitUntilReady() { return theSink->waitUntilReady(); }
 	virtual Tristate isReadyYet() { return theSink->isGoingYet(); }
 	virtual const Type& type() const { return xLsConnectionReal::type(); }
-	virtual void setType(Type const& _type) { theType = _type; }
+	virtual void setType(Type const& _type) { LxConnectionReal::setType(_type); }
 	virtual void resetType() { theType = TransmissionType(); xLsConnectionReal::reset(); }
 	virtual void reset() { xLsConnectionReal::reset(); }
 	virtual void sourceStopping() {}
@@ -844,8 +844,8 @@ class DLLEXPORT LLsConnection: public LxConnectionReal, public xLsConnectionReal
 	virtual void startPlungers() { theSink->startPlungers(); }
 	virtual void plungerSent() { theSink->plungerSent(theSinkIndex); }
 	virtual void noMorePlungers() { theSink->noMorePlungers(); }
-	virtual uint maximumScratchElements(uint) { return m_writeBuffer.size(); }
-	virtual uint maximumScratchElementsEver() { return m_writeBuffer.size(); }
+	virtual uint freeInDestinationBuffer(uint) { return m_writeBuffer.size(); }
+	virtual uint freeInDestinationBufferEver() { return m_writeBuffer.size(); }
 
 	//* Reimplementation from xLConnection.
 	virtual bool pullType() { theSource->confirmTypes(); return !theType.isNull(); }
@@ -1309,7 +1309,7 @@ int CoProcessor::cyclesReady()
 	uint cycles = UINT_MAX;
 	for (uint i = 0; i < numOutputs(); i++)
 	{
-		uint bFree = min<uint>(UINT_MAX / 2, theOutputs[i]->bufferElementsFree() / theOutputs[i]->type().size());
+		uint bFree = min<uint>(UINT_MAX / 2, theOutputs[i]->maximumScratchSamples(0));
 		if (bFree < mSpace[i])
 			return 0;
 		else if (mSpace[i] > 0)

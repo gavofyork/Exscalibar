@@ -58,6 +58,7 @@ private:
 
 	uint theInterScope;
 	mutable BufferData *theResident;
+	mutable uint m_residentSamples;
 };
 
 }

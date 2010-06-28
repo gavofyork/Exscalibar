@@ -40,7 +40,7 @@ namespace Geddei
  * different machines. Handles data transfer between them and some basic control
  * protocol for communicating data types.
  */
-class Connection
+class DLLEXPORT Connection
 {
 public:
 	/**
@@ -53,9 +53,6 @@ public:
 	};
 
 protected:
-	mutable Type theType;
-
-public:
 	/**
 	 * Retrieves the type of signal for the connection.
 	 *
@@ -63,19 +60,25 @@ public:
 	 */
 	virtual Type const& type() const = 0;
 
+	virtual void enforceMinimumRead(uint) {}
+	virtual void enforceMinimumWrite(uint) {}
+
+	mutable Type theType;
+
+public:
 	/**
 	 * Makes the writing/reading buffer at least @a elements big.
 	 *
 	 * Source-writers/sink-readers may make access transactions of elements
 	 * without blocking indefinately.
 	 *
-	 * Makes sure that maximumScratchElementsEver() will return at least
+	 * Makes sure that freeInDestinationBufferEver() will return at least
 	 * elements.
 	 *
 	 * Makes sure that readElements(@a elements) will never block indefinately.
 	 */
-	virtual void enforceMinimumRead(uint) {}
-	virtual void enforceMinimumWrite(uint) {}
+	virtual void setMinimumRead(uint _s) { enforceMinimumRead(_s * theType.size()); }
+	virtual void setMinimumWrite(uint _s) { enforceMinimumWrite(_s * theType.size()); }
 
 	/**
 	 * Simple constructor.

@@ -22,7 +22,7 @@ using namespace Geddei;
 class Gain: public SubProcessor
 {
 public:
-	Gain() : SubProcessor("Gain") {}
+	Gain() : SubProcessor("Gain", NotMulti, SubInplace) {}
 
 private:
 	virtual QString simpleText() const { return ""; }
@@ -30,7 +30,7 @@ private:
 	virtual PropertiesInfo specifyProperties() const;
 	virtual void initFromProperties() { setupVisual(0, 0); }
 	virtual bool verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes);
-	virtual void processChunk(BufferDatas const& _ins, BufferDatas& _outs) const;
+	virtual void processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const;
 
 	float m_gain;
 	DECLARE_1_PROPERTY(Gain, m_gain);
@@ -52,17 +52,24 @@ bool Gain::verifyAndSpecifyTypes(Types const& _inTypes, Types& o_outTypes)
 	return true;
 }
 
-void Gain::processChunk(BufferDatas const& _ins, BufferDatas& _outs) const
+void Gain::processChunks(BufferDatas const& _ins, BufferDatas& _outs, uint _c) const
 {
+	if (m_gain == 1)
+		return;
 	if (m_isMark)
 	{
-		for (uint i	= 0; i < m_arity; i++)
-			_outs[0][i] = i ? _ins[0][i] : (m_gain * _ins[0][i]);
+		for (uint c = 0; c < _c; c++)
+			for (uint i	= 0; i < m_arity; i++)
+				_outs[0](c, i) = i ? _ins[0](c, i) : (m_gain * _ins[0](c, i));
 //		Mark::setTimestamp(_outs[0], Mark::timestamp(_ins[0]));
 	}
 	else
-		for (uint i	= 0; i < m_arity; i++)
-			_outs[0][i] = _ins[0][i] * m_gain;
+		for (uint c = 0; c < _c; c++)
+		{
+			BufferData d = _outs[0].samples(c);
+			for (uint i	= 0; i < m_arity; i++)
+				d[i] *= m_gain;// _ins[0](c, i);
+		}
 }
 
 EXPORT_CLASS(Gain, 0,2,0, SubProcessor);

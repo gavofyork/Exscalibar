@@ -16,6 +16,7 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ConnectionItem.h"
 #include "ProcessorsView.h"
 #include "ProcessorBasedItem.h"
 #include "OutputItem.h"
@@ -24,8 +25,7 @@ OutputItem::OutputItem(int _i, BaseItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
 	m_size			(_size),
 	m_index			(_i),
-	m_hover			(false),
-	m_inputItem		(0)
+	m_hover			(false)
 {
 	setCursor(Qt::CrossCursor);
 	setAcceptHoverEvents(true);
@@ -39,6 +39,17 @@ bool OutputItem::isConnected() const
 		if (i->from() == this)
 			return true;
 	return false;
+}
+
+QList<ConnectionItem*> OutputItem::connections() const
+{
+	QList<ConnectionItem*> ret;
+	if (!scene())
+		return ret;
+	foreach (ConnectionItem* ci, filter<ConnectionItem>(scene()->items()))
+		if (ci->from() == this)
+			ret.append(ci);
+	return ret;
 }
 
 BaseItem* OutputItem::baseItem() const

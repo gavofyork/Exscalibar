@@ -63,8 +63,8 @@ class DLLEXPORT LRConnection: public LxConnectionReal
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual uint maximumScratchElements(uint) { return Undefined; }
-	virtual uint maximumScratchElementsEver() { return Undefined; }
+	virtual uint freeInDestinationBuffer(uint) { return Undefined; }
+	virtual uint freeInDestinationBufferEver() { return Undefined; }
 	virtual void enforceMinimum(uint elements);
 
 	//* Reimplementations from LxConnectionReal

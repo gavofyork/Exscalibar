@@ -35,20 +35,14 @@ ConnectionItem::ConnectionItem(InputItem* _to, OutputItem* _from):
 	setFlags(ItemIsFocusable | ItemIsSelectable);
 	setCursor(Qt::ArrowCursor);
 	setZValue(-1);
-	foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
-		if (ci->from() == from() || ci->to() == to())
-			ci->refreshNature();
 }
 
 ConnectionItem::~ConnectionItem()
 {
-	InputItem* t = m_to;
-	OutputItem* f = m_from;
+//	InputItem* t = m_to;
+//	OutputItem* f = m_from;
 	m_from = 0;
 	m_to = 0;
-	foreach (ConnectionItem* ci, filterRelaxed<ConnectionItem>(scene()->items()))
-		if (ci->from() == f || ci->to() == t)
-			ci->refreshNature();
 }
 
 QList<QPointF> ConnectionItem::magnetism(BaseItem const* _b, bool _moving) const
@@ -101,7 +95,7 @@ void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidge
 		_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), 5));
 		_p->drawPath(path());
 	}
-	_p->setPen(QPen((m_nature == Connection) ? Qt::black : Qt::blue, 2));
+	_p->setPen(QPen(m_isValid ? (m_nature == Connection) ? Qt::black : (m_nature == Ghost) ? Qt::gray : (m_nature == Reaper) ? Qt::darkCyan : Qt::blue : Qt::red, 2));
 	_p->drawPath(path());
 }
 
@@ -109,9 +103,29 @@ void ConnectionItem::refreshNature()
 {
 	update();
 	m_nature = Connection;
+	m_aux = 0;
 
 	DomProcessorItem* fp = dynamic_cast<DomProcessorItem*>(fromProcessor());
 	DomProcessorItem* tp = dynamic_cast<DomProcessorItem*>(toProcessor());
+
+	if (!fp && tp)
+	{
+		QList<DomProcessorItem*> a = tp->all();
+		if (filter<InputItem>(a.first()->childItems()).count() == 1 && filter<OutputItem>(a.last()->childItems()).count() == 1 && filter<InputItem>(a.first()->childItems()).first()->isConnected())
+			m_nature = Ghost;
+		return;
+	}
+
+	if (fp && !tp)
+	{
+		QList<DomProcessorItem*> a = fp->all();
+		if (filter<InputItem>(a.first()->childItems()).count() == 1 && filter<OutputItem>(a.last()->childItems()).count() == 1 && filter<InputItem>(a.first()->childItems()).first()->isConnected())
+		{
+			m_aux = filter<InputItem>(a.first()->childItems()).first()->connections().first();
+			m_nature = Reaper;
+		}
+		return;
+	}
 
 	if (!fp || !tp ||
 		filter<OutputItem>(fp->childItems()).count() != 1 ||

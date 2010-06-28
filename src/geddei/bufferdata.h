@@ -481,6 +481,8 @@ public:
 	BufferData samples(uint index, uint amount);
 	BufferData samples(uint index) { return samples(index, samples() - index); }
 
+	float rms() const;
+
 	inline BufferData leftSamples(uint _amount) { return samples(0, _amount); }
 	inline BufferData rightSamples(uint _amount) { return samples(samples() - _amount, _amount); }
 	inline BufferData const leftSamples(uint _amount) const { return samples(0, _amount); }

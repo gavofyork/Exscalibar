@@ -62,7 +62,7 @@ public:
 
 void Similarity::processor()
 {
-	uint bandWidth = input(0).type().asA<Spectrum>().size();
+	uint bandWidth = input(0).readType().asA<Spectrum>().size();
 
 	float *theMatrix = new float[theSize * theSize];
 

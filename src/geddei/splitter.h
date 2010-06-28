@@ -68,8 +68,8 @@ class DLLEXPORT Splitter: public LxConnection, public Source
 	virtual void startPlungers();
 	virtual void plungerSent();
 	virtual void noMorePlungers();
-	virtual uint maximumScratchElements(uint minimum = 1);
-	virtual uint maximumScratchElementsEver();
+	virtual uint freeInDestinationBuffer(uint minimum = 1);
+	virtual uint freeInDestinationBufferEver();
 	virtual void enforceMinimumWrite(uint _elements);
 	virtual uint bufferElementsFree();
 	virtual double secondsPassed() const { return theSource->secondsPassed(); }

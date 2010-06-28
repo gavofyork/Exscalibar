@@ -30,7 +30,7 @@ class ProcessorBasedItem;
 class ConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
-	enum Nature { Connection, Coupling };
+	enum Nature { Connection, Coupling, Ghost, Reaper };
 
 	ConnectionItem(InputItem* _to, OutputItem* _from);
 	virtual ~ConnectionItem();
@@ -41,6 +41,7 @@ public:
 	InputItem* to() const { return m_to; }
 	OutputItem* from() const { return m_from; }
 
+	bool isValid() const { return m_isValid; }
 	void setValid(bool _v) { m_isValid = _v; }
 
 	QList<QPointF> magnetism(BaseItem const* _b, bool _moving) const;
@@ -59,6 +60,7 @@ public:
 
 	void refreshNature();
 	Nature nature() const { return m_nature; }
+	ConnectionItem* auxConnection() const { return m_aux; }
 
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
@@ -70,4 +72,5 @@ private:
 	InputItem* m_to;
 
 	Nature m_nature;
+	ConnectionItem* m_aux;
 };

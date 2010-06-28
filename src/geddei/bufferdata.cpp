@@ -128,6 +128,15 @@ ostream &operator<<(ostream &out, const BufferData &me)
 	return out << "]";
 }
 
+float BufferData::rms() const
+{
+	float ret = 0;
+	for (uint i = 0; i < elements(); i++)
+		ret += (*this)[i];
+//	ret /= (float)elements();
+	return ret;
+}
+
 bool BufferData::plunger() const
 {
 	return theInfo->thePlunger;
@@ -165,27 +174,31 @@ void BufferData::copyFrom(const BufferData &data)
 	if (rollsOver())
 	{	if (data.rollsOver())
 			if (sizeFirstPart() > data.sizeFirstPart())
-			{	memcpy(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
-				memcpy(firstPart() + data.sizeFirstPart(), data.secondPart(), (sizeFirstPart() - data.sizeFirstPart()) * 4);
-				memcpy(secondPart(), data.secondPart() + sizeFirstPart() - data.sizeFirstPart(), sizeSecondPart() * 4);
+			{
+				(data.theInfo == theInfo ? memmove : memcpy)(secondPart(), data.secondPart() + sizeFirstPart() - data.sizeFirstPart(), sizeSecondPart() * 4);
+				(data.theInfo == theInfo ? memmove : memcpy)(firstPart() + data.sizeFirstPart(), data.secondPart(), (sizeFirstPart() - data.sizeFirstPart()) * 4);
+				(data.theInfo == theInfo ? memmove : memcpy)(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
 			}
 			else
-			{	memcpy(firstPart(), data.firstPart(), sizeFirstPart() * 4);
-				memcpy(secondPart(), data.firstPart() + sizeFirstPart(), (data.sizeFirstPart() - sizeFirstPart()) * 4);
-				memcpy(secondPart() + data.sizeFirstPart() - sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
+			{
+				(data.theInfo == theInfo ? memmove : memcpy)(secondPart() + data.sizeFirstPart() - sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
+				(data.theInfo == theInfo ? memmove : memcpy)(secondPart(), data.firstPart() + sizeFirstPart(), (data.sizeFirstPart() - sizeFirstPart()) * 4);
+				(data.theInfo == theInfo ? memmove : memcpy)(firstPart(), data.firstPart(), sizeFirstPart() * 4);
 			}
 		else
-		{	memcpy(firstPart(), data.firstPart(), sizeFirstPart() * 4);
-			memcpy(secondPart(), data.firstPart() + sizeFirstPart(), sizeSecondPart() * 4);
+		{
+			(data.theInfo == theInfo ? memmove : memcpy)(secondPart(), data.firstPart() + sizeFirstPart(), sizeSecondPart() * 4);
+			(data.theInfo == theInfo ? memmove : memcpy)(firstPart(), data.firstPart(), sizeFirstPart() * 4);
 		}
 	}
 	else
 		if (data.rollsOver())
-		{	memcpy(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
-			memcpy(firstPart() + data.sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
+		{
+			(data.theInfo == theInfo ? memmove : memcpy)(firstPart() + data.sizeFirstPart(), data.secondPart(), data.sizeSecondPart() * 4);
+			(data.theInfo == theInfo ? memmove : memcpy)(firstPart(), data.firstPart(), data.sizeFirstPart() * 4);
 		}
 		else
-			memcpy(firstPart(), data.firstPart(), data.sizeOnlyPart() * 4);
+			(data.theInfo == theInfo ? memmove : memcpy)(firstPart(), data.firstPart(), data.sizeOnlyPart() * 4);
 }
 
 BufferData &BufferData::dontRollOver(bool makeCopy)

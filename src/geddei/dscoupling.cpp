@@ -75,9 +75,9 @@ void DSCoupling::specifyTypes(const Types &inTypes, const Types &outTypes)
 	Types dummyOutTypes(outTypes.count());
 
 	if (!theSubProc->proxyVSTypes(inTypes, dummyOutTypes))
-	{	qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
+	{
+		qDebug("*** CRITICAL: SubProcessor does not verify previously validated types.");
 	}
-	theSubProc->theOutTypes = outTypes;
 	// TODO: check outTypes == dummyOutTypes, taking into account MultiOut
 }
 

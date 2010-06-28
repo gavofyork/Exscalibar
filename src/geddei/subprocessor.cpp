@@ -25,8 +25,9 @@ using namespace Geddei;
 namespace Geddei
 {
 
-SubProcessor::SubProcessor(const QString &type, const MultiplicityType &multi):
-	theMulti(multi)
+SubProcessor::SubProcessor(const QString &type, MultiplicityType _multi, int _f):
+	theMulti(_multi),
+	m_flags (_f)
 {
 	theType = type;
 	thePrimaryOf = 0;
@@ -41,6 +42,14 @@ void SubProcessor::setupIO(uint numInputs, uint numOutputs)
 {
 	theNumInputs = numInputs;
 	theNumOutputs = numOutputs;
+}
+
+bool SubProcessor::proxyVSTypes(const Types &inTypes, Types &outTypes)
+{
+	bool ret = verifyAndSpecifyTypes(inTypes, outTypes);
+	m_inTypes = inTypes;
+	m_outTypes = outTypes;
+	return ret;
 }
 
 void SubProcessor::setupSamplesIO(uint samplesIn, uint samplesStep, uint samplesOut)

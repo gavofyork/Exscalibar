@@ -113,6 +113,9 @@ void DomProcessorItem::prepYourself(ProcessorGroup& _g)
 		d->m_combined = m_combined;
 
 	ProcessorBasedItem::prepYourself(_g);
+
+	if (filter<OutputItem>(childItems()).count() && filter<OutputItem>(childItems()).first()->isConnected() && filter<OutputItem>(childItems()).first()->connections().first()->nature() == ConnectionItem::Reaper)
+		executive()->setNoGroup();
 }
 
 void DomProcessorItem::unprepYourself()

@@ -66,15 +66,10 @@ public:
 	 */
 	virtual ~xLConnection();
 
+	Type const& readType() const { return type(); }
+
 	virtual double secondsPassed() const = 0;
 	virtual double secondsPassed(float) const { return secondsPassed(); }
-
-	/**
-	 * Retrieves the type of signal this connection transfers.
-	 *
-	 * @return A Type of this conection's TransmissionType.
-	 */
-	virtual Type const& type() const { return theType; }
 
 	/**
 	 * Blocks until at least @a samples are ready to be read (or peeked) on the
@@ -253,6 +248,13 @@ protected:
 	 * Simple constructor.
 	 */
 	xLConnection(Sink *newSink, uint newSinkIndex);
+
+	/**
+	 * Retrieves the type of signal this connection transfers.
+	 *
+	 * @return A Type of this conection's TransmissionType.
+	 */
+	virtual Type const& type() const { return theType; }
 
 	/** @internal
 	 * Resets the connection object.
