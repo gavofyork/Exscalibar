@@ -29,7 +29,7 @@ using namespace Geddei;
 namespace Geddei
 {
 
-Splitter::Splitter(Processor *source, uint sourceIndex) : LxConnection(source, sourceIndex)
+Splitter::Splitter(Source *source, uint sourceIndex) : LxConnection(source, sourceIndex)
 {
 }
 
@@ -42,7 +42,7 @@ Splitter::~Splitter()
 void Splitter::enforceMinimumWrite(uint _elements)
 {
 	foreach (LxConnection* i, theConnections)
-		i->enforceMinimumWrite(_elements);
+		i->setMinimumWrite(_elements / theType.size());
 }
 
 void Splitter::forgetScratch(const BufferData &data)
@@ -137,16 +137,34 @@ void Splitter::reset()
 
 uint Splitter::bufferElementsFree()
 {
-	uint ret = theConnections.first()->bufferElementsFree();
 	QList<LxConnection*>::iterator i = theConnections.begin();
+	uint ret = (*i)->bufferElementsFree() / theType.size();
 	for (i++; i != theConnections.end(); i++)
-		ret = min(ret, (*i)->bufferElementsFree());
-	return ret;
+		ret = ::min(ret, (*i)->bufferElementsFree() / theType.size());
+	return ret * theType.size();
+}
+
+uint Splitter::freeInDestinationBuffer(uint minimum)
+{
+	QList<LxConnection*>::iterator i = theConnections.begin();
+	uint ret = (*i)->maximumScratchSamples((minimum + theType.size() - 1) / theType.size());
+	for (i++; i != theConnections.end(); i++)
+		ret = ::min(ret, (*i)->maximumScratchSamples((minimum + theType.size() - 1) / theType.size()));
+	return ret * theType.size();
+}
+
+uint Splitter::freeInDestinationBufferEver()
+{
+	QList<LxConnection*>::iterator i = theConnections.begin();
+	uint ret = (*i)->freeInDestinationBufferEver() / theType.size();
+	for (i++; i != theConnections.end(); i++)
+		ret = ::min(ret, (*i)->freeInDestinationBufferEver() / theType.size());
+	return ret * theType.size();
 }
 
 BufferData Splitter::makeScratchElements(uint elements, bool autoPush)
 {
-	BufferData ret = theConnections.first()->makeScratchElements(elements, autoPush);
+	BufferData ret = theConnections.first()->makeScratchSamples(elements/theType.size(), autoPush);
 	ret.adopt(dynamic_cast<ScratchOwner *>(this));
 	return ret;
 }
@@ -155,7 +173,11 @@ void Splitter::pushBE(const BufferData &data)
 {
 	QList<LxConnection*>::iterator i = theConnections.begin();
 	for (i++; i != theConnections.end(); i++)
-		dynamic_cast<LxConnection *>(*i)->push(data);
+	{
+		BufferData r = dynamic_cast<LxConnection *>(*i)->makeScratchSamples(data.elements() / theType.size());
+		r.copyFrom(data);
+		dynamic_cast<LxConnection *>(*i)->push(r);
+	}
 	dynamic_cast<LxConnection *>(theConnections.first())->push(data);
 }
 
@@ -183,24 +205,6 @@ void Splitter::noMorePlungers()
 {
 	foreach (LxConnection* i, theConnections)
 		i->noMorePlungers();
-}
-
-uint Splitter::freeInDestinationBuffer(uint minimum)
-{
-	QList<LxConnection*>::iterator i = theConnections.begin();
-	uint ret = (*i)->freeInDestinationBuffer(minimum);
-	for (i++; i != theConnections.end(); i++)
-		ret = ::min(ret, (*i)->freeInDestinationBuffer(minimum));
-	return ret;
-}
-
-uint Splitter::freeInDestinationBufferEver()
-{
-	QList<LxConnection*>::iterator i = theConnections.begin();
-	uint ret = (*i)->freeInDestinationBufferEver();
-	for (i++; i != theConnections.end(); i++)
-		ret = ::min(ret, (*i)->freeInDestinationBufferEver());
-	return ret;
 }
 
 }

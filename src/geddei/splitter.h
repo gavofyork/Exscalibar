@@ -40,6 +40,11 @@ class Processor;
  */
 class DLLEXPORT Splitter: public LxConnection, public Source
 {
+public:
+	Splitter(Source *source, uint sourceIndex);
+	virtual ~Splitter();
+
+private:
 	//* Reimplementations from Source
 	virtual void checkExit();
 	virtual bool confirmTypes();
@@ -76,10 +81,6 @@ class DLLEXPORT Splitter: public LxConnection, public Source
 	virtual double secondsPassed(float _s, uint _i = 0) const { return theSource->secondsPassed(_s, _i); }
 
 	QList<LxConnection*> theConnections;
-
-public:
-	Splitter(Processor *source, uint sourceIndex);
-	virtual ~Splitter();
 };
 
 }

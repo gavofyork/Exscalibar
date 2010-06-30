@@ -318,10 +318,14 @@ bool GeddeiNite::connectAll()
 {
 	QString failed;
 	foreach (ConnectionItem* i, filterRelaxed<ConnectionItem>(theScene.items()))
+		i->resetNature();
+	foreach (ConnectionItem* i, filterRelaxed<ConnectionItem>(theScene.items()))
 		i->refreshNature();
 
 	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		i->prepYourself(theGroup);
+	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
+		i->preConnectYourself();
 	foreach (BaseItem* i, filterRelaxed<BaseItem>(theScene.items()))
 		if (!i->connectYourself())
 			failed += i->name() + ", ";

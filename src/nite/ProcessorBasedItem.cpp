@@ -16,6 +16,11 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Geddei>
+#include <splitter.h>
+#include <llconnection.h>
+using namespace Geddei;
+
 #include "ConnectionItem.h"
 #include "DomProcessorItem.h"
 #include "ProcessorsView.h"
@@ -34,6 +39,9 @@ ProcessorBasedItem::ProcessorBasedItem(Properties const& _pr, QSizeF const& _siz
 	m_multiplicity		(0)
 {
 }
+
+QList<InputItem*>	ProcessorBasedItem::inputs() const { return filter<InputItem>(childItems()); }
+QList<OutputItem*>	ProcessorBasedItem::outputs() const { return filter<OutputItem>(childItems()); }
 
 void ProcessorBasedItem::updateMultiDisplay()
 {
@@ -208,6 +216,8 @@ void ProcessorBasedItem::prepYourself(ProcessorGroup& _g)
 
 bool ProcessorBasedItem::connectYourself()
 {
+	qDebug() << "----";
+	qDebug() << "Connecting" << this->typeName() << this->name();
 	if (executive())
 	{
 		bool m = false;
@@ -236,55 +246,101 @@ bool ProcessorBasedItem::connectYourself()
 		else
 			foreach (InputItem* ii, filter<InputItem>(childItems()))
 			{
-				QList<ConnectionItem*> cis;
-				foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
-					if (i->to() == ii)
-						cis << i;
-				if (cis.size() != 1)
+				if (ii->connections().count() != 1)
 					return false;
 
-				ConnectionItem *tci = cis[0];
-				ConnectionItem *fci = tci;
+				ConnectionItem* tci = ii->connections().first();
 
-				if (tci->nature() == ConnectionItem::Reaper)
-					fci = tci->auxConnection();
+				if (tci->m_splitter)
+					continue;
 
-				if (!fci->from()->processorItem()->executive()->isConnected(fci->from()->index()))
-					foreach (ConnectionItem* i, fci->from()->connections())
-						if (i != fci)
-						{
-							fci->from()->processorItem()->executive()->split(fci->from()->index());
-							break;
-						}
+				if (tci->nature() != ConnectionItem::SplitConnection && tci->nature() != ConnectionItem::Connection)
+					return true;
 
-				if (tci->nature() == ConnectionItem::Reaper)
+				ConnectionItem* fci = tci->auxConnection() ? tci->auxConnection() : tci;
+
+				DomProcessorItem* payload = tci->auxConnection() ? dynamic_cast<DomProcessorItem*>(tci->auxConnection()->toProcessor()) : 0;
+				LxConnection* lxc = 0;
+				Source* src = 0;
+				uint ind = 0;
+
+				if (tci->nature() == ConnectionItem::SplitConnection)
 				{
-					DomProcessorItem* dpi = dynamic_cast<DomProcessorItem*>(tci->fromProcessor());
-					if (dpi)
-					{
-						LxConnection* c = dynamic_cast<LxConnection*>(const_cast<Connection*>(fci->fromProcessor()->executive()->connect(fci->from()->index(), executive(), ii->index())));
-						c->setSub(dynamic_cast<DomProcessor*>(dpi->executive())->primary());
-					}
+					ConnectionItem* presplit = fci->fromProcessor()->inputs().first()->connections().first();
+					if (!presplit->m_splitter && !fci->fromProcessor()->connectYourself())
+						return false;
+					if (!presplit->m_splitter)
+						return false;
+					assert(presplit->m_splitter);
+					src = presplit->m_splitter;
+					ind = 0;
+					qDebug() << "Using splitter of" << fci->fromProcessor()->typeName() << "for FROM";
 				}
 				else if (tci->nature() == ConnectionItem::Connection)
 				{
+					src = fci->fromProcessor()->executive();
+					ind = fci->from()->index();
+					if (&fci->fromProcessor()->executive()->output(ind))
+						return false;
+					qDebug() << "Using" << fci->fromProcessor()->typeName() << "processor for FROM";
+
+				}
+
+				bool weMustSplit = tci->toProcessor()->outputs().count() && tci->toProcessor()->outputs().first()->connections().count() > 1;
+				if (weMustSplit)
+				{
+					// Make splitter and save.
+					if (!tci->m_splitter)
+					{
+						tci->m_splitter = new Splitter(src, ind);
+						qDebug() << "Created splitter on FROM.";
+					}
+					lxc = tci->m_splitter;
+					qDebug() << "Using splitter for loading.";
+				}
+				else
+				{
+					lxc = new LLConnection(src, ind, executive(), ii->index(), 0);
+					qDebug() << "Using connection for loading.";
+				}
+
+				if (lxc)
+				{
+					qDebug() << "Got load target...";
+					if (payload)
+					{
+						qDebug() << "Setting sub " << payload->typeName();
+						lxc->setSub(dynamic_cast<DomProcessor*>(payload->executive())->primary());
+					}
+				}
+				/*
+				else if (tci->nature() == ConnectionItem::Connection)
+				{
+					if (!fci->from()->processorItem()->executive()->isConnected(fci->from()->index()))
+						foreach (ConnectionItem* i, fci->from()->connections())
+							if (i != fci)
+							{
+								fci->from()->processorItem()->executive()->split(fci->from()->index());
+								break;
+							}
 					assert(fci->fromProcessor()->executive());
 					tci->setValid(fci->fromProcessor()->executive()->connect(fci->from()->index(), executive(), ii->index()));
 					if (!tci->isValid())
 						ret = false;
-				}
+				}*/
 				else
 					tci->setValid(true);
 			}
-	/*
+#if 0
 		qDebug() << executive()->numInputs() << executive()->numOutputs();
 		for (uint i = 0; i < executive()->numInputs(); i++)
 			qDebug() << &executive()->input(i);
 		for (uint i = 0; i < executive()->numOutputs(); i++)
 			qDebug() << &executive()->output(i);
-	*/
+#endif
 		if (!ret) return false;
 	}
+	qDebug() << "----";
 	return BaseItem::connectYourself();
 }
 

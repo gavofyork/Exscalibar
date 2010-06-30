@@ -69,7 +69,7 @@ class DLLEXPORT LLConnection: public LxConnectionReal, public xLConnectionReal
 	virtual uint bufferElementsFree();
 	virtual void transport(const BufferData &data);
 
-	friend class Processor;
+public:
 	LLConnection(Source *newSource, uint newSourceIndex, Sink *newSink, uint newSinkIndex, uint bufferSize);
 };
 

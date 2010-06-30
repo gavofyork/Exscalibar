@@ -27,10 +27,17 @@ class InputItem;
 class OutputItem;
 class ProcessorBasedItem;
 
+namespace Geddei
+{
+class Splitter;
+}
+using namespace Geddei;
+
 class ConnectionItem: public QGraphicsPathItem, public Magnetic
 {
 public:
-	enum Nature { Connection, Coupling, Ghost, Reaper };
+	typedef int Nature;
+	enum { Unknown = -1, Coupling = 0, Connection = 1, Split = 2, SplitCoupling = Coupling|Split, SplitConnection = Connection|Split };
 
 	ConnectionItem(InputItem* _to, OutputItem* _from);
 	virtual ~ConnectionItem();
@@ -59,9 +66,11 @@ public:
 	void rejigEndPoints();
 
 	void refreshNature();
+	void resetNature();
 	Nature nature() const { return m_nature; }
 	ConnectionItem* auxConnection() const { return m_aux; }
 
+	Splitter* m_splitter;
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);

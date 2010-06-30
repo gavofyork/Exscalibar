@@ -171,9 +171,10 @@ BufferData LxConnection::makeScratchSamples(uint _samples, bool _autoPush)
 
 		if (m_midScratch.size() < (int)aelements)
 		{
-			qDebug() << "*** MSS(" << _samples << "): RESIZING to " << aelements * m_midType.size() << m_leftOver;
+			qDebug() << "*** MSS(" << _samples << "): RESIZING to " << aelements << m_leftOver;
 			assert(aelements <= (m_sub->theIn + _samples) * m_midType.size());
 			m_midScratch.resize((m_sub->theIn + _samples) * m_midType.size());
+//			m_midScratch.resize(aelements);
 		}
 
 		BufferData d = BufferData(_samples * m_midType.size(), m_midType.size(), m_midScratch.data() + m_leftOver, dynamic_cast<ScratchOwner*>(this), _autoPush ? BufferInfo::Activate : BufferInfo::Forget);

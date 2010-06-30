@@ -16,6 +16,9 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <splitter.h>
+using namespace Geddei;
+
 #include "InputItem.h"
 #include "OutputItem.h"
 #include "ProcessorItem.h"
@@ -95,49 +98,77 @@ void ConnectionItem::paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidge
 		_p->setPen(QPen(QColor::fromHsv(220, 220, 255, 128), 5));
 		_p->drawPath(path());
 	}
-	_p->setPen(QPen(m_isValid ? (m_nature == Connection) ? Qt::black : (m_nature == Ghost) ? Qt::gray : (m_nature == Reaper) ? Qt::darkCyan : Qt::blue : Qt::red, 2));
+	_p->setPen(QPen((m_isValid && m_nature != Unknown) ? (m_nature == Connection) ? Qt::black : (m_nature == Coupling) ? Qt::darkBlue : (m_nature == SplitConnection) ? Qt::gray : Qt::blue : Qt::red, 2));
 	_p->drawPath(path());
+}
+
+void ConnectionItem::resetNature()
+{
+	m_nature = Unknown;
+	m_aux = 0;
+	m_splitter = 0;
 }
 
 void ConnectionItem::refreshNature()
 {
 	update();
-	m_nature = Connection;
-	m_aux = 0;
 
 	DomProcessorItem* fp = dynamic_cast<DomProcessorItem*>(fromProcessor());
 	DomProcessorItem* tp = dynamic_cast<DomProcessorItem*>(toProcessor());
+	QList<DomProcessorItem*> af;
+	if (fp) af = fp->all();
+	if (!(af.count() && filter<InputItem>(af.first()->childItems()).count() == 1 && filter<OutputItem>(af.last()->childItems()).count() == 1 && filter<InputItem>(af.first()->childItems()).first()->isConnected()))
+		af.clear();
+	QList<DomProcessorItem*> at;
+	if (tp) at = tp->all();
+	if (!(at.count() && filter<InputItem>(at.first()->childItems()).count() == 1 && filter<OutputItem>(at.last()->childItems()).count() == 1 && filter<InputItem>(at.first()->childItems()).first()->isConnected()))
+		at.clear();
 
-	if (!fp && tp)
-	{
-		QList<DomProcessorItem*> a = tp->all();
-		if (filter<InputItem>(a.first()->childItems()).count() == 1 && filter<OutputItem>(a.last()->childItems()).count() == 1 && filter<InputItem>(a.first()->childItems()).first()->isConnected())
-			m_nature = Ghost;
-		return;
-	}
+	qDebug() << "---";
+	qDebug() << (void*)this;
 
-	if (fp && !tp)
+	if (fp)
+		qDebug() << "FP:" << fp->typeName() << fp->name();
+	foreach (DomProcessorItem* dpi, af)
+		qDebug() << dpi->typeName() << dpi->name();
+	if (tp)
+		qDebug() << "TP:" << tp->typeName() << tp->name();
+	foreach (DomProcessorItem* dpi, at)
+		qDebug() << dpi->typeName() << dpi->name();
+
+	if (!at.isEmpty() || !af.isEmpty())
 	{
-		QList<DomProcessorItem*> a = fp->all();
-		if (filter<InputItem>(a.first()->childItems()).count() == 1 && filter<OutputItem>(a.last()->childItems()).count() == 1 && filter<InputItem>(a.first()->childItems()).first()->isConnected())
+		// If the from and to trains are the same, we're in the middle of a train. COUPLING.
+		ConnectionItem* firstSplit = 0;
+		if (fp && fp->outputs().first()->connections().count() > 1)
+			firstSplit = this;
+		else if (af.size() && af.first()->inputs().first()->connections().first()->fromProcessor()->outputs().first()->connections().count() > 1)
+			firstSplit = af.first()->inputs().first()->connections().first();
+		m_aux = 0;
+		m_nature = Coupling;
+		bool lastIsSplit = at.count() && at.last() == tp && tp->outputs().first()->connections().count() > 1;
+		if (lastIsSplit)
 		{
-			m_aux = filter<InputItem>(a.first()->childItems()).first()->connections().first();
-			m_nature = Reaper;
+			m_aux = at.first()->inputs().first()->connections().first();
+			m_nature = Connection;
 		}
-		return;
+
+		if (af != at)
+		{
+			// Not within the same SubProcessor train.
+			if (!tp)
+			{
+				m_aux = firstSplit ? firstSplit : af.first()->inputs().first()->connections().first();
+				m_nature = Connection;
+			}
+		}
+		qDebug() << firstSplit << (firstSplit ? firstSplit->fromProcessor()->outputs().first()->connections().count() : -1);
+		if ((m_aux || firstSplit) && (m_aux ? m_aux : firstSplit)->fromProcessor()->outputs().first()->connections().count() > 1)
+			m_nature |= Split;
 	}
-
-	if (!fp || !tp ||
-		filter<OutputItem>(fp->childItems()).count() != 1 ||
-		filter<InputItem>(tp->childItems()).count() != 1)
-		return;
-
-	foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
-		if ((i->from() == from() && i != this) || (i->to() == to() && i != this))
-			return;
-
-	// Single connection between two DomProcessors each with one input/output.
-	m_nature = Coupling;
+	else
+		m_nature = Connection;
+	qDebug() << m_nature << (void*)m_aux;
 }
 
 ProcessorBasedItem* ConnectionItem::fromProcessor() const

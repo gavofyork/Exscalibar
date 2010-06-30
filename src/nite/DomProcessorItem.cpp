@@ -79,25 +79,17 @@ void DomProcessorItem::paintCentre(QPainter* _p)
 
 QList<DomProcessorItem*> DomProcessorItem::allBefore()
 {
-	if (filter<InputItem>(childItems()).count() == 1)
-	{
-		InputItem* ii = filter<InputItem>(childItems())[0];
-		foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
-			if (i->to() == ii && i->nature() == ConnectionItem::Coupling)
-				return QList<DomProcessorItem*>(dynamic_cast<DomProcessorItem*>(i->fromBase())->allBefore()) << dynamic_cast<DomProcessorItem*>(i->fromBase());
-	}
+	DomProcessorItem* dpi = 0;
+	if (inputs().count() == 1 && inputs().first()->connections().count() == 1 && (dpi = dynamic_cast<DomProcessorItem*>(inputs().first()->connections().first()->fromProcessor())) && dpi->outputs().count() == 1 && dpi->outputs().first()->connections().count() == 1)
+		return QList<DomProcessorItem*>(dpi->allBefore()) << dpi;
 	return QList<DomProcessorItem*>();
 }
 
 QList<DomProcessorItem*> DomProcessorItem::allAfter()
 {
-	if (filter<OutputItem>(childItems()).count() == 1)
-	{
-		OutputItem* ii = filter<OutputItem>(childItems())[0];
-		foreach (ConnectionItem* i, filter<ConnectionItem>(scene()->items()))
-			if (i->from() == ii && i->nature() == ConnectionItem::Coupling)
-				return QList<DomProcessorItem*>() << dynamic_cast<DomProcessorItem*>(i->toBase()) << dynamic_cast<DomProcessorItem*>(i->toBase())->allAfter();
-	}
+	DomProcessorItem* dpi = 0;
+	if (outputs().count() == 1 && outputs().first()->connections().count() == 1 && (dpi = dynamic_cast<DomProcessorItem*>(outputs().first()->connections().first()->toProcessor())) && dpi->inputs().count() == 1 && dpi->inputs().first()->connections().count() == 1)
+		return QList<DomProcessorItem*>() << dpi << dpi->allAfter();
 	return QList<DomProcessorItem*>();
 }
 
@@ -114,8 +106,8 @@ void DomProcessorItem::prepYourself(ProcessorGroup& _g)
 
 	ProcessorBasedItem::prepYourself(_g);
 
-	if (filter<OutputItem>(childItems()).count() && filter<OutputItem>(childItems()).first()->isConnected() && filter<OutputItem>(childItems()).first()->connections().first()->nature() == ConnectionItem::Reaper)
-		executive()->setNoGroup();
+	//if (filter<OutputItem>(childItems()).count() && filter<OutputItem>(childItems()).first()->isConnected() && filter<OutputItem>(childItems()).first()->connections().first()->nature() == ConnectionItem::Reaper)
+	executive()->setNoGroup();
 }
 
 void DomProcessorItem::unprepYourself()

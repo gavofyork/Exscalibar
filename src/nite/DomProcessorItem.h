@@ -31,6 +31,7 @@ class DomProcessorItem: public ProcessorBasedItem
 public:
 	DomProcessorItem(QString const& _type, Properties const& _pr = Properties(), QSizeF const& _size = QSizeF());
 
+	virtual QString		typeName() const { return m_prototypal->primary()->type(); }
 	Properties			baseProperties() const { return Properties("Latency/Throughput", 0.0); }
 
 	virtual QDomElement	saveYourself(QDomElement& _root, QDomDocument& _doc) const;

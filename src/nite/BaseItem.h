@@ -54,6 +54,7 @@ public:
 	virtual QDomElement	saveYourself(QDomElement&, QDomDocument&) const = 0;
 
 	virtual void		prepYourself(ProcessorGroup&);
+	virtual void		preConnectYourself() {}
 	virtual bool		connectYourself();
 	virtual void		disconnectYourself();
 	virtual void		unprepYourself();

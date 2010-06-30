@@ -38,7 +38,8 @@ SOURCES += monitor.cpp \
     Convolver.cpp \
     PeakFinder.cpp \
     Generator.cpp \
-    Pauser.cpp
+    Pauser.cpp \
+    Eet.cpp
 !isEmpty(COMPOSE):system("$$COMPOSE $$SOURCES") {
 	DEPLOYMENT += $$SOURCES
 	SOURCES = .composed.cpp

@@ -159,22 +159,6 @@ public:
 	 */
 	LxConnection &operator<<(const BufferData &data) { push(data); return *this; }
 
-	/**
-	 * Some syntactic sugar, if you're into that sort of thing. Equivalent to
-	 * the makeScratchSamples() method.
-	 *
-	 * That is, the following two statements are sematically identical:
-	 *
-	 * @code
-	 * BufferData d = connection.makeScratchSamples(5, false);
-	 * BufferData d = connection + 5;
-	 * @endcode
-	 *
-	 * @param samples The size of the data chunk required in samples.
-	 * @return The BufferData object into which data can be written.
-	 */
-	BufferData operator+(uint samples) { return makeScratchSamples(samples); }
-
 	virtual void setMinimumRead(uint _s);
 	virtual void setMinimumWrite(uint _s);
 
@@ -206,7 +190,7 @@ protected:
 
 	/**
 	 * Returns the maximum amount of scratch elements we could ever make that
-	 * won't (definately) cause a deadlock.
+	 * won't (definitely) cause a deadlock.
 	 *
 	 * Typically this value should be divided by two to be sure that the
 	 * scratch size asked for will definately be possible.

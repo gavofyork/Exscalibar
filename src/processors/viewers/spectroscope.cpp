@@ -29,30 +29,57 @@ using namespace Geddei;
  */
 class Spectroscope: public CoProcessor
 {
+public:
+	Spectroscope(): CoProcessor("Spectroscope") {}
+
+private:
+	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(0, 0, 255); }
+	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
+	virtual PropertiesInfo specifyProperties() const;
+	virtual void initFromProperties();
+	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
+	virtual int process();
+
+	bool m_autoScale;
+	float m_dropSpeedMin;
+	float m_dropSpeedMax;
+	int m_refreshPeriod;
+	DECLARE_4_PROPERTIES(Spectroscope, m_autoScale, m_dropSpeedMin, m_dropSpeedMax, m_refreshPeriod);
+
 	QVector<float> m_last;
 	float m_minAmp;
 	float m_deltaAmp;
 
 	float m_curMin;
 	float m_curMax;
-
-	bool m_autoScale;
-	float m_dropSpeedMin;
-	float m_dropSpeedMax;
-	int m_refreshFreq;
-
-	virtual int process();
-	virtual void processorStopped();
-	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
-	virtual PropertiesInfo specifyProperties() const;
-	virtual void initFromProperties(const Properties &properties);
-	virtual void updateFromProperties(const Properties &properties);
-	virtual bool paintProcessor(QPainter& _p, QSizeF const& _s) const;
-	virtual QColor specifyOutlineColour() const { return QColor::fromHsv(120, 96, 160); }
-
-public:
-	Spectroscope(): CoProcessor("Spectroscope", NotMulti) {}
 };
+
+PropertiesInfo Spectroscope::specifyProperties() const
+{
+	return PropertiesInfo
+				("RefreshPeriod", 30, "The refresh period (in ms).", false, "r", AV(1, 1000, AllowedValue::Log10))
+				("AutoScale", true, "Whether to scale the amplitude according to the incoming data, rather than its type.", true, "s", AVbool)
+				("DropSpeedMax", 0.01f, "How fast to forget the old scale and rescale to new data.", true, "x", AVlogUnity)
+				("DropSpeedMin", 0.01f, "How fast to forget the old scale and rescale to new data.", true, "n", AVlogUnity);
+}
+
+void Spectroscope::initFromProperties()
+{
+	setupIO(1, 0);
+	setupVisual(40, 20, m_refreshPeriod, 40, 20, true);
+}
+
+bool Spectroscope::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
+{
+	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
+		return false;
+	m_minAmp = _inTypes[0].asA<Spectrum>().min();
+	m_deltaAmp = _inTypes[0].asA<Spectrum>().max() - m_minAmp;
+	m_curMin = m_minAmp;
+	m_curMax = m_minAmp + m_deltaAmp;
+	m_last.resize(_inTypes[0].asA<Spectrum>().size());
+	return true;
+}
 
 int Spectroscope::process()
 {
@@ -90,44 +117,6 @@ bool Spectroscope::paintProcessor(QPainter& _p, QSizeF const& _s) const
 			_p.drawLine(QLineF(i, 0, i, -(m_last[i] - m_minAmp) / max(0.0001f, m_deltaAmp) * _s.height()));
 	}
 	return true;
-}
-
-void Spectroscope::processorStopped()
-{
-}
-
-bool Spectroscope::verifyAndSpecifyTypes(const Types& _inTypes, Types&)
-{
-	if (_inTypes.count() != 1 || !_inTypes[0].isA<Spectrum>())
-		return false;
-	m_minAmp = _inTypes[0].asA<Spectrum>().min();
-	m_deltaAmp = _inTypes[0].asA<Spectrum>().max() - m_minAmp;
-	m_curMin = m_minAmp;
-	m_curMax = m_minAmp + m_deltaAmp;
-	m_last.resize(_inTypes[0].asA<Spectrum>().size());
-	setupVisual(m_last.size(), 40, m_refreshFreq);
-	return true;
-}
-
-void Spectroscope::initFromProperties(Properties const& _p)
-{
-	m_refreshFreq = 1000 / max(1, _p["Refresh Frequency"].toInt());
-	setupIO(1, 0);
-}
-
-void Spectroscope::updateFromProperties(Properties const& _p)
-{
-	m_autoScale = _p["Auto-scale"].toBool();
-	m_dropSpeedMin = _p["Drop speed (min)"].toDouble();
-	m_dropSpeedMax = _p["Drop speed (max)"].toDouble();
-}
-
-PropertiesInfo Spectroscope::specifyProperties() const
-{
-	return PropertiesInfo("Refresh Frequency", 30, "The number of times to redraw the wave each second (Hz).")
-							("Auto-scale", true, "Whether to scale the amplitude according to the incoming data, rather than its type.")
-							("Drop speed (max)", 0.01f, "How fast to forget the old scale and rescale to new data.")
-							("Drop speed (min)", 0.01f, "How fast to forget the old scale and rescale to new data.");
 }
 
 EXPORT_CLASS(Spectroscope, 0,1,0, Processor);

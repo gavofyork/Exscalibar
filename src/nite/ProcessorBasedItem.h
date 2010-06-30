@@ -45,6 +45,9 @@ public:
 	virtual QString		typeName() const { return prototypal()->type(); }
 	void				setTryMulti(bool _m) { m_tryToShowMulti = _m; updateMultiDisplay(); }
 
+	QList<InputItem*>	inputs() const;
+	QList<OutputItem*>	outputs() const;
+
 	virtual Processor*	executive() const = 0;
 	virtual void		typesConfirmed();
 	virtual void		prepYourself(ProcessorGroup&);
