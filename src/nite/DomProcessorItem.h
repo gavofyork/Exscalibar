@@ -54,6 +54,11 @@ protected:
 	QString				composedSubs();
 	virtual void		paintCentre(QPainter* _p);
 	virtual void		prepYourself(ProcessorGroup&);
+	virtual bool		connectYourself();
+	virtual void		preConnectYourself();
+	virtual void		onOutputConnected(OutputItem* o, Connection*);
+
+	virtual void		disconnectYourself();
 	virtual void		unprepYourself();
 
 	virtual void		propertiesChanged(QString const& _newName = QString::null);
@@ -62,6 +67,8 @@ private:
 	DomProcessor*		m_combined;
 	DomProcessor*		m_prototypal;
 
+	bool				m_alreadySetSub;
+	bool				m_inert;
 	QString				m_type;
 	QSizeF				m_controlsSize;
 };

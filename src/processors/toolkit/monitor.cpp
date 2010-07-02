@@ -16,33 +16,24 @@
  * along with Exscalibar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include "qfactoryexporter.h"
-
-#include "bufferdata.h"
-#include "buffer.h"
-#include "processor.h"
-#include "processorforwarder.h"
-#include "processorgroup.h"
-using namespace Geddei;
-
-#include "contiguous.h"
+#include <Plugin>
 using namespace Geddei;
 
 #include "monitor.h"
 
 #define MESSAGES 0
 
-void Monitor::processor()
+int Monitor::process()
 {
-	theTimer.start();
-	theTotalSamples = 0;
-	while (thereIsInputForProcessing(1))
+	BufferData d = input(0).readSamples();
+	theTotalSamples += d.samples();
+	output(0).push(d);
+	if (m_secondsNoted < theTimer.elapsed() / 1000)
 	{
-		BufferData d = input(0).readSamples();
-		theTotalSamples += d.samples();
-		output(0).push(d);
+		m_secondsNoted++;
+		qDebug("--- [%s:%d s] Samples/Signal-time: %d/%f", qPrintable(name()), m_secondsNoted, theTotalSamples, theTotalSamples / input(0).readType().asA<Contiguous>().frequency());
 	}
+	return 0;
 }
 
 void Monitor::receivedPlunger()
@@ -74,6 +65,9 @@ void Monitor::waitForPlunger()
 bool Monitor::processorStarted()
 {
 	thePlungersCaught = 0;
+	theTimer.start();
+	theTotalSamples = 0;
+	m_secondsNoted = 0;
 	return true;
 }
 
@@ -84,7 +78,7 @@ void Monitor::processorStopped()
 
 void Monitor::specifyOutputSpace(QVector<uint> &samples)
 {
-	samples[0] = input(0).capacity() / 2;
+	samples[0] = input(0).capacity();
 }
 
 bool Monitor::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
@@ -97,7 +91,7 @@ bool Monitor::verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes)
 	return true;
 }
 
-void Monitor::initFromProperties(const Properties &)
+void Monitor::initFromProperties()
 {
 	setupIO(1, 1);
 }

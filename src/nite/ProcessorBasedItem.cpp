@@ -210,14 +210,40 @@ void ProcessorBasedItem::prepYourself(ProcessorGroup& _g)
 			if (c > 1)
 				executive()->MultiSource::split(0);
 		}
+		foreach (InputItem* ii, inputs())
+			ii->m_inert = false;
+	}
+	foreach (OutputItem* oi, outputs())
+	{
+		oi->m_rerouteIndex = 0;
+		oi->m_rerouteSource = 0;
 	}
 	BaseItem::prepYourself(_g);
+
+	m_preConnected = false;
+}
+
+void ProcessorBasedItem::preConnectYourself()
+{
+	if (m_preConnected)
+		return;
+
+	foreach (OutputItem* oi, outputs())
+		if (oi->connections().count() > 1)
+		{
+			oi->m_rerouteSource = new Splitter(executive(), oi->index());
+			oi->m_rerouteIndex = 0;
+		}
+
+	m_preConnected = true;
 }
 
 bool ProcessorBasedItem::connectYourself()
 {
 	qDebug() << "----";
 	qDebug() << "Connecting" << this->typeName() << this->name();
+
+
 	if (executive())
 	{
 		bool m = false;
@@ -248,11 +274,19 @@ bool ProcessorBasedItem::connectYourself()
 			{
 				if (ii->connections().count() != 1)
 					return false;
-
 				ConnectionItem* tci = ii->connections().first();
+				Source* src = tci->from()->connectProcessor();
+				uint ind = tci->from()->connectIndex();
+				Connection* c = new LLConnection(src, ind, executive(), ii->index(), 0);
+				tci->fromProcessor()->onOutputConnected(tci->from(), c);
+				// connect and call callback to set the appropriate sub-train.
+#if 0
 
 				if (tci->m_splitter)
+				{
+					qDebug() << "Already Split - must already be connected - leaving...";
 					continue;
+				}
 
 				if (tci->nature() != ConnectionItem::SplitConnection && tci->nature() != ConnectionItem::Connection)
 					return true;
@@ -266,15 +300,26 @@ bool ProcessorBasedItem::connectYourself()
 
 				if (tci->nature() == ConnectionItem::SplitConnection)
 				{
-					ConnectionItem* presplit = fci->fromProcessor()->inputs().first()->connections().first();
-					if (!presplit->m_splitter && !fci->fromProcessor()->connectYourself())
-						return false;
-					if (!presplit->m_splitter)
-						return false;
-					assert(presplit->m_splitter);
-					src = presplit->m_splitter;
-					ind = 0;
-					qDebug() << "Using splitter of" << fci->fromProcessor()->typeName() << "for FROM";
+					if (dynamic_cast<DomProcessorItem*>(fci->fromProcessor()))
+					{
+						if (!&(fci->fromProcessor()->executive()->output(fci->from()->index())))
+							fci->fromProcessor()->executive()->split(fci->from()->index());
+						src = fci->fromProcessor()->executive();
+						ind = fci->from()->index();
+						qDebug() << "Created splitter for" << fci->fromProcessor()->typeName() << "for FROM";
+					}
+					else
+					{
+						ConnectionItem* presplit = fci->fromProcessor()->inputs().first()->connections().first();
+						if (!presplit->m_splitter && !fci->fromProcessor()->connectYourself())
+							return false;
+						if (!presplit->m_splitter)
+							return false;
+						assert(presplit->m_splitter);
+						src = presplit->m_splitter;
+						ind = 0;
+						qDebug() << "Using splitter of" << fci->fromProcessor()->typeName() << "for FROM";
+					}
 				}
 				else if (tci->nature() == ConnectionItem::Connection)
 				{
@@ -286,8 +331,7 @@ bool ProcessorBasedItem::connectYourself()
 
 				}
 
-				bool weMustSplit = tci->toProcessor()->outputs().count() && tci->toProcessor()->outputs().first()->connections().count() > 1;
-				if (weMustSplit)
+				if (payload && tci->toProcessor()->outputs().count() && tci->toProcessor()->outputs().first()->connections().count() > 1)
 				{
 					// Make splitter and save.
 					if (!tci->m_splitter)
@@ -313,23 +357,10 @@ bool ProcessorBasedItem::connectYourself()
 						lxc->setSub(dynamic_cast<DomProcessor*>(payload->executive())->primary());
 					}
 				}
-				/*
-				else if (tci->nature() == ConnectionItem::Connection)
-				{
-					if (!fci->from()->processorItem()->executive()->isConnected(fci->from()->index()))
-						foreach (ConnectionItem* i, fci->from()->connections())
-							if (i != fci)
-							{
-								fci->from()->processorItem()->executive()->split(fci->from()->index());
-								break;
-							}
-					assert(fci->fromProcessor()->executive());
-					tci->setValid(fci->fromProcessor()->executive()->connect(fci->from()->index(), executive(), ii->index()));
-					if (!tci->isValid())
-						ret = false;
-				}*/
-				else
-					tci->setValid(true);
+
+//				else
+//					tci->setValid(true);
+#endif
 			}
 #if 0
 		qDebug() << executive()->numInputs() << executive()->numOutputs();

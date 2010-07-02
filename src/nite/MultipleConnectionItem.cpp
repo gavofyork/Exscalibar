@@ -43,7 +43,7 @@ MultipleConnectionItem::~MultipleConnectionItem()
 	m_to = 0;
 }
 
-void MultipleConnectionItem::refreshNature(BaseItem* _b)
+void MultipleConnectionItem::refreshNature(BaseItem*)
 {
 	/*if (_b->scene())
 		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_b->scene()->items()))
@@ -51,7 +51,7 @@ void MultipleConnectionItem::refreshNature(BaseItem* _b)
 				ci->refreshNature();*/
 }
 
-void MultipleConnectionItem::refreshNature(MultipleInputItem* _i, MultipleOutputItem* _o, QGraphicsScene* _s)
+void MultipleConnectionItem::refreshNature(MultipleInputItem*, MultipleOutputItem*, QGraphicsScene*)
 {
 /*	if (_s)
 		foreach (MultipleConnectionItem* ci, filterRelaxed<MultipleConnectionItem>(_s->items()))

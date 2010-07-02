@@ -112,7 +112,7 @@ void ConnectionItem::resetNature()
 void ConnectionItem::refreshNature()
 {
 	update();
-
+#if 0
 	DomProcessorItem* fp = dynamic_cast<DomProcessorItem*>(fromProcessor());
 	DomProcessorItem* tp = dynamic_cast<DomProcessorItem*>(toProcessor());
 	QList<DomProcessorItem*> af;
@@ -169,6 +169,7 @@ void ConnectionItem::refreshNature()
 	else
 		m_nature = Connection;
 	qDebug() << m_nature << (void*)m_aux;
+#endif
 }
 
 ProcessorBasedItem* ConnectionItem::fromProcessor() const

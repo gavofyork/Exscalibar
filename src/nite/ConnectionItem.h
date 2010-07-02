@@ -71,6 +71,7 @@ public:
 	ConnectionItem* auxConnection() const { return m_aux; }
 
 	Splitter* m_splitter;
+
 private:
 	virtual void focusInEvent(QFocusEvent* _e);
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);

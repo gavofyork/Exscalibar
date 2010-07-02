@@ -629,7 +629,7 @@ bool Processor::confirmTypes()
 	uint ii = 0;
 	for (QVector<xLConnection *>::Iterator i = theInputs.begin(); i != theInputs.end(); i++,ii++)
 	{	if (!*i)
-		{	if (MESSAGES) qDebug("Processor::confirmInputTypes(): (%s) Input not connected.", qPrintable(name()));
+		{	if (MESSAGES||1) qDebug("Processor::confirmInputTypes(): (%s) Input not connected.", qPrintable(name()));
 			theTypesConfirmed = false;
 			QFastMutexLocker lock(&theErrorSystem);
 			theError = InputNotConnected;

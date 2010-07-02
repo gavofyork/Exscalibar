@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <splitter.h>
+using namespace Geddei;
+
 #include <QtGui>
 
 class ProcessorBasedItem;
@@ -30,8 +33,12 @@ public:
 
 	ProcessorBasedItem* processorItem() const;
 	BaseItem* baseItem() const;
+
 	inline uint index() const { return m_index; }
 	inline QSizeF size() const { return m_size; }
+
+	inline uint connectIndex() const { return m_rerouteSource ? m_rerouteIndex : m_index; }
+	Source* connectProcessor() const;
 
 	bool isConnected() const;
 	QList<ConnectionItem*> connections() const;
@@ -42,6 +49,9 @@ public:
 	virtual int type() const { return ItemType; }
 
 	virtual QRectF boundingRect() const;
+
+	Source*		m_rerouteSource;
+	uint m_rerouteIndex;
 
 protected:
 	virtual void paint(QPainter* _p, const QStyleOptionGraphicsItem*, QWidget*);

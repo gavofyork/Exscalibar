@@ -44,13 +44,13 @@
  * It also has a couple of methods allowing the developer to block based on
  * waiting for plungers, meaning they can be counted or otherwise acted upon.
  */
-class DLLEXPORT Monitor: public HeavyProcessor
+class DLLEXPORT Monitor: public CoProcessor
 {
 	virtual bool processorStarted();
-	virtual void processor();
+	virtual int process();
 	virtual void processorStopped();
 	virtual bool verifyAndSpecifyTypes(const Types &inTypes, Types &outTypes);
-	virtual void initFromProperties(const Properties &properties);
+	virtual void initFromProperties();
 	virtual void receivedPlunger();
 	virtual void specifyOutputSpace(QVector<uint> &samples);
 
@@ -64,6 +64,7 @@ class DLLEXPORT Monitor: public HeavyProcessor
 	uint theTotalSamples;
 	double theTotalTime;
 	QTime theTimer;
+	int m_secondsNoted;
 
 public:
 	/**
@@ -135,5 +136,5 @@ public:
 	 */
 	void resetPlungerMemory();
 
-	Monitor(): HeavyProcessor("Monitor", NotMulti, Guarded), thePlungersCaught(0) {}
+	Monitor(): CoProcessor("Monitor", NotMulti), thePlungersCaught(0) {}
 };

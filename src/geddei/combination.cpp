@@ -95,8 +95,10 @@ void Combination::processOwnChunks(const BufferDatas &in, BufferDatas &out, uint
 	uint xc = (interSamples - cachedSamples) / theX->theOut;
 
 	d.copyData(0, theResident->samples(cachedSamples));
-	assert(in[0].samples() == (xc - 1) * theX->theStep + theX->theIn);
-	BufferDatas aIn = in.rightSamples((xc - 1) * theX->theStep + theX->theIn);
+	assert(in[0].samples() == (xc - 1) * theX->theStep + theX->theIn + cachedSamples / theX->theOut * theX->theStep);
+	BufferDatas aIn = in.samples(cachedSamples / theX->theOut * theX->theStep, (xc - 1) * theX->theStep + theX->theIn);
+
+	// XXX: inplace & resident/cached samples - WTF?
 
 	unsigned long long s = rdtsc();
 	theX->processOwnChunks(in, theY->isInplace() ? out : d, xc);

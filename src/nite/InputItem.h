@@ -50,6 +50,8 @@ public:
 	enum { ItemType = UserType + 2 };
 	virtual int type() const { return ItemType; }
 
+	bool m_inert;
+
 protected:
 	uint		m_index;
 	QSizeF		m_size;

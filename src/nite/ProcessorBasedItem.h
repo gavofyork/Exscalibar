@@ -51,7 +51,9 @@ public:
 	virtual Processor*	executive() const = 0;
 	virtual void		typesConfirmed();
 	virtual void		prepYourself(ProcessorGroup&);
+	virtual void		preConnectYourself();
 	virtual bool		connectYourself();
+	virtual void		onOutputConnected(OutputItem*, Connection*) {}
 	virtual void		disconnectYourself();
 	virtual QTask*		primaryTask() const { return dynamic_cast<CoProcessor*>(executive()); }
 
@@ -66,9 +68,12 @@ protected:
 
 	void				updateMultiplicities();
 
+	bool				m_preConnected;
+
 private:
 	void				updateMultiDisplay();
 
 	bool				m_tryToShowMulti;
 	uint				m_multiplicity;
+
 };

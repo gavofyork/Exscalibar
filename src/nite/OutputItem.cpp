@@ -23,6 +23,8 @@
 
 OutputItem::OutputItem(int _i, BaseItem* _p, QSizeF const& _size):
 	QGraphicsItem	(_p),
+	m_rerouteSource	(0),
+	m_rerouteIndex	(0),
 	m_size			(_size),
 	m_index			(_i),
 	m_hover			(false)
@@ -39,6 +41,11 @@ bool OutputItem::isConnected() const
 		if (i->from() == this)
 			return true;
 	return false;
+}
+
+Source* OutputItem::connectProcessor() const
+{
+	return m_rerouteSource ? m_rerouteSource : processorItem()->executive();
 }
 
 QList<ConnectionItem*> OutputItem::connections() const

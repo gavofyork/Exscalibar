@@ -96,7 +96,15 @@ QList<DomProcessorItem*> DomProcessorItem::allAfter()
 void DomProcessorItem::prepYourself(ProcessorGroup& _g)
 {
 	if (allAfter().size() != 0)
+	{
+		m_inert = true;
+		m_preConnected = true;
 		return;
+	}
+
+	m_inert = false;
+
+	// store address?
 
 	m_combined = new DomProcessor(composedSubs());
 	m_combined->init(name(), subsProperties().stashed() + baseProperties());
@@ -107,7 +115,70 @@ void DomProcessorItem::prepYourself(ProcessorGroup& _g)
 	ProcessorBasedItem::prepYourself(_g);
 
 	//if (filter<OutputItem>(childItems()).count() && filter<OutputItem>(childItems()).first()->isConnected() && filter<OutputItem>(childItems()).first()->connections().first()->nature() == ConnectionItem::Reaper)
-	executive()->setNoGroup();
+	//executive()->setNoGroup();
+}
+
+void DomProcessorItem::preConnectYourself()
+{
+	if (m_preConnected)
+		return;
+
+	m_alreadySetSub = false;
+	if (outputs().count() != 1 || outputs().first()->connections().count() == 0 || inputs().count() != 1 || inputs().first()->connections().count() == 0)
+	{
+		ProcessorBasedItem::preConnectYourself();
+		return;
+	}
+
+	DomProcessorItem* i = all().first();
+
+	i->inputs().first()->connections().first()->fromProcessor()->preConnectYourself();
+	Source* src = i->inputs().first()->connections().first()->from()->connectProcessor();
+	uint index = i->inputs().first()->connections().first()->from()->connectIndex();
+
+
+	if (outputs().first()->connections().count() == 1)
+	{
+		outputs().first()->m_rerouteSource = src;
+		outputs().first()->m_rerouteIndex = index;
+	}
+	else if (outputs().first()->connections().count() > 1)
+	{
+		Splitter* spl = new Splitter(src, index);
+		outputs().first()->m_rerouteIndex = 0;
+		outputs().first()->m_rerouteSource = spl;
+		spl->setSub(dynamic_cast<DomProcessor*>(executive())->primary());
+		m_alreadySetSub = true;
+		executive()->setNoGroup();
+	}
+
+	m_inert = true;
+
+	m_preConnected = true;
+}
+
+bool DomProcessorItem::connectYourself()
+{
+	if (m_inert)
+		return true;
+	return ProcessorBasedItem::connectYourself();
+}
+
+void DomProcessorItem::onOutputConnected(OutputItem*, Connection* _c)
+{
+	if (m_inert && !m_alreadySetSub)
+	{
+		dynamic_cast<LxConnection*>(_c)->setSub(dynamic_cast<DomProcessor*>(executive())->primary());
+		executive()->setNoGroup();
+	}
+}
+
+void DomProcessorItem::disconnectYourself()
+{
+	if (!m_inert)
+	{
+		ProcessorBasedItem::disconnectYourself();
+	}
 }
 
 void DomProcessorItem::unprepYourself()
